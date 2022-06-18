@@ -112,10 +112,6 @@ cyto_plot_gating_scheme <- function(x,
                                     legend_text_size = 1.2,
                                     ...) {
   
-  # TODO: CONTROL PLOT ORDER? - SUPPLY NODES MANUALLY?
-  # TODO: IS HIDDEN EVEN USED?
-  # TODO: NODE RESTRICTION & PLOT ORDER
-  
   # CYTO_PLOT_COMPLETE ---------------------------------------------------------
   
   # CYTO_PLOT METHOD & EXIT
@@ -561,7 +557,7 @@ cyto_plot_gating_scheme <- function(x,
       )
     # GATING SCHEME STEPS
     } else {
-      title <- LAPPY(
+      title <- LAPPLY(
         names(x_list),
         function(z) {
           paste0(
@@ -630,7 +626,10 @@ cyto_plot_gating_scheme <- function(x,
                 pops <- NULL
                 if(!.all_na(overlay)) {
                   # DESCENDANTS | CHILDREN 
-                  if(all(overlay %in% c("descendants", "children"))) {
+                  if(all(overlay %in% c("descendants", 
+                                        "children",
+                                        "terminal descendants",
+                                        "terminal children"))) {
                     overlay <- cyto_nodes_kin(
                       gs,
                       nodes = parent,
@@ -786,6 +785,195 @@ cyto_plot_gating_scheme <- function(x,
     )
   # CALL CYTO_PLOT() - PER GATING STEP
   } else {
+    # LOOP THROUGH GATING STEPS
+    plots <- structure(
+      lapply(
+        seq_along(gt_split),
+        function(z) {
+          # HEADER COUNTER
+          header_cnt <- (z - 1) * pg
+          # TTLE COUNTER
+          title_cnt <- 0
+          # GATINGTEMPLATE CHUNK
+          gt_chunk <- gt_split[[z]]
+          # CONSTRUCT PLOTS PER GROUP
+          p <- structure(
+            lapply(
+              seq_along(x_list),
+              function(v) {
+                # TITLE COUNTER
+                title_cnt <<- title_cnt + 1
+                # GATINGHIERARCHY | GATINGSET
+                gs <- x_list[[v]]
+                # PARENT 
+                parent <- unique(gt_chunk[, "parent_auto"])
+                # ALIAS
+                alias <- unique(gt_chunk[, "alias_auto"])
+                # CHANNELS
+                channels <- unlist(strsplit(unique(gt_chunk[, "dims"]), ","))
+                # POPULATIONS TO OVERLAY 
+                pops <- NULL
+                # OVERLAY
+                if(!.all_na(overlay)) {
+                  # DESCENDANTS | CHILDREN
+                  if(all(overlay %in% c("descendants",
+                                        "children",
+                                        "terminal descendants",
+                                        "terminal children"))) {
+                    overlay <- cyto_nodes_kin(
+                      gs,
+                      nodes = parent,
+                      type = overlay,
+                      path = "auto",
+                      hidden = hidden
+                    )
+                  }
+                  pops <- overlay
+                }
+                # CALL CYTO_PLOT()
+                cyto_plot(
+                  gs,
+                  parent = parent,
+                  alias = alias,
+                  overlay = overlay,
+                  channels = channels,
+                  merge_by = "all", # TODO: FIX TITLE
+                  layout = layout,
+                  title = title[title_cnt],
+                  header = "", # HEADER ADDED MANUALLY
+                  page = FALSE, # PAGE MANUALLY
+                  legend = FALSE,
+                  point_col = node_props[
+                    node_props$node %in% c(parent, pops), "point_col"
+                  ],
+                  hist_fill = node_props[
+                    node_props$node %in% c(parent, pops), "hist_fill"
+                  ],
+                  gate_line_col = node_props[
+                    node_props$node %in% alias, "gate_line_col"
+                  ],
+                  border_line_col = node_props[
+                    node_props$node %in% parent, "border_line_col"
+                  ],
+                  title_text_col = node_props[
+                    node_props$node %in% parent, "title_text_col"
+                  ],
+                  ...
+                )
+                # LEGEND - FULL LEGEND ON EACH PAGE
+                if(v == length(x_list) & cyto_class(legend, "list", TRUE)) {
+                  print("HELLO")
+                  # CONSTRUCT LEGEND
+                  lapply(
+                    seq_along(legend),
+                    function(w) {
+                      # OPEN NEW DEVICE
+                      if(.par("page")[[1]]) {
+                        cyto_plot_new()
+                      }
+                      # CREATE NEW PLOT
+                      plot.new()
+                      # SINGLE CENTRAL LEGEND
+                      if(length(legend) == 1 & length(legend[[w]]) == 1) {
+                        legend(
+                          "center",
+                          legend = legend[[w]][[1]],
+                          fill = node_props$point_col[
+                            match(names(legend[[w]][[1]]), node_props$node)   
+                          ],
+                          bty = "n",
+                          cex = legend_text_size,
+                          x.intersp = 0.5
+                        )
+                      # MULTIPLE LEGENDS
+                      } else {
+                        # COMPUTE PLOT BOUNDARIES
+                        usr <- .par("usr")[[1]]
+                        rng_usr <- mapply(".line2user", .par("mar")[[1]], 1:4)
+                        # CONSTRUCT LEGENDS
+                        lapply(
+                          seq_along(legend[[w]]),
+                          function(g) {
+                            # CREATE LEFT LEGEND
+                            if(g == 1) {
+                              legend(
+                                "left",
+                                inset = c(
+                                  -0.88 * abs(
+                                    diff(c(rng_usr[1], usr[1]))
+                                  )/abs(diff(usr[1:2])),
+                                  0
+                                ),
+                                legend = legend[[w]][[g]],
+                                fill = node_props$point_col[
+                                  match(
+                                    names(legend[[w]][[g]]), node_props$node
+                                  )
+                                ],
+                                bty = "n",
+                                cex = legend_text_size,
+                                x.intersp = 0.5,
+                                xpd = TRUE
+                              )
+                              # CREATE RIGHT LEGEND 
+                            } else {
+                              legend(
+                                "right",
+                                inset = c(
+                                  -0.88 * abs(
+                                    diff(c(rng_usr[2], usr[2]))
+                                  )/abs(diff(usr[1:2])) + usr[2],
+                                  0
+                                ),
+                                legend = legend[[w]][[g]],
+                                fill = node_props$point_col[
+                                  match(
+                                    names(legend[[w]][[g]]), node_props$node
+                                  )
+                                ],
+                                bty = "n",
+                                cex = legend_text_size,
+                                x.intersp = 0.5,
+                                xpd = TRUE
+                              )
+                            }
+                          }
+                        )
+                      }
+                    }
+                  )
+                }
+                # PAGE | HEADER | RECORD
+                rec <- NULL
+                if(.par("page")[[1]] | v == length(x_list)) {
+                  # HEADER INDEX
+                  ind <- header_cnt + ceiling(v/np)
+                  # HEADER
+                  if(!.all_na(header[ind])) {
+                    .cyto_plot_header(
+                      header[ind],
+                      header_text_font = header_text_font[ind],
+                      header_text_size = header_text_size[ind],
+                      header_text_col = header_text_col[ind]
+                    )
+                  }
+                  # NEW PAGE
+                  cyto_plot_new_page()
+                  # RECORD
+                  rec <- cyto_plot_record()
+                }
+                return(rec)
+              }
+            ),
+            names = names(x_list)
+          )
+          # PREPARE PLOTS
+          p[LAPPLY(p, "is.null")] <- NULL
+          return(p)
+        }
+      ),
+      names = names(gt_split)
+    )
     
   }
 
