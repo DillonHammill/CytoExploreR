@@ -998,11 +998,11 @@ cyto_plot <- function(x,
               header_text_size = header_text_size[1],
               header_text_col = header_text_col[1]
             )
-            header <- header[-1]
-            header_text_font <- header_text_font[-1]
-            header_text_size <- header_text_size[-1]
-            header_text_col <- header_text_col[-1]
           }
+          header <<- header[-1]
+          header_text_font <<- header_text_font[-1]
+          header_text_size <<- header_text_size[-1]
+          header_text_col <<- header_text_col[-1]
         }
         # RECORD
         p <- cyto_plot_record()

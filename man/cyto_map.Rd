@@ -18,6 +18,7 @@ cyto_map(
   inverse = FALSE,
   trans = NA,
   plot = TRUE,
+  cross_entropy = TRUE,
   ...
 )
 }
@@ -39,12 +40,12 @@ reduction algorithm, set to all channels with markers assigned by default.}
 \item{type}{indicates the type of dimension reduction algorithm to apply to
 the data, can be either supplied by name \code{e.g. "UMAP"} or as a
 function \code{e.g. "uwot::umap"}. Natively supported options include:
-\itemize{\item{"PCA"}{uses rsvd::rpca() to compute principal
-components}\item{"t-SNE"}{uses Rtsne::Rtsne() to compute t-SNE
-co-ordinates} \item{"FIt-SNE"}{uses
+\itemize{\item{"PCA"}{ uses rsvd::rpca() to compute principal
+components}\item{"t-SNE"}{ uses Rtsne::Rtsne() to compute t-SNE
+co-ordinates} \item{"FIt-SNE"}{ uses
 \url{https://github.com/KlugerLab/FIt-SNE} to compute FIt-SNE co-ordinates
-(some additional configuration required)}\item{"UMAP"}{uses uwot::umap() to
-compute UMAP co-ordinates}\item{}{EmbedSOM}{uses EmbedSOM::SOM() and
+(some additional configuration required)}\item{"UMAP"}{ uses uwot::umap()
+to compute UMAP co-ordinates}\item{}{EmbedSOM}{ uses EmbedSOM::SOM() and
 EmbedSOM::EmbedSOM() to compute EmbedSOM co-ordinates}}}
 
 \item{scale}{optional argument to scale each channel prior to computing
@@ -82,13 +83,20 @@ dimension reduction algorithm.}
 \code{cyto_plot_map} to visualise the produced dimension-reduced maps, set
 to TRUE by default.}
 
+\item{cross_entropy}{logical indicating whether cross entropies should also
+be computed for comparison within \code{\link{cyto_map_compare}}, set to
+\code{TRUE} by default. The cross entropies are computed for every cell
+using the method described by Roca et al. 2022 and stored as a separate
+parameter in each cytoframe. Currently, cross entropies can only be
+calculated for UMAP and t-SNE dimension reduction algorithms.}
+
 \item{...}{additional arguments passed to the specified dimension reduction
 algorithm}
 }
 \value{
 either a \code{cytoset} or \code{GatingSet} with the
   dimension-reduced parameters added as additional channels in each of the
-  underlyig \code{cytoframes}.
+  underlying \code{cytoframes}.
 }
 \description{
 \code{cyto_map} is a convenient wrapper function to produced
