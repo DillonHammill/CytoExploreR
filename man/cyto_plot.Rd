@@ -151,9 +151,9 @@ applied to the data prior to plotting. The transformerList is used
 internally to ensure that the axes on the constructed plots are
 appropriately labelled.}
 
-\item{merge_by}{a vector of pData variables to sort and merge samples into
-groups prior to plotting, set to "name" by default to prevent merging. To
-merge all samples set this argument to \code{TRUE} or \code{"all"}.}
+\item{merge_by}{a vector of experiment variables to sort and merge samples
+into groups prior to plotting, set to "name" by default to prevent merging.
+To merge all samples set this argument to \code{TRUE} or \code{"all"}.}
 
 \item{overlay}{name(s) of the populations to overlay or a \code{cytoset},
 \code{list of cytosets} or \code{list of cytoset lists} containing
@@ -197,7 +197,7 @@ graphic device prior to plotting. Mac users will need to install
 pop-up graphics device in inches, set to \code{c(10,10)} by default.}
 
 \item{select}{named list containing experimental variables to be used to
-select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+select samples using \code{\link{cyto_select}} when a \code{cytoset} or
 \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
 details. Sample selection occurs prior to grouping with \code{merge_by}.}
 

@@ -11,6 +11,7 @@ cyto_plot_gating_scheme(
   merge_by = "name",
   overlay = NA,
   order = "nodes",
+  alias = NULL,
   hidden = FALSE,
   layout,
   title,
@@ -35,9 +36,25 @@ cyto_plot_gating_scheme(
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
+\item{select}{named list containing experimental variables to be used to
+select samples using \code{\link{cyto_select}} when a \code{cytoset} or
+\code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+details. Sample selection occurs prior to grouping with \code{merge_by}.}
+
 \item{gatingTemplate}{name of the gatingTemplate csv file used to gate
 \code{x}. If not supplied the gating scheme will be obtained directly from
 the GatingHierarchy or GatingSet.}
+
+\item{merge_by}{a vector of experiment variables to sort and merge samples
+into groups prior to plotting, set to "name" by default to prevent merging.
+To merge all samples set this argument to \code{TRUE} or \code{"all"}.}
+
+\item{overlay}{name(s) of the populations in the \code{GatingHierarchy} or
+\code{GatingSet} to overlay on every plot in the gating scheme. For
+back-gating, \code{overlay} can also be set to \code{"children"},
+\code{"descendants"}, \code{"terminal children"} or \code{"terminal
+descendants"} in which case the nodes to overlay are determined separately
+for every plot based on the \code{parent} population.}
 
 \item{order}{can be either \code{"groups"} or \code{"nodes"} to control the
 order in which the data is plotted. Setting \code{order = "nodes"} will
@@ -45,14 +62,69 @@ plot each group on a single page with a plot for each set of nodes. On the
 other hand, setting \code{order = "groups"} will plot each set of nodes on
 a separate page with plots for each group.}
 
-\item{hidden}{logical indicating whether \code{hidden} nodes should be
-included in the gating scheme, set to FALSE by default.}
+\item{alias}{name(s) of the populations for which the gating scheme is to be
+plotted, the order of the populations supplied here dictates the plot order
+within \code{cyto_plot_gating_scheme()}.}
+
+\item{hidden}{logical to indicate whether nodes hidden in the
+\code{GatingHierarchy} or \code{GatingSet} should be included in the gating
+scheme, set to FALSE by default.}
+
+\item{layout}{a vector of the length 2 of form \code{c(#rows, #columns)} or a
+matrix indicating the dimensions of the grid for plotting.}
+
+\item{title}{a vector of text to label each of the plots in the gating
+scheme, set to the name of the parent population in each plot by default.}
+
+\item{header}{a vector of text to label each page of plots, set to the name
+of each group specified by \code{merge_by} by default.}
 
 \item{legend}{logical indicating whether a should be included when
 populations are overlaid onto the plots, set to TRUE by default.
 Alternatively, for gating schemes with many nodes, users can supply a
 vector of integers to split the legend across multiple panels, set to 12
 nodes by default.}
+
+\item{legend_text}{vector of text to include in the legend to override the
+default labels.}
+
+\item{point_col}{vector of colours to use for each population defined in the
+gating scheme, colours are automatically selected from \code{point_cols} if
+not supplied.}
+
+\item{point_cols}{vector of colours from which a colour for each node should
+be selected when colours are not supplied manually through
+\code{point_col}, resorts to using the default \code{cyto_plot()} colour
+palette if not supplied.}
+
+\item{gate_line_col}{colour(s) to use for gates, set to \code{"red"} by
+default. Setting \code{gate_line_col = NA} will automatically match the
+gate colour with node colour.}
+
+\item{border_line_col}{colour to use for the border of each plot, set to
+"black" by default. Setting \code{border_line_col = NA} will automatically
+match the border colour with parent colour.}
+
+\item{title_text_col}{colour to use in each plot for the title text, set to
+\code{"black"} by default. Setting \code{title_test_col = NA} will
+automatically match the title colour with parent colour.}
+
+\item{header_text_font}{numeric to control the font of the header text, set
+to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
+alternatives.}
+
+\item{header_text_size}{numeric to control the size of the header text, set
+to 1 by default.}
+
+\item{header_text_col}{colour to use for the header text, set to "black" by
+default.}
+
+\item{legend_text_font}{numeric to control the font of legend text, set to 1
+for plain font by default. See \code{\link[graphics:par]{font}} for
+alternatives.}
+
+\item{legend_text_size}{numeric to control the size of text in the legend,
+set to 1.2 by default.}
 
 \item{...}{additional arguments passed to \code{cyto_plot()}.}
 }

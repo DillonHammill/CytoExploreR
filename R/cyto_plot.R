@@ -26,9 +26,9 @@
 #'   applied to the data prior to plotting. The transformerList is used
 #'   internally to ensure that the axes on the constructed plots are
 #'   appropriately labelled.
-#' @param merge_by a vector of pData variables to sort and merge samples into
-#'   groups prior to plotting, set to "name" by default to prevent merging. To
-#'   merge all samples set this argument to \code{TRUE} or \code{"all"}.
+#' @param merge_by a vector of experiment variables to sort and merge samples
+#'   into groups prior to plotting, set to "name" by default to prevent merging.
+#'   To merge all samples set this argument to \code{TRUE} or \code{"all"}.
 #' @param overlay name(s) of the populations to overlay or a \code{cytoset},
 #'   \code{list of cytosets} or \code{list of cytoset lists} containing
 #'   populations to be overlaid onto the plot(s). This argument can be set to
@@ -57,7 +57,7 @@
 #' @param popup_size a vector of length 2 to control the height and width of
 #'   pop-up graphics device in inches, set to \code{c(10,10)} by default.
 #' @param select named list containing experimental variables to be used to
-#'   select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+#'   select samples using \code{\link{cyto_select}} when a \code{cytoset} or
 #'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
 #'   details. Sample selection occurs prior to grouping with \code{merge_by}.
 #' @param xlim lower and upper limits of x axis (e.g. c(0,250000)).
