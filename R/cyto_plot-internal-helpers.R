@@ -178,6 +178,32 @@
     names = names(x)
   )
   
+  # EVENTS - NA -> MINIMUM ACROSS BASE LAYERS
+  if(.all_na(events)) {
+    events <- min(
+      LAPPLY(
+        x,
+        function(z) {
+          sum(
+            cyto_apply(
+              z,
+              channels = cyto_channels(z)[1],
+              FUN = "cyto_stat_count",
+              input = "column",
+              copy = FALSE
+            )[, 1]
+          )
+        }
+      )
+    )
+    message(
+      paste0(
+        "Downsampling the base layer in each plot to ",
+        events, " events..."
+      )
+    )
+  }
+  
   # OVERLAY - POPULATION NAMES
   if(!.all_na(overlay)) {
     # OVERLAY - POPULATION NAMES
@@ -334,26 +360,6 @@
         }
       ),
       names = names(x)
-    )
-  }
-  
-  # EVENTS - NA -> MINIMUM ACROSS BASE LAYERS
-  if(.all_na(events)) {
-    events <- min(
-      LAPPLY(
-        x,
-        function(z) {
-          cyto_stat_count(
-            cyto_exprs(z[[1]][[1]])
-          )
-        }
-      )
-    )
-    message(
-      paste0(
-        "Downsampling the base layer in each plot to ",
-        events, " events..."
-      )
     )
   }
   
