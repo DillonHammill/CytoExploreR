@@ -5311,6 +5311,16 @@ cyto_markers_edit <- function(x,
     pd <- pd_new[[1]]
   }
   
+  # CROSS CHECK EXISTING MARKER ASSIGNMENTS
+  lapply(
+    cyto_markers(x),
+    function(z) {
+      if(is.na(pd[pd[, "channel" %in% names(z), "marker"]]) & z != names(z)) {
+        pd[pd[, "channel"] %in% names(z), "marker"] <<- unname(z)
+      }
+    }
+  )
+  
   # DEFAULT FILE NAME
   if (is.null(save_as)) {
     save_as <- file
