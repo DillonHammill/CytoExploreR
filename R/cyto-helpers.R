@@ -6125,7 +6125,7 @@ cyto_nodes <- function(x,
       x <- file_ext_append(x, ".csv")
       x <- suppressMessages(gatingTemplate(x))
     }
-    # NODES
+    # FULL NODES
     if(path == "full") {
       nodes <- names(
         gt_get_nodes(
@@ -6135,12 +6135,18 @@ cyto_nodes <- function(x,
         )
       )
       names(nodes) <- nodes
+      # DROP COMMA SEPARATED NODES
+      nodes <- nodes[!grepl(",", names(nodes))]
+    # AUTO NODES
     } else {
       nodes <- gt_get_nodes(
         x, 
         only.names = TRUE,
         ...
       )
+      # DROP COMMA SEPARATED NODES
+      nodes <- nodes[!grepl(",", names(nodes))]
+      nodes <- unlist(nodes)
     }
     # TERMINAL NODES
     if(terminal) {
@@ -6600,8 +6606,10 @@ cyto_nodes_ancestor <- function(x,
 #' Get paths to nodes
 #'
 #' @param x object of class
-#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}},
+#'   \code{\link[openCyto:gatinGtemplate-class]{gatingTemplate}} or the name of
+#'   a gatingTemplate CSV file.
 #' @param nodes vector of nodes for which the relative nodes should be returned.
 #' @param type options include \code{"children"}, \code{"parent"},
 #'   \code{"grandparent"} or \code{"descendants"} to indicate the type of
@@ -6619,6 +6627,7 @@ cyto_nodes_ancestor <- function(x,
 #'
 #' @importFrom flowWorkspace gh_pop_get_parent gh_pop_get_children
 #'   gh_pop_get_descendants
+#' @importFrom openCyto gt_get_children
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -6654,82 +6663,208 @@ cyto_nodes_kin <- function(x,
   
   # NOTE: HIDDEN NOT SUPPORTED FOR PARENTS IN FLOWWORKSPACE
   
-  # GATINGHIERARCHY
-  gh <- x
-  if(cyto_class(x, "GatingSet", TRUE)) {
-    gh <- x[[1]]
-  }
-  
-  # RELATIVE NODES
-  LAPPLY(
-    nodes,
-    function(node) {
-      # CHILDREN
-      if(.grepl("^c", type)) {
-        pops <- gh_pop_get_children(
-          gh,
-          node,
-          showHidden = hidden,
-          path = path
-        )
-      # DESCENDANTS
-      } else if(.grepl("^d", type)) {
-        pops <- gh_pop_get_descendants(
-          gh,
-          node,
-          showHidden = hidden,
-          path = path
-        )
-      # PARENT
-      } else if(.grepl("^p", type)) {
-        pops <- gh_pop_get_parent(
-          gh,
-          node,
-          path = path
-        )
-      # GRANDPARENT
-      } else if(.grepl("^g", type)) {
-        parent <- gh_pop_get_parent(
-          gh,
-          node,
-          path = path
-        )
-        pops <- gh_pop_get_parent(
-          gh,
-          parent,
-          path = path
-        )
-      # UNSUPPORTED TYPE
-      } else {
-        stop(
-          paste0(
-            "'type' must be either 'parent', 'children', ",
-            "'descendants' or 'grandparent'!"
-          )
-        )
-      }
-      names(pops) <- rep(node, length(pops))
-      # TERMINAL
-      if(terminal) {
-        pops <- pops[
-          LAPPLY(
-            pops,
-            function(pop) {
-              length(
-                gh_pop_get_children(
-                  gh,
-                  unname(pop),
-                  showHidden = hidden
-                )
-              ) == 0
-            }
-          )
-        ]
-      }
-      return(pops)
+  # GATINGHERARCHY | GATINGSET
+  if(cyto_class(x, "GatingSet")) {
+    
+    # GATINGHIERARCHY
+    gh <- x
+    if(cyto_class(x, "GatingSet", TRUE)) {
+      gh <- x[[1]]
     }
-  )
-  
+    
+    # RELATIVE NODES
+    return(
+      LAPPLY(
+        nodes,
+        function(node) {
+          # CHILDREN
+          if(.grepl("^c", type)) {
+            pops <- gh_pop_get_children(
+              gh,
+              node,
+              showHidden = hidden,
+              path = path
+            )
+          # DESCENDANTS
+          } else if(.grepl("^d", type)) {
+            pops <- gh_pop_get_descendants(
+              gh,
+              node,
+              showHidden = hidden,
+              path = path
+            )
+          # PARENT
+          } else if(.grepl("^p", type)) {
+            if(node != "root") {
+              pops <- gh_pop_get_parent(
+                gh,
+                node,
+                path = path
+              )
+            } else {
+              pops <- "root"
+            }
+          # GRANDPARENT
+          } else if(.grepl("^g", type)) {
+            if(node != "root") {
+              pops <- gh_pop_get_parent(
+                gh,
+                node,
+                path = path
+              )
+            } else {
+              pops <- "root"
+            }
+            if(pops != "root") {
+              pops <- gh_pop_get_parent(
+                gh,
+                pops,
+                path = path
+              )
+            }
+          # UNSUPPORTED TYPE
+          } else {
+            stop(
+              paste0(
+                "'type' must be either 'parent', 'children', ",
+                "'descendants' or 'grandparent'!"
+              )
+            )
+          }
+          names(pops) <- names(pops) <- rep(
+            cyto_nodes_convert(
+              gh,
+              nodes = node,
+              path = path
+            ),
+            length(pops)
+          )
+          # TERMINAL
+          if(terminal) {
+            pops <- pops[
+              LAPPLY(
+                pops,
+                function(pop) {
+                  length(
+                    gh_pop_get_children(
+                      gh,
+                      unname(pop),
+                      showHidden = hidden
+                    )
+                  ) == 0
+                }
+              )
+            ]
+          }
+          return(pops)
+        }
+      )
+    )
+  # GATINGTEMPLATE
+  } else {
+    # READ GATINGTEMPLATE FROM FILE
+    if(is.character(x)) {
+      x <- file_ext_append(x, ".csv")
+      x <- suppressMessages(gatingTemplate(x))
+    }
+    # GATINGTEMPLATE REQUIRED
+    if(!cyto_class(x, "gatingTemplate")) {
+      stop(
+        "'x' must be either a GatingHierarchy, GatingSet or gatingTemplate!"
+      )
+    }
+    # HIDDEN
+    if(!hidden) {
+      warning(
+        "'hidden' will be ignored for gatingTemplates."
+      )
+    }
+    # RELATIVE NODES
+    res <- LAPPLY(
+      nodes,
+      function(node) {
+        # FULL PATHS TO NODES IN GATINGTEMPLATE
+        paths <- cyto_nodes(
+          x,
+          path = "full"
+        )
+        # CONVERT NODE TO FULL PATH
+        node <- cyto_nodes_convert(
+          x,
+          nodes = node,
+          path = "full"
+        )
+        # CHILDREN
+        if(.grepl("^c", type)) {
+          pops <- gt_get_children(
+            x,
+            node
+          )
+        # DESCENDANTS
+        } else if(.grepl("^d", type)) {
+          pops <- paths[.grepl(node, paths)]
+          pops <- pops[!pops %in% node]
+        # PARENT
+        } else if(.grepl("^p", type)) {
+          pops <- dirname(node)
+          if(pops == ".") {
+            pops <- "root"
+          }
+        # GRANDPARENT
+        } else if(.grepl("^g", type)) {
+          pops <- dirname(node)
+          if(pops == ".") {
+            pops <- "root"
+          }
+          if(pops != "root") {
+            pops <- dirname(pops)
+            if(pops == ".") {
+              pops <- "root"
+            }
+          }
+        # UNSUPPORTED TYPE
+        } else {
+          stop(
+            paste0(
+              "'type' must be either 'parent', 'children', ",
+              "'descendants' or 'grandparent'!"
+            )
+          )
+        }
+        names(pops) <- rep(
+          cyto_nodes_convert(
+            x,
+            nodes = node,
+            path = path
+          ),
+          length(pops)
+        )
+        return(pops[!is.na(pops)])
+      }
+    )
+    # TERMINAL NODES
+    if(terminal) {
+      res <- res[
+        LAPPLY(
+          res,
+          function(pop) {
+            length(
+              gt_get_children(
+                x,
+                unname(pop)
+              )
+            ) == 0
+          }
+        )
+      ]
+    }
+    # FULL | AUTO PATH
+    cyto_nodes_convert(
+      x,
+      nodes = res,
+      path = path
+    )
+  }
 }
 
 ## CYTO_COPY -------------------------------------------------------------------
