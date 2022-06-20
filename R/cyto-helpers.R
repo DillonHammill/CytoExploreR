@@ -6303,11 +6303,11 @@ cyto_nodes_convert <- function(x,
     path = "full",
     hidden = hidden
   )
-  # nodes_auto <- cyto_nodes(
-  #   x, 
-  #   path = "auto",
-  #   hidden = hidden
-  # )
+  nodes_auto <- cyto_nodes(
+    x,
+    path = "auto",
+    hidden = hidden
+  )
   # nodes_terminal <- basename(nodes_full)
   
   # STRIP REFERENCE TO ROOT
@@ -6330,7 +6330,6 @@ cyto_nodes_convert <- function(x,
   
   # ANCHOR
   if (!is.null(anchor)) {
-    # TODO: PERFORM SEARCH WITH ESCAPED SLASHES
     # DROP ROOT REFERENCE
     if(grepl("\\/?root\\/", anchor)){
       anchor <- gsub("\\/?root\\/", "/", anchor)
