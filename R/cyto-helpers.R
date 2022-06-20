@@ -5312,14 +5312,19 @@ cyto_markers_edit <- function(x,
   }
   
   # CROSS CHECK EXISTING MARKER ASSIGNMENTS
-  lapply(
-    cyto_markers(x),
-    function(z) {
-      if(is.na(pd[pd[, "channel" %in% names(z), "marker"]]) & z != names(z)) {
-        pd[pd[, "channel"] %in% names(z), "marker"] <<- unname(z)
+  markers <- cyto_markers(x)
+  if(length(markers) > 0) {
+    lapply(
+      seq_along(markers),
+      function(z) {
+        if(is.na(pd[pd[, "channel"] %in% names(markers)[z], "marker"]) & 
+           z != names(markers)[z]) {
+          pd[pd[, "channel"] %in% names(markers)[z], "marker"] <<- 
+            unname(markers)[z]
+        }
       }
-    }
-  )
+    )
+  }
   
   # DEFAULT FILE NAME
   if (is.null(save_as)) {
@@ -5471,8 +5476,7 @@ cyto_details_edit <- function(x,
     ignore.case = TRUE,
     data.table = FALSE,
     type = "experiment details",
-    files = file,
-    channel = chans
+    files = file
   )
   
   # INHERIT EXPERIMENT DETAILS FROM FILE
