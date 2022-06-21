@@ -6386,7 +6386,6 @@ cyto_nodes_convert <- function(x,
     path = "auto",
     hidden = hidden
   )
-  nodes_all <- c(nodes_full, nodes_auto)
   # nodes_terminal <- basename(nodes_full)
   
   # STRIP REFERENCE TO ROOT
@@ -6419,16 +6418,15 @@ cyto_nodes_convert <- function(x,
       "\\\\\\1",
       anchor
     )
-    # ANCHOR NODE(S) SEARCH
+    # PARTIAL FULL MATCH
     anchor_match <- grep(
       paste0(
         if(anchor == "root") {
           ""
-        } else if(!grepl("^\\/", anchor)) {
-          "\\/"
         } else {
-          ""
-        }, anchor, "$" # AVOID PARTIAL MATCH IN TERMINAL NODE
+          anchor
+        },
+        "$"
       ),
       nodes_full,
       fixed = FALSE,
@@ -6472,31 +6470,20 @@ cyto_nodes_convert <- function(x,
   nodes <- LAPPLY(
     nodes, 
     function(node) {
-      # EXACT FULL PATH MATCH
-      if(node %in% nodes_full) {
-        nodes_match <- match(node, nodes_full)
-      # EXACT AUTO PATH MATCH
-      }else if(node %in% nodes_auto){
-        nodes_match <- match(node, nodes_auto)
-      # TRY PARTIAL MATCH
-      } else {
-        nodes_match <- grep(
-          paste0(
-            if(node == "root") {
-              ""
-            } else if(!grepl("^\\/", node)) {
-              "\\/"
-            } else {
-              ""
-            },
-            node,
-            "$"
-          ),
-          nodes_full,
-          ignore.case = ignore.case,
-          fixed = FALSE
-        )
-      }
+      # PARTIAL FULL MATCH
+      nodes_match <- grep(
+        paste0(
+          if(node == "root") {
+            ""
+          } else {
+            node
+          },
+          "$"
+        ),
+        nodes_full,
+        fixed = FALSE,
+        ignore.case = ignore.case
+      )
       # INVALID NODE
       if(length(nodes_match) == 0) {
         stop(
@@ -6514,16 +6501,42 @@ cyto_nodes_convert <- function(x,
       }
       # RETURN NODE
       if (length(nodes_match) == 1) {
-        nodes <- cyto_nodes(
-          x,
-          path = path,
-          hidden = hidden
-        )[nodes_match]
-        return(nodes)
+        return(
+          cyto_nodes(
+            x,
+            path = path,
+            hidden = hidden
+          )[nodes_match]
+        )
       # AMBIGUOUS NODE - ANCHOR TO PARENTAL NODE
       } else if (length(nodes_match) > 1) {
         # NO ANCHOR
         if (is.null(anchor)) {
+          # ATTEMPT EXACT AUTO MATCH
+          nodes_match <- grep(
+            paste0(
+              "^\\/?",
+              if(node == "root") {
+                ""
+              } else {
+                node
+              },
+              "$"
+            ),
+            nodes_auto,
+            fixed = FALSE,
+            ignore.case = ignore.case
+          )
+          # EXACT AUTO MATCH LOCATED
+          if(length(nodes_match) == 1) {
+            return(
+              cyto_nodes(
+                x,
+                path = path,
+                hidden = hidden
+              )[nodes_match]
+            )
+          }
           stop(
             paste0(
               node, 
@@ -6544,6 +6557,8 @@ cyto_nodes_convert <- function(x,
           nodes_full_split <- .cyto_nodes_split(nodes_full)
           # SPLIT ANCHOR
           anchor_split <- .cyto_nodes_split(anchor)
+          # NODE FRAGMENTS
+          node_frag <- unique(unlist(c(anchor_split, node_split)))
           # ROOT ANCHOR
           if (anchor_split == "root") {
             anchor_split <- NULL
@@ -6553,7 +6568,7 @@ cyto_nodes_convert <- function(x,
             LAPPLY(
               nodes_full_split, 
               function(z) {
-                all(unique(c(node_split, anchor_split)) %in% z)
+                all(node_frag %in% z)
               }
             )
           )
@@ -6587,7 +6602,7 @@ cyto_nodes_convert <- function(x,
                   )
                 )
               }
-              ind <- which(nodes_lengths == nodes_length_min)
+              ind <- ind[which(nodes_lengths == nodes_length_min)]
               node <- cyto_nodes(
                 x, 
                 path = path,
