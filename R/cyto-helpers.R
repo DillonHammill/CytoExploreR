@@ -6071,7 +6071,6 @@ cyto_compensate.flowFrame <- function(x,
 #'
 #' @importFrom flowWorkspace gh_get_pop_paths gs_get_pop_paths
 #'   gh_pop_get_children gs_pop_get_children
-#' @importFrom openCyto gatingTemplate gt_get_nodes
 #'
 #' @export
 cyto_nodes <- function(x,
@@ -6124,44 +6123,100 @@ cyto_nodes <- function(x,
     }
   # GATINGTEMPLATE
   } else {
+    # NOTE: GT_GET_NODES() DOESN'T PARSE OUT POP = "*" CYTO_GATE_CLUST()
     # GATINGTEMPLATE NAME
     if(is.character(x)) {
       x <- file_ext_append(x, ".csv")
       x <- suppressMessages(gatingTemplate(x))
     }
-    # FULL NODES
-    if(path == "full") {
-      nodes <- names(
-        gt_get_nodes(
-          x, 
-          only.names = TRUE,
-          ...
-        )
+    # PARSE GATINGTEMPLATE
+    gt <- cyto_gatingTemplate_parse(
+      gt,
+      data.table = FALSE
+    )
+    # FULL NODE PATHS
+    nodes_full <- c(
+      "root",
+      LAPPLY(
+        1:nrow(gt),
+        function(z) {
+          paste0(
+            if(gt[z, "parent"] == "root") {
+              "/"
+            } else {
+              paste0(
+                gt[z, "parent"],
+                "/"
+              )
+            },
+            unlist(
+              strsplit(
+                gt[z, "alias"],
+                ","
+              )
+            )
+          )
+        }
       )
-      names(nodes) <- nodes
-      # DROP COMMA SEPARATED NODES
-      nodes <- nodes[!grepl(",", names(nodes))]
-    # AUTO NODES
+    )
+    # AUTO NODE PATHS
+    if(path == "auto") {
+      nodes <- LAPPLY(
+        nodes_full,
+        function(node) {
+          pop <- basename(node)
+          pop_match <- grep(
+            paste0(
+              "/",
+              pop,
+              "$"
+            ),
+            nodes_full
+          )
+          # NON-UNIQUE ALIAS
+          if(length(pop_match) > 1) {
+            pop <- paste0(
+              "/",
+              pop
+            )
+            pop_split <- unlist(
+              strsplit(
+                node, "/"
+              )
+            )
+            pop_split <- pop_split[!pop_split %in% ""]
+            # BYPASS ROOT ANCHOR
+            if(length(pop_split) > 1) {
+              for(i in (length(pop_split) - 1):1) {
+                pop  <- paste0(
+                  "/",
+                  pop_split[i],
+                  pop
+                )
+                if(length(grep(paste0(pop, "$"), nodes_full)) == 1) {
+                    pop <- gsub("^/", "", pop)
+                  break()
+                }
+              }
+            }
+          }
+          return(pop)
+        }
+      )
+    # FULL NODE PATHS
     } else {
-      nodes <- gt_get_nodes(
-        x, 
-        only.names = TRUE,
-        ...
-      )
-      # DROP COMMA SEPARATED NODES
-      nodes <- nodes[!grepl(",", names(nodes))]
-      nodes <- unlist(nodes)
+      nodes <- nodes_full
     }
     # TERMINAL NODES
     if(terminal) {
       nodes <- LAPPLY(
         seq_along(nodes),
         function(z) {
-          # FULL NODE PATH REQUIRED HERE
-          if(length(gt_get_children(x, names(nodes)[z])) == 0) {
-            return(nodes[z])
-          } else {
+          # CHECK FOR DESCENDANTS
+          if(any(grepl(paste0(nodes_full[z], "/"), nodes_full))) {
             return(NULL)
+          } else {
+            return(nodes[z])
           }
         }
       )
@@ -6243,16 +6298,35 @@ cyto_nodes_check <- function(x,
         stop(
           paste0(
             node, 
-            " is not unique in this ", class(x), ".",
+            " is not unique in this ", 
+            if(is.character(x)){
+              "gatingTemplate"
+              } else {
+                cyto_class(x)
+              }, ".",
             " Use either ", 
-            paste0(nodes_auto[ind], collapse = " or "),
+            paste0(
+              nodes_auto[ind], 
+              collapse = " or "
+            ),
             "."
           )
         )
       }
       # NO MATCH
       if(length(ind) == 0){
-        stop(paste0(node, " does not exist in this ", class(x), "."))
+        stop(
+          paste0(
+            node, 
+            " does not exist in this ", 
+            if(is.character(x)){
+              "gatingTemplate"
+            } else {
+              cyto_class(x)
+            },
+            "."
+          )
+        )
       }
     }
   )
@@ -6312,6 +6386,7 @@ cyto_nodes_convert <- function(x,
     path = "auto",
     hidden = hidden
   )
+  nodes_all <- c(nodes_full, nodes_auto)
   # nodes_terminal <- basename(nodes_full)
   
   # STRIP REFERENCE TO ROOT
@@ -6361,11 +6436,33 @@ cyto_nodes_convert <- function(x,
     )
     # INVALID ANCHOR
     if(length(anchor_match) == 0) {
-      stop(paste0(anchor, " does not exist in this ", class(x), "!"))
+      stop(
+        paste0(
+          anchor, 
+          " does not exist in this ",
+          if(is.character(x)){
+            "gatingTemplate"
+          } else {
+            cyto_class(x)
+          }, 
+          "!"
+        )
+      )
     }
     # ANCHOR MUST BE UNIQUE
     if (length(anchor_match) > 1) {
-      stop(paste0(anchor, " is not unique within this ", class(x), "!"))
+      stop(
+        paste0(
+          anchor, 
+          " is not unique within this ",
+          if(is.character(x)){
+            "gatingTemplate"
+          } else {
+            cyto_class(x)
+          }, 
+          "!"
+        )
+      )
     }
     # FULL ANCHOR
     anchor <- nodes_full[anchor_match]
@@ -6375,26 +6472,45 @@ cyto_nodes_convert <- function(x,
   nodes <- LAPPLY(
     nodes, 
     function(node) {
-      # NODE SEARCH
-      nodes_match <- grep(
-        paste0(
-          if(node == "root") {
-            ""
-          } else if(!grepl("^\\/", node)) {
-            "\\/"
-          } else {
-            ""
-          },
-          node,
-          "$"
-        ),
-        nodes_full,
-        ignore.case = ignore.case,
-        fixed = FALSE
-      )
+      # EXACT FULL PATH MATCH
+      if(node %in% nodes_full) {
+        nodes_match <- match(node, nodes_full)
+      # EXACT AUTO PATH MATCH
+      }else if(node %in% nodes_auto){
+        nodes_match <- match(node, nodes_auto)
+      # TRY PARTIAL MATCH
+      } else {
+        nodes_match <- grep(
+          paste0(
+            if(node == "root") {
+              ""
+            } else if(!grepl("^\\/", node)) {
+              "\\/"
+            } else {
+              ""
+            },
+            node,
+            "$"
+          ),
+          nodes_full,
+          ignore.case = ignore.case,
+          fixed = FALSE
+        )
+      }
       # INVALID NODE
       if(length(nodes_match) == 0) {
-        stop(paste0(node, " does not exist in this ", class(x), "!"))
+        stop(
+          paste0(
+            node, 
+            " does not exist in this ", 
+            if(is.character(x)){
+              "gatingTemplate"
+            } else {
+              cyto_class(x)
+            }, 
+            "!"
+          )
+        )
       }
       # RETURN NODE
       if (length(nodes_match) == 1) {
@@ -6408,7 +6524,18 @@ cyto_nodes_convert <- function(x,
       } else if (length(nodes_match) > 1) {
         # NO ANCHOR
         if (is.null(anchor)) {
-          stop(paste0(node, " is ambiguous in this ", class(x), "!"))
+          stop(
+            paste0(
+              node, 
+              " is ambiguous in this ",
+              if(is.character(x)){
+                "gatingTemplate"
+              } else {
+                cyto_class(x)
+              }, 
+              "!"
+            )
+          )
         # ANCHOR
         } else if (!is.null(anchor)) {
           # SPLIT NODE
@@ -6630,7 +6757,6 @@ cyto_nodes_ancestor <- function(x,
 #'
 #' @importFrom flowWorkspace gh_pop_get_parent gh_pop_get_children
 #'   gh_pop_get_descendants
-#' @importFrom openCyto gt_get_children
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -6799,10 +6925,7 @@ cyto_nodes_kin <- function(x,
         )
         # CHILDREN
         if(.grepl("^c", type)) {
-          pops <- gt_get_children(
-            x,
-            node
-          )
+          pops <- paths[dirname(paths) %in% node]
         # DESCENDANTS
         } else if(.grepl("^d", type)) {
           pops <- paths[.grepl(node, paths)]
@@ -6810,18 +6933,18 @@ cyto_nodes_kin <- function(x,
         # PARENT
         } else if(.grepl("^p", type)) {
           pops <- dirname(node)
-          if(pops == ".") {
+          if(pops %in%  c(".", "/")) {
             pops <- "root"
           }
         # GRANDPARENT
         } else if(.grepl("^g", type)) {
           pops <- dirname(node)
-          if(pops == ".") {
+          if(pops %in%  c(".", "/")) {
             pops <- "root"
           }
           if(pops != "root") {
             pops <- dirname(pops)
-            if(pops == ".") {
+            if(pops %in%  c(".", "/")) {
               pops <- "root"
             }
           }

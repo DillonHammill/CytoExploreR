@@ -967,6 +967,47 @@ cyto_gatingTemplate_read <- function(gatingTemplate = NULL,
   # GATINGTEMPLATE
   if(cyto_class(gatingTemplate, "gatingTemplate")){
     gt <- as.data.table(gatingTemplate)
+    # DROP EMPTY POP
+    gt <- gt[!gt[["pop"]] %in% c("", NA), , drop = FALSE]
+    # PARSE OUT POP = * WITH SINGLE ALIAS
+    ind <- which(
+      gt[["pop"]] %in% "*" & !grepl("/|\\*", gt[["alias"]])
+    )
+    # ROWS TO PARSE
+    if(length(ind) > 0) {
+      gt_parse <- gt[ind, ]
+      gt_parse <- cbind(gt[ind, ], "index" = ind)
+      gt_parse <- split(
+        gt_parse,
+        as.list(
+          gt_parse
+        )[
+          colnames(gt_parse)[
+            -match(
+              c("alias", "pop", "index"),
+              colnames(gt_parse)
+            )
+          ]
+        ],
+        drop = TRUE
+      )
+      lapply(
+        gt_parse,
+        function(z) {
+          # COLLAPSE ALIAS
+          gt_alias <- paste0(
+            z[["alias"]],
+            collapse = ","
+          )
+          # REPLACE ALIAS
+          gt[min(z[["index"]]), "alias"] <<- gt_alias
+          # KEEP FIRST ROW
+          ind <- z[["index"]][!z[["index"]] == min(z[["index"]])]
+          # REMOVE EXCESS ROWS
+          gt <<- gt[-ind, ]
+        }
+      )
+    }
   # DATA.TABLE OR DATA.FRAME
   } else if( cyto_class(gatingTemplate, c("data.table", "data.frame"))) {
     gt <- gatingTemplate
