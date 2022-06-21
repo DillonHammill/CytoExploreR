@@ -6124,14 +6124,9 @@ cyto_nodes <- function(x,
   # GATINGTEMPLATE
   } else {
     # NOTE: GT_GET_NODES() DOESN'T PARSE OUT POP = "*" CYTO_GATE_CLUST()
-    # GATINGTEMPLATE NAME
-    if(is.character(x)) {
-      x <- file_ext_append(x, ".csv")
-      x <- suppressMessages(gatingTemplate(x))
-    }
     # PARSE GATINGTEMPLATE
     gt <- cyto_gatingTemplate_parse(
-      gt,
+      x,
       data.table = FALSE
     )
     # FULL NODE PATHS
