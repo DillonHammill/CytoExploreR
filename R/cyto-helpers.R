@@ -6421,11 +6421,7 @@ cyto_nodes_convert <- function(x,
     # PARTIAL FULL MATCH
     anchor_match <- grep(
       paste0(
-        if(anchor == "root") {
-          ""
-        } else {
-          anchor
-        },
+        anchor,
         "$"
       ),
       nodes_full,
@@ -6465,7 +6461,7 @@ cyto_nodes_convert <- function(x,
     # FULL ANCHOR
     anchor <- nodes_full[anchor_match]
   }
-  
+
   # CONVERT NODES
   nodes <- LAPPLY(
     nodes, 
@@ -6473,11 +6469,7 @@ cyto_nodes_convert <- function(x,
       # PARTIAL FULL MATCH
       nodes_match <- grep(
         paste0(
-          if(node == "root") {
-            ""
-          } else {
-            node
-          },
+          node,
           "$"
         ),
         nodes_full,
@@ -6557,12 +6549,12 @@ cyto_nodes_convert <- function(x,
           nodes_full_split <- .cyto_nodes_split(nodes_full)
           # SPLIT ANCHOR
           anchor_split <- .cyto_nodes_split(anchor)
+          # ROOT ANCHOR
+          if (all(anchor_split[[1]] == "root")) {
+            anchor_split <- list(NULL)
+          }
           # NODE FRAGMENTS
           node_frag <- unique(unlist(c(anchor_split, node_split)))
-          # ROOT ANCHOR
-          if (anchor_split == "root") {
-            anchor_split <- NULL
-          }
           # UNIQUE NODE EXISTS
           ind <- which(
             LAPPLY(
