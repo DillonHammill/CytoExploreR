@@ -3009,6 +3009,40 @@ cyto_select <- function(x,
   
 }
 
+## CYTO_VARS -------------------------------------------------------------------
+
+#' Retrieve the names of the experiment variables
+#'
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#'   
+#' @return a vector containing the names of the experiment variables.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @seealso \code{\link{cyto_details}}
+#' @seealso \code{\link{cyto_select}}
+#' @seealso \code{\link{cyto_groups}}
+#' 
+#' @examples 
+#' library(CytoExploreRData)
+#'
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
+#'
+#' # experiment variables
+#' cyto_vars(gs)
+#'
+#' @export
+cyto_vars <- function(x) {
+  
+  return(
+    colnames(cyto_details(x))
+  )
+  
+}
+
 ## CYTO_GROUPS -----------------------------------------------------------------
 
 #' Retrieve details about experimental groups
