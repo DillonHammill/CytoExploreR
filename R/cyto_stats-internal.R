@@ -1181,7 +1181,7 @@ cyto_stat_rescale <- function(x,
         )
       )
     }
-    # CHECK SCALE MARIX
+    # CHECK SCALE MATRIX
     if(!setequal(dim(scale), c(2, ncol(x)))) {
       stop(
         "'scale' must a matrix of min/max values for each column in x!"

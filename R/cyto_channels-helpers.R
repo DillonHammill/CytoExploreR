@@ -904,7 +904,6 @@ cyto_channel_match <- function(x,
   # IMPORT DATA FROM FILE
   pd_new <- cyto_file_search(
     "Details.*\\.csv$|Channel-Match.*\\.csv",
-    colnames = c("channel", "marker"),
     rownames = rownames(pd),
     ignore.case = TRUE,
     data.table = FALSE,
@@ -922,7 +921,7 @@ cyto_channel_match <- function(x,
   }
   
   # DEFAULT FILE NAME
-  if (is.null(save_as)) {
+  if(is.null(save_as)) {
     save_as <- file
     if(is.null(save_as)) {
       save_as <- cyto_file_name(

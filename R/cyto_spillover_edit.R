@@ -123,7 +123,7 @@ cyto_spillover_edit <- function(x,
                                 point_size = 4,
                                 axes_text_size = 1.7,
                                 axes_label_text_size = 2,
-                                title_text_size = 2,
+                                title_text_size = 1.5,
                                 header_text_size = 1.5,
                                 viewer = FALSE,
                                 ...) {
@@ -1340,7 +1340,7 @@ editPlotUI <- function(id,
   
   plotOutput(
     NS(id, "plot"),
-    width = "90%",
+    width = "70%",
     ...
   )
   
@@ -1359,7 +1359,7 @@ editPlotServer <- function(id,
                            point_size = 3,
                            axes_text_size = 1.7,
                            axes_label_text_size = 2,
-                           title_text_size = 2,
+                           title_text_size = 1.5,
                            ...) {
   
   moduleServer(id, function(input,
@@ -1409,6 +1409,7 @@ editPlotServer <- function(id,
             key_text_size = 2,
             key_title_text_size = 2,
             popup = FALSE,
+            margins = c(4,5,6,6.5),
             ...
           )
         )
@@ -1549,6 +1550,7 @@ editPlotServer <- function(id,
                 "black"
               },
               label_text_size = 1.1,
+              margins = c(5,6,2,4),
               ...
             )
           )
@@ -1587,7 +1589,7 @@ compPlotServer <- function(id,
                            point_size = 3,
                            axes_text_size = 1.7,
                            axes_label_text_size = 2,
-                           title_text_size = 2,
+                           title_text_size = 1.5,
                            ...) {
   
   moduleServer(id, function(input,
@@ -1709,74 +1711,85 @@ compPlotServer <- function(id,
   raw_data <- cyto_data_extract(
     x, 
     format = "matrix",
+    channels = channels,
     copy = FALSE
   )[[1]][[1]]
-  raw_data <- raw_data[, channels]
-  # SORT RAW DATA
-  raw_data <- raw_data[order(raw_data[, channels[1]]), ]
-  raw_data <- as.data.frame(raw_data)
-  # SPLIT PLOT RANGE INTO CHUNKS
-  xlim <- par("usr")
-  # NUMBER OF CHUNKS
-  n <- 25
-  chunks <- seq(
-    from = floor(xlim[1]),
-    to = ceiling(xlim[2]),
-    by = (ceiling(xlim[2]) - floor(xlim[1])) / n
-  )
-  # SPLIT SORTED RAW DATA INTO CHUNKS
-  raw_data_chunks <- lapply(seq_len(n - 1), function(z) {
-    if (z < n - 1) {
-      raw_data[raw_data[, channels[1]] >= chunks[z] &
-                 raw_data[, channels[1]] < chunks[z + 1], ]
-    } else {
-      raw_data[raw_data[, channels[1]] >= chunks[z] &
-                 raw_data[, channels[1]] <= chunks[z + 1], ]
-    }
-  })
-  # COMPUTE MEDIANS IN BOTH CHANNELS PER CHUNK
-  xmedians <- LAPPLY(
-    raw_data_chunks,
-    function(z) {
-      # ONLY COMPUTE IF SUFFICIENT EVENTS
-      if (nrow(z) > 30) {
-        median(z[, channels[1]])
-      } else {
-        NA
+  
+  # BYPASS EMPTY SAMPLES
+  if(nrow(raw_data) > 0) {
+    # SORT RAW DATA
+    raw_data <- raw_data[order(raw_data[, channels[1]]), ]
+    raw_data <- as.data.frame(raw_data)
+    # SPLIT PLOT RANGE INTO CHUNKS
+    xlim <- par("usr")
+    # NUMBER OF CHUNKS
+    n <- 25
+    chunks <- seq(
+      from = floor(xlim[1]),
+      to = ceiling(xlim[2]),
+      by = (ceiling(xlim[2]) - floor(xlim[1])) / n
+    )
+    # SPLIT SORTED RAW DATA INTO CHUNKS
+    raw_data_chunks <- lapply(
+      seq_len(n - 1), 
+      function(z) {
+        if (z < n - 1) {
+          raw_data[raw_data[, channels[1]] >= chunks[z] &
+                   raw_data[, channels[1]] < chunks[z + 1], ]
+        } else {
+          raw_data[raw_data[, channels[1]] >= chunks[z] &
+                   raw_data[, channels[1]] <= chunks[z + 1], ]
+        }
       }
-    }
-  )
-  xmedians <- xmedians[!is.na(xmedians)]
-  ymedians <- LAPPLY(
-    raw_data_chunks,
-    function(z) {
-      # ONLY COMPUTE IF SUFFICIENT EVENTS
-      if (nrow(z) > 30) {
-        median(z[, channels[2]])
-      } else {
-        NA
+    )
+    # COMPUTE MEDIANS IN BOTH CHANNELS PER CHUNK
+    xmedians <- LAPPLY(
+      raw_data_chunks,
+      function(z) {
+        # ONLY COMPUTE IF SUFFICIENT EVENTS
+        if (nrow(z) > 30) {
+          median(z[, channels[1]])
+        } else {
+          NA
+        }
       }
-    }
-  )
-  ymedians <- ymedians[!is.na(ymedians)]
-  # PREPARE MEDFIs
-  medians <- data.frame(xmedians, ymedians)
-  colnames(medians) <- c(
-    channels[1],
-    channels[2]
-  )
-  vals_x <- medians[, channels[1]]
-  vals_y <- medians[, channels[2]]
-  loessMod <- suppressWarnings(
-    loess(vals_y ~ vals_x,
-          data = medians,
-          span = 0.9)
-  )
-  loessMod <- predict(loessMod)
-  # ADD LINE TO PLOT
-  lines(medians[, channels[1]],
-        loessMod,
-        col = "purple2",
-        lwd = 3
-  )
+    )
+    xmedians <- xmedians[!is.na(xmedians)]
+    ymedians <- LAPPLY(
+      raw_data_chunks,
+      function(z) {
+        # ONLY COMPUTE IF SUFFICIENT EVENTS
+        if (nrow(z) > 30) {
+          median(z[, channels[2]])
+        } else {
+          NA
+        }
+      }
+    )
+    ymedians <- ymedians[!is.na(ymedians)]
+    # PREPARE MEDFIs
+    medians <- data.frame(xmedians, ymedians)
+    colnames(medians) <- c(
+      channels[1],
+      channels[2]
+    )
+    vals_x <- medians[, channels[1]]
+    vals_y <- medians[, channels[2]]
+    loessMod <- suppressWarnings(
+      loess(
+        vals_y ~ vals_x,
+        data = medians,
+        span = 0.9
+      )
+    )
+    loessMod <- predict(loessMod)
+    # ADD LINE TO PLOT
+    lines(
+      medians[, channels[1]],
+      loessMod,
+      col = "purple2",
+      lwd = 3
+    )
+  }
+  
 }

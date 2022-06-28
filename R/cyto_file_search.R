@@ -148,7 +148,7 @@ cyto_file_search <- function(x,
   # MULTIPLE FILES LOCATED
   } else {
     # INTERACTIVE FILE SELECTION
-    if(interactive & cyto_option("CytoExploreR_interactive")) {
+    if(interactive() & cyto_option("CytoExploreR_interactive")) {
       message(
         paste0(
           "Multiple files located matching the ",
