@@ -5390,12 +5390,14 @@ cyto_markers_edit <- function(x,
       viewer = "pane",
       ...
     )
+  } else {
+    pd_new <- pd
   }
   
   # WRITE CSV
   if(!.all_na(save_as)) {
     write_to_csv(
-      pd_new,
+      pd,
       save_as,
       row.names = FALSE
     )
