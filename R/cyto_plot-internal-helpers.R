@@ -165,16 +165,19 @@
   # PREPARE X
   x <- structure(
     lapply(
-      x, 
+      seq_along(x), 
       function(z){
         if(is.null(gh)) {
           return(
-            list(z)
+            structure(
+              list(x[[z]]),
+              names = names(x)[z]
+            )
           )
         } else {
           return(
             structure(
-              list(z), 
+              list(x[[z]]), 
               names = parent
             )
           )
@@ -308,8 +311,8 @@
       overlay <- structure(
         list(overlay),
         names = ifelse(
-          length(overlay) == 1, 
-          cyto_names(overlay), 
+          length(overlay) == 1,
+          cyto_names(overlay),
           NULL
         )
       )

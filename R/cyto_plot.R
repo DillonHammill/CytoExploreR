@@ -638,12 +638,17 @@ cyto_plot <- function(x,
         seq_along(args$x), 
         function(z){
           if(length(unique(names(args$x[[z]]))) == 1) {
-            return(
-             paste(
-               args$title[z],
-               unique(names(args$x[[z]])),
-               sep = "\n")
-            )
+            if(unique(names(args$x[[z]])) %in% args$title[z]) {
+              return(args$title[z])
+            } else {
+              return(
+                paste(
+                  args$title[z],
+                  unique(names(args$x[[z]])),
+                  sep = "\n"
+                )
+              )
+            }
         } else {
           return(args$title[z])
         }
@@ -656,15 +661,16 @@ cyto_plot <- function(x,
       }
       # POPULATIONS/SAMPLES
       if(!is.null(LAPPLY(args$x, "names"))) {
-        args$title <- paste(
-          args$title,
-          LAPPLY(
-            args$x, 
-            function(z) {
-              names(z)[1] # BASE LAYER
+        args$title <- LAPPLY(
+          seq_along(args$x),
+          function(z) {
+            # BASE LAYER POPULATION
+            if(names(args$x[[z]])[1] %in% args$title[z]) {
+              return(args$title[z])
+            } else {
+              return(paste(args$title[z], names(args$x[[z]])[1], sep = "\n"))
             }
-          ),
-          sep = "\n"
+          }
         )
       }
     }
