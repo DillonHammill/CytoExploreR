@@ -99,17 +99,27 @@
   
   # MISSING LISTED AS NULL -> CONVERTED TO EMPTY
   args <- formals("cyto_plot")
+  # SPECTRA ARGUMENTS NOT DEFINED WITHIN CYTO_PLOT()
+  spectra_args <- formals("cyto_plot_spectra")
+  spectra_args <- spectra_args[grepl("spectra", names(spectra_args))]
+  args <- c(
+    args,
+    c(list("spectra" = FALSE), spectra_args)
+  )
   args <- args[!names(args) %in% c("merge_by",
                                    "overlay",
                                    "events",
                                    "layout",
                                    "select",
                                    "...")]
-  lapply(names(args), function(z) {
-    if (all(class(args[[z]]) == "name")) {
-      args[[z]] <<- ""
+  lapply(
+    names(args), 
+    function(z) {
+      if (all(class(args[[z]]) == "name")) {
+        args[[z]] <<- ""
+      }
     }
-  })
+  )
   
   # REMOVE ARGUMENTS THAT SHOULD PREPARED ALREADY OR SEPARATELY
   args <- args[!names(args) %in%
@@ -167,7 +177,10 @@
     "label_position",
     "label_memory",
     "legend",
-    arg_names[grepl("key", arg_names)] # all key arguments
+    arg_names[grepl("key", arg_names)], # all key arguments
+    "spectra",
+    "spectra_cols",
+    "spectra_col_scale"
   )
   
   # UPDATE ARG_NAMES
@@ -180,7 +193,9 @@
     arg_names[grepl("hist_fill", arg_names)], # hist_fill arguments
     arg_names[grepl("hist_line", arg_names)], # hist_line arguments
     arg_names[grepl("legend_", arg_names)], # legend aes arguments
-    arg_names[grepl("point_", arg_names)] # point args
+    arg_names[grepl("point_", arg_names)], # point args
+    "spectra_col",
+    "spectra_col_alpha"
   )
   
   # UPDATE ARG_NAMES
@@ -210,7 +225,7 @@
   
   # ARGUMENT NAMES
   x_names <- names(x)
-  
+
   # REPEAT AND FORMAT ARGUMENTS
   x <- lapply(seq_along(x), function(z) {
     # ARGUMENT
@@ -233,6 +248,8 @@
         # WATCH OUT COLOURS
         if(arg %in% c("point_cols",
                       "point_col_scale",
+                      "spectra_cols",
+                      "spectra_col_scale",
                       "hist_cols")){
           arg_default_length <- length(x[[arg]])
         }
@@ -266,11 +283,12 @@
         arg_total_length <- sum(arg_plot_length)
       }
       # FILL ARGUMENT WITH PLACE HOLDER & SPLIT
-      arg_repeat <- rep(c(
-        x[[arg]],
-        rep("*-*", arg_total_length)
-      ),
-      length.out = arg_total_length
+      arg_repeat <- rep(
+        c(
+          x[[arg]],
+          rep("*-*", arg_total_length)
+        ),
+        length.out = arg_total_length
       )
       # SPLIT INTO PLOTS
       arg_split <- split(

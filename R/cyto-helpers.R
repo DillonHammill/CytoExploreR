@@ -7878,7 +7878,7 @@ cyto_cbind.flowSet <- function(x,
     # SAME NUMBER OF EVENTS
     if(nrow(cols) != sum(cyto_counts)){
       stop(
-        paste0("'cols' does not contain the same number of events as this", 
+        paste0("'cols' does not contain the same number of events as this ", 
                class(x))
       )
       # SPLIT MATRIX INTO LIST

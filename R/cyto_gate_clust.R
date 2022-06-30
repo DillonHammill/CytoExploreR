@@ -156,6 +156,29 @@ cyto_gate_clust <- function(x,
     # KMEANS
     } else if(grepl("^kmeans$", type, ignore.case = TRUE)) {
       # USES STATS::KMEANS()
+    # DBSCAN 
+    } else if(grepl("^dbscan$|^hdbscan$|^SNN$", type, ignore.case = TRUE)) {
+      # LOAD DBSCAN
+      cyto_required(
+        "dbscan",
+        source = "CRAN",
+        ref = paste0(
+          "Hahsler M, Piekenbrock M, Doran D (2019). dbscan: Fast ",
+          "Density-Based Clustering with R. Journal of Statistical Software, ",
+          "91(1), 1–30. doi: 10.18637/jss.v091.i01"
+        )
+      )
+      # PREPARE TYPE
+      if(grepl("^SNN$", type, ignore.case = TRUE)) {
+        type <- "dbscan::sNNclust"
+      } else {
+        type <- paste0(
+          "dbscan::",
+          tolower(type)
+        )
+      }
+      # INPUT FORMAT
+      input <- "matrix"
     }
   }
   
@@ -552,3 +575,66 @@ cyto_gate_clust <- function(x,
   return(gate)
   
 }
+
+#' #' @noRd
+#' .cyto_gate_flood <- function(x,
+#'                              bins = 256,
+#'                              smooth = 1,
+#'                              bandwidth = NA,
+#'                              limits = c(NA, NA)) {
+#'   
+#'   # COMPUTE KDE
+#'   kde <- cyto_stat_density(
+#'     x,
+#'     stat = "density",
+#'     bins = bins,
+#'     smooth = smooth,
+#'     bandwidth = bandwidth,
+#'     limits = limits
+#'   )[[1]]
+#'   
+#'   # STORE LABELS
+#'   kde$z <- rep(NA, length(kde$x))
+#'   
+#'   # ORDER
+#'   ind <- order(kde$y, decreasing = TRUE)
+#'   
+#'   # LABEL
+#'   label <- 0
+#'   for(i in ind) {
+#'     # LEFT
+#'     if((i - 1) >= 1) {
+#'       if(!is.na(kde$z[i - 1])) {
+#'         kde$z[i] <- kde$z[i - 1]
+#'         next
+#'       }
+#'     }
+#'     # RIGHT
+#'     if((i + 1) <= length(kde$z)) {
+#'       if(!is.na(kde$z[i + 1])) {
+#'         kde$z[i] <- kde$z[i + 1]
+#'         next
+#'       }
+#'     }
+#'     label <- label + 1
+#'     kde$z[i] <- label
+#'   }
+#' 
+#'   # VISUALISE
+#'   plot(kde)
+#'   lapply(
+#'     unique(kde$z),
+#'     function(v) {
+#'       print(k$x[max(which(kde$z == v))] + 0.5*diff(kde$x[1:2]))
+#'       abline(
+#'         v = k$x[max(which(kde$z == v))] + 0.5*diff(kde$x[1:2]),
+#'         col = "red"
+#'       )
+#'     }
+#'   )
+#'   
+#'   # MERGE
+#'   
+#'   return(kde)
+#'   
+#' }

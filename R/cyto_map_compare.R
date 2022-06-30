@@ -311,7 +311,6 @@ cyto_map_compare <- function(x,
                 list = TRUE
               )
             )
-            print(str(rank_test))
             # STORE P VALUES
             for(i in 1:(length(x) - 1)) {
               for(j in (i + 1):length(x)) {

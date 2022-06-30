@@ -84,7 +84,6 @@
 #' @seealso \link{cyto_plot_profile}
 #' @seealso \link{cyto_plot_explore}
 #' @seealso \link{cyto_plot_map}
-#' @seealso \link{cyto_plot_grid}
 #'
 #' @export
 cyto_plot_gating_scheme <- function(x,

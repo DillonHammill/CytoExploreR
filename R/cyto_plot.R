@@ -503,6 +503,9 @@ cyto_plot <- function(x,
   # ARGUMENTS
   args <- .args_list(...)
   
+  # SPECTRA
+  args$spectra <- any(grepl("spectra", names(args)))
+  
   # REMOVE PAGE ARGUMENT
   args <- args[!names(args) %in% c("page")]
   
@@ -523,7 +526,7 @@ cyto_plot <- function(x,
     args$channels <- cyto_channels_extract(
       args$x,
       channels = args$channels,
-      plot = TRUE
+      plot = !args$spectra
     )
   }
   
@@ -679,56 +682,87 @@ cyto_plot <- function(x,
     }
   }
   
-  # X AXIS LIMITS - SUPPLIED ON LINEAR SCALE
-  args$xlim <- .cyto_transform(
-    args$xlim,
-    trans = args$axes_trans,
-    channel = args$channels[1],
-    inverse = FALSE
-  )
-  
-  # COMPUTE MISSING X AXIS LIMITS
-  if (any(is.na(args$xlim))) {
-    args$xlim[is.na(args$xlim)] <- 
-      .cyto_plot_axes_limits(
-        args$x,
-        channels = args$channels[1],
-        gate = args$gate[[1]],
-        axes_limits = args$axes_limits,
-        buffer = args$axes_limits_buffer
-      )[, args$channels[1]][is.na(args$xlim)]
+  # XLIM - SPECTRA
+  if(args$spectra) {
+    args$xlim = c(1, length(args$channels))
+  # XLIM - HISTOGRAM | SCATTER
+  } else {
+    # X AXIS LIMITS - SUPPLIED ON LINEAR SCALE
+    args$xlim <- .cyto_transform(
+      args$xlim,
+      trans = args$axes_trans,
+      channel = args$channels[1],
+      inverse = FALSE
+    )
+    # COMPUTE MISSING X AXIS LIMITS
+    if (any(is.na(args$xlim))) {
+      args$xlim[is.na(args$xlim)] <- 
+        .cyto_plot_axes_limits(
+          args$x,
+          channels = args$channels[1],
+          gate = args$gate[[1]],
+          axes_limits = args$axes_limits,
+          buffer = args$axes_limits_buffer
+        )[, args$channels[1]][is.na(args$xlim)]
+    }
   }
   
   # Y AXIS LIMITS - SUPPLIED ON LINEAR SCALE
-  if(length(args$channels) == 2){
+  if(length(args$channels) >= 2) {
+    # SPECTRA - USE TRANSFORMERS FROM SECOND CHANNEL
     args$ylim <- .cyto_transform(
       args$ylim,
       trans = args$axes_trans,
       channel = args$channels[2]
     )
-    if(any(is.na(args$ylim))) {
-      args$ylim[is.na(args$ylim)] <- 
-        .cyto_plot_axes_limits(
-          args$x,
-          channels = args$channels[2],
-          gate = args$gate[[1]],
-          axes_limits = args$axes_limits,
-          buffer = args$axes_limits_buffer
-        )[, args$channels[2]][is.na(args$ylim)]
+    # SPECTRA - COMPUTE LIMITS ACROSS CHANNELS
+    if(args$spectra) {
+      if(any(is.na(args$ylim))) {
+        args$ylim[is.na(args$ylim)] <- 
+          range(
+            .cyto_plot_axes_limits(
+              args$x,
+              channels = args$channels,
+              gate = args$gate[[1]],
+              axes_limits = args$axes_limits,
+              buffer = args$axes_limits_buffer
+            )
+          )[is.na(args$ylim)]
+      }
+    # SCATTER - COMPUTE LIMITS 
+    } else {
+      if(any(is.na(args$ylim))) {
+        args$ylim[is.na(args$ylim)] <- 
+          .cyto_plot_axes_limits(
+            args$x,
+            channels = args$channels[2],
+            gate = args$gate[[1]],
+            axes_limits = args$axes_limits,
+            buffer = args$axes_limits_buffer
+          )[, args$channels[2]][is.na(args$ylim)]
+      }
     }
   }
-  
-  # X AXIS BREAKS & LABELS
-  axes_text_x <- 
-    .cyto_plot_axes_text(
-      args$x[[1]],
-      channels = args$channels[1],
-      axes_text = args$axes_text[1],
-      axes_trans = args$axes_trans,
-      axes_range = list(args$xlim),
-      axes_limits = args$axes_limits
-    )[[1]]
 
+  # X AXIS BREAKS & LABELS
+  if(args$spectra) {
+    axes_text_x <- list(
+      "label" = args$channels,
+      "at" = seq_len(max(args$xlim)),
+      "add" = axes_text[1],
+      "las" = 2
+    )
+  } else {
+    axes_text_x <- 
+      .cyto_plot_axes_text(
+        args$x[[1]],
+        channels = args$channels[1],
+        axes_text = args$axes_text[1],
+        axes_trans = args$axes_trans,
+        axes_range = list(args$xlim),
+        axes_limits = args$axes_limits
+      )[[1]]
+  }
   
   # Y AXIS BREAKS & LABELS
   axes_text_y <- 
@@ -740,7 +774,7 @@ cyto_plot <- function(x,
       axes_range = list(args$ylim),
       axes_limits = args$axes_limits
     )[[1]]
-  
+
   # AXES_TEXT
   args$axes_text <- list(axes_text_x, axes_text_y)
   args$axes_text <- rep(list(args$axes_text), length.out = length(args$x))
@@ -754,7 +788,7 @@ cyto_plot <- function(x,
   )
   
   # LABEL_TEXT_Y CO-ORDINATES - LINEAR -> TRANSFORMED SCALE
-  if(length(channels) == 2) {
+  if(length(channels) >= 2) {
     args$label_text_y <- .cyto_transform(
       args$label_text_y,
       trans = args$axes_trans,

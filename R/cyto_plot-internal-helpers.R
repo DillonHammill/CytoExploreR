@@ -18,8 +18,14 @@
   # CYTO_PLOT_EMPTY
   cyto_plot_empty(args)
   
+  # SPECTRA
+  if(args$spectra) {
+    cyto_func_execute(
+      ".cyto_plot_spectra",
+      args
+    )
   # HISTOGRAMS
-  if(length(args$channels) == 1) {
+  } else if(length(args$channels) == 1) {
     cyto_plot_hist(args)
   # POINTS & CONTOURS
   } else {
@@ -961,7 +967,7 @@
   }
   
   # TIME CHANNEL ALWAYS USE DATA LIMITS
-  if(grepl("^Time", channels, ignore.case = TRUE)){
+  if(any(grepl("^Time", channels, ignore.case = TRUE))) {
     axes_limits <- "data"
   } 
   
@@ -1299,7 +1305,8 @@
           list(
             "label" = names(axis_ticks),
             "at" = axis_ticks,
-            "add" = axes_text[z]
+            "add" = axes_text[z],
+            "las" = 0
           )
         )
         # TRANSFORMED SCALE
@@ -1406,7 +1413,8 @@
           list(
             "label" = axis_labels, 
             "at" = axis_ticks,
-            "add" = axes_text[z]
+            "add" = axes_text[z],
+            "las" = 0
           )
         )
       }
@@ -1433,6 +1441,16 @@
                                   xlab,
                                   ylab,
                                   hist_stat = "count") {
+  
+  # SPECTRA
+  if(length(channels) > 2) {
+    return(
+      list(
+        "xlab" = "",
+        "ylab" = "Intensity"
+      )
+    )
+  }
   
   # CHANNELS
   channels <- c(channels, NA)[1:2]
@@ -1751,7 +1769,7 @@
       label_stat <- rep(label_stat, length.out = TNP)
     }
     # 2D PLOT
-  } else if (length(channels) == 2) {
+  } else if (length(channels) >= 2) {
     # LABEL_STAT MISSING
     if (all(LAPPLY(label_stat, ".empty"))) {
       # GATE - FREQ STAT
@@ -2300,7 +2318,7 @@
             text_y[y] <- label_text_y[[z]][y]
           }
           # 2D PLOT - MODE
-        } else if (length(channels) == 2) {
+        } else if (length(channels) >= 2) {
           # GATE CENTER
           gate_center <- gate_centers[y, ]
           # X COORD REQUIRED
@@ -2852,7 +2870,11 @@
                               point_cols = NA,
                               point_col = NA,
                               point_col_alpha = 1,
-                              key = "both") {
+                              key = "both",
+                              spectra_col_scale = NA,
+                              spectra_col = NA,
+                              spectra_col_alpha = 1,
+                              spectra_cols = NA) {
   
   # ARGUMENTS ------------------------------------------------------------------
   
@@ -3024,7 +3046,207 @@
       text.col = rev(legend_text_col),
       text.font = rev(legend_text_font)
     )
+  # LEGEND - SPECTRA
+  } else if(length(channels) >  2) {
+    # SPECTRA COLOUR SCALE
+    spectra_col <- .cyto_plot_spectra_col(
+      x,
+      spectra_col = spectra_col,
+      spectra_cols = spectra_cols,
+      spectra_col_scale = spectra_col_scale
+    )
+    # SPECTRA COLOURS
+    spectra_col <- LAPPLY(
+      seq_along(spectra_col),
+      function(z) {
+        adjustcolor(
+          rgb(
+            spectra_col[[z]](1),
+            maxColorValue = 255
+          ),
+          spectra_col_alpha[z]
+        )
+      }
+    )
+    # LEGEND LOCATION - NO KEY
+    legend_x <- 1.08 * .par("usr")[[1]][2]
+    # LEGEND
+    legend(
+      x = legend_x,
+      y = cnt + 0.6 * lgnd_height,
+      legend = paste0("   ", rev(legend_text)), # HACKY WAY TO ALIGN TEXT
+      col = rev(spectra_col),
+      pch = 15,
+      pt.cex = 2.4,
+      xpd = TRUE,
+      bty = "n",
+      x.intersp = 0.5, # MOVE DIAGONALLY
+      y.intersp = 1.2,
+      adj = c(0, 0.49), # XY ADJUSTMENT
+      cex = legend_text_size,
+      text.col = rev(legend_text_col),
+      text.font = rev(legend_text_font)
+    )
   }
+}
+
+## SPECTRA ---------------------------------------------------------------------
+
+#' Create colour scales for each overlaid spectra
+#' @noRd
+.cyto_plot_spectra_col <- function(x,
+                                   spectra_col = NA,
+                                   spectra_cols = NA,
+                                   spectra_col_scale = NA) {
+  
+  # LAYERS
+  L <- length(x)
+  
+  # SPECTRAL COLOURS
+  if(cyto_class(spectra_col, "list", TRUE)) {
+    spectra_col <- c(
+      spectra_col,
+      rep(list(NA), L)
+    )[seq_len(L)]
+  } else {
+    spectra_col <- as.list(
+      rep(
+        c(spectra_col, rep(NA, L)),
+        length.out = L
+      )
+    )
+  }
+  
+  # SPECTRAL COLOUR SCALE
+  spectra_col_scale <- .cyto_plot_point_col_scale(spectra_col_scale)
+  
+  # SPECTRA COLOURS
+  if(!is.function(spectra_cols)) {
+    if(.all_na(spectra_cols)) {
+      spectra_cols <- colorRampPalette(
+        .cyto_plot_colour_palette("point_cols")
+      )
+    } else {
+      spectra_cols <- colorRampPalette(
+        spectra_cols
+      )
+    }
+  }
+  
+  # REQUIRED COLOURS
+  spectra_extra_cols <- spectra_cols(
+    sum(
+      LAPPLY(
+        spectra_col[-1],
+        .all_na
+      )
+    )
+  )
+  
+  # MAKE COLOUR SCALES PER LAYER
+  lapply(
+    seq_along(spectra_col),
+    function(z) {
+      if(!is.function(spectra_col[[z]])) {
+        if(.all_na(spectra_col[[z]])) {
+          if(z == 1) {
+            spectra_col[[z]] <- colorRamp(
+              spectra_col_scale
+            )
+          } else {
+            # TODO: WHITE ON BLACK BACKGROUND?
+            spectra_col[[z]] <- colorRamp(
+              c("white", spectra_extra_cols[1])
+            )
+            spectra_extra_cols <<- spectra_extra_cols[-1]
+          }
+        } else {
+          spectra_col[[z]] <- colorRamp(
+            c("white", spectra_col[[z]])
+          )
+        }
+      }
+      return(spectra_col[[z]])
+    }
+  )
+  
+}
+
+#' Add spectra to plot
+#' @param x list of cytosets
+#' @importFrom grDevices colorRamp colorRampPalette adjustcolor
+#' @noRd
+.cyto_plot_spectra <- function(x,
+                               channels = NULL,
+                               spectra_col_scale = NA,
+                               spectra_col = NA,
+                               spectra_cols = NA,
+                               spectra_col_alpha = 1) {
+  
+  # SPECTRA COLOUR SCALES
+  spectra_col <- .cyto_plot_spectra_col(
+    x,
+    spectra_col_scale = spectra_col_scale,
+    spectra_col = spectra_col,
+    spectra_cols = spectra_cols
+  )
+  
+  # PLOT LIMITS
+  ylim <- .par("usr")[[1]][3:4]
+  
+  # ADD SPECTRA
+  mapply(
+    function(cs,
+             spectra_col,
+             spectra_col_alpha) {
+      
+      lapply(
+        seq_along(channels),
+        function(z) {
+          # COMPUTE HISTOGRAM
+          d <- cyto_apply(
+            cs,
+            channels = channels[z],
+            input = "matrix",
+            FUN = "cyto_stat_density",
+            n = 150,
+            smooth = 4,
+            bandwidth = diff(ylim/256),
+            stat = "count"
+          )[[1]][[1]]
+          # BIN WIDTH
+          x_bin <- diff(d$x)/2
+          # MAP Y -> [0,1]
+          d$y <- CytoExploreR:::cyto_stat_rescale(
+            d$y,
+            scale = c(0,1)
+          )
+          # MAP COLOURS
+          d$z <- rgb(
+            spectra_col(d$y),
+            maxColorValue = 255
+          )
+          for(i in 1:length(d$y)) {
+            if(d$y[i] > 0.1) {
+              # RECTANGLE
+              rect(
+                xleft = z - 0.495,
+                xright = z + 0.495,
+                ytop = d$x[i] + x_bin,
+                ybottom = d$x[i] - x_bin,
+                col = adjustcolor(d$z[i], spectra_col_alpha),
+                border = NA
+              )
+            }
+          }
+        }
+      )
+    },
+    x,
+    spectra_col,
+    spectra_col_alpha
+  )
+  
 }
 
 ## KEY -------------------------------------------------------------------------
@@ -3284,8 +3506,8 @@
                                  key_title = "",
                                  axes_trans = NA) {
   
-  # 1D REMOVE KEY 
-  if(length(channels) == 1) {
+  # 1D | SPECTRA - REMOVE KEY 
+  if(length(channels) != 2) {
     return(
       structure(
         lapply(
@@ -3789,7 +4011,7 @@
       title <- NA
     }
   # 2D scatterplots
-  } else if (length(channels) == 2) {
+  } else if (length(channels) >= 2) {
     # missing title replaced with sample name
     if (.empty(title)) {
       title <- cyto_names(x)

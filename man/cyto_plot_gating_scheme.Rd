@@ -141,8 +141,6 @@ Visualise cytometry gating strategies
 \link{cyto_plot_explore}
 
 \link{cyto_plot_map}
-
-\link{cyto_plot_grid}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

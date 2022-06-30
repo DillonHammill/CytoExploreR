@@ -18,7 +18,7 @@ cyto_spillover_edit(
   point_size = 4,
   axes_text_size = 1.7,
   axes_label_text_size = 2,
-  title_text_size = 2,
+  title_text_size = 1.5,
   header_text_size = 1.5,
   viewer = FALSE,
   ...
