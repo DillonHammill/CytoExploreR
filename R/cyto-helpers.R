@@ -6447,6 +6447,12 @@ cyto_nodes_convert <- function(x,
       "\\\\\\1",
       anchor
     )
+    # ANCHOR - PREVENT PARTIAL MATCH
+    if(!anchor == "root") {
+      if(!grepl("^\\/", anchor)) {
+        anchor <- paste0("/", anchor)
+      }
+    }
     # PARTIAL FULL MATCH
     anchor_match <- grep(
       paste0(
