@@ -79,18 +79,22 @@ cyto_unmix_compute <- function(x,
     "label"
   )
   
-  # REQUIRED COLUMNS
-  vars_req <- c()
-  lapply(
-    vars,
-    function(z) {
-      if(any(grepl(z, colnames(pd), ignore.case = TRUE))) {
-        colnames(pd)[grep(z, colnames(pd), ignore.case = TRUE)[1]] <<- z
-      } else {
-        vars_req <<- c(vars_req, z)
-      }
-    }
-  )
+  # APPEND REQUIRED COLUMNS
+  vars_req <- vars[!vars %in% colnames(pd)]
+  if(length(vars_req) > 0) {
+    pd <- cbind(
+      pd,
+      matrix(
+        NA,
+        ncol = length(vars_req),
+        nrow = nrow(pd),
+        dimnames = list(
+          rownames(pd),
+          vars_req
+        )
+      )
+    )
+  }
   
   # IMPORT DATA FROM FILE
   pd_new <- cyto_file_search(
@@ -103,42 +107,78 @@ cyto_unmix_compute <- function(x,
     files = NULL
   )
   
+  # EXPERIMENT DETAILS INDICES
+  pd_ind <- match(rownames(pd), rownames(pd_new[[1]]))
+  
   # INHERIT DETAILS FROM FILE - FILE MAY CONTAIN EXTRA ROWS
   if(!is.null(pd_new)) {
     # APPEND EXTRA DETAILS NOT IN FILE
-    vars <- colnames(pd)[!colnames(pd) %in% colnames(pd_new)]
-    lapply(
-      vars,
-      function(z) {
-        pd_new[, z] <<- NA
-        pd_new[match(rownames(pd), rownames(pd_new)), z] <<- pd[, z]
-      }
-    )
+    vars_req <- colnames(pd)[!colnames(pd) %in% colnames(pd_new[[1]])]
+    if(length(vars_req) > 0) {
+      lapply(
+        vars_req,
+        function(z) {
+          pd_new[[1]] <<- cbind(
+            pd_new[[1]],
+            structure(
+              list(
+                rep(NA, nrow(pd_new[[1]])),
+                names = z
+              )
+            )
+          )
+          pd_new[[1]][pd_ind, z] <<- pd[, z]
+        }
+      )
+    }
     pd <- pd_new[[1]]
     file <- names(pd_new)
   } else {
     file <- NULL
   }
   
-  # MISSING VARIABLES
-  if(length(vars_req) > 0) {
-    pd <- cbind(
-      pd,
-      matrix(
-        NA,
-        nrow = nrow(pd),
-        ncol = length(vars_req),
-        dimnames = list(
-          rownames(pd),
-          vars_req
-        )
-      )
+  # DEFAULT PARENT - EDUCATED GUESS
+  if(cyto_class(x, "GatingSet")) {
+    # MISSING PARENTS - AVAILABLE SAMPLES
+    ind <- which(
+      rownames(pd) %in% rownames(cyto_details(x)) & 
+        is.na(pd$parent)
     )
-  }
-  
-  # DEFAULT PARENT
-  if(.all_na(pd[, "parent"])) {
-    pd[, "parent"] <- rep(parent, length.out = nrow(pd))
+    # DEFAULT PARENT
+    if(length(ind) > 0) {
+      # TERMINAL NODES
+      pops <- cyto_nodes(
+        x[ind],
+        terminal = TRUE,
+        path = "auto"
+      )
+      # COMPUTE COUNTS FOR EACH TERMINAL NODE
+      pop_stats <- cyto_apply(
+        x[ind],
+        parent = pops,
+        channels = channels[1],
+        input = "matrix",
+        FUN = "cyto_stat_count",
+        copy = FALSE
+      )
+      if(cyto_class(pop_stats, "list", TRUE)) {
+        pop_stats <- do.call("cbind", pop_stats)
+        dimnames(pop_stats) <- list(rownames(pop_stats), pops)
+      }
+      # PARENT - TERMINAL NODE MOST EVENTS
+      pd$parent[ind] <- pops[
+        apply(
+          pop_stats,
+          1,
+          "which.max"
+        )
+      ]
+    }
+    # GROUPS MISSING - DEFAULT TO PARENTS
+    ind <- which(is.na(pd$group))
+    if(length(ind) > 0) {
+      pd$group[ind] <- pd$parent[ind]
+    }
   }
   
   # EDIT DETAILS - ROWNAMES CANNOT BE EDITED
@@ -146,6 +186,14 @@ cyto_unmix_compute <- function(x,
     # REMOVE ROW NAMES
     cyto_names <- rownames(pd)
     rownames(pd) <- NULL
+    # PARENT - DROPDOWN COLUMN
+    if(cyto_class(x, "GatingSet")) {
+      col_options <- list(
+        parent = cyto_nodes(x)
+      )
+    } else {
+      col_options = NULL
+    }
     # EDIT
     pd <- data_edit(
       pd,
@@ -156,6 +204,7 @@ cyto_unmix_compute <- function(x,
       quiet = TRUE,
       hide = TRUE,
       viewer = "pane",
+      col_options = col_options,
       ...
     )
     # REPLACE ROW NAMES - REQUIRED TO UPDATE CYTO_DETAILS
@@ -168,12 +217,16 @@ cyto_unmix_compute <- function(x,
   }
   
   # UPDATE DETAILS - PD MAY CONTAIN EXTRA INFORMATION
-  cyto_details(x) <- pd[match_ind(
-    rownames(
-      cyto_details(x)
+  cyto_details(x) <- pd[
+    match_ind(
+      rownames(
+        cyto_details(x)
+      ), 
+      rownames(pd)
     ), 
-    rownames(pd)
-  ), , drop = FALSE]
+    , 
+    drop = FALSE
+  ]
   
   # SAVE UNMIXING DETAILS TO FILE
   if(is.null(file)) {
@@ -229,7 +282,7 @@ cyto_unmix_compute <- function(x,
         )
         auto <- cyto_enquire(NULL)
         if(!is.na(suppressWarnings(as.numeric(auto)))) {
-          auto <- names(cs_list)[auto]
+          auto <- names(cs_list)[as.numeric(auto)]
         }
         # AUTO REQUIRED
       } else {
