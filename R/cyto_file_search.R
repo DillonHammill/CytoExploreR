@@ -166,7 +166,11 @@ cyto_file_search <- function(x,
       # FILE OPTIONS
       message(
         paste0(
-          names(files),
+          paste0(
+            1:length(files),
+            ": ",
+            names(files)
+          ),
           sep = "\n"
         )
       )

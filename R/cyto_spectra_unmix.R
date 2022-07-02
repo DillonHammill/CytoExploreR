@@ -14,7 +14,7 @@
 #' extract from each sample (e.g. single cells or single beads) when a
 #' GatingHierarchy or Gatingset is supplied}\item{label}{a name for the new
 #' unmixed parameter for each control (e.g. CD4 FITC) - labels for unstained
-#' controls should be left empty}}. Each \code{group} must contain a reference
+#' controls should be set to \code{"Unstained"}}}. Each \code{group} must contain a reference
 #' unstained population in order to compute the unmixing matrix.
 #'
 #' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
@@ -32,9 +32,20 @@
 #'   written, set to \code{Spectral-Unmixing-Matrix.csv} prefixed with the date
 #'   by default. Set this argument to NA if you don't want to write the unmixing
 #'   matrix to file.
-#' @param ... not in use.
+#' @param axes_trans object of class \code{transformerList} containing the
+#'   transformer definitions for transformations applied to the supplied data,
+#'   only required when \code{cytoset} objects are supplied.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
+#' @param ... additional arguments passed to \code{cyto_plot()} to allow
+#'   customisation of plots used for gating.
 #'
 #' @return computed unmixing coefficients in the form of a matrix.
+#'
+#' @importFrom flowCore rectangleGate
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -43,7 +54,6 @@
 #' # GatingSet of controls
 #' unmix <- cyto_unmix_compute(
 #'   gs,
-#'   group_by = "type",
 #'   auto = "cells",
 #'   save_as = "Spectral-Unmixing-Matrix.csv"
 #' )
@@ -56,16 +66,40 @@ cyto_unmix_compute <- function(x,
                                select = NULL,
                                auto = NULL,
                                save_as = NULL,
+                               axes_trans = NA,
+                               axes_limits = "machine",
                                ...) {
+  
+  # TODO: TRANSFORMATIONS
   
   # PREPARE DATA ---------------------------------------------------------------
   
   # SELECT
-  x <- cyto_select(x, select)
+  if(!is.null(select)) {
+    x <- cyto_select(x, select)
+  }
   
   # CHANNELS
   if(is.null(channels)) {
-    channels <- cyto_fluor_channels(x)
+    channels <- cyto_channels(
+      x,
+      exclude = c(
+        "FSC",
+        "SSC",
+        "Time",
+        "Event-ID"
+      )
+    )
+  } else {
+    channels <- cyto_channels_extract(
+      x,
+      channels = channels
+    )
+  }
+  
+  # TRANSFORMERS
+  if(.all_na(axes_trans)) {
+    axes_trans <- cyto_transformers_extract(x)
   }
   
   # UNMIXING DETAILS
@@ -247,12 +281,9 @@ cyto_unmix_compute <- function(x,
     file = file,
     row.names = TRUE
   )
-
-  # RESTRICTED EXPERIMENT DETAILS
-  pd <- cyto_details(x)
   
   # SPLIT DATA INTO GROUPS
-  cs_list <- cyto_group_by(
+  cgs_list <- cyto_group_by(
     x,
     group_by = "group"
   )
@@ -260,8 +291,8 @@ cyto_unmix_compute <- function(x,
   # AUTOFLUORESCENCE
   if(is.null(auto)) {
     # SINGLE GROUP
-    if(length(cs_list) == 1) {
-      auto <- names(cs_list)
+    if(length(cgs_list) == 1) {
+      auto <- names(cgs_list)
     # MULTIPLE GROUPS - SELECTION REQUIRED
     } else {
       # ENQUIRE
@@ -274,15 +305,15 @@ cyto_unmix_compute <- function(x,
         )
         message(
           paste0(
-            1:length(cs_list), 
+            1:length(cgs_list), 
             ": ", 
-            names(cs_list),
+            names(cgs_list),
             sep = "\n"
           )
         )
         auto <- cyto_enquire(NULL)
         if(!is.na(suppressWarnings(as.numeric(auto)))) {
-          auto <- names(cs_list)[as.numeric(auto)]
+          auto <- names(cgs_list)[as.numeric(auto)]
         }
         # AUTO REQUIRED
       } else {
@@ -296,69 +327,418 @@ cyto_unmix_compute <- function(x,
     }
   }
   
-  # EXTRACT DATA - EACH GROUP SAME PARENT
-  cs_list <- structure(
-    lapply(
-      seq_along(cs_list),
-      function(z) {
-        cyto_data_extract(
-          cs_list[[z]],
-          parent = cyto_details(cs_list[[z]])$parent[1],
-          channels = channels
-        )[[1]]
-      }
-    ),
-    names = names(cs_list)
-  )
-  
   # COMPUTE SPECTRAL UNMIXING MATRIX -------------------------------------------
   
-  # COMPUTE MEDFI - ALL CHANNELS
-  medFI_list <- structure(
+  # PREPARE DATA
+  unmix <- do.call(
+    "rbind",
     lapply(
-      cs_list,
+      seq_along(cgs_list),
       function(z) {
+        # CYTOSET | GATINGSET
+        cgs <- cgs_list[[z]]
+        # GROUP DETAILS
+        pd_grp <- cyto_details(cgs)
+        # LOCATE UNSTAINED CONTROLS
+        unst <- NULL
+        unst_ind <- which(
+          grepl(
+            "Unstained|NIL|Auto",
+            pd_grp[, "label"],
+            ignore.case = TRUE
+          )
+        )
+        # DROP EXCESS UNSTAINED CONTRTOLS
+        if(length(unst_ind) > 0) {
+          if(length(unst_ind) == 1) {
+            # EXTRACT UNSTAINED SAMPLE
+            unst <- cgs[unst_ind]
+            # DROP UNSTAINED SAMPLE
+            cgs <- cgs[-unst_ind]
+            # UPDATE DETAILS
+            pd_grp <- pd_grp[-unst_ind, , drop = FALSE]
+          } else {
+            unst_rm <- unst_ind[
+              -which.min(
+                apply(
+                  do.call(
+                    "rbind",
+                    lapply(
+                      unst_ind,
+                      function(w) {
+                        # CYTOSET COPY
+                        cs <- cyto_data_extract(
+                          cgs[w],
+                          parent = pd_grp[, "parent"][w],
+                          channels = channels,
+                          format = "cytoset",
+                          trans = axes_trans,
+                          inverse = TRUE,
+                          copy = TRUE
+                        )[[1]]
+                        # COMPUTE CHANNEL CV
+                        cyto_apply(
+                          cs,
+                          channels = channels,
+                          input = "matrix",
+                          FUN = "cyto_stat_cv",
+                          trans = axes_trans,
+                          inverse = FALSE,
+                          copy = FALSE
+                        )
+                      }
+                    )
+                  ),
+                  1,
+                  "mean"
+                )
+              )
+            ]
+            # EXTRACT UNSTAINED SAMPLE
+            unst <- cgs[unst_ind[!unst_ind %in% unst_rm]]
+            # DROP UNSTAINED SAMPLE
+            cgs <- cgs[-unst_ind]
+            # UPDATE DETAILS
+            pd_grp <- pd_grp[-unst_ind, , drop = FALSE]
+          }
+        }
+        # COMPUTE PEAK EMISSION ALL DETECTORS
+        peak_em <- structure(
+          lapply(
+            seq_along(cgs),
+            function(w) {
+              # UNSTAINED PEAK EM
+              if(!is.null(unst)) {
+                # UNSTAINED MATCH PARENT
+                cs <- cyto_data_extract(
+                  unst,
+                  parent = pd_grp[, "parent"][w],
+                  channels = channels,
+                  format = "cytoset",
+                  trans = axes_trans,
+                  inverse = FALSE,
+                  copy = FALSE
+                )[[1]]
+                # COMPUTE MAXIMA
+                neg_em <- cyto_apply(
+                  cs,
+                  channels = channels,
+                  input = "matrix",
+                  FUN = "cyto_stat_quantile",
+                  probs = c(0.99),
+                  trans = axes_trans,
+                  inverse = TRUE,
+                  copy = TRUE
+                )
+              } else {
+                neg_em <- NULL
+              }
+              # POSITIVE PEAK EM - LIENAR COPY
+              cs <- cyto_data_extract(
+                cgs[w],
+                parent = pd_grp[, "parent"][w],
+                channels = channels,
+                format = "cytoset",
+                trans = axes_trans,
+                inverse = FALSE,
+                copy = FALSE
+              )[[1]]
+              # COMPUTE MAXIMA
+              pos_em <- cyto_apply(
+                cs,
+                channels = channels,
+                input = "matrix",
+                FUN = "cyto_stat_quantile",
+                probs = 0.99,
+                trans = axes_trans,
+                inverse = TRUE,
+                copy = TRUE
+              ) 
+              # RETURN NEGATIVE & POSITIVE EM
+              list(
+                "-" = neg_em,
+                "+" = pos_em
+              )
+            }
+          ),
+          names = cyto_names(cgs)
+        )
+        # COMBINE PEAK EM
+        peak_em <- structure(
+          lapply(
+            c("-", "+"),
+            function(w) {
+              do.call(
+                "rbind",
+                lapply(
+                  peak_em,
+                  `[[`,
+                  w
+                )
+              )
+            }
+          ),
+          names = c("-", "+")
+        )
+        # DROP DUPLICATE CONTROLS BY LABEL
+        ind_rm <- LAPPLY(
+          unique(pd_grp[, "label"]),
+          function(w) {
+            ind <- which(pd_grp[, "label"] %in% w)
+            pd_chunk <- pd_grp[ind, ]
+            if(nrow(pd_chunk) > 1) {
+              return(
+                ind[
+                  -which.max(
+                    rowSums(
+                      peak_em[["+"]][ind, , drop = FALSE]
+                    )
+                  )
+                ]
+              )
+            } else {
+              return(NULL)
+            }
+          }
+        )
+        # DROP DUPLICATES
+        if(length(ind_rm) > 0) {
+          # REMOVE DUPLICATES FROM PEAK EM
+          peak_em[["+"]] <- peak_em[["+"]][-ind_rm, ]
+          peak_em[["-"]] <- peak_em[["-"]][-ind_rm, ]
+          # DROP DUPLICATE SAMPLES
+          cgs <- cgs[-ind_rm]
+          # UPDATE DETAILS
+          pd_grp <- pd_grp[-ind_rm, , drop = FALSE]
+        }
+        # SUBTRACT UNSTAINED PROFILE
+        if(!is.null(peak_em[["-"]])) {
+          # SWEEP OUT UNSTAINED
+          peak_em <- peak_em[["+"]] - peak_em[["-"]]
+        } else {
+          peak_em <- peak_em[["+"]]
+        }
+        # LOCATE PEAK EMISSION CHANNEL
+        pd_grp[, "peak"] <- chans[
+          apply(
+            peak_em,
+            1,
+            "which.max"
+          )
+        ]
+        print(pd_grp)
+        # PERFORM GATING IN PEAK EMISSION CHANNEL - POSITIVE + NEGTAIVE EVENTS
+        cs_list <- structure(
+          lapply(
+            seq_along(cgs),
+            function(w) {
+              # UNSTAINED CYTOSET - TRANSFORMED COPY
+              if(!is.null(unst)) {
+                neg_events <- cyto_data_extract(
+                  unst,
+                  parent = pd_grp[w, "parent"],
+                  channels = channels,
+                  format = "cytoset",
+                  trans = axes_trans,
+                  inverse = FALSE,
+                  copy = FALSE
+                )[[1]]
+              } else {
+                neg_events <- NULL
+              }
+              # STAINED CYTOSET - TRANSFORMED COPY
+              pos_events <- cyto_data_extract(
+                cgs[w],
+                parent = pd_grp[w, "parent"],
+                channels = channels,
+                format = "cytoset",
+                trans = axes_trans,
+                inverse = FALSE,
+                copy = FALSE
+              )[[1]]
+              # GATING
+              cyto_plot(
+                if(length(neg_events) == 0){
+                  pos_events
+                } else {
+                  neg_events
+                },
+                channels = pd_grp[w, "peak"],
+                overlay = if(!is.null(neg_events)){
+                  pos_events
+                } else {
+                  NA
+                },
+                hist_stack = 0,
+                hist_fill = if(is.null(neg_events)){
+                  "dodgerblue"
+                } else {
+                  c("red", "dodgerblue")
+                },
+                hist_fill_alpha = 0.6,
+                title = cyto_names(pos_events),
+                axes_limits = axes_limits, 
+                axes_trans = axes_trans,
+                legend = FALSE,
+                ...
+              )
+              # INTERACTIVE - USE CYTO_GATE_DRAW()
+              if(interactive() & cyto_option("CytoExploreR_interactive")) {
+                # GATE NEGATIVE POPULATION
+                neg_gt <- cyto_gate_draw(
+                  x = if(!is.null(neg_events)){
+                    neg_events
+                  } else {
+                    pos_events
+                  },
+                  alias = paste0(pd_grp[w, "peak"], "-"),
+                  channels = pd_grp[w, "peak"],
+                  type = "interval",
+                  plot = FALSE
+                )
+                # GATE POSITIVE POPULATION
+                pos_gt <- cyto_gate_draw(
+                  x = pos_events,
+                  alias = paste0(pd_grp[w, "peak"], "+"),
+                  channels = pd_grp[w, "peak"],
+                  type = "interval",
+                  plot = FALSE
+                )
+              # NON-INTERACTIVE - USE QUANTILES
+              } else {
+                # NEGATIVE QUANTILE GATE
+                neg_gt <- cyto_apply(
+                  if(is.null(neg_events)) {
+                    pos_events
+                  } else {
+                    neg_events
+                  },
+                  channel = pd_grp[w, "peak"],
+                  input = "matrix",
+                  FUN = "cyto_stat_quantile",
+                  probs = c(0.01, 0.4),
+                  trans = axes_trans,
+                  inverse = FALSE,
+                  copy = FALSE
+                )
+                rownames(neg_gt) <- c("min", "max")
+                # CREATE GATE
+                neg_gt <- rectangleGate(
+                  neg_gt,
+                  filterId = paste0(
+                    pd_grp[w, "peak"],
+                    "-"
+                  )
+                )
+                # NEGATIVE QUANTILE GATE
+                pos_gt <- cyto_apply(
+                  pos_events,
+                  channel = pd_grp[w, "peak"],
+                  input = "matrix",
+                  FUN = "cyto_stat_quantile",
+                  probs = c(0.95, 0.99),
+                  trans = axes_trans,
+                  inverse = FALSE,
+                  copy = FALSE
+                )
+                rownames(pos_gt) <- c("min", "max")
+                # CREATE GATE
+                pos_gt <- rectangleGate(
+                  pos_gt,
+                  filterId = paste0(
+                    pd_grp[w, "peak"],
+                    "+"
+                  )
+                )
+                # PLOT GATES
+                cyto_plot_gate(
+                  list(
+                    neg_gt,
+                    pos_gt
+                  )
+                )
+              }
+              # RETURN GATED POSITIVE/NEGATIVE POPULATIONS
+              return(
+                list(
+                  "-" = cyto_gate_apply(
+                    if(is.null(neg_events)) {
+                      pos_events
+                    } else {
+                      neg_events
+                    },
+                    neg_gt
+                  )[[1]][[1]], # LIST OF POPULATIONS PER GATE
+                  "+" = cyto_gate_apply(
+                    pos_events,
+                    pos_gt
+                  )[[1]][[1]] # LIST OF POPULATIONS PER GATE
+                )
+              )
+            }
+          ),
+          names = cyto_names(cgs)
+        )
+        # COMPUTE UNMIXING MATRIX
         do.call(
           "rbind",
-          cyto_apply(
-            z,
-            FUN = "cyto_stat_median",
-            input = "matrix",
-            simplify = FALSE
+          structure(
+            lapply(
+              seq_along(cs_list),
+              function(q) {
+                # COMPUTE POSITIVE MEDFI
+                pos <- cyto_apply(
+                  cs_list[[q]][["+"]],
+                  FUN = "cyto_stat_median",
+                  channels = channels,
+                  input = "matrix",
+                  trans = axes_trans,
+                  inverse = TRUE,
+                  copy = TRUE
+                )
+                rownames(pos) <- pd_grp[q, "label"]
+                # COMPUTE NEGATIVE MEDFI
+                neg <- cyto_apply(
+                  cs_list[[q]][["-"]],
+                  FUN = "cyto_stat_median",
+                  channels = channels,
+                  input = "matrix",
+                  trans = axes_trans,
+                  inverse = TRUE,
+                  copy = TRUE
+                )
+                rownames(neg) <- pd_grp[q, "label"]
+                # SWEEP OUT NEGATIVE MEDFI & APPEND AUTO
+                if(any(auto %in% names(cgs_list)[z]) & q == length(cs_list)) {
+                  return(
+                    rbind(
+                      pos - neg,
+                      matrix(
+                        apply(
+                          neg,
+                          2,
+                          "mean"
+                        ),
+                        nrow = 1,
+                        ncol = length(channels),
+                        dimnames = list(
+                          "Autofluorescence",
+                          channels
+                        )
+                      )
+                    )
+                  )
+                } else {
+                  return(
+                    pos - neg
+                  )
+                }
+              }
+            ),
+            names = names(cs_list)
           )
         )
       }
-    ),
-    names = names(cs_list)
-  )
-  
-  # SWEEP OUT UNSTAINED SIGNAL PER GROUP
-  unmix <- do.call(
-    "rbind",
-    structure(
-      lapply(
-        seq_along(medFI_list),
-        function(z) {
-          # UNSTAINED INDEX
-          ind <- which.min(rowSums(medFI_list[[z]]))
-          # SWEEP OUT UNSTAINED SIGNAL
-          m <- sweep(
-            medFI_list[[z]],
-            2,
-            medFI_list[[z]][ind, , drop = FALSE],
-            "-"
-          )[-ind, , drop = FALSE]
-          # AUTOFLUORESCENCE
-          if(auto %in% names(medFI_list)[z]) {
-            m <- rbind(
-              m, 
-              "*auto*" = medFI_list[[z]][ind, ]
-            )
-          }
-          return(m)
-        }
-      ),
-      names = names(medFI_list)
     )
   )
   
@@ -375,32 +755,6 @@ cyto_unmix_compute <- function(x,
   
   # REMOVE NEGATIVE VALUES
   unmix[unmix < 0] <- 0
-  
-  # LABELS
-  rownames(unmix) <- LAPPLY(
-    rownames(unmix),
-    function(z) {
-      ind <- tryCatch(
-        cyto_match(
-          x,
-          z,
-          exact = TRUE
-        ),
-        error = function(e) {
-          return(NULL)
-        }
-      )
-      if(is.null(ind)) {
-        return(
-          "Autofluorescence"
-        )
-      } else {
-        return(
-          pd$label[ind]
-        )
-      }
-    }
-  )
   
   # DEFAULT FILENAME
   if(is.null(save_as)) {

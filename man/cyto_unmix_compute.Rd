@@ -11,6 +11,8 @@ cyto_unmix_compute(
   select = NULL,
   auto = NULL,
   save_as = NULL,
+  axes_trans = NA,
+  axes_limits = "machine",
   ...
 )
 }
@@ -36,7 +38,18 @@ written, set to \code{Spectral-Unmixing-Matrix.csv} prefixed with the date
 by default. Set this argument to NA if you don't want to write the unmixing
 matrix to file.}
 
-\item{...}{not in use.}
+\item{axes_trans}{object of class \code{transformerList} containing the
+transformer definitions for transformations applied to the supplied data,
+only required when \code{cytoset} objects are supplied.}
+
+\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"machine"} by default to use entire axes ranges. Fine control over
+axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+arguments.}
+
+\item{...}{additional arguments passed to \code{cyto_plot()} to allow
+customisation of plots used for gating.}
 }
 \value{
 computed unmixing coefficients in the form of a matrix.
@@ -55,7 +68,7 @@ each sample (i.e. cells or beads)}\item{parent}{name of the population to
 extract from each sample (e.g. single cells or single beads) when a
 GatingHierarchy or Gatingset is supplied}\item{label}{a name for the new
 unmixed parameter for each control (e.g. CD4 FITC) - labels for unstained
-controls should be left empty}}. Each \code{group} must contain a reference
+controls should be set to \code{"Unstained"}}}. Each \code{group} must contain a reference
 unstained population in order to compute the unmixing matrix.
 }
 \examples{
@@ -63,7 +76,6 @@ unstained population in order to compute the unmixing matrix.
 # GatingSet of controls
 unmix <- cyto_unmix_compute(
   gs,
-  group_by = "type",
   auto = "cells",
   save_as = "Spectral-Unmixing-Matrix.csv"
 )

@@ -8,6 +8,8 @@ cyto_plot_spectra(
   x,
   parent = "root",
   channels = NULL,
+  axes_trans = NA,
+  axes_limits = "machine",
   spectra_col_scale = NA,
   spectra_col = NA,
   spectra_cols = NA,
@@ -27,6 +29,16 @@ default.}
 \item{channels}{names of the channels or markers to be included in the
 spectral profiles, set to all channels except \code{"Time"}, \code{"FSC"}
 and \code{"SSC"} by default.}
+
+\item{axes_trans}{object of class
+\code{\link[flowWorkspace:transformerList]{transformerList}} which was used
+to transform the channels of the supplied data.}
+
+\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"machine"} by default to use entire axes ranges. Fine control over
+axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+arguments.}
 
 \item{spectra_col_scale}{vector of ordered colours to use for the density
 colour gradient of spectra, matches \code{point_col_scale} by default.}
