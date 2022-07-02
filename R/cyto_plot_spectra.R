@@ -51,7 +51,7 @@
 #' @export
 cyto_plot_spectra <- function(x,
                               parent = "root",
-                              channels = NULL,
+                              channels,
                               axes_trans = NA,
                               axes_limits = "machine",
                               spectra_col_scale = NA,
@@ -76,7 +76,7 @@ cyto_plot_spectra <- function(x,
   }
   
   # EXPERIMENT DETAILS
-  pd <- cyto_details(x)
+  pd <- cyto_details(args$x)
   
   # AXES_TRANS
   if(.all_na(args$axes_trans)){

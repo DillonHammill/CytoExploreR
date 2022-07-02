@@ -102,6 +102,46 @@ cyto_unmix_compute <- function(x,
     axes_trans <- cyto_transformers_extract(x)
   }
   
+  # TRANSFORMED DATA REQUIRED FOR GATING
+  if(any(!channels %in% names(axes_trans))) {
+    # DEFINE NEW TRANSFORMERS
+    trans_new <- cyto_transformers_define(
+      x, 
+      channels = channels[!channels %in% names(axes_trans)],
+      type = "biex",
+      widthBasis = -10,
+      plot = FALSE,
+      progress = FALSE
+    )
+    # APPLY NEW TRANSFORMERS
+    x <- suppressWarnings(
+      cyto_transform(
+        x,
+        trans = trans_new,
+        copy = TRUE,
+        plot = FALSE,
+        quiet = TRUE
+      )
+    )
+    # COMBINE TRANSFROMERS
+    if(.all_na(axes_trans)) {
+      axes_trans <- trans_new
+    } else {
+      axes_trans <- cyto_transformers_combine(axes_trans, trans_new)
+    }
+  }
+  
+  # RESTRICT TRANSFORMERS TO CHANNELS
+  if(!.all_na(axes_trans)) {
+    if(any(channels %in% names(axes_trans))) {
+      axes_trans <- cyto_transformers_combine(
+        axes_trans[names(axes_trans) %in% channels]
+      )
+    } else {
+      axes_trans <- NA
+    }
+  }
+  
   # UNMIXING DETAILS
   pd <- cyto_details(x)
   
