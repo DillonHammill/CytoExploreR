@@ -946,17 +946,10 @@ cyto_unmix.flowFrame <- function(x,
   colnames(unmix_coef) <- rownames(unmix)
   rownames(unmix_coef) <- NULL
   
-  utils::write.csv(
-    unmix_coef,
-    "columns.csv"
-  )
-  
   # REMOVE UNMIXED PARAMETERS (EXTRA PARAMETERS REQUIRED OR CBIND NOT WORK)
   rm <- channels[
     channels %in% colnames(unmix)
   ]
-  
-  print(rm)
   
   # ALL CHANNELS (CAUSES ISSUES WITH CYTO_CBIND())
   if(length(rm) == length(channels)) {
