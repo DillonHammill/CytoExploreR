@@ -903,7 +903,7 @@ cyto_stat_scale <- function(x,
       # UNSUPPORTED SCALING METHOD
     } else {
       stop(
-        "'type' must be either 'range', 'mean' or 'zscore'!"
+        "'type' must be either 'range', 'mean', 'median' or 'zscore'!"
       )
     }
   } else {

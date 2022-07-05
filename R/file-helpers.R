@@ -274,9 +274,11 @@ write_to_csv <- function(x,
   }
   file <- file_ext_append(file, ".csv")
   suppressMessages(
-    fwrite(x,
-           file = file,
-           ...)
+    fwrite(
+      as.data.frame(x), # BYPASS MATRIX -> DATA.TABLE COERCION (ROWNAMES DROP)
+      file = file,
+      ...
+    )
   )
   
 }

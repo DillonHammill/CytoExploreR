@@ -5574,6 +5574,9 @@ cyto_details_edit <- function(x,
     rownames(pd)
   ), , drop = FALSE]
    
+  # UPDATE FILE NAMES
+  cyto_names(x) <- cyto_details(x)[, "name"]
+  
   # SAVE UPDATED DETAILS - CANNOT SAVE ABOVE AS ROWNAMES REMOVED
   if(!.all_na(save_as)) {
     write_to_csv(
@@ -7862,7 +7865,7 @@ cyto_cbind.flowFrame <- function(x,
       x <- realize_view(x)
     }
     cf_append_cols(x, cols)
-    # FLOWFRAME  
+  # FLOWFRAME  
   }else{
     fr_append_cols(x, cols)
   }

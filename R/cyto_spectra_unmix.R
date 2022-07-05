@@ -14,8 +14,9 @@
 #' extract from each sample (e.g. single cells or single beads) when a
 #' GatingHierarchy or Gatingset is supplied}\item{label}{a name for the new
 #' unmixed parameter for each control (e.g. CD4 FITC) - labels for unstained
-#' controls should be set to \code{"Unstained"}}}. Each \code{group} must contain a reference
-#' unstained population in order to compute the unmixing matrix.
+#' controls should be set to \code{"Unstained"}}}. Each \code{group} must
+#' contain a reference unstained population in order to compute the unmixing
+#' matrix.
 #'
 #' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing single
@@ -26,8 +27,10 @@
 #'   should be computed, set to all fluorescent channels by default.
 #' @param select passed to \code{cyto_select()} to extract a subset of samples
 #'   for computation of unmixing matrix.
-#' @param auto indicates which group (see \code{group_by}) should be used to get
-#'   the levels of background autofluorescence.
+#' @param auto logical indicating whether autofluorescence subtraction should be
+#'   performed, set to TRUE by default. Users will be asked which group to use
+#'   for autofluorescence subtraction or the name of the group can be supplied
+#'   manually here.
 #' @param save_as name of a CSV to which the computed unmixing matrix should be
 #'   written, set to \code{Spectral-Unmixing-Matrix.csv} prefixed with the date
 #'   by default. Set this argument to NA if you don't want to write the unmixing
@@ -64,14 +67,12 @@ cyto_unmix_compute <- function(x,
                                parent = "root",
                                channels = NULL,
                                select = NULL,
-                               auto = NULL,
+                               auto = TRUE,
                                save_as = NULL,
                                axes_trans = NA,
                                axes_limits = "machine",
                                ...) {
-  
-  # TODO: TRANSFORMATIONS
-  
+
   # PREPARE DATA ---------------------------------------------------------------
   
   # SELECT
@@ -87,7 +88,8 @@ cyto_unmix_compute <- function(x,
         "FSC",
         "SSC",
         "Time",
-        "Event-ID"
+        "Event-ID",
+        "Sample-ID"
       )
     )
   } else {
@@ -328,42 +330,44 @@ cyto_unmix_compute <- function(x,
     group_by = "group"
   )
   
-  # AUTOFLUORESCENCE
-  if(is.null(auto)) {
-    # SINGLE GROUP
-    if(length(cgs_list) == 1) {
-      auto <- names(cgs_list)
-    # MULTIPLE GROUPS - SELECTION REQUIRED
-    } else {
-      # ENQUIRE
-      if(interactive() & cyto_option("CytoExploreR_interactive")) {
-        message(
-          paste0(
-            "Which of the following groups do you want to use for the ",
-            "autofluorescence parameter? \n"
-          )
+  # CHECK AUTOFLUORESCENCE
+  if(!auto %in% c(TRUE, FALSE)) {
+    if(!auto %in% names(cgs_list)) {
+      auto <- NULL
+    }
+  } else if(auto %in% TRUE) {
+    auto <- names(cgs_list)
+  } else {
+    auto <- NULL
+  }
+  
+  # SELECT AUTOFLUORESCENCE GROUP
+  if(length(auto) > 1) {
+    # INTERCTAIVE ENQUIRE
+    if(interactive() & cyto_option("CytoExploreR_interactive")) {
+      message(
+        paste0(
+          "Which of the following groups do you want to use for the ",
+          "autofluorescence parameter? \n"
         )
-        message(
-          paste0(
-            1:length(cgs_list), 
-            ": ", 
-            names(cgs_list),
-            sep = "\n"
-          )
+      )
+      message(
+        paste0(
+          1:length(auto), 
+          ": ", 
+          auto,
+          sep = "\n"
         )
-        auto <- cyto_enquire(NULL)
-        if(!is.na(suppressWarnings(as.numeric(auto)))) {
-          auto <- names(cgs_list)[as.numeric(auto)]
-        }
-        # AUTO REQUIRED
+      )
+      opt <- cyto_enquire(NULL)
+      if(!is.na(suppressWarnings(as.numeric(opt)))) {
+        auto <- auto[as.numeric(opt)]
       } else {
-        stop(
-          paste0(
-            "Supply the name of the group to use for autofluorescence ",
-            "parameter to 'auto'."
-          )
-        )
+        auto <- opt
       }
+    # NON-INTERACTIVE 
+    } else {
+      auto <- auto[1]
     }
   }
   
@@ -559,14 +563,13 @@ cyto_unmix_compute <- function(x,
           peak_em <- peak_em[["+"]]
         }
         # LOCATE PEAK EMISSION CHANNEL
-        pd_grp[, "peak"] <- chans[
+        pd_grp[, "peak"] <- channels[
           apply(
             peak_em,
             1,
             "which.max"
           )
         ]
-        print(pd_grp)
         # PERFORM GATING IN PEAK EMISSION CHANNEL - POSITIVE + NEGTAIVE EVENTS
         cs_list <- structure(
           lapply(
@@ -913,8 +916,10 @@ cyto_unmix.flowFrame <- function(x,
   } else {
     # UNMIX FILE
     if(is.character(unmix)) {
+      # ROWNAMES REQUIRED
       unmix <- read_from_csv(
-        unmix
+        unmix,
+        data.table = FALSE
       )
     }
   }
@@ -938,9 +943,20 @@ cyto_unmix.flowFrame <- function(x,
   
   # UNMIX
   unmix_coef <- t(ls$coefficients)
+  colnames(unmix_coef) <- rownames(unmix)
+  rownames(unmix_coef) <- NULL
+  
+  utils::write.csv(
+    unmix_coef,
+    "columns.csv"
+  )
   
   # REMOVE UNMIXED PARAMETERS (EXTRA PARAMETERS REQUIRED OR CBIND NOT WORK)
-  rm <- cyto_channels(x) %in% colnames(unmix)
+  rm <- channels[
+    channels %in% colnames(unmix)
+  ]
+  
+  print(rm)
   
   # ALL CHANNELS (CAUSES ISSUES WITH CYTO_CBIND())
   if(length(rm) == length(channels)) {
@@ -949,7 +965,7 @@ cyto_unmix.flowFrame <- function(x,
     # ADD UNMIXED PARAMETERS
     x <- cyto_cbind(
       x,
-      unmix
+      unmix_coef
     )
     # COPY & REMOVE EXCESS PARAMETER
     return(
@@ -960,7 +976,9 @@ cyto_unmix.flowFrame <- function(x,
   # SOME EXTRA CHANNELS
   } else {
     # REMOVE RAW PARAMETERS
-    x <- x[, !cyto_channels(x) %in% colnames(unmix)]
+    if(length(rm) > 0) {
+      x <- x[, -match(rm, colnames(unmix))]
+    }
     # ADD UNMIXED PARAMETERS
     x <- cyto_cbind(
       x,

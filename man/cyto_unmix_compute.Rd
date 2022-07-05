@@ -9,7 +9,7 @@ cyto_unmix_compute(
   parent = "root",
   channels = NULL,
   select = NULL,
-  auto = NULL,
+  auto = TRUE,
   save_as = NULL,
   axes_trans = NA,
   axes_limits = "machine",
@@ -30,8 +30,10 @@ should be computed, set to all fluorescent channels by default.}
 \item{select}{passed to \code{cyto_select()} to extract a subset of samples
 for computation of unmixing matrix.}
 
-\item{auto}{indicates which group (see \code{group_by}) should be used to get
-the levels of background autofluorescence.}
+\item{auto}{logical indicating whether autofluorescence subtraction should be
+performed, set to TRUE by default. Users will be asked which group to use
+for autofluorescence subtraction or the name of the group can be supplied
+manually here.}
 
 \item{save_as}{name of a CSV to which the computed unmixing matrix should be
 written, set to \code{Spectral-Unmixing-Matrix.csv} prefixed with the date
@@ -68,8 +70,9 @@ each sample (i.e. cells or beads)}\item{parent}{name of the population to
 extract from each sample (e.g. single cells or single beads) when a
 GatingHierarchy or Gatingset is supplied}\item{label}{a name for the new
 unmixed parameter for each control (e.g. CD4 FITC) - labels for unstained
-controls should be set to \code{"Unstained"}}}. Each \code{group} must contain a reference
-unstained population in order to compute the unmixing matrix.
+controls should be set to \code{"Unstained"}}}. Each \code{group} must
+contain a reference unstained population in order to compute the unmixing
+matrix.
 }
 \examples{
 \dontrun{

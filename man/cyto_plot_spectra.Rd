@@ -7,7 +7,7 @@
 cyto_plot_spectra(
   x,
   parent = "root",
-  channels = NULL,
+  channels,
   axes_trans = NA,
   axes_limits = "machine",
   spectra_col_scale = NA,

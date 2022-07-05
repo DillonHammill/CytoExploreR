@@ -70,7 +70,9 @@ cyto_plot_spectra <- function(x,
       exclude = c(
         "FSC",
         "SSC",
-        "Time"
+        "Time",
+        "Event-ID",
+        "Sample-ID"
       )
     )
   }
