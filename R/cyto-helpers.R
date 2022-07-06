@@ -7259,7 +7259,8 @@ cyto_spillover_extract <- function(x) {
 #'   "row", set to "cytoframe" by default. \code{cyto_apply} will take care of
 #'   all the data formatting prior to passing it \code{FUN}. The \code{"column"}
 #'   and \code{"row"} options are for functions that expect vectors as the
-#'   input.
+#'   input. Although not indexed here, \code{data.frame}, \code{data.table} and
+#'   \code{tibble} are also acceptable input formats.
 #' @param copy logical indicating whether the data should be copied prior to
 #'   preprocessing the data, set to FALSE by default. Users should set this
 #'   argument to TRUE when apply inverse transformations to ensure that the
@@ -7341,21 +7342,27 @@ cyto_apply.default <- function(x,
     
     # APPLY FUNCTION
     res <- structure(
-      lapply(x, function(z){
-        cyto_apply(z,
-                   FUN = FUN,
-                   ...,
-                   select = select,
-                   coerce = coerce,
-                   events = events,
-                   input = input,
-                   copy = copy,
-                   channels = channels,
-                   trans = trans,
-                   inverse = inverse,
-                   slot = slot,
-                   simplify = simplify)
-      }), names = names(x)
+      lapply(
+        x, 
+        function(z) {
+          cyto_apply(
+            z,
+            FUN = FUN,
+            ...,
+            select = select,
+            coerce = coerce,
+            events = events,
+            input = input,
+            copy = copy,
+            channels = channels,
+            trans = trans,
+            inverse = inverse,
+            slot = slot,
+            simplify = simplify
+          )
+        }
+      ), 
+      names = names(x)
     )
     
     # MATRIX - SINGLE PARENT
@@ -7457,16 +7464,16 @@ cyto_apply.flowSet <- function(x,
   # CYTOSET INPUT 
   if(input == 1 | .grepl("^cytoset|^cs", input)) {
     input <- "cytoset"
-    # CYTOFRAME INPUT
+  # CYTOFRAME INPUT
   } else if(input == 2 | .grepl("^cytoframe|^cf", input)) {
     input  <- "cytoframe"
-    # MATRIX INPUT
+  # MATRIX INPUT
   } else if(input == 3 | .grepl("^m", input)) {
     input <- "matrix"
-    # COLUMN/CHANNEL INPUT
+  # COLUMN/CHANNEL INPUT
   } else if(input == 4 | .grepl("^co|^ch", input)) {
     input <- "column"
-    # ROW/CELL
+  # ROW/CELL
   } else if(input == 5 | .grepl("^r|ce", input)) {
     input <- "row"
   }
@@ -7523,23 +7530,6 @@ cyto_apply.flowSet <- function(x,
       ), 
       names = cyto_names(x)
     )
-  } else if(input == "matrix") {
-    res <- structure(
-      lapply(
-        cyto_names(x), 
-        function(z){
-          output <- cyto_slot(
-            FUN(
-              cyto_exprs(x[[z]], drop = FALSE),
-              ...
-            ),
-            slot = slot
-          )
-          return(cyto_convert(output))
-        }
-      ), 
-      names = cyto_names(x)
-    )
   } else if(input == "column") {
     # TODO: Add support for passing channel-specific arguments through here
     # named vector or named list
@@ -7571,6 +7561,28 @@ cyto_apply.flowSet <- function(x,
               cyto_exprs(x[[z]], drop = FALSE),
               1, 
               FUN,
+              ...
+            ),
+            slot = slot
+          )
+          return(cyto_convert(output))
+        }
+      ), 
+      names = cyto_names(x)
+    )
+  # MATRIX | DATA.FRAME | DATA.TABLE | TIBBLE
+  } else {
+    res <- structure(
+      lapply(
+        cyto_names(x), 
+        function(z){
+          output <- cyto_slot(
+            FUN(
+              cyto_exprs(
+                x[[z]], 
+                drop = FALSE,
+                format = input
+              ),
               ...
             ),
             slot = slot

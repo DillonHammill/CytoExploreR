@@ -53,7 +53,8 @@ either 1 - "cytoset", 2 - "cytoframe", 3 - "matrix", 4 - "column" or 5 -
 "row", set to "cytoframe" by default. \code{cyto_apply} will take care of
 all the data formatting prior to passing it \code{FUN}. The \code{"column"}
 and \code{"row"} options are for functions that expect vectors as the
-input.}
+input. Although not indexed here, \code{data.frame}, \code{data.table} and
+\code{tibble} are also acceptable input formats.}
 
 \item{copy}{logical indicating whether the data should be copied prior to
 preprocessing the data, set to FALSE by default. Users should set this
