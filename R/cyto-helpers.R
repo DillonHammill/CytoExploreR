@@ -2421,8 +2421,8 @@ cyto_data_extract <- function(x,
             cs
           }
         }
-      # MATRIX
-      } else if(.grepl("matrix", format)) {
+      # MATRIX | TIBBLE | DATA.FRAME | DATA.TABLE
+      } else {
         # CYTOFRAME -> MATRIX
         if(cyto_class(cs, "flowFrame")) {
           structure(
@@ -2430,7 +2430,8 @@ cyto_data_extract <- function(x,
               cyto_exprs(
                 cs, 
                 markers = markers,
-                drop = FALSE
+                drop = FALSE,
+                format = format
               )
             ), 
             names = cyto_names(cs)
@@ -2444,7 +2445,8 @@ cyto_data_extract <- function(x,
                 cyto_exprs(
                   cs[[z]],
                   markers = markers,
-                  drop = FALSE
+                  drop = FALSE,
+                  format = format
                 )
               }
             ), 
@@ -2482,6 +2484,11 @@ cyto_extract <- function(...){
 #'   default.
 #' @param drop logical to control whether single channel extractions should be
 #'   converted to vectors by default, set to TRUE by default.
+#' @param format indicates the desired class for the returned tabular data, set
+#'   to \code{"matrix"} by default. Alternatives include \code{data.table},
+#'   \code{data.frame} and \code{tibble}. The \code{matrix} format will return a
+#'   vector by default if only a single channel is specified, this is due to
+#'   \code{drop} being set to TRUE by default.
 #' @param ... additional arguments passed to data extraction from matrix.
 #'
 #' @return matrix or list of matrices containing raw data.
@@ -2520,6 +2527,7 @@ cyto_exprs.flowFrame <- function(x,
                                  channels = NULL,
                                  markers = FALSE,
                                  drop = TRUE,
+                                 format = "matrix",
                                  ...) {
   
   # CHANNELS
@@ -2528,13 +2536,54 @@ cyto_exprs.flowFrame <- function(x,
   }
   
   # EXTRACT DATA
-  mt <- exprs(x)[, , drop = drop, ...]
+  if(format %in% "matrix") {
+    mt <- exprs(x)[, , drop = drop, ...]
+  } else {
+    mt <- exprs(x)[, , drop = FALSE]
+  }
 
   # MARKERS
   if(markers) {
     colnames(mt) <- unname(cyto_markers_extract(x, colnames(mt)))
   }
   
+  # UNSUPPORTED FORMAT
+  if(!format %in% c("matrix", "data.table", "data.frame", "tibble")) {
+    warning(
+      paste0(
+        "'format' must be either matrix, data.frame, data.table or tibble ",
+        "in cyto_exprs()!"
+      )
+    )
+  }
+  
+  # FORMAT -> DATA.FRAME
+  if(format %in% "data.frame") {
+    mt <- as.data.frame(
+      mt,
+      ...
+    )
+  # FORMAT -> DATA.TABLE
+  } else if(format %in% "data.table") {
+    mt <- cyto_func_call(
+      "data.table::as.data.table",
+      list(
+        mt,
+        ...
+      )
+    )
+  # FORMAT -> TIBBLE
+  } else if(format %in% "tibble") {
+    mt <- cyto_func_call(
+      "tibble::as_tibble",
+      list(
+        mt,
+        ...
+      )
+    )
+  }
+  
+  # FORMATTED MATRIX
   return(mt)
   
 }
@@ -2545,6 +2594,7 @@ cyto_exprs.flowSet <- function(x,
                                channels = NULL,
                                markers = FALSE,
                                drop = TRUE,
+                               format = "matrix",
                                ...) {
   
   # CHANNELS
@@ -2562,6 +2612,7 @@ cyto_exprs.flowSet <- function(x,
           channels = NULL,
           markers = markers,
           drop = drop,
+          format = format,
           ...
         )
       }

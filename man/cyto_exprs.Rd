@@ -8,9 +8,23 @@
 \usage{
 cyto_exprs(x, ...)
 
-\method{cyto_exprs}{flowFrame}(x, channels = NULL, markers = FALSE, drop = TRUE, ...)
+\method{cyto_exprs}{flowFrame}(
+  x,
+  channels = NULL,
+  markers = FALSE,
+  drop = TRUE,
+  format = "matrix",
+  ...
+)
 
-\method{cyto_exprs}{flowSet}(x, channels = NULL, markers = FALSE, drop = TRUE, ...)
+\method{cyto_exprs}{flowSet}(
+  x,
+  channels = NULL,
+  markers = FALSE,
+  drop = TRUE,
+  format = "matrix",
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}} or
@@ -27,6 +41,12 @@ default.}
 
 \item{drop}{logical to control whether single channel extractions should be
 converted to vectors by default, set to TRUE by default.}
+
+\item{format}{indicates the desired class for the returned tabular data, set
+to \code{"matrix"} by default. Alternatives include \code{data.table},
+\code{data.frame} and \code{tibble}. The \code{matrix} format will return a
+vector by default if only a single channel is specified, this is due to
+\code{drop} being set to TRUE by default.}
 }
 \value{
 matrix or list of matrices containing raw data.
