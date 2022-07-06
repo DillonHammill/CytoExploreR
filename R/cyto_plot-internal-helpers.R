@@ -688,10 +688,16 @@
     names(grps) <- grps
   # DATA NOT PREPARED YET
   } else {
+    # SELECT X
+    if(!is.null(select)) {
+      x <- cyto_select(
+        x,
+        select
+      )
+    }
     # EXPERIMENTAL GROUPS
     grps <- cyto_groups(
       x,
-      select = select,
       group_by = merge_by,
       details = TRUE
     )
@@ -751,13 +757,17 @@
         gate <- list(gate)
       }
       # STORE FILTER NAMES IN LIST NAMES
-      ids <- LAPPLY(gate, function(z){
-        tryCatch(
-          z@filterId,
-          error = function(e){
-            return(NA)
-          })
-      })
+      ids <- LAPPLY(
+        gate, 
+        function(z){
+          tryCatch(
+            z@filterId,
+            error = function(e) {
+              return(NA)
+            }
+          )
+        }
+      )
       names(gate)[!is.na(ids)] <- ids[!is.na(ids)]
       # REPEAT GATES PER GROUP
       gate <- structure(
@@ -789,7 +799,7 @@
                 function(z){
                   tryCatch(
                     z@filterId,
-                    error = function(e){
+                    error = function(e) {
                       return(NA)
                     }
                   )
@@ -806,12 +816,17 @@
         # EXTRACT FILTERS
         gate <- unlist(gate)
         # STORE FILTER NAMES IN LIST NAMES
-        ids <- LAPPLY(gate, function(z){
-          tryCatch(z@filterId,
-                   error = function(e){
-                     return(NA)
-                   })
-        })
+        ids <- LAPPLY(
+          gate, 
+          function(z){
+            tryCatch(
+              z@filterId,
+              error = function(e) {
+                return(NA)
+              }
+            )
+          }
+        )
         names(gate)[!is.na(ids)] <- ids[!is.na(ids)]
         # REPEAT GATES PER GROUP
         gate <- structure(
@@ -840,11 +855,15 @@
           # NEGATE
           if(negate) {
             if(length(gates) == 1) {
-              gates <- c(gates,
-                         list("negate" = !gates[[1]]))
+              gates <- c(
+                gates,
+                list("negate" = !gates[[1]])
+              )
             } else {
-              gates <- c(gates,
-                         list("negate" = !do.call("|", unname(unlist(gates)))))
+              gates <- c(
+                gates,
+                list("negate" = !do.call("|", unname(unlist(gates))))
+              )
             }
           }
           return(gates)
@@ -863,11 +882,9 @@
             # NEGATE
             if(negate) {
               if(length(z) == 1) {
-                z <- c(z,
-                       list("negate" = !z[[1]]))
+                z <- c(z, list("negate" = !z[[1]]))
               } else {
-                z <- c(z,
-                       list("negate" = !do.call("|", unname(unlist(z)))))
+                z <- c(z, list("negate" = !do.call("|", unname(unlist(z)))))
               }
             }
             return(z)
