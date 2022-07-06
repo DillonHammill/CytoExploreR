@@ -11,6 +11,7 @@ cyto_load(
   sort = TRUE,
   barcode = FALSE,
   restrict = FALSE,
+  copy = FALSE,
   fixed = FALSE,
   ignore.case = TRUE,
   ...
@@ -37,6 +38,9 @@ using \code{cyto_barcode}, set to FALSE by default.}
 \item{restrict}{logical indicating whether unassigned channels should be
 dropped from the returned cytoset, set to FALSE by default. See
 \code{\link{cyto_channels_restrict}}.}
+
+\item{copy}{logical indicating whether \code{GatingSet} archives should be
+copied after loading, set to FALSE by default.}
 
 \item{fixed}{logical passed to \code{grepl()} during file name matching in
 \code{select} and \code{exclude} to control whether an exact match is

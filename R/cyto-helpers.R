@@ -319,6 +319,8 @@ cyto_export <- function(x,
 #' @param restrict logical indicating whether unassigned channels should be
 #'   dropped from the returned cytoset, set to FALSE by default. See
 #'   \code{\link{cyto_channels_restrict}}.
+#' @param copy logical indicating whether \code{GatingSet} archives should be
+#'   copied after loading, set to FALSE by default.
 #' @param fixed logical passed to \code{grepl()} during file name matching in
 #'   \code{select} and \code{exclude} to control whether an exact match is
 #'   required, set to FALSE by default for more flexible matching.
@@ -357,6 +359,7 @@ cyto_load <- function(path = ".",
                       sort = TRUE,
                       barcode = FALSE,
                       restrict = FALSE,
+                      copy = FALSE,
                       fixed = FALSE,
                       ignore.case = TRUE,
                       ...) {
@@ -423,13 +426,19 @@ cyto_load <- function(path = ".",
     }
   )
   
-  # SAVED GATINGSET
+  # SAVED GATINGSET ARCHIVE
   if ("pb" %in% file_ext(files)) {
     # LOAD GATINGSET
     x <- load_gs(
       path = path,
       backend_readonly = FALSE
     )
+    # COPY
+    if(copy) {
+      x <- cyto_copy(
+        x
+      )
+    }
     # BARCODE
     if(!any(.grepl("^Event-?ID$", cyto_channels(x), ignore.case = TRUE))) {
       x <- cyto_barcode(

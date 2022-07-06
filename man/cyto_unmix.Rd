@@ -16,6 +16,10 @@ unmixing matrix.}
 \item{copy}{logical indicating whether unmixing should be applied to a copy
 of the original data, set to FALSE by default.}
 
+\item{drop}{logical indicating whether the original channels used compute the
+unmixing matrix should be dropped from the unmixed data, set to TRUE by
+default.}
+
 \item{...}{not in use.}
 }
 \value{

@@ -839,6 +839,9 @@ cyto_unmix_compute <- function(x,
 #'   unmixing matrix.
 #' @param copy logical indicating whether unmixing should be applied to a copy
 #'   of the original data, set to FALSE by default.
+#' @param drop logical indicating whether the original channels used compute the
+#'   unmixing matrix should be dropped from the unmixed data, set to TRUE by
+#'   default.
 #' @param ... not in use.
 #'
 #' @return unmixed \code{cytoframe}, \code{cytoset}, \code{GatingHierarchy} or
@@ -878,6 +881,7 @@ cyto_unmix <- function(x,
 cyto_unmix.default <- function(x,
                                unmix = NULL,
                                copy = FALSE,
+                               drop = TRUE,
                                ...) {
   
   # APPLY SPECTRAL UNMIXING
@@ -887,7 +891,8 @@ cyto_unmix.default <- function(x,
     FUN = "cyto_unmix",
     input = "cytoframe",
     unmix = unmix,
-    copy = copy
+    copy = copy,
+    drop = drop
   )
   
   # UPDATE DATA IN GATINGHIERARCHY/GATINGSET
@@ -905,6 +910,7 @@ cyto_unmix.default <- function(x,
 cyto_unmix.flowFrame <- function(x, 
                                  unmix = NULL,
                                  copy = FALSE,
+                                 drop = TRUE,
                                  ...){
   
   # MISSING UNMIX
@@ -946,39 +952,40 @@ cyto_unmix.flowFrame <- function(x,
   colnames(unmix_coef) <- rownames(unmix)
   rownames(unmix_coef) <- NULL
   
-  # REMOVE UNMIXED PARAMETERS (EXTRA PARAMETERS REQUIRED OR CBIND NOT WORK)
-  rm <- channels[
-    channels %in% colnames(unmix)
-  ]
-  
-  # ALL CHANNELS (CAUSES ISSUES WITH CYTO_CBIND())
-  if(length(rm) == length(channels)) {
-    # KEEP A CHANNEL FOR CBINDING
-    x <- x[, rm[1]]
+  # APPEND UNMIXED PARAMETERS
+  if(!drop) {
     # ADD UNMIXED PARAMETERS
     x <- cyto_cbind(
       x,
       unmix_coef
     )
-    # COPY & REMOVE EXCESS PARAMETER
-    return(
-      cyto_copy(
+  # DROP ORIGINAL PARAMETERS
+  } else {
+    rm <- colnames(unmix)
+    # REMOVE ALL CHANNELS
+    if(length(rm) == length(channels)) {
+      # KEEP A CHANNEL FOR CBINDING
+      x <- x[, rm[1]]
+      # ADD UNMIXED PARAMETERS
+      x <- cyto_cbind(
+        x,
+        unmix_coef
+      )
+      # DROP EXCESS PARAMETER
+      x <- cyto_copy(
         x[, -match(rm[1], cyto_channels(x))]
       )
-    )
-  # SOME EXTRA CHANNELS
-  } else {
-    # REMOVE RAW PARAMETERS
-    if(length(rm) > 0) {
-      x <- x[, -match(rm, colnames(unmix))]
+    # REMOVE SOME CHANNELS
+    } else {
+      # ADD UNMIXED PARAMETERS
+      x <- cyto_cbind(
+        x[, -match(rm, cyto_channels(x))],
+        unmix_coef
+      )
     }
-    # ADD UNMIXED PARAMETERS
-    x <- cyto_cbind(
-      x,
-      unmix_coef
-    )
-    # RETURN UNMIXED CYTOFRAME
-    return(x)
   }
+  
+  # RETURN UNMIXED CYTOFRAME
+  return(x)
 
 }
