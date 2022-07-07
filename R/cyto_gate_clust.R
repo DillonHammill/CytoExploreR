@@ -18,7 +18,10 @@
 #' @param channels names of the channels or markers to be be passed to the
 #'   clustering algorithm during the gating step.
 #' @param type either a character string to indicate the type of clustering
-#'   algorithm to apply or a function to perform the clustering.
+#'   algorithm to apply or a function to perform the clustering. Natively
+#'   supported clustering algorithms include \code{"dbscan"}, \code{"hdbscan"},
+#'   \code{"SNN"}, \code{"FlowSOM"}, \code{"kmeans"}, \code{"HGC"} and
+#'   \code{"immunoclust"}.
 #' @param merge_by a vector of experiment variables to merge the data into
 #'   groups prior to applying the clustering algorithm supplied to \code{type},
 #'   set to \code{"all"} by default to merge all samples prior to gating. If
@@ -47,9 +50,9 @@
 #'
 #' @return a GatingHierarchy or GatingSet with gates added for the clustered
 #'   populations and an updated gatingTemplate.
-#'   
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @importFrom openCyto gs_add_gating_method CytoExploreR_.argDeparser
 #'
 #' @seealso \code{\link{cyto_gate_remove}}
@@ -159,7 +162,7 @@ cyto_gate_clust <- function(x,
     # DBSCAN 
     } else if(grepl("^dbscan$|^hdbscan$|^SNN$", type, ignore.case = TRUE)) {
       # LOAD DBSCAN
-      cyto_required(
+      cyto_require(
         "dbscan",
         source = "CRAN",
         ref = paste0(
@@ -179,6 +182,24 @@ cyto_gate_clust <- function(x,
       }
       # INPUT FORMAT
       input <- "matrix"
+    # HIERARCHICAL GRAPH BASED CLUSTERING
+    } else if(grepl("^HGC$", type, ignore.case = TRUE)) {
+      # LOAD DENDEXTEND - CUTREE
+      cyto_require(
+        "dendextend",
+        source = "CRAN"
+      )
+      # LOAD HGC
+      cyto_require(
+        "HGC",
+        source = "github",
+        repo = "XuegongLab/HGC@HGC4oldRVersion",
+        ref = paste0(
+          "Ziheng Zou, Kui Hua, Xuegong Zhang (2021) HGC: fast hierarchical ",
+          "clustering for large-scale single-cell data, Bioinformatics ",
+          "37(21)"
+        )
+      )
     }
   }
   
@@ -449,6 +470,61 @@ cyto_gate_clust <- function(x,
         "stats::kmeans",
         args
       )$cluster
+    # HGC
+    } else if(grepl("^HGC$", type, ignore.case = TRUE)) {
+      # HGC WRAPPER - ADD N ARGUMENT FOR CLUSTERS
+      hgc_fun <- function(x, ...) {
+        # ARGUMENTS
+        args <- list(...)
+        args$mat <- x
+        # K REQUIRED
+        if(!"n" %in% names(args)) {
+          stop(
+            paste0(
+              "The number of clusters must be specified to 'n' for HGC ",
+              "clustering!"
+            )
+          )
+        }
+        # SNN TREE
+        SNN <- cyto_func_execute(
+          "HGC::SNN.Construction",
+          args
+        )
+        args$G <- SNN
+        # DENDROGRAM
+        tree <- cyto_func_execute(
+          "HGC::HGC.dendrogram",
+          args
+        )
+        # K - CLUSTERS
+        args$k <- args$n
+        args$tree <- tree
+        # CUT DENDROGRAM
+        cyto_func_execute(
+          "dendextend::cutree",
+          args
+        )
+      }
+      # EXTRACT DATA MATRIX
+      fr <- cyto_data_extract(
+        fr,
+        format = "matrix",
+        channels = params,
+        trans = pp_res$trans,
+        inverse = FALSE,
+        copy = FALSE
+      )[[1]][[1]]
+      # ARGUMENTS
+      args <- list(
+        fr,
+        ...
+      )
+      # RUN HGC
+      gate <- cyto_func_call(
+        "hgc_fun",
+        args
+      )
     # CONVERT TYPE TO FUNCTION
     } else {
       type <- cyto_func_match(type)

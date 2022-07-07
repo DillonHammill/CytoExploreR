@@ -72,16 +72,19 @@
   exprs <- exprs[
     do.call(
       "intersect",
-      lapply(seq_len(ncol(exprs)), function(p){
-        v <- exprs[, p]
-        q <- quantile(
-          v,
-          probs = c(trim, 1 - trim)
-        )
-        return(
-          which(v > q[1] & v < q[2])
-        )
-      })
+      lapply(
+        seq_len(ncol(exprs)), 
+        function(p) {
+          v <- exprs[, p]
+          q <- quantile(
+            v,
+            probs = c(trim, 1 - trim)
+          )
+          return(
+            which(v > q[1] & v < q[2])
+          )
+        }
+      )
     )
     ,]
   # FIT ROBUST LINEAR MODEL

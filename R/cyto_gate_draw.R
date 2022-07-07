@@ -312,9 +312,13 @@ cyto_gate_draw <- function(x,
           title[z] <<- names(cs_lists)[z]
           # PARENT POPULATION
           if(!is.null(names(cs_lists[[z]])[1])) {
-            title[z] <<- paste(title[z], 
-                               names(cs_lists[[z]])[1], 
-                               sep = "\n")
+            title[z] <<- paste(
+              unique(
+                c(title[z], 
+                  names(cs_lists[[z]])[1])
+              ), 
+              sep = "\n"
+            )
           }
         }
         # MERGED CYTOSET
