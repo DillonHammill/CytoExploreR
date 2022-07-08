@@ -29,8 +29,9 @@
 #'   co-ordinates} \item{"FIt-SNE"}{ uses
 #'   \url{https://github.com/KlugerLab/FIt-SNE} to compute FIt-SNE co-ordinates
 #'   (some additional configuration required)}\item{"UMAP"}{ uses uwot::umap()
-#'   to compute UMAP co-ordinates}\item{}{EmbedSOM}{ uses EmbedSOM::SOM() and
-#'   EmbedSOM::EmbedSOM() to compute EmbedSOM co-ordinates}}
+#'   to compute UMAP co-ordinates}\item{"EmbedSOM"}{ uses EmbedSOM::SOM() and
+#'   EmbedSOM::EmbedSOM() to compute EmbedSOM co-ordinates}\item{"PHATE"}{ uses
+#'   phateR::phate() to compute trajectory embedding co-ordinates}}
 #' @param scale optional argument to scale each channel prior to computing
 #'   dimension-reduced co-ordinates, options include \code{"range"},
 #'   \code{"mean"}, \code{"median"} or \code{"zscore"}. Set to \code{"range"} by
@@ -580,7 +581,26 @@ cyto_map <- function(x,
         "EmbedSOM::EmbedSOM",
         args
       )
-      colnames(cyto_map_coords) <- c("EmbedSOM-1", "EmbedSOM-2")  
+      colnames(cyto_map_coords) <- c("EmbedSOM-1", "EmbedSOM-2") 
+    # PHATE
+    } else if(grepl("^PHATE$", type, ignore.case = TRUE)) {
+      # MESSAGE
+      message(
+        "Using phateR::phate() to compute PHATE co-ordinates..."
+      )
+      # PHATER
+      cyto_require(
+        "phateR",
+        source = "CRAN",
+        ref = paste0(
+          "Moon K. et al. (2019) Visualising structure and transitions in ",
+          "high dimensional biological data. Nature Biotechnology 37(1482-1492)"
+        )
+      )
+      # TYPE -> FUNCTION
+      type <- cyto_func_match(
+        "phateR::phate"
+      )
     # OTHER
     } else {
       type <- tryCatch(
@@ -646,7 +666,6 @@ cyto_map <- function(x,
         )
       }
     }
-    
     # EXTRACT CO-ORDINATES (ALL DIMENSIONS)
     if(!cyto_class(cyto_map_coords, "matrix")) {
       # FIND CO-ORDINATES

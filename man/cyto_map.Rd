@@ -45,8 +45,9 @@ components}\item{"t-SNE"}{ uses Rtsne::Rtsne() to compute t-SNE
 co-ordinates} \item{"FIt-SNE"}{ uses
 \url{https://github.com/KlugerLab/FIt-SNE} to compute FIt-SNE co-ordinates
 (some additional configuration required)}\item{"UMAP"}{ uses uwot::umap()
-to compute UMAP co-ordinates}\item{}{EmbedSOM}{ uses EmbedSOM::SOM() and
-EmbedSOM::EmbedSOM() to compute EmbedSOM co-ordinates}}}
+to compute UMAP co-ordinates}\item{"EmbedSOM"}{ uses EmbedSOM::SOM() and
+EmbedSOM::EmbedSOM() to compute EmbedSOM co-ordinates}\item{"PHATE"}{ uses
+phateR::phate() to compute trajectory embedding co-ordinates}}}
 
 \item{scale}{optional argument to scale each channel prior to computing
 dimension-reduced co-ordinates, options include \code{"range"},

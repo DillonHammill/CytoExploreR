@@ -317,7 +317,7 @@ cyto_gate_draw <- function(x,
                 c(title[z], 
                   names(cs_lists[[z]])[1])
               ), 
-              sep = "\n"
+              collapse = "\n"
             )
           }
         }
