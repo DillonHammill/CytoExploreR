@@ -763,7 +763,8 @@ cyto_spillover_compute <- function(x,
       legend_col_breaks = 50,
       legend_text_breaks = c(seq(1, 50, 10), 51),
       title = "Spillover Matrix",
-      legend = FALSE # spacing needs work
+      legend = FALSE # spacing needs work,
+      dendrogram_scale = TRUE
     )
   }
   
