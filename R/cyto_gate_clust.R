@@ -20,8 +20,8 @@
 #' @param type either a character string to indicate the type of clustering
 #'   algorithm to apply or a function to perform the clustering. Natively
 #'   supported clustering algorithms include \code{"dbscan"}, \code{"hdbscan"},
-#'   \code{"SNN"}, \code{"FlowSOM"}, \code{"kmeans"}, \code{"HGC"} and
-#'   \code{"immunoclust"}.
+#'   \code{"SNN"}, \code{"flowPeaks"} \code{"FlowSOM"}, \code{"kmeans"},
+#'   \code{"HGC"}, \code{"Rclusterpp"} and \code{"immunoclust"}.
 #' @param merge_by a vector of experiment variables to merge the data into
 #'   groups prior to applying the clustering algorithm supplied to \code{type},
 #'   set to \code{"all"} by default to merge all samples prior to gating. If
@@ -72,6 +72,8 @@ cyto_gate_clust <- function(x,
                             inverse = FALSE,
                             slot = NULL,
                             ...){
+  
+  # TODO: ADD SCALE ARGUMENT
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -200,6 +202,28 @@ cyto_gate_clust <- function(x,
           "37(21)"
         )
       )
+    # RCLUSTERPP
+    } else if(grepl("^rclusterpp$", type, ignore.case = TRUE)) {
+      # LOAD RCLUSTERPP
+      cyto_require(
+        "Rclusterpp",
+        source = "CRAN"
+      )
+    # FLOWPEAKS
+    } else if(grepl("^flowpeaks$", type, ignore.case = TRUE)) {
+      # LOAD FLOWPEAKS
+      cyto_require(
+        "flowPeaks",
+        source = "BioC",
+        ref = paste0(
+          "Ge Y. et al (2012) flowPeaks: a fast unsupervised clustering for ",
+          "flow cytometry data via K-means and density peak fnding. ",
+          "Bioinformatics 8(15):2052-8."
+        )
+      )
+      type <- "flowPeaks::flowPeaks"
+      input <- "matrix"
+      slot <- "peaks.cluster"
     }
   }
   
@@ -522,8 +546,43 @@ cyto_gate_clust <- function(x,
       )
       # RUN HGC
       gate <- cyto_func_call(
-        "hgc_fun",
+        hgc_fun,
         args
+      )
+    # RCLUSTERPP
+    }else if(grepl("^rclusterpp$", type, ignore.case = TRUE)) {
+      # CHECK ARGUMENTS - K REQUIRED
+      if(!"k" %in% names(args)) {
+        stop(
+          paste0(
+            "Rclusterpp requires argument 'k' to indicate the desired number ",
+            "of clusters!"
+          )
+        )
+      }
+      # EXTRACT DATA MATRIX
+      fr <- cyto_data_extract(
+        fr,
+        format = "matrix",
+        channels = params,
+        trans = pp_res$trans,
+        inverse = FALSE,
+        copy = FALSE
+      )[[1]][[1]]
+      # ARGUMENTS
+      args <- list(
+        x = fr,
+        ...
+      )
+      # RUN RCLUSTERCPP HCLUST
+      tree <- cyto_func_execute(
+        "Rclusterpp::Rclusterpp.hclust",
+        args
+      )
+      # CUT TREE
+      res <- cyto_func_execute(
+        "stats::cutree",
+        c(args, list("tree" = tree))
       )
     # CONVERT TYPE TO FUNCTION
     } else {

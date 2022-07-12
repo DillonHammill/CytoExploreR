@@ -42,8 +42,8 @@ clustering algorithm during the gating step.}
 \item{type}{either a character string to indicate the type of clustering
 algorithm to apply or a function to perform the clustering. Natively
 supported clustering algorithms include \code{"dbscan"}, \code{"hdbscan"},
-\code{"SNN"}, \code{"FlowSOM"}, \code{"kmeans"}, \code{"HGC"} and
-\code{"immunoclust"}.}
+\code{"SNN"}, \code{"flowPeaks"} \code{"FlowSOM"}, \code{"kmeans"},
+\code{"HGC"}, \code{"Rclusterpp"} and \code{"immunoclust"}.}
 
 \item{merge_by}{a vector of experiment variables to merge the data into
 groups prior to applying the clustering algorithm supplied to \code{type},
