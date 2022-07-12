@@ -64,8 +64,8 @@
 #'   arguments.
 #' @param spillover superseded by the \code{save_as} argument above, only
 #'   included for backwards compatibility with older versions of CytoExploreR.
-#' @param plot logical indicating whether the computed spillover matrix should
-#'   be displayed in a heatmap, set to TRUE by default.
+#' @param heatmap logical indicating whether the computed spillover matrix
+#'   should be displayed in a heatmap, set to TRUE by default.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
 #' @return spillover matrix and write spillover matrix to csv file named in
@@ -134,7 +134,7 @@ cyto_spillover_compute <- function(x,
                                    axes_trans = NA,
                                    axes_limits = "machine",
                                    spillover = NULL,
-                                   plot = FALSE,
+                                   heatmap = TRUE,
                                    ...) {
 
   # SPILLOVER ------------------------------------------------------------------
@@ -748,7 +748,7 @@ cyto_spillover_compute <- function(x,
   }
   
   # HEATMAP
-  if(plot) {
+  if(heatmap) {
     sp <- spill_mat
     if(is.null(rownames(sp))) {
       rownames(sp) <- colnames(sp)
@@ -757,7 +757,13 @@ cyto_spillover_compute <- function(x,
     # CONSTRUCT HEATMAP - USE CYTO_PLOT_HEATMAP?
     heat_map(
       sp,
-      box_col_empty = "grey40"
+      box_col_empty = "black",
+      dendrogram = TRUE,
+      box_col_scale = .cyto_plot_point_col_scale(),
+      legend_col_breaks = 50,
+      legend_text_breaks = c(seq(1, 50, 10), 51),
+      title = "Spillover Matrix",
+      legend = FALSE # spacing needs work
     )
   }
   

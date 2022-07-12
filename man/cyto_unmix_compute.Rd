@@ -13,6 +13,7 @@ cyto_unmix_compute(
   save_as = NULL,
   axes_trans = NA,
   axes_limits = "machine",
+  heatmap = TRUE,
   ...
 )
 }
@@ -49,6 +50,9 @@ only required when \code{cytoset} objects are supplied.}
 to \code{"machine"} by default to use entire axes ranges. Fine control over
 axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 arguments.}
+
+\item{heatmap}{logical indicating whether the computed spectral unmixing
+matrix should be displayed in a heatmap, set to TRUE by default.}
 
 \item{...}{additional arguments passed to \code{cyto_plot()} to allow
 customisation of plots used for gating.}

@@ -43,6 +43,8 @@
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
+#' @param heatmap logical indicating whether the computed spectral unmixing
+#'   matrix should be displayed in a heatmap, set to TRUE by default.
 #' @param ... additional arguments passed to \code{cyto_plot()} to allow
 #'   customisation of plots used for gating.
 #'
@@ -71,6 +73,7 @@ cyto_unmix_compute <- function(x,
                                save_as = NULL,
                                axes_trans = NA,
                                axes_limits = "machine",
+                               heatmap = TRUE,
                                ...) {
 
   # PREPARE DATA ---------------------------------------------------------------
@@ -821,6 +824,22 @@ cyto_unmix_compute <- function(x,
     )
   }
 
+  # HEATMAP
+  if(heatmap) {
+    um <- unmix
+    # CONSTRUCT HEATMAP - USE CYTO_PLOT_HEATMAP?
+    heat_map(
+      um,
+      dendrogram = "row",
+      box_col_scale = .cyto_plot_point_col_scale(),
+      legend_col_breaks = 50,
+      legend_text_breaks = c(seq(1, 50, 10), 51),
+      title = "Spectral Unmixing Matrix",
+      legend = FALSE, # spacing needs work
+      dendrogram_scale = TRUE
+    )
+  }
+  
   # SPECTRAL UNMIXING MATRIX
   return(unmix)
   
