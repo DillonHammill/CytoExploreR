@@ -680,11 +680,14 @@ cyto_plot <- function(x,
   if(.all_na(args$legend_text)) {
     # POPULATIONS
     if(!is.null(LAPPLY(args$x, "names"))) {
-      args$legend_text <- LAPPLY(args$x, function(z){
-        nm <- names(z)
-        nm[nm == "root"] <- "All Events"
-        return(nm)
-      })
+      args$legend_text <- LAPPLY(
+        args$x, 
+        function(z){
+          nm <- names(z)
+          nm[nm == "root"] <- "All Events"
+          return(nm)
+        }
+      )
     }
   }
   
@@ -749,7 +752,7 @@ cyto_plot <- function(x,
       }
     }
   }
-
+  
   # X AXIS BREAKS & LABELS
   if(args$spectra) {
     axes_text_x <- list(
@@ -794,7 +797,7 @@ cyto_plot <- function(x,
   )
   
   # LABEL_TEXT_Y CO-ORDINATES - LINEAR -> TRANSFORMED SCALE
-  if(length(channels) >= 2) {
+  if(length(args$channels) >= 2) {
     args$label_text_y <- .cyto_transform(
       args$label_text_y,
       trans = args$axes_trans,

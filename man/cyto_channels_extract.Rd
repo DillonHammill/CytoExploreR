@@ -20,7 +20,7 @@ cyto_channels_extract(
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{channels}{vector of channel and/or marker names (e.g. c("Alexa Fluor
-700-A","CD8")).}
+700-A","CD8")) or indices.}
 
 \item{skip}{vector of markers/channels in \code{channels} to bypass when
 converting to valid channels, for example \code{"Unstained"} is bypassed
@@ -31,7 +31,7 @@ a plot, set to FALSE by default. If set to TRUE an additional check will be
 performed to ensure that only 1 or 2 \code{channels} are supplied.}
 
 \item{ignore.case}{logical indicating whether case insensitive channel
-matches should be returned, set to TRUE bu default.}
+matches should be returned, set to TRUE by default.}
 
 \item{...}{additional arguments passed to \code{\link[base:grep]{grepl}} for
 character matching. For exact character string matching to override the

@@ -20,11 +20,11 @@ cyto_markers(
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} or a list of these
 objects.}
 
-\item{select}{vector of channels or markers for which the channel/marker
-combinations should be returned.}
+\item{select}{vector of channels, markers or indices for which the
+channel/marker combinations should be returned.}
 
-\item{exclude}{vector of channels or markers for which the channel/marker
-combinations should not be returned.}
+\item{exclude}{vector of channels, markers or indices for which the
+channel/marker combinations should not be returned.}
 
 \item{append}{logical indicating whether the name of the channel should be
 appended to the marker names in the form \code{<marker> channel}, set to
@@ -49,7 +49,7 @@ Extract marker names
 library(CytoExploreRData)
 
 # Activation GatingSet
-gs <- cyto_load(system.file("extdata/Activation-GatingSet", 
+gs <- cyto_load(system.file("extdata/Activation-GatingSet",
                 package = "CytoExploreRData"))
 
 # GatingHierarchy

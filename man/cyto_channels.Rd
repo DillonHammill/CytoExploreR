@@ -19,9 +19,11 @@ cyto_channels(
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
-\item{select}{vector of channel names to select.}
+\item{select}{channel selection criteria in the form of character strings or
+indices.}
 
-\item{exclude}{vector of channel names to exclude.}
+\item{exclude}{channel exclusion criteria in the form of character strings or
+indices.}
 
 \item{append}{logical indicating whether the name of the channel should be
 appended to the marker names in the form \code{<marker> channel}, set to

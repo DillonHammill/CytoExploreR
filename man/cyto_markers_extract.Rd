@@ -21,7 +21,7 @@ cyto_markers_extract(
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{channels}{vector of channel and/or marker names (e.g. c("Alexa Fluor
-700-A","CD8")).}
+700-A","CD8")) or channel indices.}
 
 \item{skip}{vector of markers/channels in \code{channels} to bypass when
 converting to valid markers, for example \code{"Unstained"} is bypassed

@@ -892,6 +892,16 @@
         ),
         names = names(alias)
       )
+    } else {
+      gate <- structure(
+        lapply(
+          names(grps), 
+          function(z){
+            NA
+          }
+        ),
+        names = names(grps)
+      )
     }
   }
   
@@ -1127,7 +1137,7 @@
       }
     }
   }
-  
+
   # BUFFER ---------------------------------------------------------------------
   
   # ADD 2% BUFFER EITHER SIDE - 4% TOTAL IN PLOT

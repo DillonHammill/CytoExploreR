@@ -10,8 +10,10 @@
 #'   \code{\link[flowWorkspace:cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param select vector of channel names to select.
-#' @param exclude vector of channel names to exclude.
+#' @param select channel selection criteria in the form of character strings or
+#'   indices.
+#' @param exclude channel exclusion criteria in the form of character strings or
+#'   indices.
 #' @param append logical indicating whether the name of the channel should be
 #'   appended to the marker names in the form \code{<marker> channel}, set to
 #'   FALSE by default.
@@ -77,36 +79,67 @@ cyto_channels <- function(x,
       LAPPLY(
         select, 
         function(z){
-          # EXACT MATCH
-          match(z, channels)
-          which(
-            suppressWarnings(
-              .grepl(
-                z, 
-                channels, 
-                ignore.case = ignore.case,
-                ...
+          # INDEX
+          if(is.numeric(z)) {
+            z
+          # NAME
+          } else {
+            which(
+              suppressWarnings(
+                .grepl(
+                  z, 
+                  channels, 
+                  ignore.case = ignore.case,
+                  ...
+                )
               )
             )
-          )
+          }
         }
       )
     )
-    channels <- channels[ind]
+  } else {
+    ind <- seq_along(channels)
   }
   
   # EXCLUDE
   if(!is.null(exclude)){
-    for(z in exclude){
-      channels <- channels[!suppressWarnings(
-        .grepl(
-          z, 
-          channels, 
-          ignore.case = ignore.case,
-          ...
-        )
-      )]
-    }
+    ind_rm <- unique(
+      LAPPLY(
+        exclude, 
+        function(z){
+          # INDEX
+          if(is.numeric(z)) {
+            z
+            # NAME
+          } else {
+            which(
+              suppressWarnings(
+                .grepl(
+                  z, 
+                  channels, 
+                  ignore.case = ignore.case,
+                  ...
+                )
+              )
+            )
+          }
+        }
+      )
+    )
+  } else {
+    ind_rm <- NULL
+  }
+  
+  # CHANNELS EXCLUDE
+  if(length(ind_rm) > 0) {
+    channels <- intersect(
+      channels[ind],
+      channels[-ind_rm]
+    )
+  # ALL CHANNELS
+  } else {
+    channels <- channels[ind]
   }
   
   # MARKERS
@@ -185,10 +218,10 @@ cyto_channels <- function(x,
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} or a list of these
 #'   objects.
-#' @param select vector of channels or markers for which the channel/marker
-#'   combinations should be returned.
-#' @param exclude vector of channels or markers for which the channel/marker
-#'   combinations should not be returned.
+#' @param select vector of channels, markers or indices for which the
+#'   channel/marker combinations should be returned.
+#' @param exclude vector of channels, markers or indices for which the
+#'   channel/marker combinations should not be returned.
 #' @param append logical indicating whether the name of the channel should be
 #'   appended to the marker names in the form \code{<marker> channel}, set to
 #'   FALSE by default.
@@ -211,7 +244,7 @@ cyto_channels <- function(x,
 #' library(CytoExploreRData)
 #'
 #' # Activation GatingSet
-#' gs <- cyto_load(system.file("extdata/Activation-GatingSet", 
+#' gs <- cyto_load(system.file("extdata/Activation-GatingSet",
 #'                 package = "CytoExploreRData"))
 #'
 #' # GatingHierarchy
@@ -263,49 +296,83 @@ cyto_markers <- function(x,
   if(!length(markers) == 0) {
     # SELECT
     if(!is.null(select)){
-      ind <- unique(LAPPLY(select, function(z){
-        which(
-          suppressWarnings(
-            .grepl(
-              z,
-              markers,
-              ignore.case = ignore.case,
-              ...
-            )
-          ) |
-          suppressWarnings(
-            .grepl(
-              z, 
-              names(markers),
-              ignore.case = ignore.case,
-              ...
-            )
-          )
+      ind <- unique(
+        LAPPLY(
+          select, 
+          function(z) {
+            if(is.numeric(z)) {
+              z
+            } else {
+              which(
+                suppressWarnings(
+                  .grepl(
+                    z,
+                    markers,
+                    ignore.case = ignore.case,
+                    ...
+                  )
+                ) |
+                suppressWarnings(
+                  .grepl(
+                    z, 
+                    names(markers),
+                    ignore.case = ignore.case,
+                    ...
+                  )
+                )
+              )
+            }
+          }
         )
-      }))
-      markers <- markers[ind]
+      )
+    } else {
+      ind <- seq_along(markers)
     }
     
     # EXCLUDE
     if(!is.null(exclude)){
-      # EXCLUDE
-      for(z in exclude) {
-        markers <- markers[
-          !(suppressWarnings(
-            .grepl(
-              z, 
-              markers,
-              ignore.case = ignore.case,
-              ...
-            )
-          ) | suppressWarnings(
-            .grepl(z,
-            names(markers),
-            ignore.case = ignore.case,
-            ...
-          )
-        ))]
-      }
+      ind_rm <- unique(
+        LAPPLY(
+          exclude, 
+          function(z) {
+            if(is.numeric(z)) {
+              z
+            } else {
+              which(
+                suppressWarnings(
+                  .grepl(
+                    z,
+                    markers,
+                    ignore.case = ignore.case,
+                    ...
+                  )
+                ) |
+                suppressWarnings(
+                  .grepl(
+                    z, 
+                    names(markers),
+                    ignore.case = ignore.case,
+                    ...
+                  )
+                )
+              )
+            }
+          }
+        )
+      )
+    } else {
+      ind_rm <- NULL
+    }
+    
+    # MARKERS EXCLUDE
+    if(length(ind_rm) > 0) {
+      markers <- intersect(
+        markers[ind],
+        markers[-ind_rm]
+      )
+    # ALL MARKERS
+    } else {
+      markers <- markers[ind]
     }
     # APPEND
     if(append) {
@@ -459,7 +526,7 @@ cyto_fluor_channels <- function(x,
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param channels vector of channel and/or marker names (e.g. c("Alexa Fluor
-#'   700-A","CD8")).
+#'   700-A","CD8")) or indices.
 #' @param skip vector of markers/channels in \code{channels} to bypass when
 #'   converting to valid channels, for example \code{"Unstained"} is bypassed
 #'   when checking channels in the channel match file.
@@ -467,7 +534,7 @@ cyto_fluor_channels <- function(x,
 #'   a plot, set to FALSE by default. If set to TRUE an additional check will be
 #'   performed to ensure that only 1 or 2 \code{channels} are supplied.
 #' @param ignore.case logical indicating whether case insensitive channel
-#'   matches should be returned, set to TRUE bu default.
+#'   matches should be returned, set to TRUE by default.
 #' @param ... additional arguments passed to \code{\link[base:grep]{grepl}} for
 #'   character matching. For exact character string matching to override the
 #'   default which ignores character case, set \code{fixed} to TRUE.
@@ -506,6 +573,9 @@ cyto_channels_extract <- function(x,
     # SKIP
     if(any(.grepl(channels[z], skip, ignore.case = ignore.case, ...))) {
       res <- c(res, channels[z])
+    # INDEX
+    } else if(is.numeric(channels[z])) {
+      res <- c(res, chans[channels[z]]) 
     # EXACT MARKER MATCH
     } else if(channels[z] %in% markers) {
       res <- c(
@@ -593,7 +663,7 @@ cyto_channels_extract <- function(x,
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param channels vector of channel and/or marker names (e.g. c("Alexa Fluor
-#'   700-A","CD8")).
+#'   700-A","CD8")) or channel indices.
 #' @param skip vector of markers/channels in \code{channels} to bypass when
 #'   converting to valid markers, for example \code{"Unstained"} is bypassed
 #'   when checking markers in the channel match file.
@@ -647,6 +717,9 @@ cyto_markers_extract <- function(x,
     if(any(.grepl(channels[z], skip, ignore.case = ignore.case, ...))) {
       res <- c(res, channels[z])
       names(res[length(res)]) <- channels[z] # append
+    # INDEX
+    } else if(is.numeric(channels[z])) {
+      res <- c(res, markers[match(chans[channels[z]], names(markers))])
     # EXACT MARKER MATCH
     } else if(channels[z] %in% markers) {
       res <- c(res, markers[match(channels[z], markers)])
