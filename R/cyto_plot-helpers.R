@@ -2312,7 +2312,7 @@ cyto_plot_theme_args <- function() {
     "key_hist_line_type",
     "key_hist_line_width",
     "key_hist_line_col",
-    "spectr_cols",
+    "spectra_cols",
     "spectra_col_scale",
     "spectra_col_alpha",
     "spectra_border_line_type",

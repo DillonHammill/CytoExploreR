@@ -1663,7 +1663,7 @@
   
   # LEGEND TEXT
   if (legend != FALSE & !.all_na(legend_text)) {
-    mar[4] <- mar[4] + 3.1 + max(nchar(legend_text))*0.32*mean(legend_text_size)
+    mar[4] <- mar[4] + 2.5 + max(nchar(legend_text))*0.4*mean(legend_text_size)
   }
   
   # RIGHT PADDING
