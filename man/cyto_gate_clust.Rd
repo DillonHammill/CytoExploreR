@@ -16,6 +16,9 @@ cyto_gate_clust(
   input = "flowFrame",
   inverse = FALSE,
   slot = NULL,
+  events = 1,
+  impute = 5,
+  scale = "range",
   ...
 )
 }
@@ -72,6 +75,20 @@ clustering algorithm to extract the cluster labels after gating. The
 purpose of \code{slot} is to ensure that a valid gate type (i.e. a factor
 containing the factor labels) is passed to \code{openCyto} during the
 gating step.}
+
+\item{events}{indicates the number of events to pass to the clustering
+algorithm. If the number of events is less than the total number of events,
+\code{cyto_impute()} will be used to impute the remaining labels using a
+kNN computed with \code{impute} nearest neighbours.}
+
+\item{impute}{indicates the value of k to use to impute missing labels using
+\code{cyto_impute()} when \code{events} is used to speed up clustering, set
+to 5 by default.}
+
+\item{scale}{optional argument to scale each channel prior to passing data to
+the specified clustering algorithm, options include \code{"range"},
+\code{"mean"}, \code{"median"} or \code{"zscore"}. Set to \code{"range"} by
+default, scaling can be turned off by setting this argument to NULL.}
 
 \item{...}{additional arguments passed to the clustering algorithm supplied
 to \code{type}, refer to the documentation for the relevant clustering

@@ -15,6 +15,7 @@ cyto_compensate(x, ...)
   select = 1,
   remove = FALSE,
   copy = FALSE,
+  quiet = FALSE,
   ...
 )
 
@@ -24,6 +25,7 @@ cyto_compensate(x, ...)
   select = 1,
   remove = FALSE,
   copy = FALSE,
+  quiet = FALSE,
   ...
 )
 
@@ -33,6 +35,7 @@ cyto_compensate(x, ...)
   select = 1,
   remove = FALSE,
   copy = FALSE,
+  quiet = FALSE,
   ...
 )
 }
@@ -61,6 +64,9 @@ removed from the supplied samples, set to FALSE by default.}
 prior to applying compensation for fluorescent spillover, set to FALSE by
 default. Setting this argument to TRUE will leave the supplied data
 untouched and return a copy of the data with compensation applied.}
+
+\item{quiet}{logical indicating whether messages should be printed, set to
+FALSE by default to print messages.}
 }
 \value{
 a compensated \code{flowFrame}, \code{flowSet} or \code{GatingSet}

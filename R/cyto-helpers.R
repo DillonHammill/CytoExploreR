@@ -1545,13 +1545,11 @@ cyto_transform.default <- function(x,
   
   # TRANSFORM FLOWFRAME OR FLOWSET
   if (cyto_class(x, c("flowFrame", "flowSet"))) {
-    
     # Extract transformations from transformerList to transformList
     transform_list <- cyto_transform_extract(
       transformer_list,
       inverse = inverse
     )
-    
     # APPLY TRANSFORMATIONS
     x <- suppressMessages(
       transform(
@@ -1559,21 +1557,20 @@ cyto_transform.default <- function(x,
         transform_list
       )
     )
-    
-    # TRANSFORM GATINGHIERARCHY OR GATINGSET
+  # TRANSFORM GATINGHIERARCHY OR GATINGSET
   } else if (cyto_class(x, "GatingSet")) {
-    # NO TRANSFORMERS
+    # TRANSFORMERS
     if(!.all_na(transformer_list)) {
+      # SPILLOVER
+      spill <- cyto_spillover_extract(x)
       # EXTRACT DATA
       cs <- cyto_data_extract(
         x,
         parent = "root",
         copy = ifelse(copy, FALSE, TRUE) # COPIED ABOVE?
       )[[1]]
-
       # GATETEMPLATE
       gateTemplate <- cyto_gateTemplate(x)
-      
       # INVERSE TRANSFORMATIONS - APPLIED AT CYTOSET LEVEL - NOT ATTACHED
       if(inverse) {
         # TRANSFORMLIST
@@ -1588,12 +1585,46 @@ cyto_transform.default <- function(x,
             transform_list
           )
         )
+        # REMOVE COMPENSATION
+        if(!is.null(spill)) {
+          cs <- cyto_compensate(
+            cs, 
+            spillover = spill,
+            remove = TRUE,
+            quiet = TRUE
+          )
+        }
         # RECONSTRUCT GATINGSET
         x <- GatingSet(cs)
+        # APPLY COMPENSATION
+        if(!is.null(spill)) {
+          x <- cyto_compensate(
+            x, 
+            spillover = spill,
+            quiet = TRUE
+          )
+        }
       # DATA TRANSFORMATIONS - APPLIED GATINGSET LEVEL - ATTACHED
       } else {
+        # REMOVE COMPENSATION
+        if(!is.null(spill)) {
+          cs <- cyto_compensate(
+            cs, 
+            spillover = spill,
+            remove = TRUE,
+            quiet = TRUE
+          )
+        }
         # RECONSTRUCT GATINGSET
         x <- GatingSet(cs)
+        # APPLY COMPENSATION
+        if(!is.null(spill)) {
+          x <- cyto_compensate(
+            x, 
+            spillover = spill,
+            quiet = TRUE
+          )
+        }
         # APPLY DATA TRANSFORMATIONS
         x <- suppressMessages(
           transform(
@@ -1868,6 +1899,8 @@ cyto_transform.transformerList <- function(x,
       trans <- cyto_transformers_combine(
         trans[names(trans) %in% cyto_channels(x)]
       )
+      # SPILLOVER
+      spill <- cyto_spillover_extract(x)
       # EXTRACT DATA
       cs <- cyto_data_extract(
         x,
@@ -1890,12 +1923,46 @@ cyto_transform.transformerList <- function(x,
             transform_list
           )
         )
+        # REMOVE COMPENSATION
+        if(!is.null(spill)) {
+          cs <- cyto_compensate(
+            cs, 
+            spillover = spill,
+            remove = TRUE,
+            quiet = TRUE
+          )
+        }
         # RECONSTRUCT GATINGSET
         x <- GatingSet(cs)
+        # APPLY COMPENSATION
+        if(!is.null(spill)) {
+          x <- cyto_compensate(
+            x, 
+            spillover = spill,
+            quiet = TRUE
+          )
+        }
         # DATA TRANSFORMATIONS - APPLIED GATINGSET LEVEL - ATTACHED
       } else {
+        # REMOVE COMPENSATION
+        if(!is.null(spill)) {
+          cs <- cyto_compensate(
+            cs, 
+            spillover = spill,
+            remove = TRUE,
+            quiet = TRUE
+          )
+        }
         # RECONSTRUCT GATINGSET
         x <- GatingSet(cs)
+        # APPLY COMPENSATION
+        if(!is.null(spill)) {
+          x <- cyto_compensate(
+            x, 
+            spillover = spill,
+            quiet = TRUE
+          )
+        }
         # APPLY DATA TRANSFORMATIONS
         x <- suppressMessages(
           transform(
@@ -5736,6 +5803,8 @@ cyto_details_save <- function(x,
 #'   prior to applying compensation for fluorescent spillover, set to FALSE by
 #'   default. Setting this argument to TRUE will leave the supplied data
 #'   untouched and return a copy of the data with compensation applied.
+#' @param quiet logical indicating whether messages should be printed, set to
+#'   FALSE by default to print messages.
 #' @param ... not in use.
 #'
 #' @return a compensated \code{flowFrame}, \code{flowSet} or \code{GatingSet}
@@ -5790,6 +5859,7 @@ cyto_compensate.GatingSet <- function(x,
                                       select = 1,
                                       remove = FALSE,
                                       copy = FALSE,
+                                      quiet = FALSE,
                                       ...) {
   
   # WARNING
@@ -5836,9 +5906,11 @@ cyto_compensate.GatingSet <- function(x,
   
   # INVERSE TRANSFORMATIONS
   if(!.all_na(trans)) {
-    message(
-      "Applying inverse data transformations..."
-    )
+    if(!quiet) {
+      message(
+        "Applying inverse data transformations..."
+      )
+    }
     cs <- cyto_transform(
       cs,
       trans = trans,
@@ -5850,9 +5922,11 @@ cyto_compensate.GatingSet <- function(x,
   
   # DECOMPENSATE
   if(remove) {
-    message(
-      "Removing applied compensation..."
-    )
+    if(!quiet) {
+      message(
+        "Removing applied compensation..."
+      )
+    }
     cf_list <- lapply(
       seq_along(cs), 
       function(z) {
@@ -5872,17 +5946,21 @@ cyto_compensate.GatingSet <- function(x,
   
   # COMPENSATE
   if(!remove) {
-    message(
-      "Compensating for fluorescence spillover..."
-    )
+    if(!quiet) {
+      message(
+        "Compensating for fluorescence spillover..."
+      )
+    }
     flowWorkspace::compensate(gs, spill)
   }
   
   # RE-APPLY TRANSFORMATIONS
   if(!.all_na(trans)) {
-    message(
-      "Re-applying data transformations..."
-    )
+    if(!quiet) {
+      message(
+        "Re-applying data transformations..."
+      )
+    }
     gs <- cyto_transform(
       gs,
       trans = trans,
@@ -5894,9 +5972,11 @@ cyto_compensate.GatingSet <- function(x,
   
   # TRANSFER GATES
   if(length(cyto_nodes(x)) > 1) {
-    message(
-      "Recomputing gates..."
-    )
+    if(!quiet) {
+      message(
+        "Recomputing gates..."
+      )
+    }
     x <- cyto_gateTemplate_apply(
       gs,
       x
@@ -5916,6 +5996,7 @@ cyto_compensate.flowSet <- function(x,
                                     select = 1,
                                     remove = FALSE,
                                     copy = FALSE,
+                                    quiet = FALSE,
                                     ...) {
   
   # PREPARE SPILLOVER MATRIX
@@ -5959,6 +6040,7 @@ cyto_compensate.flowFrame <- function(x,
                                       select = 1,
                                       remove = FALSE,
                                       copy = FALSE,
+                                      quiet = FALSE,
                                       ...) {
   
   # PREPARE SPILLOVER MATRIX
@@ -8046,20 +8128,28 @@ cyto_enquire <- function(x,
 #'
 #' @param x name of the required package.
 #' @param source where to install the package from if it is not found on the
-#'   user's machine, options include \code{CRAN}, \code{BioC} or \code{GitHub}.
-#'   Set to \code{CRAN} by default.
+#'   user's machine, options include \code{CRAN}, \code{BioC} or \code{GitHub}
+#'   for R packages. Option \code{pip} is available for installing python
+#'   modules using pip.
 #' @param repo name of the GitHub repository from which the package should be
 #'   installed when \code{source = GitHub}.
+#' @param python logical indicating whether the required package should be
+#'   loaded from python instead of R, set to FALSE by default.
+#' @param import provides a way to import modules or parts of modules that may
+#'   have different names to the required package specified by \code{x}, set to
+#'   NULL by default to attempt to import \code{x} directly.
 #' @param version minimal version requirement if the package is located on the
 #'   user's machine.
 #' @param ref citation to print to the console when loading the package for use
 #'   within CytoExploreR.
 #' @param ... additional arguments passed to \code{install.packages},
-#'   \code{BiocManager::install} or \code{remotes::install_github}.
+#'   \code{BiocManager::install}, \code{remotes::install_github} or
+#'   \code{reticulate::py_install()}.
 #'
-#' @return NULL
+#' @return NULL or imported python module.
 #'
 #' @importFrom utils install.packages installed.packages
+#' @importFrom reticulate py_available py_module_available import
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -8067,68 +8157,134 @@ cyto_enquire <- function(x,
 cyto_require <- function(x,
                          source = "CRAN",
                          repo = NULL,
+                         python = FALSE,
+                         import = NULL,
                          version = NULL,
                          ref = NULL,
                          ...) {
   
-  # PACKAGE LOCATED
-  pkgs <- as.data.frame(installed.packages())
-  
-  # PACKAGE FOUND
-  if(x %in% pkgs$Package) {
-    # CHECK VERSION
-    if(!is.null(version)) {
-      # PACKAGE VERSION
-      pkg_version <- pkgs[pkgs$Package == x, "Version"]
-      # VERSION TOO OLD
-      if(tryCatch(pkg_version < version, error = function(e){TRUE})) {
-        inst <- TRUE
-      # VERSION CORRECT
+  # PYTHON
+  if(python) {
+    # PYTHON AVAILABLE - ANNOYING! - NEED CALL SOMETHING FIRST
+    if(py_available()) {
+      # TODO: CHECK AVAILABLE MODULE HAS CORRECT VERSION
+      # IMPORT
+      if(is.null(import)) {
+        import <- x
+      }
+      # MODULE AVAILABLE
+      if(py_module_available(x)) {  # REFERENCE
+        if(!is.null(ref)) {
+          message(ref)
+        }
+        return(import(import))
+      # MODULE INSTALLATION REQUIRED
+      } else {
+        # INSTALL ARGUMENTS
+        args <- list(...)
+        # PIP
+        if(!"pip" %in% names(args)) {
+          args$pip <- if(source %in% "pip") {
+            TRUE
+          } else {
+            FALSE
+          }
+        }
+        # MODULE VERSION
+        if(!is.null(version)) {
+          module <- paste0(x, "==", version)
+        } else {
+          module <- x
+        }
+        # TODO: INSTALLATION FROM GITHUB
+        # INSTALL MODULE
+        inst <- tryCatch(
+          cyto_func_call(
+            "reticulate::py_install",
+            c(list(module), args)
+          ),
+          error = function(e) {
+            return(FALSE)
+          }
+        )
+        # IMPORT MODULE
+        if(py_module_available(import) & is.null(inst)) {
+          # REFERENCE
+          if(!is.null(ref)) {
+            message(ref)
+          }
+          # LOAD INSTALLED MODULE
+          return(import(import))
+        # MODULE INSTALL UNSUCCESSFUL
+        } else {
+          return(NULL)
+        }
+      }
+    # NO PYTHON
+    } else {
+      warning(
+        ""
+      )
+      return(NULL)
+    }
+  # R
+  } else {
+    # PACKAGE LOCATED
+    pkgs <- as.data.frame(installed.packages())
+    # PACKAGE FOUND
+    if(x %in% pkgs$Package) {
+      # CHECK VERSION
+      if(!is.null(version)) {
+        # PACKAGE VERSION
+        pkg_version <- pkgs[pkgs$Package == x, "Version"]
+        # VERSION TOO OLD
+        if(tryCatch(pkg_version < version, error = function(e){TRUE})) {
+          inst <- TRUE
+          # VERSION CORRECT
+        } else {
+          inst <- FALSE
+        }
+        # VERSION DOES NOT MATTER
       } else {
         inst <- FALSE
       }
-    # VERSION DOES NOT MATTER
+      # PACKAGE MISSING 
     } else {
-      inst <- FALSE
+      inst <- TRUE
     }
-  # PACKAGE MISSING 
-  } else {
-    inst <- TRUE
-  }
-  
-  # INSTALL PACKAGE
-  if(inst) {
-    # MESSAGE
-    message(
-      paste0("Installing required package: ",
-             x, "...")
-    )
-    # GITHUB - REPO
-    if(!is.null(repo)) {
-      if(!"remotes" %in% pkgs$Package) {
-        install.packages("remotes")
-      }
+    # INSTALL PACKAGE
+    if(inst) {
+      # MESSAGE
+      message(
+        paste0("Installing required package: ",
+               x, "...")
+      )
+      # GITHUB - REPO
+      if(!is.null(repo)) {
+        if(!"remotes" %in% pkgs$Package) {
+          install.packages("remotes")
+        }
         cyto_func_call("remotes::install_github", list(repo, ...))
         # remotes::install_github(repo, ...)
-    # CRAN
-    } else if(grepl("^c", source, ignore.case = TRUE)){
-      install.packages(x, ...)
-    # BIOCONDUCTOR
-    } else if (grepl("^b", source, ignore.case = TRUE)) {
-      if(!"BiocManager" %in% pkgs$Package) {
-        install.packages("BiocManager", ...)
-      }
+        # CRAN
+      } else if(grepl("^c", source, ignore.case = TRUE)){
+        install.packages(x, ...)
+        # BIOCONDUCTOR
+      } else if (grepl("^b", source, ignore.case = TRUE)) {
+        if(!"BiocManager" %in% pkgs$Package) {
+          install.packages("BiocManager", ...)
+        }
         cyto_func_call("BiocManager::install", list(x, ...))
         # BiocManager::install(x, ...)
+      }
     }
-  }
-  
-  # LOAD PACKAGE
-  requireNamespace(x)
-  
-  # REFERENCE
-  if(!is.null(ref)) {
-    message(ref)
+    # LOAD PACKAGE
+    requireNamespace(x)
+    # REFERENCE
+    if(!is.null(ref)) {
+      message(ref)
+    }
+    return(NULL)
   }
   
 }

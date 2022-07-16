@@ -910,7 +910,9 @@ cyto_stat_scale <- function(x,
     apply(
       x,
       2,
-      "cyto_stat_scale"
+      "cyto_stat_scale",
+      type = type,
+      ...
     )
   }
   

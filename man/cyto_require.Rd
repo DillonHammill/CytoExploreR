@@ -4,17 +4,34 @@
 \alias{cyto_require}
 \title{Load external packages for use within CytoExploreR}
 \usage{
-cyto_require(x, source = "CRAN", repo = NULL, version = NULL, ref = NULL, ...)
+cyto_require(
+  x,
+  source = "CRAN",
+  repo = NULL,
+  python = FALSE,
+  import = NULL,
+  version = NULL,
+  ref = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{name of the required package.}
 
 \item{source}{where to install the package from if it is not found on the
-user's machine, options include \code{CRAN}, \code{BioC} or \code{GitHub}.
-Set to \code{CRAN} by default.}
+user's machine, options include \code{CRAN}, \code{BioC} or \code{GitHub}
+for R packages. Option \code{pip} is available for installing python
+modules using pip.}
 
 \item{repo}{name of the GitHub repository from which the package should be
 installed when \code{source = GitHub}.}
+
+\item{python}{logical indicating whether the required package should be
+loaded from python instead of R, set to FALSE by default.}
+
+\item{import}{provides a way to import modules or parts of modules that may
+have different names to the required package specified by \code{x}, set to
+NULL by default to attempt to import \code{x} directly.}
 
 \item{version}{minimal version requirement if the package is located on the
 user's machine.}
@@ -23,7 +40,11 @@ user's machine.}
 within CytoExploreR.}
 
 \item{...}{additional arguments passed to \code{install.packages},
-\code{BiocManager::install} or \code{remotes::install_github}.}
+\code{BiocManager::install}, \code{remotes::install_github} or
+\code{reticulate::py_install()}.}
+}
+\value{
+NULL or imported python module.
 }
 \description{
 Load external packages for use within CytoExploreR

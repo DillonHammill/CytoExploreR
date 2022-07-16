@@ -44,6 +44,17 @@
 #'   purpose of \code{slot} is to ensure that a valid gate type (i.e. a factor
 #'   containing the factor labels) is passed to \code{openCyto} during the
 #'   gating step.
+#' @param impute indicates the value of k to use to impute missing labels using
+#'   \code{cyto_impute()} when \code{events} is used to speed up clustering, set
+#'   to 5 by default.
+#' @param events indicates the number of events to pass to the clustering
+#'   algorithm. If the number of events is less than the total number of events,
+#'   \code{cyto_impute()} will be used to impute the remaining labels using a
+#'   kNN computed with \code{impute} nearest neighbours.
+#' @param scale optional argument to scale each channel prior to passing data to
+#'   the specified clustering algorithm, options include \code{"range"},
+#'   \code{"mean"}, \code{"median"} or \code{"zscore"}. Set to \code{"range"} by
+#'   default, scaling can be turned off by setting this argument to NULL.
 #' @param ... additional arguments passed to the clustering algorithm supplied
 #'   to \code{type}, refer to the documentation for the relevant clustering
 #'   algorithm for more details.
@@ -71,6 +82,9 @@ cyto_gate_clust <- function(x,
                             input = "flowFrame",
                             inverse = FALSE,
                             slot = NULL,
+                            events = 1,
+                            impute = 5,
+                            scale = "range",
                             ...){
   
   # TODO: ADD SCALE ARGUMENT
@@ -265,6 +279,9 @@ cyto_gate_clust <- function(x,
           "slot" = slot,
           "inverse" = inverse,
           "alias" = alias,
+          "impute" = impute,
+          "events" = events,
+          "scale" = scale,
           "openCyto.minEvents" = -1,
           ...
         ),
@@ -378,6 +395,9 @@ cyto_gate_clust <- function(x,
                              slot = NULL,
                              inverse = FALSE,
                              alias = "cluster",
+                             impute = 5,
+                             events = 1,
+                             scale = "range",
                              ...){
   
   # TODO: ADD FRAMEID TO FILTERRESULTS?
@@ -405,8 +425,27 @@ cyto_gate_clust <- function(x,
   if(is.null(params)) {
     params <- cyto_channels(
       fr,
-      exclude = c("Event", "Sample", "Time")
+      exclude = c(
+        "Event", 
+        "Sample", 
+        "Time", 
+        "Original"
+      )
     )
+  }
+  
+  # SCALE
+  if(!is.null(scale)) {
+    if(!scale %in% FALSE) {
+      cyto_exprs(fr) <- cyto_stat_scale(
+        cyto_exprs(
+          fr,
+          channels = params,
+          drop = FALSE
+        ),
+        type = scale
+      )
+    }
   }
   
   # DEFAULT CLUSTERING METHODS
@@ -429,17 +468,18 @@ cyto_gate_clust <- function(x,
         args_default[!names(args_default) %in% names(args)]
       )
       # PREPARE DATA - INVERSE DATA OPTIONAL
-      fr <- cyto_data_extract(
+      fr_clust <- cyto_data_extract(
         fr,
         format = "flowFrame",
         channels = params,
         trans = pp_res$trans,
         inverse = ifelse(args$transform, TRUE, FALSE),
+        events = events,
         copy = FALSE
       )[[1]][[1]]
       # ADD DATA TO ARGUMENTS
       args <- c(
-        list(fr),
+        list(fr_clust),
         args
       )
       # RUN FLOWSOM
@@ -455,17 +495,18 @@ cyto_gate_clust <- function(x,
     # IMMUNOCLUST
     } else if(grepl("^ImmunoClust$", type, ignore.case = TRUE)) {
       # PREPARE DATA - INVERSE DATA REQUIRED
-      fr <- cyto_data_extract(
+      fr_clust <- cyto_data_extract(
         fr,
         format = "flowFrame",
         channels = params,
         trans = pp_res$trans,
         inverse = TRUE,
+        events = events,
         copy = FALSE
       )[[1]][[1]]
       # IMMUNOCLUST ARGUMENTS
       args <- list(
-        fr,
+        fr_clust,
         ...
       )
       # RUN IMMUNOCLUST
@@ -476,17 +517,18 @@ cyto_gate_clust <- function(x,
     # KMEANS  
     } else if(grepl("^kmeans$", type, ignore.case = TRUE)) {
       # PREPARE DATA - MATRIX REQUIRED
-      fr <- cyto_data_extract(
+      fr_clust <- cyto_data_extract(
         fr,
         format = "matrix",
         channels = params,
         trans = pp_res$trans,
         inverse = FALSE,
+        events = events,
         copy = FALSE
       )[[1]][[1]]
       # ARGUMENTS
       args <- list(
-        fr,
+        fr_clust,
         ...
       )
       # RUN KMEANS
@@ -510,6 +552,11 @@ cyto_gate_clust <- function(x,
             )
           )
         }
+        # SCALE
+        args$x <- cyto_stat_scale(
+          args$x,
+          type = "range"
+        )
         # SNN TREE
         SNN <- cyto_func_execute(
           "HGC::SNN.Construction",
@@ -531,17 +578,18 @@ cyto_gate_clust <- function(x,
         )
       }
       # EXTRACT DATA MATRIX
-      fr <- cyto_data_extract(
+      fr_clust <- cyto_data_extract(
         fr,
         format = "matrix",
         channels = params,
         trans = pp_res$trans,
         inverse = FALSE,
+        events = events,
         copy = FALSE
       )[[1]][[1]]
       # ARGUMENTS
       args <- list(
-        fr,
+        fr_clust,
         ...
       )
       # RUN HGC
@@ -561,17 +609,18 @@ cyto_gate_clust <- function(x,
         )
       }
       # EXTRACT DATA MATRIX
-      fr <- cyto_data_extract(
+      fr_clust <- cyto_data_extract(
         fr,
         format = "matrix",
         channels = params,
         trans = pp_res$trans,
         inverse = FALSE,
+        events = events,
         copy = FALSE
       )[[1]][[1]]
       # ARGUMENTS
       args <- list(
-        x = fr,
+        x = fr_clust,
         ...
       )
       # RUN RCLUSTERCPP HCLUST
@@ -593,21 +642,20 @@ cyto_gate_clust <- function(x,
   # NON-STANDARD CLUSTERING ALGORITHM
   if(is.function(type)) {
     # CONVERT DATA TO REQUIRED FORMAT - DATA RESTRICTED TO CHANNELS
-    if(!cyto_class(fr, input, TRUE)) {
-      fr <- cyto_data_extract(
-        fr,
-        format = input,
-        channels = params,
-        trans = pp_res$trans,
-        inverse = inverse,
-        copy = FALSE,
-      )[[1]][[1]]
-    }
+    fr_clust <- cyto_data_extract(
+      fr,
+      format = input,
+      channels = params,
+      trans = pp_res$trans,
+      inverse = inverse,
+      events = events,
+      copy = FALSE,
+    )[[1]][[1]]
     # APPLY CLUSTERING ALGORITHM
     gate <- cyto_slot(
       cyto_func_call(
         type,
-        list(fr, ...)
+        list(fr_clust, ...)
       ),
       slot = slot
     )
@@ -621,6 +669,19 @@ cyto_gate_clust <- function(x,
   # CONVERT NA -> 0
   if(any(is.na(gate))) {
     `levels<-` (addNA(gate), c(levels(gate), 0))
+  }
+  
+  # IMPUTE MISSING LABELS
+  if(length(gate) != BiocGenerics::nrow(fr)) {
+    gate <- factor(
+      cyto_impute(
+        train = fr_clust,
+        test = fr,
+        labels = gate,
+        k = impute,
+        channels = params
+      )[, 1]
+    )
   }
   
   # ALIAS
@@ -659,7 +720,14 @@ cyto_gate_clust <- function(x,
       }
     }
     # ALIAS - INDEX
-    alias <- paste0(alias, "-", seq(index + 1, index + length(levels(gate))))
+    alias <- paste0(
+      alias, 
+      "-", 
+      seq(
+        index + 1, 
+        index + length(levels(gate))
+      )
+    )
   }
   
   # LABEL CLUSTERS IN SIZE ORDER -> LARGEST TO SMALLEST
@@ -684,11 +752,12 @@ cyto_gate_clust <- function(x,
             levels(g) <- levels(gate[[1]])
             return(g)
           }
-        )
+        ),
+        names = nms
       )
     )
   }
-  
+
   # ORDER GATES
   gate <- gate[names(pp_res$counts)]
   

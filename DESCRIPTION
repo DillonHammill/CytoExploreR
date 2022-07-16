@@ -32,6 +32,7 @@ Imports:
     methods,
     progress,
     purrr,
+    reticulate,
     robustbase,
     rhandsontable (>= 0.3.8),
     shiny,

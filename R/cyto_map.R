@@ -25,13 +25,19 @@
 #'   the data, can be either supplied by name \code{e.g. "UMAP"} or as a
 #'   function \code{e.g. "uwot::umap"}. Natively supported options include:
 #'   \itemize{\item{"PCA"}{ uses rsvd::rpca() to compute principal
-#'   components}\item{"t-SNE"}{ uses Rtsne::Rtsne() to compute t-SNE
-#'   co-ordinates} \item{"FIt-SNE"}{ uses
+#'   components}\item{"t-SNE"}{ uses python openTSNE or R Rtsne::Rtsne() to
+#'   compute t-SNE co-ordinates} \item{"FIt-SNE"}{ uses
 #'   \url{https://github.com/KlugerLab/FIt-SNE} to compute FIt-SNE co-ordinates
-#'   (some additional configuration required)}\item{"UMAP"}{ uses uwot::umap()
-#'   to compute UMAP co-ordinates}\item{"EmbedSOM"}{ uses EmbedSOM::SOM() and
+#'   (some additional configuration required)}\item{"UMAP"}{ uses python
+#'   umap-learn or R uwot::umap() to compute UMAP
+#'   co-ordinates}\item{"EmbedSOM"}{ uses EmbedSOM::SOM() and
 #'   EmbedSOM::EmbedSOM() to compute EmbedSOM co-ordinates}\item{"PHATE"}{ uses
-#'   phateR::phate() to compute trajectory embedding co-ordinates}}
+#'   python phate to compute trajectory embedding
+#'   co-ordinates}\item{"PaCMAP"}{uses python pacmap to compute pairwise
+#'   controlled manifold approximation co-ordinates}\item{"TriMap"}{uses python
+#'   trimap.TRIMAP() to compute triplet constrained
+#'   co-ordinates}\item{"IsoMap"}{uses python sklearn.manifold.Isomap() to
+#'   compute non-linear isomapping co-ordinates}}
 #' @param scale optional argument to scale each channel prior to computing
 #'   dimension-reduced co-ordinates, options include \code{"range"},
 #'   \code{"mean"}, \code{"median"} or \code{"zscore"}. Set to \code{"range"} by
@@ -59,12 +65,6 @@
 #' @param plot logical indicating whether a call should be made to
 #'   \code{cyto_plot_map} to visualise the produced dimension-reduced maps, set
 #'   to TRUE by default.
-#' @param cross_entropy logical indicating whether cross entropies should also
-#'   be computed for comparison within \code{\link{cyto_map_compare}}, set to
-#'   \code{TRUE} by default. The cross entropies are computed for every cell
-#'   using the method described by Roca et al. 2022 and stored as a separate
-#'   parameter in each cytoframe. Currently, cross entropies can only be
-#'   calculated for UMAP and t-SNE dimension reduction algorithms.
 #' @param ... additional arguments passed to the specified dimension reduction
 #'   algorithm
 #'
@@ -94,7 +94,6 @@ cyto_map <- function(x,
                      inverse = FALSE,
                      trans = NA,
                      plot = TRUE,
-                     cross_entropy = TRUE,
                      ...) {
   
   # CHECKS ---------------------------------------------------------------------
@@ -210,6 +209,7 @@ cyto_map <- function(x,
   }
   
   # MAP EACH GROUP
+  x_map_chans <- c()
   x_data_map <- structure(
     lapply(
       seq_along(x_data_groups), 
@@ -256,9 +256,9 @@ cyto_map <- function(x,
           type = type,
           seed = seed,
           label = label,
-          cross_entropy = cross_entropy,
           ...
         )
+        x_map_chans <<- colnames(coords)
         # APPEND NEW PARAMETERS
         cf <- cyto_cbind(
           cf, 
@@ -324,79 +324,28 @@ cyto_map <- function(x,
     ), , drop = FALSE
   ]
   
-  # UPDATE CYTOSET IN GATINGSET
+  # REBUILD GATINGSET
   if(cyto_class(x, "GatingSet")) {
-    
-    # CANNOT ADD NEW PARAMETERS TO SUBSET OF GATINGSET
-    # RECONSTRUCT GATINGSET FROM SCRATCH SO SPILL, TRANS & GATES ARE ATTACHED
-    
-    # RECONSTRUCTING GATINGSET
-    message(
-      "Building a new GatingSet..."
+    # REBUILD GATINGSET
+    x <- cyto_rebuild(
+      x = x,
+      y = x_data_map,
+      inverse = inverse
     )
-    # REVERSE TRANSFORMATIONS
-    if(!.all_na(trans) & !inverse) {
-      x_data_map <- cyto_transform(
-        x_data_map,
-        trans = trans,
-        inverse = TRUE,
-        plot = FALSE,
-        quiet = TRUE
-      )
-    }
-    # REVERSE COMPENSATION
-    spill <- cyto_spillover_extract(x)
-    if(!is.null(spill)) {
-      x_data_map <- cyto_compensate(
-        x,
-        remove = TRUE
-      )
-    }
-    # BUILD NEW GATINGSET
-    gs <- GatingSet(x_data_map)
-    # RE-APPLY COMPENSATION
-    if(!is.null(spill)) {
-      message(
-        "Compensating for fluorescent spillover..."
-      )
-      gs <- cyto_compensate(
-        gs,
-        spillover = spill
-      )
-    }
-    # RE-APPLY TRANSFORMATIONS
-    if(!.all_na(trans)) {
-      message(
-        "Re-applying data transformations..."
-      )
-      gs <- cyto_transform(
-        gs,
-        trans = trans,
-        inverse = FALSE,
-        plot = FALSE,
-        quiet = TRUE
-      )
-    }
-    # TRANSFER GATES
-    if(length(cyto_nodes(x)) > 1) {
-      message(
-        "Recomputing gates..."
-      )
-      x <- cyto_gateTemplate_apply(
-        gs, 
-        x
-      )
-    } else {
-      x <- gs
-    }
-
+  # CYTOSET
   } else {
     x <- x_data_map
   }
   
   # PLOT 
   if(plot) {
-    # cyto_plot_map()
+    # TODO: OVERLAY GATED DESCENDANTS (SLOW & POINT_COL REQUIRES EVENTS=1)
+    cyto_plot(
+      x,
+      parent = parent,
+      channels = x_map_chans[1:2],
+      merge_by = "all"
+    )
   }
   
   # RETURN FORMATTED DATA
@@ -411,7 +360,6 @@ cyto_map <- function(x,
                       type = "UMAP",
                       seed = NULL,
                       label = NULL,
-                      cross_entropy = TRUE,
                       ...){
   
   # SEED
@@ -425,8 +373,7 @@ cyto_map <- function(x,
     -match(
       c("type",
         "seed",
-        "label",
-        "cross_entropy"),
+        "label"),
       names(args)
     )
   ]
@@ -460,593 +407,416 @@ cyto_map <- function(x,
     }
   }
   
-  # SUPPORTED CROSS ENTROPY METHOD
-  method <- NULL
-  
   # CHARACTER FUNCTION
   if(is.character(type)) {
     # PCA
     if(grepl("^PCA$", type, ignore.case = TRUE)) {
-      # MESSAGE
-      message(
-        "Using rsvd::rpca() to compute PCA co-ordinates..."
-      )
-      # RSVD
-      cyto_require(
-        "rsvd",
-        source = "CRAN",
-        ref = paste0(
-          "Erichson NB, Voronin S, Brunton SL, Kutz JN (2019). Randomized ",
-          "Matrix Decompositions Using R. Journal of Statistical Software, ",
-          "89(11), 1–48. doi: 10.18637/jss.v089.i11."
-        )
-      )
-      # TYPE -> FUNCTION
-      type <- cyto_func_match("rsvd::rpca")
+      type <- ".cyto_map_pca"
     # FIt-SNE
     } else if(grepl("^FIt-?SNE$", type, ignore.case = TRUE)) {
-      # MESSAGE
-      message(
-        "Using FIt-SNE::fftRtsne() to compute FIt-SNE co-ordinates... "
-      )
-      # TYPE -> FUNCTION
-      type <- CytoExploreR::fftRtsne
+      type <- ".cyto_map_fitsne"
     # T-SNE
     } else if(grepl("^t-?SNE$", type, ignore.case = TRUE)) {
-      # MESSAGE
-      message(
-        paste0(
-          "Using Rtsne::Rtsne() to compute t-SNE co-ordinates..."
-        )
-      )
-      # Rtsne
-      cyto_require(
-        "Rtsne",
-        source = "CRAN",
-        ref = paste0(
-          "L.J.P. van der Maaten and G.E. Hinton. Visualizing High-Dimensional",
-          " Data Using t-SNE. Journal of Machine Learning Research",
-          " 9(Nov):2579-2605, 2008."
-        )
-      )
-      # TYPE -> FUNCTION
-      type <- cyto_func_match(
-        "Rtsne::Rtsne"
-      )
-      # SUPPORTED CROSS ENTROPY METHOD
-      method <- "t-SNE"
+      type <- ".cyto_map_tsne"
     # UMAP 
     } else if(grepl("^UMAP$", type, ignore.case = TRUE)) {
-      # MESSAGE
-      message(
-        "Using uwot::umap() to compute UMAP co-ordinates..."
-      )
-      # UWOT
-      cyto_require(
-        "uwot",
-        source = "CRAN",
-        ref = paste0(
-          "McInnes L., Healy J. & Melville J. (2018) UMAP: Uniform Manifold ",
-          "Approximation and Projection for Dimension Reduction. ",
-          "arXiv:1802.03426v3"
-        )
-      )
-      # TYPE -> FUNCTION
-      type <- cyto_func_match(
-        "uwot::umap"
-      )
-      # SUPPORTED CROSS ENTROPY METHOD
-      method <- "UMAP"
-      # CROSS ENTROPY
-      if(cross_entropy) {
-        args[["ret_nn"]] <- TRUE
-        args[["ret_model"]] <- TRUE
-      }
+      type <- ".cyto_map_umap"
     # EMBEDSOM
     } else if(grepl("^Embed-?SOM$", type , ignore.case = TRUE)) {
-      # MESSAGE
-      message(
-        "Using EmbedSOM::EmbedSOM() to compute EmbedSOM co-ordinates..."
-      )
-      # EMBEDSOM
-      cyto_require(
-        "EmbedSOM",
-        source = "CRAN",
-        ref = paste0(
-          "Kratchovil M., Koladiya A. & Vondrasek J. (2019) Generalised ",
-          "EmbedSOM on quadtree-structured self-organising maps. F1000 ",
-          "Research (8:2120)"
-        )
-      )
-      # DATA
-      names(args)[1] <- "data"
-      # CREATE SOM - FLOWSOM NOT SUPPLIED
-      if(!any(c("fsom", "map") %in% names(args))) {
-        # DEFAULT SOM GRID SIZE - X
-        if(!"xdim" %in% names(args)) {
-          args[["xdim"]] <- 24
-        }
-        # DEFAULT SOM GRID SIZE - Y
-        if(!"ydim" %in% names(args)) {
-          args[["ydim"]] <- 24
-        }
-        # SOM
-        args[["map"]] <- cyto_func_execute(
-          "EmbedSOM::SOM",
-          args
-        )
-      }
-      # EMBEDSOM
-      cyto_map_coords <- cyto_func_execute(
-        "EmbedSOM::EmbedSOM",
-        args
-      )
-      colnames(cyto_map_coords) <- c("EmbedSOM-1", "EmbedSOM-2") 
+      type <- ".cyto_map_embedsom"
     # PHATE
     } else if(grepl("^PHATE$", type, ignore.case = TRUE)) {
-      # MESSAGE
-      message(
-        "Using phateR::phate() to compute PHATE co-ordinates..."
-      )
-      # PHATER
-      cyto_require(
-        "phateR",
-        source = "CRAN",
-        ref = paste0(
-          "Moon K. et al. (2019) Visualising structure and transitions in ",
-          "high dimensional biological data. Nature Biotechnology 37(1482-1492)"
-        )
-      )
-      # TYPE -> FUNCTION
-      type <- cyto_func_match(
-        "phateR::phate"
-      )
-    # OTHER
-    } else {
-      type <- tryCatch(
-        cyto_func_match(
-          type
-        ),
-        error = function(e){
-          stop(
-            "'type'is not the name of a valid dimension reduction function!"
-          )
-        }
-      )
+      type <- ".cyto_map_phate"
+    # PACMAP
+    } else if(grepl("^PaCMAP$", type, ignore.case = TRUE)) {
+      type <- ".cyto_map_pacmap"
+    # TRIMAP
+    } else if(grepl("^TriMap$", type, ignore.case = TRUE)) {
+      type <- ".cyto_map_trimap"
+    # ISOMAP
+    } else if(grepl("^IsoMap$", type, ignore.case = TRUE)) {
+      type <- ".cyto_map_isomap"
     }
   }
   
-  # FUNCTION
-  if(is.function(type)) {
-    # MESSAGE
-    message(
-      paste0(
-        "Computing ",
-        paste0(label, "()"),
-        " co-ordinates..."
-      )
+  # MESSAGE
+  message(
+    paste0(
+      "Computing ",
+      paste0(label, "()"),
+      " co-ordinates..."
     )
-    # FORMAL ARGUMENTS
-    cyto_map_fun_args <- cyto_func_args(type)
-    names(args)[match("x", names(args))] <- cyto_map_fun_args[1]
-    # CALL MAPPING FUNCTION
-    cyto_map_coords <- cyto_func_call(
-      type,
-      args
-    )
-    # COMPUTE CROSS ENTROPIES
-    if(cross_entropy) {
-      # CROSS ENTROPY NOT SUPPORTED
-      if(length(method) == 0) {
-        warning(
-          paste0(
-            "Cross entropies can only be computed for UMAP and t-SNE ",
-            "dimensionality reduction algorithms!"
-          )
-        )
-      # UMAP
-      } else if(method == "UMAP") {
-        cyto_map_coords$embedding <- cbind(
-          cyto_map_coords$embedding,
-          cross_entropy(
-            x,
-            type = method,
-            coords = cyto_map_coords
-          )
-        )
-      # t-SNE
-      } else if(method == "t-SNE") {
-        cyto_map_coords$Y <- cbind(
-          cyto_map_coords$Y,
-          cross_entropy(
-            x,
-            type = method,
-            coords = cyto_map_coords
-          )
-        )
-      }
-    }
-    # EXTRACT CO-ORDINATES (ALL DIMENSIONS)
-    if(!cyto_class(cyto_map_coords, "matrix")) {
-      # FIND CO-ORDINATES
-      coords <- NULL
-      lapply(
-        seq_along(cyto_map_coords), 
-        function(z) {
-          if(cyto_class(cyto_map_coords[[z]], "matrix")) {
-            if(nrow(cyto_map_coords[[z]]) == nrow(x)) {
-              coords <<- cbind(coords, cyto_map_coords[[z]])
-            }
+  )
+  # CALL MAPPING FUNCTION
+  cyto_map_coords <- cyto_func_call(
+    type,
+    args
+  )
+  # EXTRACT CO-ORDINATES (ALL DIMENSIONS)
+  if(!cyto_class(cyto_map_coords, "matrix")) {
+    # FIND CO-ORDINATES
+    coords <- NULL
+    lapply(
+      seq_along(cyto_map_coords), 
+      function(z) {
+        if(cyto_class(cyto_map_coords[[z]], "matrix")) {
+          if(nrow(cyto_map_coords[[z]]) == nrow(x)) {
+            coords <<- cbind(coords, cyto_map_coords[[z]])
           }
         }
-      )
-      cyto_map_coords <- coords
-    }
-    # DIMENSION REDUCTION + CROSS ENTROPY
-    if(!is.null(method) & cross_entropy) {
-      colnames(cyto_map_coords) <- c(
-        paste0(
-          label,
-          "-",
-          1:(ncol(cyto_map_coords) - 1)
-        ),
-        paste0(
-          label,
-          "_cross_entropy"
-        )
-      )
-    # DIMENION REDUCTION ONLY
-    } else {
-      colnames(cyto_map_coords) <- paste0(
-        label,
-        "-",
-        1:ncol(cyto_map_coords)
-      )
-    }
+      }
+    )
+    cyto_map_coords <- coords
   }
+  
+  # DIMENSION REDUCTION
+  colnames(cyto_map_coords) <- paste0(
+    label,
+    "-",
+    1:ncol(cyto_map_coords)
+  )
   
   # RETURN MAPPED DATA
   return(cyto_map_coords)
   
 }
 
-#' Internal function to compute cross entropies
-#' @noRd
-cross_entropy <- function(x,
-                          type = "UMAP",
-                          coords = NULL) {
-  
-  # MESSAGE
-  message(
-    paste0(
-      "Computing ",
-      type,
-      " cross-entropies..."
-    )
-  )
-  
-  # REFERENCE
-  message(
-    paste0(
-      "Roca C. et al. (2021) A Cross Entropy test allows quantitative ",
-      "statistical comparison of t-SNE and UMAP representations. ",
-      "arXiv:2112.04172"
-    )
-  )
-  
-  # SIZE
-  n <- nrow(x)
-  
-  # UMAP -----------------------------------------------------------------------
-  if(type == "UMAP") {
-    
-    # FORMAT NEAREST NEIGHBOURS - ORIGINAL SPACE
-    cnt <- 0
-    coords$nn[[1]]$idx <- t(
-      apply(
-        coords$nn[[1]]$idx,
-        1,
-        function(z) {
-          cnt <<- cnt + 1
-          z[z != cnt]
-        }
-      )
-    )
-    coords$nn[[1]]$dist <- t(
-      apply(
-        coords$nn[[1]]$dist,
-        1,
-        function(z) {
-          z[z != 0]
-        }
-      )
-    )
-
-    # COMPUTE SIGMA
-    sigma <- apply(
-      coords$nn[[1]]$dist,
-      1,
-      function(dd){
-        # UMAP SIGMA ERROR
-        sigma_error <- function(ss, dd) {
-          p <- exp(-pmax(0, dd - min(dd)) / ss)
-          sum(p) - log2(length(p))
-        }
-        dd_ascen <- sort(dd[dd > 0])
-        ss_lower <- dd_ascen[1]
-        dd_descen <- sort(dd[!is.infinite(dd)], decreasing = TRUE)
-        ss_upper <- dd_descen[1]
-        while(sigma_error(ss_upper, dd) < 0){
-          ss_lower <- ss_upper
-          ss_upper <- 2 * ss_upper
-        }
-        while(sigma_error(ss_lower, dd) > 0) {
-          ss_upper <- ss_lower
-          ss_lower <- ss_lower/2
-        }
-        uniroot(
-          sigma_error,
-          dd,
-          interval = c(ss_lower, ss_upper),
-          tol = (ss_upper - ss_lower) * .Machine$double.eps ^ 0.25
-        )$root
-      }
-    )
-    
-    # COMPUTE PROBABILITIES - ORIGINAL SPACE
-    cnt <- 0
-    orig_p <- t(
-      apply(
-        coords$nn[[1]]$dist,
-        1,
-        function(z) {
-          cnt <<- cnt + 1
-          exp(
-            -pmax(
-              0,
-              z - min(z)
-            ) /
-              sigma[cnt]
-          )
-        }
-      )
-    )
-    
-    # SYMMETRIZE PROBABILITIES - ORIGINAL SPACE
-    for(i in seq_len(nrow(coords$nn[[1]]$idx))) {
-      for(j2 in seq_len(length(coords$nn[[1]]$idx[i, ]))) {
-        j <- coords$nn[[1]]$idx[i, j2]
-        i2 <- match(i, coords$nn[[1]]$idx[j, ])
-        if(!is.na(i2)) {
-          if(j > i) {
-            p_sym <- orig_p[i, j2] + orig_p[j, i2] - 
-              orig_p[i, j2] * orig_p[j, i2]
-            orig_p[i, j2] <- p_sym
-            orig_p[j, i2] <- p_sym
-          }
-        } else {
-          # orig_p[i, j2] <- orig_p[i, j2]/2
-        }
-      }
-    }
-
-    # COMPUTE DISTANCE IN UMAP SPACE FOR ORIGINAL CLOSE NEIGHBOURS
-    cnt <- 0
-    umap_dist <- t(
-      apply(
-        coords$nn[[1]]$idx,
-        1,
-        function(z) {
-          cnt <<- cnt + 1
-          unlist(
-            lapply(
-              z, 
-              function(w) {
-                sum(
-                  (coords$embedding[cnt, ] - coords$embedding[w, ]) ^ 2
-                )
-              }
-            )
-          )
-        }
-      )
-    )
-
-    # COMPUTE PROBABILITIES ASSOCIATED TO UMAP REPRESENTATION
-    umap_p <- t(
-      apply(
-        umap_dist,
-        1,
-        function(z) {
-          1/ (1 + coords$a * z ^ coords$b)
-        }
-      )
-    )
-
-    # COMPUTE FUZZY CROSS ENTROPIES
-    res <- unlist(
-      lapply(
-        1:nrow(orig_p),
-        function(z) {
-          -sum(
-            orig_p[z, ] * log(umap_p[z, ]) +
-              (1 - orig_p[z, ]) * log(1 - umap_p[z, ])
-          )
-        }
-      )
-    )
-    
-  # t-SNE ----------------------------------------------------------------------
-  } else if(type == "t-SNE" ) {
-    
-    # RANN REQUIRED - NN2()
-    cyto_require(
-      "RANN",
-      source = "CRAN"
-    )
-    
-    # COMPUTE NEAREST NEIGHBOURS - ORIGINAL SPACE
-    coords$nn <- cyto_func_call(
-      "RANN::nn2",
-      args = list(
-        x,
-        k = coords$perplexity * 3 + 1
-      )
-    )
-    names(coords$nn) <- c("idx", "dist")
-    
-    # FORMAT NEAREST NEIGHBOURS - ORIGINAL SPACE
-    cnt <- 0
-    coords$nn$idx <- t(
-      apply(
-        coords$nn$idx,
-        1,
-        function(z) {
-          cnt <<- cnt + 1
-          z[z != cnt]
-        }
-      )
-    )
-    coords$nn$dist <- t(
-      apply(
-        coords$nn$dist,
-        1,
-        function(z) {
-          z[z != 0]
-        }
-      )
-    )
-    
-    # COMPUTE SIGMA
-    sigma <- apply(
-      coords$nn$dist,
-      1,
-      function(dd2) {
-        # t-SNE PERPLEXITY ERROR
-        sigma_error <- function(ss, dd2) {
-          p <- exp(-dd2/(2*ss^2))
-          if(sum(p) < .Machine$double.eps) {
-            p <- 1
-          }
-          p <- p/sum(p)
-          p <- p[p > 0]
-          2^(-sum(p*log2(p))) - coords$perplexity
-        }
-        dd2_min_idx <- 1
-        dd2_ascen <- sort(dd2)
-        while(dd2_ascen[dd2_min_idx] == 0) {
-          dd2_min_idx <- dd2_min_idx + 1
-        }
-        ss_lower <- dd2_ascen[dd2_min_idx]
-        dd2_max_idx <- 1
-        dd2_descen <- sort(dd2, decreasing = TRUE)
-        while(is.infinite(dd2_descen[dd2_max_idx])) {
-          dd2_max_idx <- dd2_max_idx + 1
-        }
-        ss_upper <- dd2_descen[dd2_max_idx]
-        while(sigma_error(ss_upper, dd2) < 0) {
-          ss_lower <- ss_upper
-          ss_upper <- 2 * ss_upper
-        }
-        while(sigma_error(ss_lower, dd2) > 0) {
-          ss_upper <- ss_lower
-          ss_lower <- ss_lower/2
-        }
-        uniroot(
-          sigma_error,
-          dd2,
-          interval = c(ss_lower, ss_upper),
-          tol = (ss_upper - ss_lower) * .Machine$double.eps ^ 0.25
-        )$root
-      }
-    )
-    
-    # COMPUTE PROBABILITIES - ORIGINAL SPACE
-    cnt <- 0
-    orig_p <- t(
-      apply(
-        coords$nn$dist,
-        1,
-        function(z) {
-          cnt <<- cnt + 1
-          p <- exp(-z/(2*sigma[cnt]^2))
-          p/sum(p)
-        }
-      )
-    )
-    
-    # SYMMETRIZE PROBABILITIES - ORIGINAL SPACE
-    for(i in seq_len(nrow(coords$nn$idx))) {
-      for(j2 in seq_len(length(coords$nn$idx[i, ]))) {
-        j <- coords$nn$idx[i, j2]
-        i2 <- match(i, coords$nn$idx[j, ])
-        if(!is.na(i2)) {
-          if(j > i) {
-            p_sym <- orig_p[i, j2] + orig_p[j, i2] / 2
-            orig_p[i, j2] <- p_sym
-            orig_p[j, i2] <- p_sym
-          }
-        } else {
-          orig_p[i, j2] <- orig_p[i, j2]/2
-        }
-      }
-    }
-    orig_p <- sweep(
-      orig_p,
-      1,
-      rowSums(orig_p),
-      "/"
-    )
-    
-    # COMPUTE DISTANCE IN t-SNE SPACE FOR ORIGINAL CLOSE NEIGHBOURS
-    cnt <- 0
-    tsne_dist <- t(
-      apply(
-        coords$nn$idx,
-        1,
-        function(z) {
-          cnt <<- cnt + 1
-          unlist(
-            lapply(
-              z, 
-              function(w) {
-                sum(
-                  (coords$Y[cnt, ] - coords$Y[w, ]) ^ 2
-                )
-              }
-            )
-          )
-        }
-      )
-    )
-    
-    # COMPUTE PROBABILITIES ASSOCIATED TO t-SNE REPRESENTATION
-    tsne_p_factor <- nrow(coords$Y) / (2*sum(1/(1+dist(coords$Y)^2)))
-    tsne_p <- t(
-      apply(
-        tsne_dist,
-        1,
-        function(z) {
-          tsne_p_factor / (1 + z)
-        }
-      )
-    )
-    
-    # COMPUTE CROSS ENTROPIES
-    res <- unlist(
-      lapply(
-        1:nrow(orig_p),
-        function(z) {
-          -sum(
-            orig_p[z, ] * log(tsne_p[z, ])
-          )
-        }
-      )
-    )
-    
-  }
-    
-  # RETURN CROSS ENTROPIES PER CELL
-  return(res)
-  
-}
+# CROSS ENTROPY TEST SUPPORT REMOVED
+# cross_entropy <- function(x,
+#                           type = "UMAP",
+#                           coords = NULL) {
+# 
+#   # MESSAGE
+#   message(
+#     paste0(
+#       "Computing ",
+#       type,
+#       " cross-entropies..."
+#     )
+#   )
+# 
+#   # REFERENCE
+#   message(
+#     paste0(
+#       "Roca C. et al. (2021) A Cross Entropy test allows quantitative ",
+#       "statistical comparison of t-SNE and UMAP representations. ",
+#       "arXiv:2112.04172"
+#     )
+#   )
+# 
+#   # SIZE
+#   n <- nrow(x)
+# 
+#   # UMAP -----------------------------------------------------------------------
+#   if(type == "UMAP") {
+# 
+#     # FORMAT NEAREST NEIGHBOURS - ORIGINAL SPACE
+#     cnt <- 0
+#     coords$nn[[1]]$idx <- t(
+#       apply(
+#         coords$nn[[1]]$idx,
+#         1,
+#         function(z) {
+#           cnt <<- cnt + 1
+#           z[z != cnt]
+#         }
+#       )
+#     )
+#     coords$nn[[1]]$dist <- t(
+#       apply(
+#         coords$nn[[1]]$dist,
+#         1,
+#         function(z) {
+#           z[z != 0]
+#         }
+#       )
+#     )
+# 
+#     # COMPUTE SIGMA
+#     sigma <- apply(
+#       coords$nn[[1]]$dist,
+#       1,
+#       function(dd){
+#         # UMAP SIGMA ERROR
+#         sigma_error <- function(ss, dd) {
+#           p <- exp(-pmax(0, dd - min(dd)) / ss)
+#           sum(p) - log2(length(p))
+#         }
+#         dd_ascen <- sort(dd[dd > 0])
+#         ss_lower <- dd_ascen[1]
+#         dd_descen <- sort(dd[!is.infinite(dd)], decreasing = TRUE)
+#         ss_upper <- dd_descen[1]
+#         while(sigma_error(ss_upper, dd) < 0){
+#           ss_lower <- ss_upper
+#           ss_upper <- 2 * ss_upper
+#         }
+#         while(sigma_error(ss_lower, dd) > 0) {
+#           ss_upper <- ss_lower
+#           ss_lower <- ss_lower/2
+#         }
+#         uniroot(
+#           sigma_error,
+#           dd,
+#           interval = c(ss_lower, ss_upper),
+#           tol = (ss_upper - ss_lower) * .Machine$double.eps ^ 0.25
+#         )$root
+#       }
+#     )
+# 
+#     # COMPUTE PROBABILITIES - ORIGINAL SPACE
+#     cnt <- 0
+#     orig_p <- t(
+#       apply(
+#         coords$nn[[1]]$dist,
+#         1,
+#         function(z) {
+#           cnt <<- cnt + 1
+#           exp(
+#             -pmax(
+#               0,
+#               z - min(z)
+#             ) /
+#               sigma[cnt]
+#           )
+#         }
+#       )
+#     )
+# 
+#     # SYMMETRIZE PROBABILITIES - ORIGINAL SPACE
+#     for(i in seq_len(nrow(coords$nn[[1]]$idx))) {
+#       for(j2 in seq_len(length(coords$nn[[1]]$idx[i, ]))) {
+#         j <- coords$nn[[1]]$idx[i, j2]
+#         i2 <- match(i, coords$nn[[1]]$idx[j, ])
+#         if(!is.na(i2)) {
+#           if(j > i) {
+#             p_sym <- orig_p[i, j2] + orig_p[j, i2] -
+#               orig_p[i, j2] * orig_p[j, i2]
+#             orig_p[i, j2] <- p_sym
+#             orig_p[j, i2] <- p_sym
+#           }
+#         } else {
+#           # orig_p[i, j2] <- orig_p[i, j2]/2
+#         }
+#       }
+#     }
+# 
+#     # COMPUTE DISTANCE IN UMAP SPACE FOR ORIGINAL CLOSE NEIGHBOURS
+#     cnt <- 0
+#     umap_dist <- t(
+#       apply(
+#         coords$nn[[1]]$idx,
+#         1,
+#         function(z) {
+#           cnt <<- cnt + 1
+#           unlist(
+#             lapply(
+#               z,
+#               function(w) {
+#                 sum(
+#                   (coords$embedding[cnt, ] - coords$embedding[w, ]) ^ 2
+#                 )
+#               }
+#             )
+#           )
+#         }
+#       )
+#     )
+# 
+#     # COMPUTE PROBABILITIES ASSOCIATED TO UMAP REPRESENTATION
+#     umap_p <- t(
+#       apply(
+#         umap_dist,
+#         1,
+#         function(z) {
+#           1/ (1 + coords$a * z ^ coords$b)
+#         }
+#       )
+#     )
+# 
+#     # COMPUTE FUZZY CROSS ENTROPIES
+#     res <- unlist(
+#       lapply(
+#         1:nrow(orig_p),
+#         function(z) {
+#           -sum(
+#             orig_p[z, ] * log(umap_p[z, ]) +
+#               (1 - orig_p[z, ]) * log(1 - umap_p[z, ])
+#           )
+#         }
+#       )
+#     )
+# 
+#   # t-SNE ----------------------------------------------------------------------
+#   } else if(type == "t-SNE" ) {
+# 
+#     # RANN REQUIRED - NN2()
+#     cyto_require(
+#       "RANN",
+#       source = "CRAN"
+#     )
+# 
+#     # COMPUTE NEAREST NEIGHBOURS - ORIGINAL SPACE
+#     coords$nn <- cyto_func_call(
+#       "RANN::nn2",
+#       args = list(
+#         x,
+#         k = coords$perplexity * 3 + 1
+#       )
+#     )
+#     names(coords$nn) <- c("idx", "dist")
+# 
+#     # FORMAT NEAREST NEIGHBOURS - ORIGINAL SPACE
+#     cnt <- 0
+#     coords$nn$idx <- t(
+#       apply(
+#         coords$nn$idx,
+#         1,
+#         function(z) {
+#           cnt <<- cnt + 1
+#           z[z != cnt]
+#         }
+#       )
+#     )
+#     coords$nn$dist <- t(
+#       apply(
+#         coords$nn$dist,
+#         1,
+#         function(z) {
+#           z[z != 0]
+#         }
+#       )
+#     )
+# 
+#     # COMPUTE SIGMA
+#     sigma <- apply(
+#       coords$nn$dist,
+#       1,
+#       function(dd2) {
+#         # t-SNE PERPLEXITY ERROR
+#         sigma_error <- function(ss, dd2) {
+#           p <- exp(-dd2/(2*ss^2))
+#           if(sum(p) < .Machine$double.eps) {
+#             p <- 1
+#           }
+#           p <- p/sum(p)
+#           p <- p[p > 0]
+#           2^(-sum(p*log2(p))) - coords$perplexity
+#         }
+#         dd2_min_idx <- 1
+#         dd2_ascen <- sort(dd2)
+#         while(dd2_ascen[dd2_min_idx] == 0) {
+#           dd2_min_idx <- dd2_min_idx + 1
+#         }
+#         ss_lower <- dd2_ascen[dd2_min_idx]
+#         dd2_max_idx <- 1
+#         dd2_descen <- sort(dd2, decreasing = TRUE)
+#         while(is.infinite(dd2_descen[dd2_max_idx])) {
+#           dd2_max_idx <- dd2_max_idx + 1
+#         }
+#         ss_upper <- dd2_descen[dd2_max_idx]
+#         while(sigma_error(ss_upper, dd2) < 0) {
+#           ss_lower <- ss_upper
+#           ss_upper <- 2 * ss_upper
+#         }
+#         while(sigma_error(ss_lower, dd2) > 0) {
+#           ss_upper <- ss_lower
+#           ss_lower <- ss_lower/2
+#         }
+#         uniroot(
+#           sigma_error,
+#           dd2,
+#           interval = c(ss_lower, ss_upper),
+#           tol = (ss_upper - ss_lower) * .Machine$double.eps ^ 0.25
+#         )$root
+#       }
+#     )
+# 
+#     # COMPUTE PROBABILITIES - ORIGINAL SPACE
+#     cnt <- 0
+#     orig_p <- t(
+#       apply(
+#         coords$nn$dist,
+#         1,
+#         function(z) {
+#           cnt <<- cnt + 1
+#           p <- exp(-z/(2*sigma[cnt]^2))
+#           p/sum(p)
+#         }
+#       )
+#     )
+# 
+#     # SYMMETRIZE PROBABILITIES - ORIGINAL SPACE
+#     for(i in seq_len(nrow(coords$nn$idx))) {
+#       for(j2 in seq_len(length(coords$nn$idx[i, ]))) {
+#         j <- coords$nn$idx[i, j2]
+#         i2 <- match(i, coords$nn$idx[j, ])
+#         if(!is.na(i2)) {
+#           if(j > i) {
+#             p_sym <- orig_p[i, j2] + orig_p[j, i2] / 2
+#             orig_p[i, j2] <- p_sym
+#             orig_p[j, i2] <- p_sym
+#           }
+#         } else {
+#           orig_p[i, j2] <- orig_p[i, j2]/2
+#         }
+#       }
+#     }
+#     orig_p <- sweep(
+#       orig_p,
+#       1,
+#       rowSums(orig_p),
+#       "/"
+#     )
+# 
+#     # COMPUTE DISTANCE IN t-SNE SPACE FOR ORIGINAL CLOSE NEIGHBOURS
+#     cnt <- 0
+#     tsne_dist <- t(
+#       apply(
+#         coords$nn$idx,
+#         1,
+#         function(z) {
+#           cnt <<- cnt + 1
+#           unlist(
+#             lapply(
+#               z,
+#               function(w) {
+#                 sum(
+#                   (coords$Y[cnt, ] - coords$Y[w, ]) ^ 2
+#                 )
+#               }
+#             )
+#           )
+#         }
+#       )
+#     )
+# 
+#     # COMPUTE PROBABILITIES ASSOCIATED TO t-SNE REPRESENTATION
+#     tsne_p_factor <- nrow(coords$Y) / (2*sum(1/(1+dist(coords$Y)^2)))
+#     tsne_p <- t(
+#       apply(
+#         tsne_dist,
+#         1,
+#         function(z) {
+#           tsne_p_factor / (1 + z)
+#         }
+#       )
+#     )
+# 
+#     # COMPUTE CROSS ENTROPIES
+#     res <- unlist(
+#       lapply(
+#         1:nrow(orig_p),
+#         function(z) {
+#           -sum(
+#             orig_p[z, ] * log(tsne_p[z, ])
+#           )
+#         }
+#       )
+#     )
+# 
+#   }
+# 
+#   # RETURN CROSS ENTROPIES PER CELL
+#   return(res)
+# 
+# }
