@@ -1606,25 +1606,25 @@ cyto_transform.default <- function(x,
         }
       # DATA TRANSFORMATIONS - APPLIED GATINGSET LEVEL - ATTACHED
       } else {
-        # REMOVE COMPENSATION
-        if(!is.null(spill)) {
-          cs <- cyto_compensate(
-            cs, 
-            spillover = spill,
-            remove = TRUE,
-            quiet = TRUE
-          )
-        }
-        # RECONSTRUCT GATINGSET
-        x <- GatingSet(cs)
-        # APPLY COMPENSATION
-        if(!is.null(spill)) {
-          x <- cyto_compensate(
-            x, 
-            spillover = spill,
-            quiet = TRUE
-          )
-        }
+        # # REMOVE COMPENSATION
+        # if(!is.null(spill)) {
+        #   cs <- cyto_compensate(
+        #     cs, 
+        #     spillover = spill,
+        #     remove = TRUE,
+        #     quiet = TRUE
+        #   )
+        # }
+        # # RECONSTRUCT GATINGSET
+        # x <- GatingSet(cs)
+        # # APPLY COMPENSATION
+        # if(!is.null(spill)) {
+        #   x <- cyto_compensate(
+        #     x, 
+        #     spillover = spill,
+        #     quiet = TRUE
+        #   )
+        # }
         # APPLY DATA TRANSFORMATIONS
         x <- suppressMessages(
           transform(
@@ -1942,27 +1942,27 @@ cyto_transform.transformerList <- function(x,
             quiet = TRUE
           )
         }
-        # DATA TRANSFORMATIONS - APPLIED GATINGSET LEVEL - ATTACHED
+      # DATA TRANSFORMATIONS - APPLIED GATINGSET LEVEL - ATTACHED
       } else {
-        # REMOVE COMPENSATION
-        if(!is.null(spill)) {
-          cs <- cyto_compensate(
-            cs, 
-            spillover = spill,
-            remove = TRUE,
-            quiet = TRUE
-          )
-        }
-        # RECONSTRUCT GATINGSET
-        x <- GatingSet(cs)
-        # APPLY COMPENSATION
-        if(!is.null(spill)) {
-          x <- cyto_compensate(
-            x, 
-            spillover = spill,
-            quiet = TRUE
-          )
-        }
+        # # REMOVE COMPENSATION
+        # if(!is.null(spill)) {
+        #   cs <- cyto_compensate(
+        #     cs, 
+        #     spillover = spill,
+        #     remove = TRUE,
+        #     quiet = TRUE
+        #   )
+        # }
+        # # RECONSTRUCT GATINGSET
+        # x <- GatingSet(cs)
+        # # APPLY COMPENSATION
+        # if(!is.null(spill)) {
+        #   x <- cyto_compensate(
+        #     x, 
+        #     spillover = spill,
+        #     quiet = TRUE
+        #   )
+        # }
         # APPLY DATA TRANSFORMATIONS
         x <- suppressMessages(
           transform(

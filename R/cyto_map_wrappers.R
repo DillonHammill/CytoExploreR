@@ -62,6 +62,73 @@
   
 }
 
+## MDS -------------------------------------------------------------------------
+
+#' MDS
+#' @noRd
+.cyto_map_mds <- function(x,
+                          n_jobs = -2,
+                          ...) {
+  
+  # CHECK PYTHON MODULE
+  py_mds<- cyto_require(
+    "sklearn",
+    python = TRUE,
+    ref = NULL,
+    import = "sklearn.manifold",
+    pip = TRUE
+  )
+  
+  # PYTHON
+  if(!is.null(py_mds)) {
+    # MESSAGE
+    message(
+      "Using MDS sklearn module to compute MDS co-ordinates..."
+    )
+    # CONFIGURE MDS - MODIFY PARAMETERS AS NECESSARY
+    mds <- py_mds$MDS(
+      n_jobs = n_jobs,
+      ...
+    )
+    # APPLY MDS TO DATASET
+    res <- mds$fit_transform(
+      data.matrix(x)
+    )
+  # R
+  } else {
+    # MESSAGE
+    message(
+      "Using stats::cmdscale() to compute MDS co-ordinates..."
+    )
+    # DISTANCE MATRIX
+    x <- cyto_func_execute(
+      "stats::dist",
+      list(
+        x = x,
+        ...
+      )
+    )
+    # MDS
+    res <- cyto_func_execute(
+      "stats::cmdscale",
+      list(
+        "d" = x,
+        "list." = FALSE,
+        "eig" = FALSE,
+        ...
+      )
+    )
+  }
+  
+  # PREPARE CO-ORDINATES
+  colnames(res) <- paste0(
+    "MDS-",
+    1:ncol(res)
+  )
+  return(res)
+  
+}
+
 ## PACMAP ----------------------------------------------------------------------
 
 #' PaCMAP
@@ -459,6 +526,129 @@
   )
   
   # FITSNE CO-ORDINATES
+  return(res)
+  
+}
+
+## KNN -------------------------------------------------------------------------
+
+#' KNN
+#' @noRd
+.cyto_map_knn <- function(x,
+                          k = 25L,
+                          ...) {
+  
+  # COMPUTE KNN
+  knn <- .cyto_knn(
+    x,
+    k = k,
+    ...
+  )
+  
+  # FORMAT KNN EDGES
+  knn <- do.call(
+    "rbind",
+    lapply(
+      seq_len(nrow(knn$nn.idx)),
+      function(i) {
+        matrix(
+          c(rep(knn$nn.idx[i, 1], ncol(knn$nn.idx) - 1),
+            knn$nn.idx[i, -1]),
+          ncol = 2,
+          nrow = ncol(knn$nn.idx) - 1,
+          dimnames = list(
+            NULL,
+            c("node", "matches")
+          )
+        )
+      }
+    )
+  )
+  
+  # CONSTRUCT GRAPH
+  g <- cyto_func_call(
+    "igraph::graph_from_edgelist",
+    list(
+      el = knn,
+      directed = FALSE
+    )
+  )
+  
+  # LAYOUT
+  set.seed(2022)
+  args$graph <- g
+  res <- cyto_func_execute(
+    "igraph::layout_with_fr",
+    args
+  )
+  colnames(res) <- paste0(
+    "kNN-",
+    1:ncol(res)
+  )
+  return(res)
+  
+}
+
+## SNN -------------------------------------------------------------------------
+
+#' SNN
+#' @noRd
+.cyto_map_snn <- function(x,
+                          k = 25,
+                          ...) {
+  
+  # RANN
+  cyto_require(
+    "HGC",
+    source = "github",
+    repo = "XuegongLab/HGC@HGC4oldRVersion",
+    ref = paste0(
+      "Ziheng Zou, Kui Hua, Xuegong Zhang (2021) HGC: fast hierarchical ",
+      "clustering for large-scale single-cell data, Bioinformatics ",
+      "37(21)"
+    )
+  )
+  
+  # IGRAPH
+  cyto_require(
+    "igraph",
+    source = "CRAN"
+  )
+  
+  # ARGUMENTS
+  args <- list(
+    data = x,
+    k = k,
+    ...
+  )
+  
+  # BUILD SNN
+  snn <- cyto_func_execute(
+    "HGC::SNN.Construction",
+    args
+  )
+  
+  # CONSTRUCT GRAPH
+  g <- cyto_func_call(
+    "igraph::graph_from_adjacency_matrix",
+    list(
+      snn,
+      mode = "undirected",
+      weigthed = TRUE
+    )
+  )
+  
+  # LAYOUT
+  set.seed(2022)
+  args$graph <- g
+  res <- cyto_func_execute(
+    "igraph::layout_with_fr",
+    args
+  )
+  colnames(res) <- paste0(
+    "sNN-",
+    1:ncol(res)
+  )
   return(res)
   
 }

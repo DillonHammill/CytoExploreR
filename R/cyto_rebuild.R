@@ -79,7 +79,8 @@ cyto_rebuild <- function(x,
     y <- cyto_compensate(
       y,
       spill = spill,
-      remove = TRUE
+      remove = TRUE,
+      quiet = TRUE
     )
   }
   # NEW GATINGSET
@@ -92,7 +93,8 @@ cyto_rebuild <- function(x,
     y <- cyto_compensate(
       y,
       spillover = spill,
-      remove = FALSE
+      remove = FALSE,
+      quiet = TRUE
     )
   }
   # APPLY TRANSFORMATIONS

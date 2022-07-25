@@ -52,7 +52,13 @@ co-ordinates}\item{"PaCMAP"}{uses python pacmap to compute pairwise
 controlled manifold approximation co-ordinates}\item{"TriMap"}{uses python
 trimap.TRIMAP() to compute triplet constrained
 co-ordinates}\item{"IsoMap"}{uses python sklearn.manifold.Isomap() to
-compute non-linear isomapping co-ordinates}}}
+compute non-linear isomapping co-ordinates}\item{"MDS"}{uses python
+sklearn.manifold.MDS() or \code{stats::cmdscale()} to compute
+multidimensional scaling co-ordinates}\item{kNN}{builds a k nearest
+neighbours (kNN) graph using RANN::nn2() and uses igraph to compute the
+layout co-ordinates for the graph}\item{sNN}{builds a shared nearest
+neighbours (sNN) graph using HGC::SNN.construction() and igraph to compute
+the layout co-ordinates for the graph}}}
 
 \item{scale}{optional argument to scale each channel prior to computing
 dimension-reduced co-ordinates, options include \code{"range"},

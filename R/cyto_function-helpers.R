@@ -82,7 +82,7 @@ cyto_func_match <- function(FUN,
 cyto_func_args <- function(FUN, 
                            drop = NA) {
   # FORMAL ARGUMENTS
-  args <- formalArgs(FUN)
+  args <- formalArgs(cyto_func_match(FUN))
   if(!.all_na(drop)) {
     args <- args[!args %in% drop]
   }
