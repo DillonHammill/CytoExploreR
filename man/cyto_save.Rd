@@ -44,9 +44,10 @@ FALSE by default.}
 or marker containing the IDs for samples or a vector containing an index
 for each event within \code{x}, set to \code{Sample-ID} channel by default.}
 
-\item{names}{original names of the samples prior to merging using
-\code{cyto_merge_by}, only required when split is TRUE. These names will be
-re-assigned to each of split cytoframes.}
+\item{names}{a vector of file names for the new FCS files. \code{names} is
+also passed to \code{cyto_split()} if \code{split = TRUE} to provides the
+original names for the split samples prior to writing new FCS
+files.}
 
 \item{overwrite}{logical flag to control how \code{save_as} should be handled
 if files already exist in this directory, users will be asked interactively

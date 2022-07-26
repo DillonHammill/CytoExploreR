@@ -758,13 +758,12 @@ cyto_spillover_compute <- function(x,
     heat_map(
       sp,
       box_col_empty = "black",
-      dendrogram = TRUE,
+      dendrogram = FALSE,
       box_col_scale = .cyto_plot_point_col_scale(),
       legend_col_breaks = 50,
       legend_text_breaks = c(seq(1, 50, 10), 51),
       title = "Spillover Matrix",
-      legend = FALSE, # spacing needs work,
-      dendrogram_scale = TRUE
+      legend = FALSE, # spacing needs work
     )
   }
   

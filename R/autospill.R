@@ -66,7 +66,10 @@
   # EXTRACT DATA
   exprs <- cyto_exprs(
     x[[1]],
-    channels = c(x_chan, y_chan)
+    channels = c(
+      x_chan, 
+      y_chan
+    )
   )
   # COMPUTE QUANTILES & REMOVE EXTREME VALUES
   exprs <- exprs[
@@ -170,24 +173,27 @@
             channel = z
           )
           # FIT RLM MODELS & UPDATE INTERCEPTS & COEFFICIENTS
-          lapply(pd$channel, function(w){
-            # DIAGONAL PARAMETERS COMBINATIONS
-            if(z == w) {
-              spill_coef[z] <<- 1
-              # NON-DIAGONAL PARAMETER COMBINATIONS
-            } else {
-              # DATA PRIMARY & SECONDARY CHANNEL
-              rlm_params <- .cyto_asp_rlm(
-                cs,
-                x_chan = z,
-                y_chan = w,
-                trim = 0.01
-              )
-              # STORE COEFFICIENT & INTERCEPT
-              spill_int[w] <<- rlm_params[1, 1]
-              spill_coef[w] <<- rlm_params[2, 1]
+          lapply(
+            pd$channel, 
+            function(w) {
+              # DIAGONAL PARAMETERS COMBINATIONS
+              if(z == w) {
+                spill_coef[z] <<- 1
+                # NON-DIAGONAL PARAMETER COMBINATIONS
+              } else {
+                # DATA PRIMARY & SECONDARY CHANNEL
+                rlm_params <- .cyto_asp_rlm(
+                  cs,
+                  x_chan = z,
+                  y_chan = w,
+                  trim = 0.01
+                )
+                # STORE COEFFICIENT & INTERCEPT
+                spill_int[w] <<- rlm_params[1, 1]
+                spill_coef[w] <<- rlm_params[2, 1]
+              }
             }
-          })
+          )
           return(
             c(spill_int, spill_coef)
           )

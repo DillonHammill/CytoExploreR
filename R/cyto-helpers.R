@@ -1606,25 +1606,25 @@ cyto_transform.default <- function(x,
         }
       # DATA TRANSFORMATIONS - APPLIED GATINGSET LEVEL - ATTACHED
       } else {
-        # # REMOVE COMPENSATION
-        # if(!is.null(spill)) {
-        #   cs <- cyto_compensate(
-        #     cs, 
-        #     spillover = spill,
-        #     remove = TRUE,
-        #     quiet = TRUE
-        #   )
-        # }
-        # # RECONSTRUCT GATINGSET
-        # x <- GatingSet(cs)
-        # # APPLY COMPENSATION
-        # if(!is.null(spill)) {
-        #   x <- cyto_compensate(
-        #     x, 
-        #     spillover = spill,
-        #     quiet = TRUE
-        #   )
-        # }
+        # REMOVE COMPENSATION
+        if(!is.null(spill)) {
+          cs <- cyto_compensate(
+            cs,
+            spillover = spill,
+            remove = TRUE,
+            quiet = TRUE
+          )
+        }
+        # RECONSTRUCT GATINGSET - REQUIRED ELSE GATINGTEMPLATE GATES EXIST
+        x <- GatingSet(cs)
+        # APPLY COMPENSATION
+        if(!is.null(spill)) {
+          x <- cyto_compensate(
+            x,
+            spillover = spill,
+            quiet = TRUE
+          )
+        }
         # APPLY DATA TRANSFORMATIONS
         x <- suppressMessages(
           transform(
@@ -1944,25 +1944,25 @@ cyto_transform.transformerList <- function(x,
         }
       # DATA TRANSFORMATIONS - APPLIED GATINGSET LEVEL - ATTACHED
       } else {
-        # # REMOVE COMPENSATION
-        # if(!is.null(spill)) {
-        #   cs <- cyto_compensate(
-        #     cs, 
-        #     spillover = spill,
-        #     remove = TRUE,
-        #     quiet = TRUE
-        #   )
-        # }
-        # # RECONSTRUCT GATINGSET
-        # x <- GatingSet(cs)
-        # # APPLY COMPENSATION
-        # if(!is.null(spill)) {
-        #   x <- cyto_compensate(
-        #     x, 
-        #     spillover = spill,
-        #     quiet = TRUE
-        #   )
-        # }
+        # REMOVE COMPENSATION
+        if(!is.null(spill)) {
+          cs <- cyto_compensate(
+            cs,
+            spillover = spill,
+            remove = TRUE,
+            quiet = TRUE
+          )
+        }
+        # RECONSTRUCT GATINGSET - REQUIRED ELSE GATINGTEMPLATE GATES EXIST
+        x <- GatingSet(cs)
+        # APPLY COMPENSATION
+        if(!is.null(spill)) {
+          x <- cyto_compensate(
+            x,
+            spillover = spill,
+            quiet = TRUE
+          )
+        }
         # APPLY DATA TRANSFORMATIONS
         x <- suppressMessages(
           transform(
@@ -4052,9 +4052,10 @@ cyto_split <- function(x,
 #' @param id passed to \code{cyto_split},  can be either the name of a channel
 #'   or marker containing the IDs for samples or a vector containing an index
 #'   for each event within \code{x}, set to \code{Sample-ID} channel by default.
-#' @param names original names of the samples prior to merging using
-#'   \code{cyto_merge_by}, only required when split is TRUE. These names will be
-#'   re-assigned to each of split cytoframes.
+#' @param names a vector of file names for the new FCS files. \code{names} is
+#'   also passed to \code{cyto_split()} if \code{split = TRUE} to provides the
+#'   original names for the split samples prior to writing new FCS
+#'   files.
 #' @param overwrite logical flag to control how \code{save_as} should be handled
 #'   if files already exist in this directory, users will be asked interactively
 #'   if \code{overwrite} is not manually supplied here.
@@ -4208,29 +4209,95 @@ cyto_save <- function(x,
             if(!dir.exists(dir)) {
               dir.create(dir)
             }
-            # FILE NAMES
-            fcs_names <- paste0(
-              dir,
-              .Platform$file.sep,
-              paste0(
-                gsub(
-                  ".fcs$",
-                  "_", 
-                  cyto_names(cs)[v]
-                ),
-                names(cs_list)[z],
-                ".fcs"
+            # FILE NAMES SUPPLIED
+            if(!is.null(names)) {
+              fcs_names <- paste0(
+                dir,
+                .Platform$file.sep,
+                paste0(
+                  gsub(
+                    ".fcs$",
+                    "", 
+                    names
+                  ),
+                  if(!is.null(names(cs_list)[z])){
+                    "_"
+                  } else {
+                    ""
+                  },
+                  names(cs_list)[z],
+                  ".fcs"
+                )
               )
-            )
+            # USE SAMPLE NAMES
+            } else {
+              fcs_names <- paste0(
+                dir,
+                .Platform$file.sep,
+                paste0(
+                  gsub(
+                    ".fcs$",
+                    "", 
+                    cyto_names(cs)
+                  ),
+                  if(!is.null(names(cs_list)[z])){
+                    "_"
+                  } else {
+                    ""
+                  },
+                  names(cs_list)[z],
+                  ".fcs"
+                )
+              )
+            }
           # SAVE_AS DIRECTORY
           } else {
             dir <- save_as
-            # FILE NAMES
-            fcs_names <- cyto_names(cs)
+            # FILE NAMES SUPPLIED
+            if(!is.null(names)) {
+              fcs_names <- paste0(
+                dir,
+                .Platform$file.sep,
+                paste0(
+                  gsub(
+                    ".fcs$",
+                    "", 
+                    names
+                  ),
+                  if(!is.null(names(cs_list)[z])){
+                    "_"
+                  } else {
+                    ""
+                  },
+                  names(cs_list)[z],
+                  ".fcs"
+                )
+              )
+              # USE SAMPLE NAMES
+            } else {
+              fcs_names <- paste0(
+                dir,
+                .Platform$file.sep,
+                paste0(
+                  gsub(
+                    ".fcs$",
+                    "", 
+                    cyto_names(cs)
+                  ),
+                  if(!is.null(names(cs_list)[z])){
+                    "_"
+                  } else {
+                    ""
+                  },
+                  names(cs_list)[z],
+                  ".fcs"
+                )
+              )
+            }
           }
           # DIRECTORY CHECK
           if(dir.exists(dir) & 
-             any(list.files(dir) %in% fcs_names)) {
+             any(list.files(dir) %in% basename(fcs_names))) {
             # OVERWRITE ENQUIRY
             if(is.null(overwrite)) {
               # FILES WILL BE OVERWRITTEN
@@ -4240,7 +4307,9 @@ cyto_save <- function(x,
                   dir, 
                   ":\n",
                   paste(
-                    fcs_names[fcs_names %in% list.files(dir)],
+                    basename(fcs_names)[
+                      basename(fcs_names) %in% list.files(dir)
+                    ],
                     collapse = "\n"
                   )
                 )
@@ -4273,30 +4342,10 @@ cyto_save <- function(x,
                 fcs_names[v]
               )
               # WRITE FCS FILE APPEND PARENT
-              if(!is.null(names(cs_list)[z])) {
-                write.FCS(
-                  cs[[v]],
-                  paste0(
-                    dir,
-                    .Platform$file.sep,
-                    paste0(
-                      gsub(".fcs$", "_", fcs_names[v]),
-                      names(cs_list)[z],
-                      ".fcs"
-                    )
-                  )
-                )
-              # WRITE FCS USING ORIGINAL NAMES
-              } else {
-                write.FCS(
-                  cs[[v]],
-                  paste0(
-                    dir,
-                    .Platform$file.sep,
-                    fcs_names[v]
-                  )
-                )
-              }
+              write.FCS(
+                cs[[v]],
+                fcs_names[v]
+              )
             }
           )
         }
@@ -6648,6 +6697,13 @@ cyto_nodes_convert <- function(x,
   nodes <- LAPPLY(
     nodes, 
     function(node) {
+      # PREPARE NODE
+      if(!grepl("^\\/", node) & !grepl("root", node)) {
+        node <- paste0(
+          "\\/",
+          node
+        )
+      }
       # PARTIAL FULL MATCH
       nodes_match <- grep(
         paste0(
