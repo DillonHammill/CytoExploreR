@@ -228,6 +228,17 @@ cyto_spillover_compute <- function(x,
     axes_trans <- cyto_transformers_extract(x)
   }
   
+  # DECOMPENSATE
+  if(cyto_class(x, "GatingSet")) {
+    if(!is.null(cyto_spillover_extract(x))) {
+      x <- cyto_compensate(
+        x,
+        remove = TRUE,
+        quiet = TRUE
+      )
+    }
+  }
+  
   # BAGWELL METHOD REQUIRES TRANSFORMED DATA
   if(grepl("^b", type, ignore.case = TRUE)) {
     if(any(!channels %in% names(axes_trans))) {
