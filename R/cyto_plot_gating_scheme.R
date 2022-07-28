@@ -649,7 +649,11 @@ cyto_plot_gating_scheme <- function(x,
                   merge_by = "all", # TODO: FIX TITLE
                   layout = layout,
                   title = title[title_cnt],
-                  header = "", # HEADER ADDED MANUALLY
+                  header = if(!.all_na(header)) {
+                    ""
+                  } else {
+                    NA
+                  }, # HEADER ADDED MANUALLY
                   page = FALSE, # PAGE MANUALLY
                   legend = FALSE,
                   point_col = node_props[
@@ -839,7 +843,11 @@ cyto_plot_gating_scheme <- function(x,
                   merge_by = "all", # TODO: FIX TITLE
                   layout = layout,
                   title = title[title_cnt],
-                  header = "", # HEADER ADDED MANUALLY
+                  header = if(!.all_na(header)) {
+                    ""
+                  } else {
+                    NA
+                  }, # HEADER ADDED MANUALLY
                   page = FALSE, # PAGE MANUALLY
                   legend = FALSE,
                   point_col = node_props[

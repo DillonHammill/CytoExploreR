@@ -1004,7 +1004,7 @@
   # RANGE ----------------------------------------------------------------------
   
   # DATA RANGE
-  data_range <- lapply(x, function(z){
+  data_range <- lapply(x, function(z) {
     if(cyto_class(z, "flowFrame")){
       if(nrow(z) == 0){
         type <- "instrument"
@@ -1066,7 +1066,8 @@
   data_range <- lapply(
     seq_len(ncol(data_range)),
     function(z){
-      c(min(data_range[, z]), max(data_range[, z]))
+      c(min(data_range[, z], na.rm = TRUE), 
+        max(data_range[, z], na.rm = TRUE))
     }
   )
   data_range <- do.call("cbind", data_range)
