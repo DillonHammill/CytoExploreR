@@ -16,6 +16,7 @@ cyto_spillover_compute(
   spillover = NULL,
   heatmap = TRUE,
   iter = 100,
+  trim = 0.001,
   ...
 )
 }
@@ -69,6 +70,9 @@ should be displayed in a heatmap, set to TRUE by default.}
 
 \item{iter}{indicates the maximum number of allowable iterations for
 autospill, defaults to 100.}
+
+\item{trim}{proportion of events to exclude from the top and bottom of each
+scale when fitting RLM models in autospill method, set to 0.001 by default.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 }

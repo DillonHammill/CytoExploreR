@@ -18,7 +18,8 @@
 .cyto_asp_spill <- function(x,
                             channels = NULL,
                             trans = NA,
-                            iter = 100) {
+                            iter = 100,
+                            trim = 0.001) {
   
   # AUTOSPILL - COMPUTE SPILLOVER COEFFICIENTS ---------------------------------
   
@@ -34,7 +35,8 @@
   # INITIAL SPILLOVER COEFFICIENTS - LINEAR DATA REQUIRED
   spill <- .cyto_asp_spill_init(
     x,
-    channels = channels
+    channels = channels,
+    trim = trim
   )
   
   # REFINE SPILLOVER COEFFICIENTS
@@ -43,7 +45,8 @@
     spill,
     channels = channels,
     trans = trans,
-    iter = iter
+    iter = iter,
+    trim = trim
   )
   
   # RETURN SPILLOVER MATRIX
@@ -74,7 +77,7 @@
 .cyto_asp_rlm <- function(x,
                           x_chan = NULL,
                           y_chan = NULL,
-                          trim = 0.01) {
+                          trim = 0.001) {
   
   # X CHANNEL
   if(is.null(x_chan)) {
@@ -89,24 +92,26 @@
     )
   )
   # COMPUTE QUANTILES & REMOVE EXTREME VALUES
-  exprs <- exprs[
-    do.call(
-      "intersect",
-      lapply(
-        seq_len(ncol(exprs)), 
-        function(p) {
-          v <- exprs[, p]
-          q <- quantile(
-            v,
-            probs = c(trim, 1 - trim)
-          )
-          return(
-            which(v > q[1] & v < q[2])
-          )
-        }
+  if(trim != 0) {
+    exprs <- exprs[
+      do.call(
+        "intersect",
+        lapply(
+          seq_len(ncol(exprs)), 
+          function(p) {
+            v <- exprs[, p]
+            q <- quantile(
+              v,
+              probs = c(trim, 1 - trim)
+            )
+            return(
+              which(v > q[1] & v < q[2])
+            )
+          }
+        )
       )
-    )
-    ,]
+      ,]
+  }
   # FIT ROBUST LINEAR MODEL
   rlm <- suppressWarnings(
     rlm(
@@ -165,7 +170,8 @@
 #'
 #' @noRd
 .cyto_asp_spill_init <- function(x,
-                                 channels) {
+                                 channels,
+                                 trim = 0.001) {
   
   # EXPERIMENT DETAILS
   pd <- cyto_details(x)
@@ -210,7 +216,7 @@
                   cs,
                   x_chan = z,
                   y_chan = w,
-                  trim = 0.01
+                  trim = trim
                 )
                 # STORE COEFFICIENT & INTERCEPT
                 spill_int[w] <<- rlm_params[1, 1]
@@ -262,7 +268,8 @@
                                    spill = NULL,
                                    trans = NA,
                                    channels,
-                                   iter = 100) {
+                                   iter = 100,
+                                   trim = 0.001) {
   
   # INITIALISE PARAMETERS
   rs_convergence <- FALSE
@@ -326,7 +333,8 @@
       spill = spill_curr,
       trans = trans,
       transform = !rs_scale_untransformed,
-      channels = channels
+      channels = channels,
+      trim = trim
     )
     # SLOPE ERROR -> SQUARE
     spill_slope_error <- matrix(
@@ -441,7 +449,8 @@
                                   spill = NULL,
                                   trans = NA,
                                   transform = FALSE,
-                                  channels) {
+                                  channels,
+                                  trim = 0.001) {
   
   # EXPERIMENT DETAILS
   pd <- cyto_details(x)
@@ -518,7 +527,7 @@
                   cs,
                   x_chan = z,
                   y_chan = w,
-                  trim = 0.01
+                  trim = trim
                 )
                 # STORE COEFFICIENT & INTERCEPT
                 spill_int[w] <<- rlm_params[1, 1]
