@@ -31,11 +31,10 @@
     channels <- unique(cyto_channels_extract(x, channels))
   }
   
-  # INITIAL SPILLOVER COEFFICIENTS
+  # INITIAL SPILLOVER COEFFICIENTS - LINEAR DATA REQUIRED
   spill <- .cyto_asp_spill_init(
     x,
-    channels = channels,
-    trans = trans
+    channels = channels
   )
   
   # REFINE SPILLOVER COEFFICIENTS
@@ -166,24 +165,10 @@
 #'
 #' @noRd
 .cyto_asp_spill_init <- function(x,
-                                 channels,
-                                 trans = NA) {
+                                 channels) {
   
   # EXPERIMENT DETAILS
   pd <- cyto_details(x)
-  
-  # INVERSE DATA TRANSFORMATIONS
-  if(!.all_na(trans)) {
-    x <- cyto_transform(
-      x,
-      trans = trans,
-      channels = channels,
-      plot = FALSE,
-      quiet = TRUE,
-      copy = TRUE,
-      inverse = TRUE
-    )
-  }
   
   # NUMBER OF CHANNELS
   n <- length(channels)

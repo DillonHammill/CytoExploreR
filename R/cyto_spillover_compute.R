@@ -712,7 +712,7 @@ cyto_spillover_compute <- function(x,
               format = "cytoframe",
               channels = channels, # ALL CHANNELS?
               trans = axes_trans,
-              inverse = FALSE,
+              inverse = TRUE,
               copy = TRUE
             )[[1]][[1]]
           }
@@ -724,7 +724,7 @@ cyto_spillover_compute <- function(x,
     spill <- .cyto_asp_spill(
       cs,
       channels = channels,
-      trans = axes_trans, #PASS TRANSFORMERS - MUST BE BIEX
+      trans = axes_trans, # PASS TRANSFORMERS
       iter = iter
     )
   }
