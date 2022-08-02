@@ -343,7 +343,6 @@
       transform = !rs_scale_untransformed,
       channels = channels
     )
-    print(spill_error$slope)
     # SLOPE ERROR -> SQUARE
     spill_slope_error <- matrix(
       0,
@@ -368,7 +367,6 @@
       }
     )
     spill_slope_error <- spill_slope_error - diag(ncol(spill_slope_error))
-    print(spill_slope_error)
     # UPDATE DELTA PARAMETERS
     rs_delta_prev <- rs_delta
     # DROP EMPTY ROWS HERE
