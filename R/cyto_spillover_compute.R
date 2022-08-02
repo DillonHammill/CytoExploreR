@@ -66,6 +66,8 @@
 #'   included for backwards compatibility with older versions of CytoExploreR.
 #' @param heatmap logical indicating whether the computed spillover matrix
 #'   should be displayed in a heatmap, set to TRUE by default.
+#' @param iter indicates the maximum number of allowable iterations for
+#'   autospill, defaults to 100.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
 #' @return spillover matrix and write spillover matrix to csv file named in
@@ -135,6 +137,7 @@ cyto_spillover_compute <- function(x,
                                    axes_limits = "machine",
                                    spillover = NULL,
                                    heatmap = TRUE,
+                                   iter = 100,
                                    ...) {
 
   # SPILLOVER ------------------------------------------------------------------
@@ -661,12 +664,14 @@ cyto_spillover_compute <- function(x,
       )
     )
     # DROP UNSTAINED CONTROLS
-    x <- cyto_select(
-      x,
-      channel = "Unstained",
-      exclude = TRUE,
-      exact = FALSE
-    )
+    if(any(.grepl("Unstained", pd$channel, ignore.case = TRUE))) {
+      x <- cyto_select(
+        x,
+        channel = "Unstained",
+        exclude = TRUE,
+        exact = FALSE
+      )
+    }
     # EXPERIMENT DETAILS
     pd <- cyto_details(x)
     # EXTRACT DATA FROM BEST CONTROLS
@@ -707,7 +712,7 @@ cyto_spillover_compute <- function(x,
               format = "cytoframe",
               channels = channels, # ALL CHANNELS?
               trans = axes_trans,
-              inverse = TRUE,
+              inverse = FALSE,
               copy = TRUE
             )[[1]][[1]]
           }
@@ -716,7 +721,12 @@ cyto_spillover_compute <- function(x,
       )
     )
     # AUTOSPILL - SPILLOVER MATRIX
-    spill <- .cyto_asp_spill(cs)
+    spill <- .cyto_asp_spill(
+      cs,
+      channels = channels,
+      trans = axes_trans, #PASS TRANSFORMERS - MUST BE BIEX
+      iter = iter
+    )
   }
   
   # FILL SPILLOVER TEMPLATE

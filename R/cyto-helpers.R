@@ -6132,6 +6132,8 @@ cyto_compensate.flowFrame <- function(x,
                                     spillover = NULL,
                                     select = NULL) {
   
+  # TODO: AUTOMATICALLY FIX NON-SQUATRE MATRICES (ROWS LESS THAN COLUMNS)
+  
   # EXTRACT CHANNELS
   chans <- cyto_channels(x)
   

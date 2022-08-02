@@ -15,6 +15,7 @@ cyto_spillover_compute(
   axes_limits = "machine",
   spillover = NULL,
   heatmap = TRUE,
+  iter = 100,
   ...
 )
 }
@@ -65,6 +66,9 @@ included for backwards compatibility with older versions of CytoExploreR.}
 
 \item{heatmap}{logical indicating whether the computed spillover matrix
 should be displayed in a heatmap, set to TRUE by default.}
+
+\item{iter}{indicates the maximum number of allowable iterations for
+autospill, defaults to 100.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 }
