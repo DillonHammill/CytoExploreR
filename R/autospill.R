@@ -283,9 +283,6 @@
   rs_delta_history <- rep(-1, 10) # asp$rs.delta.history.n
   rs_scale_untransformed <- TRUE
   
-  # EXPERIMENT DETAILS
-  pd <- cyto_details(x)
-  
   # NUMBER OF SAMPLES
   n <- length(channels)
   
@@ -428,8 +425,9 @@
 #' The following code is a modified version of the \code{get_compensation_error}
 #' function in the autospill package.
 #'
-#' @param x object of class cytoset containing uncompensated single colour
-#'   controls.
+#' @param x object of class cytoset (Roca method) or a list of gated negative
+#'   and positive populations (hybrid method) containing uncompensated single
+#'   colour controls.
 #' @param spill matrix containing the spillover coefficient estimates to be
 #'   applied to the data.
 #' @param trans object of class transformerList containing the transformation
@@ -452,150 +450,252 @@
                                   channels,
                                   trim = 0.001) {
   
-  # EXPERIMENT DETAILS
-  pd <- cyto_details(x)
-  
-  # NUMBER OF CONTROLS
-  n <- length(channels)
-  
-  # COMPENSATE DATA
-  x <- cyto_compensate(
-    x,
-    spillover = spill,
-    copy = TRUE
-  )
-  
-  # TRANSFORM DATA
-  if(transform) {
-    # TRANSFORMERS
-    if(.all_na(trans)) {
-      trans <- cyto_transformers_define(
+  # HYBRID BAGWELL REFINEMENT
+  if(cyto_class(x, "list")) {
+    # LOOP THROUGH GROUPS - COMPENSATED SLOPES - LINEAR | TRANSFORMED
+    slopes <- lapply(
+      x,
+      function(z) {
+        sp <- do.call(
+          "rbind",
+          lapply(
+            names(z), 
+            function(w){
+              # NEGATIVE POPULATION LINEAR SCALE
+              cs_neg <- cyto_transform(
+                z[[w]][["-"]],
+                trans = trans,
+                inverse = TRUE,
+                copy = TRUE,
+                quiet = TRUE,
+                plot = FALSE
+              )
+              # COMPENSATE NEGATIVE POPULATION
+              cs_neg <- cyto_compensate(
+                cs_neg,
+                spillover = spill,
+                quiet = TRUE
+              )
+              # TRANSFORM NEGATIVE POPULATION
+              if(transform) {
+                cs_neg <- cyto_transform(
+                  cs_neg,
+                  trans = trans,
+                  inverse = FALSE,
+                  copy = FALSE,
+                  quiet = TRUE,
+                  plot = FALSE
+                )
+              }
+              # POSITIVE POPULATION LINEAR SCALE
+              cs_pos <- cyto_transform(
+                z[[w]][["+"]],
+                trans = trans,
+                inverse = TRUE,
+                copy = TRUE,
+                quiet = TRUE,
+                plot = FALSE
+              )
+              # COMPENSATE POSITIVE POPULATION
+              cs_pos <- cyto_compensate(
+                cs_pos,
+                spillover = spill,
+                quiet = TRUE
+              )
+              # TRANSFORM NEGATIVE POPULATION
+              if(transform) {
+                cs_pos <- cyto_transform(
+                  cs_pos,
+                  trans = trans,
+                  inverse = FALSE,
+                  copy = FALSE,
+                  quiet = TRUE,
+                  plot = FALSE
+                )
+              }
+              # COMPUTE NEGATIVE STATS
+              neg_stats <- cyto_apply(
+                cs_neg,
+                channels = channels,
+                FUN = "cyto_stat_median",
+                input = "matrix",
+                trans = trans,
+                inverse = FALSE, # USE CURRENT SCALE
+                copy = TRUE,
+                simplify = FALSE
+              )[[1]]
+              # COMPUTE POSITIVE STATS
+              pos_stats <- cyto_apply(
+                cs_pos,
+                channels = channels,
+                FUN = "cyto_stat_median",
+                input = "matrix",
+                trans = trans,
+                inverse = FALSE, # USE CURRENT SCALE
+                copy = TRUE,
+                simplify = FALSE
+              )[[1]]
+              # SUBTRACT BACKGROUND
+              coef <- pos_stats - neg_stats
+              # NORMALISE
+              return(as.numeric(coef/coef[w]))
+            }
+          )
+        )
+        rownames(sp) <- names(z)
+        colnames(sp) <- channels
+        return(sp)
+      }
+    )
+    slopes <- do.call("rbind", slopes)
+    return(list(slope = slopes))
+  # AUTOSPILL REFINEMENT
+  } else {
+    # EXPERIMENT DETAILS
+    pd <- cyto_details(x)
+    
+    # NUMBER OF CONTROLS
+    n <- length(channels)
+    
+    # COMPENSATE DATA
+    x <- cyto_compensate(
+      x,
+      spillover = spill,
+      copy = TRUE
+    )
+    
+    # TRANSFORM DATA
+    if(transform) {
+      # TRANSFORMERS
+      if(.all_na(trans)) {
+        trans <- cyto_transformers_define(
+          x,
+          channels = channels,
+          type = "biex",
+          widthBasis = -100,
+          plot = FALSE,
+          progress = FALSE
+        )
+      }
+      # APPLY TRANSFORMATIONS
+      x <- cyto_transform(
         x,
-        channels = channels,
-        type = "biex",
-        widthBasis = -100,
+        trans = trans,
         plot = FALSE,
-        progress = FALSE
+        quiet = TRUE
       )
     }
-    # APPLY TRANSFORMATIONS
-    x <- cyto_transform(
-      x,
-      trans = trans,
-      plot = FALSE,
-      quiet = TRUE
-    )
-  }
-  
-  # INITIALISE COEFFICIENTS
-  spill_zero <- rep(0, n)
-  names(spill_zero) <- channels
-  
-  # # CREATE PLOT LAYOUT
-  # par(mfrow = c(3,4),
-  #     mar = c(4.1,4.1,2.1,2.1))
-  
-  # FIT RLM - EXTRACT INTERCEPTS, COEFFICIENTS, SLOPES & SKEWNESS
-  spill_params <- do.call(
-    "rbind",
-    structure(
-      lapply(
-        pd$channel, 
-        function(z){
-          # RESET PARAMETERS
-          spill_int <- spill_zero
-          spill_coef <- spill_zero
-          spill_slope <- spill_zero
-          spill_skew <- spill_zero
-          # EXTRACT DATA
-          cs <- cyto_select(
-            x,
-            channel = z
-          )
-          # FIT RLM MODELS & UPDATE PARAMETERS
-          lapply(
-            channels,
-            function(w) {
-              # DIAGONAL PARAMETERS COMBINATIONS
-              if(z %in% w) {
-                spill_coef[w] <<- 1
-                spill_slope[w] <<- 1
-                # NON-DIAGONAL PARAMETER COMBINATIONS
-              } else {
-                # DATA PRIMARY & SECONDARY CHANNEL
-                rlm_params <- .cyto_asp_rlm(
-                  cs,
-                  x_chan = z,
-                  y_chan = w,
-                  trim = trim
-                )
-                # STORE COEFFICIENT & INTERCEPT
-                spill_int[w] <<- rlm_params[1, 1]
-                spill_coef[w] <<- rlm_params[2, 1]
-                # SLOPE/SKEWNESS - LINEAR DATA
-                if(!transform) {
-                  spill_slope[w] <<- spill_coef[w]
-                  # SLOPE/SKEWNESS - TRANSFORMED DATA
+    
+    # INITIALISE COEFFICIENTS
+    spill_zero <- rep(0, n)
+    names(spill_zero) <- channels
+    
+    # # CREATE PLOT LAYOUT
+    # par(mfrow = c(3,4),
+    #     mar = c(4.1,4.1,2.1,2.1))
+    
+    # FIT RLM - EXTRACT INTERCEPTS, COEFFICIENTS, SLOPES & SKEWNESS
+    spill_params <- do.call(
+      "rbind",
+      structure(
+        lapply(
+          pd$channel, 
+          function(z){
+            # RESET PARAMETERS
+            spill_int <- spill_zero
+            spill_coef <- spill_zero
+            spill_slope <- spill_zero
+            spill_skew <- spill_zero
+            # EXTRACT DATA
+            cs <- cyto_select(
+              x,
+              channel = z
+            )
+            # FIT RLM MODELS & UPDATE PARAMETERS
+            lapply(
+              channels,
+              function(w) {
+                # DIAGONAL PARAMETERS COMBINATIONS
+                if(z %in% w) {
+                  spill_coef[w] <<- 1
+                  spill_slope[w] <<- 1
+                  # NON-DIAGONAL PARAMETER COMBINATIONS
                 } else {
-                  yp <- cyto_apply(
-                    cs, 
-                    "quantile",
-                    probs = c(0.01, 0.99),
-                    input = "matrix",
-                    channels = z,
-                    copy = FALSE
-                  )[, 1]
-                  xp <- c(spill_int[w] + spill_coef[w] * yp[1],
-                          spill_int[w] + spill_coef[w] * yp[2])
-                  if(yp[1] == yp[2] || xp[1] == xp[2]) {
-                    spill_slope[w] <<- 0
+                  # DATA PRIMARY & SECONDARY CHANNEL
+                  rlm_params <- .cyto_asp_rlm(
+                    cs,
+                    x_chan = z,
+                    y_chan = w,
+                    trim = trim
+                  )
+                  # STORE COEFFICIENT & INTERCEPT
+                  spill_int[w] <<- rlm_params[1, 1]
+                  spill_coef[w] <<- rlm_params[2, 1]
+                  # SLOPE/SKEWNESS - LINEAR DATA
+                  if(!transform) {
+                    spill_slope[w] <<- spill_coef[w]
+                  # SLOPE/SKEWNESS - TRANSFORMED DATA
                   } else {
-                    ypt <- .cyto_transform(
-                      yp,
-                      trans = trans,
-                      channel = z,
-                      inverse = TRUE
-                    )
-                    xpt <- .cyto_transform(
-                      xp,
-                      trans = trans,
-                      channel = w,
-                      inverse = TRUE
-                    )
-                    spill_slope[w] <<- spill_coef[w] * (xpt[2] - xpt[1]) * 
-                      (yp[2] - yp[1]) / ((xp[2] - xp[1])*(ypt[2] - ypt[1]))
+                    yp <- cyto_apply(
+                      cs, 
+                      "quantile",
+                      probs = c(0.01, 0.99),
+                      input = "matrix",
+                      channels = z,
+                      copy = FALSE
+                    )[, 1]
+                    xp <- c(spill_int[w] + spill_coef[w] * yp[1],
+                            spill_int[w] + spill_coef[w] * yp[2])
+                    if(yp[1] == yp[2] || xp[1] == xp[2]) {
+                      spill_slope[w] <<- 0
+                    } else {
+                      ypt <- .cyto_transform(
+                        yp,
+                        trans = trans,
+                        channel = z,
+                        inverse = TRUE
+                      )
+                      xpt <- .cyto_transform(
+                        xp,
+                        trans = trans,
+                        channel = w,
+                        inverse = TRUE
+                      )
+                      spill_slope[w] <<- spill_coef[w] * (xpt[2] - xpt[1]) * 
+                        (yp[2] - yp[1]) / ((xp[2] - xp[1])*(ypt[2] - ypt[1]))
+                    }
                   }
                 }
               }
-            }
-          )
-          # RETURN RLM PARAMETERS
-          return(
-            c(
-              spill_int,
-              spill_coef,
-              spill_slope
             )
-          )
-        }
-      ),
-      names = pd$channel
+            # RETURN RLM PARAMETERS
+            return(
+              c(
+                spill_int,
+                spill_coef,
+                spill_slope
+              )
+            )
+          }
+        ),
+        names = pd$channel
+      )
     )
-  )
     
-  # # RESET PLOT LAYOUT
-  # mtext("SPILLOVER REFINE", outer = TRUE)
-  # par(mfrow = c(1,1),
-  #     oma = c(0,0,3,0),
-  #     mar = c(4.1,4.1,2.1,2.1))
-  
-  # SPILLOVER ERROR PARAMETERS
-  return(
-    list(
-      int = spill_params[, 1:n, drop = FALSE],
-      coef = spill_params[, (n+1):(2*n), drop = FALSE],
-      slope = spill_params[, (2*n+1):(3*n), drop = FALSE]
+    # # RESET PLOT LAYOUT
+    # mtext("SPILLOVER REFINE", outer = TRUE)
+    # par(mfrow = c(1,1),
+    #     oma = c(0,0,3,0),
+    #     mar = c(4.1,4.1,2.1,2.1))
+    
+    # SPILLOVER ERROR PARAMETERS
+    return(
+      list(
+        int = spill_params[, 1:n, drop = FALSE],
+        coef = spill_params[, (n+1):(2*n), drop = FALSE],
+        slope = spill_params[, (2*n+1):(3*n), drop = FALSE]
+      )
     )
-  )
+  }
   
 }

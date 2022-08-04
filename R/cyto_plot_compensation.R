@@ -226,7 +226,6 @@ cyto_plot_compensation <- function(x,
           } else {
             pop <- parent
           }
-          print(pop)
           # EXTRACT LINEAR DATA
           cs <- cyto_data_extract(
             x[z],

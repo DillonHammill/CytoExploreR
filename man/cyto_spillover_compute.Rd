@@ -41,10 +41,13 @@ required to compute the spillover matrix.}
 coefficients should be computed, set to all area fluorescent channels by
 default.}
 
-\item{type}{options include \code{"Bagwell"} or \code{"Roca"} to indicate
-which method to use when computing the spillover matrix, set to
-\code{"Roca"} by default. Refer to \code{references} section for more
-details about each method.}
+\item{type}{options include \code{"Bagwell"}, \code{"Roca"} or
+\code{"hybrid"} to indicate which method to use when computing the
+spillover matrix, set to \code{"Roca"} by default. The \code{"hybrid"}
+method computes the spillover coefficients using the \code{Bagwell}
+approach (no RLM) and refines the coefficients using the \code{Autospill}
+approach. Refer to \code{references} section for more details about each
+method.}
 
 \item{save_as}{name of a csv file to which the computed spillover matrix
 should be written, set to \code{Spillover-Matrix.csv} prefixed with the
@@ -69,7 +72,7 @@ included for backwards compatibility with older versions of CytoExploreR.}
 should be displayed in a heatmap, set to TRUE by default.}
 
 \item{iter}{indicates the maximum number of allowable iterations for
-autospill, defaults to 100.}
+refining the spillover coefficients, set to 100 by default.}
 
 \item{trim}{proportion of events to exclude from the top and bottom of each
 scale when fitting RLM models in autospill method, set to 0.001 by default.}

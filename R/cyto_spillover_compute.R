@@ -45,10 +45,13 @@
 #' @param channels names of the channels or markers for which spillover
 #'   coefficients should be computed, set to all area fluorescent channels by
 #'   default.
-#' @param type options include \code{"Bagwell"} or \code{"Roca"} to indicate
-#'   which method to use when computing the spillover matrix, set to
-#'   \code{"Roca"} by default. Refer to \code{references} section for more
-#'   details about each method.
+#' @param type options include \code{"Bagwell"}, \code{"Roca"} or
+#'   \code{"hybrid"} to indicate which method to use when computing the
+#'   spillover matrix, set to \code{"Roca"} by default. The \code{"hybrid"}
+#'   method computes the spillover coefficients using the \code{Bagwell}
+#'   approach (no RLM) and refines the coefficients using the \code{Autospill}
+#'   approach. Refer to \code{references} section for more details about each
+#'   method.
 #' @param save_as name of a csv file to which the computed spillover matrix
 #'   should be written, set to \code{Spillover-Matrix.csv} prefixed with the
 #'   date by default.
@@ -67,7 +70,7 @@
 #' @param heatmap logical indicating whether the computed spillover matrix
 #'   should be displayed in a heatmap, set to TRUE by default.
 #' @param iter indicates the maximum number of allowable iterations for
-#'   autospill, defaults to 100.
+#'   refining the spillover coefficients, set to 100 by default.
 #' @param trim proportion of events to exclude from the top and bottom of each
 #'   scale when fitting RLM models in autospill method, set to 0.001 by default.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
@@ -143,6 +146,9 @@ cyto_spillover_compute <- function(x,
                                    trim = 0.001,
                                    ...) {
 
+  # TODO: SAMPLE CHECKS PERFORMED PRIOR TO GROUPING
+  # FITC ON BEADS AND CELLS - BOTH KEPT 
+  
   # SPILLOVER ------------------------------------------------------------------
   
   # BACKWARDS COMPATIBILITY
@@ -246,7 +252,7 @@ cyto_spillover_compute <- function(x,
   }
   
   # BAGWELL METHOD REQUIRES TRANSFORMED DATA
-  if(grepl("^b", type, ignore.case = TRUE)) {
+  if(grepl("^b|^h", type, ignore.case = TRUE)) {
     if(any(!channels %in% names(axes_trans))) {
       # DEFINE NEW TRANSFORMERS
       trans_new <- cyto_transformers_define(
@@ -298,7 +304,7 @@ cyto_spillover_compute <- function(x,
   # SPILLOVER COMPUTATION ------------------------------------------------------
   
   # BAGWELL METHOD
-  if(grepl("^b", type, ignore.case = TRUE)) {
+  if(grepl("^b|^h", type, ignore.case = TRUE)) {
     
     # NOTE: CS - LIST PER CONTROL WITH NEGATIVE & POSITIVE EVENTS
     
@@ -446,16 +452,16 @@ cyto_spillover_compute <- function(x,
     # GATE POPULATIONS & COMPUTE SPILLOVER COEFFICIENTS
     spill <- structure(
       lapply(
-        cs_list,
+        seq_along(cs_list),
         function(q) {
           # GATE POPULATIONS PER CHANNEL
           pops <- structure(
             lapply(
-              names(q),
+              names(cs_list[[q]]),
               function(y) {
                 # REFERENCE CYTOSETS
-                neg_events <- q[[y]][["-"]]
-                pos_events <- q[[y]][["+"]]
+                neg_events <- cs_list[[q]][[y]][["-"]]
+                pos_events <- cs_list[[q]][[y]][["+"]]
                 # CYTO_PLOT
                 cyto_plot(
                   if(is.null(neg_events)){
@@ -567,8 +573,10 @@ cyto_spillover_compute <- function(x,
                 )
               }
             ),
-            names = names(q)
+            names = names(cs_list[[q]])
           )
+          # STORE GATED POPULATIONS IN CS_LIST
+          cs_list[[q]] <<- pops
           # COMPUTE SPILLOVER COEFFICIENTS PER CHANNEL
           sp <- do.call(
             "rbind",
@@ -649,6 +657,21 @@ cyto_spillover_compute <- function(x,
             return(sp)
           }
         )
+      )
+    }
+    
+    # HYBRID METHOD - SPILLOVER REFINEMENT
+    if(.grepl("^h", type, ignore.case = TRUE)) {
+      message(
+        "Iteratively refining spillover coefficients..."
+      )
+      spill <- .cyto_asp_spill_refine(
+        cs_list,
+        spill = list(coef = spill),
+        trans = axes_trans,
+        channels = channels,
+        iter = iter,
+        trim = 0 # USE MEDIANS OF NEGATIVE & POSITIVE POPULATIONS
       )
     }
     
