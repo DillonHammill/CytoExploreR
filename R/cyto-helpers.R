@@ -8221,6 +8221,8 @@ cyto_require <- function(x,
                          ref = NULL,
                          ...) {
   
+  # TODO: INSTALL MULTIPLE PACKAGES|MODULES?
+  
   # PYTHON
   if(python) {
     # PYTHON AVAILABLE - ANNOYING! - NEED CALL SOMETHING FIRST

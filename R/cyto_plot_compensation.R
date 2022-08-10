@@ -191,7 +191,19 @@ cyto_plot_compensation <- function(x,
     spill <- cyto_spillover_extract(x)
   } else {
     if(compensated) {
-      spill <- cyto_spillover_extract(x)
+      # MACHINE SPILLOVER MATRIX APPLIED
+      if(is.null(spillover)) {
+        spill <- cyto_spillover_extract(x)
+      # CUSTOM SPILLOVER MATRIX APPLIED
+      } else {
+        spill <- structure(
+          rep(
+            list(spillover),
+            length(x)
+          ),
+          names = cyto_names(x)
+        )
+      }
     } else {
       spill <- NULL
     }
@@ -244,7 +256,8 @@ cyto_plot_compensation <- function(x,
               cs,
               spillover = spill[[z]],
               remove = TRUE,
-              copy = FALSE
+              copy = FALSE,
+              quiet = TRUE
             )
           }
           # RE-APPLY TRANSFORMERS
@@ -285,7 +298,8 @@ cyto_plot_compensation <- function(x,
     x_comp <- cyto_compensate(
       x_comp,
       spillover = spillover, # NULL - STORED SPILLOVER MATRIX
-      copy = FALSE
+      copy = FALSE,
+      quiet = TRUE
     )
     # RE-APPLY TRANSFORMATIONS
     x_comp <- cyto_transform(
