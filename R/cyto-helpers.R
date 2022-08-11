@@ -1448,11 +1448,6 @@ cyto_names_parse <- function(x,
 #'   should be plotted using \code{\link{cyto_plot}}.
 #' @param popup logical indicating whether plots should be constructed in a
 #'   popup window, set to FALSE by default.
-#' @param axes_limits options include \code{"auto"}, \code{"data"} or
-#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
-#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
-#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
-#'   arguments.
 #' @param quiet logical which prevents the printing of messages when set to
 #'   TRUE.
 #' @param ... additional arguments passed to
@@ -1514,9 +1509,10 @@ cyto_transform.default <- function(x,
                                    copy = FALSE,
                                    plot = TRUE,
                                    popup = FALSE,
-                                   axes_limits = "machine",
                                    quiet = FALSE,
                                    ...) {
+  
+  # NOTE: AXES_LIMITS CAUSE ARGUMENT CONFLICT WITH A FOR LOGICLE
   
   # TRANSFORMERS MISSING
   if(is.null(trans) | .all_na(trans)) {
@@ -1763,7 +1759,7 @@ cyto_transform.default <- function(x,
         channels = channels,
         select = select,
         axes_trans = transformer_list,
-        axes_limits = axes_limits,
+        axes_limits = "machine",
         merge_by = "all"
       ),
       error = function(e){
@@ -1783,7 +1779,6 @@ cyto_transform.transformList <- function(x,
                                          copy = FALSE,
                                          plot = TRUE,
                                          popup = FALSE,
-                                         axes_limits = "machine",
                                          quiet = FALSE,
                                          ...) {
   
@@ -1853,7 +1848,7 @@ cyto_transform.transformList <- function(x,
         x,
         channels = names(trans),
         axes_trans = trans,
-        axes_limits = axes_limits,
+        axes_limits = "machine",
         merge_by = "all"
       ), 
       error = function(e){
@@ -1874,7 +1869,6 @@ cyto_transform.transformerList <- function(x,
                                            copy = FALSE,
                                            plot = TRUE,
                                            popup = FALSE,
-                                           axes_limits = "machine",
                                            quiet = FALSE,
                                            ...) {
   
@@ -2100,7 +2094,7 @@ cyto_transform.transformerList <- function(x,
         parent = "root",
         channels = names(trans),
         axes_trans = trans,
-        axes_limits = axes_limits,
+        axes_limits = "machine",
         merge_by = "all"
       ),
       error = function(e){
@@ -5967,7 +5961,11 @@ cyto_compensate.GatingSet <- function(x,
   cs <- cyto_data_extract(
     x, 
     parent = "root",
-    copy = copy,
+    copy = if(!.all_na(trans)){
+      TRUE
+    }else {
+      copy
+    },
   )[["root"]]
   
   # PREPARE SPILLOVER MATRIX

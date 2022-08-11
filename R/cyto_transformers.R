@@ -92,11 +92,6 @@ cyto_transformer_extract <- function(...){
 #'   be plotted using \code{cyto_plot}.
 #' @param events number or frequency of events to display in plots, set to 50000
 #'   events by default. See \code{\link{cyto_plot}} for details.
-#' @param axes_limits options include \code{"auto"}, \code{"data"} or
-#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
-#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
-#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
-#'   arguments.
 #' @param progress logical indicating whether to display the progress bar(s)
 #'   when computing transformer definitions, set to TRUE by default.
 #' @param ... additional arguments passed to
@@ -130,9 +125,10 @@ cyto_transformers_define <- function(x,
                                      select = NULL,
                                      events = 50000,
                                      plot = TRUE,
-                                     axes_limits = "machine",
                                      progress = TRUE,
                                      ...) {
+  
+  # NOTE: AXES_LIMITS CAUSE ARGUMENT CONFLICT WITH A FOR LOGICLE
   
   # RESET PROGRESS BAR ON EXIT
   on.exit({
@@ -396,6 +392,10 @@ cyto_transformers_define <- function(x,
                 )
               )
             }
+            # # ADDITIONAL NEGATIVE RANGE
+            # if(!"a" %in% names(args)) {
+            #   args$a <- args$m
+            # }
             # LOGICLE TRANSFORM - DROP R AND P ARGUMENTS
             trans <- cyto_func_execute(
               "logicleTransform",
@@ -501,7 +501,7 @@ cyto_transformers_define <- function(x,
         cs,
         channels = channels,
         axes_trans = transformer_list,
-        axes_limits = axes_limits,
+        axes_limits = "machine",
         events = 1 # SAMPLED ABOVE FOR FASTER TRANSFORMATIONS
       ), 
       error = function(e){

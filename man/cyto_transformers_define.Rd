@@ -12,7 +12,6 @@ cyto_transformers_define(
   select = NULL,
   events = 50000,
   plot = TRUE,
-  axes_limits = "machine",
   progress = TRUE,
   ...
 )
@@ -48,12 +47,6 @@ events by default. See \code{\link{cyto_plot}} for details.}
 
 \item{plot}{logical indicating whether the results of transformations should
 be plotted using \code{cyto_plot}.}
-
-\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
-\code{"machine"} to use optimised, data or machine limits respectively. Set
-to \code{"machine"} by default to use entire axes ranges. Fine control over
-axes limits can be obtained by altering the \code{xlim} and \code{ylim}
-arguments.}
 
 \item{progress}{logical indicating whether to display the progress bar(s)
 when computing transformer definitions, set to TRUE by default.}

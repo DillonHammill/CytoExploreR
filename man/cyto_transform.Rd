@@ -20,7 +20,6 @@ cyto_transform(x, trans = NULL, ...)
   copy = FALSE,
   plot = TRUE,
   popup = FALSE,
-  axes_limits = "machine",
   quiet = FALSE,
   ...
 )
@@ -31,7 +30,6 @@ cyto_transform(x, trans = NULL, ...)
   copy = FALSE,
   plot = TRUE,
   popup = FALSE,
-  axes_limits = "machine",
   quiet = FALSE,
   ...
 )
@@ -43,7 +41,6 @@ cyto_transform(x, trans = NULL, ...)
   copy = FALSE,
   plot = TRUE,
   popup = FALSE,
-  axes_limits = "machine",
   quiet = FALSE,
   ...
 )
@@ -90,12 +87,6 @@ should be plotted using \code{\link{cyto_plot}}.}
 
 \item{popup}{logical indicating whether plots should be constructed in a
 popup window, set to FALSE by default.}
-
-\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
-\code{"machine"} to use optimised, data or machine limits respectively. Set
-to \code{"machine"} by default to use entire axes ranges. Fine control over
-axes limits can be obtained by altering the \code{xlim} and \code{ylim}
-arguments.}
 
 \item{quiet}{logical which prevents the printing of messages when set to
 TRUE.}
