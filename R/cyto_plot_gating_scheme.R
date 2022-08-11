@@ -869,7 +869,6 @@ cyto_plot_gating_scheme <- function(x,
                 )
                 # LEGEND - FULL LEGEND ON EACH PAGE
                 if(v == length(x_list) & cyto_class(legend, "list", TRUE)) {
-                  print("HELLO")
                   # CONSTRUCT LEGEND
                   lapply(
                     seq_along(legend),
