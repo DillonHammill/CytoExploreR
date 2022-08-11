@@ -464,46 +464,70 @@ cyto_load <- function(path = ".",
     }
     # SELECT
     if (!is.null(select)) {
-      file_ind <- c()
-      lapply(
-        select, 
-        function(z) {
-          file_ind <<- c(
-            file_ind,
-            .grep(
-              z, 
-              files, 
-              ignore.case = ignore.case, 
-              fixed = fixed
+      # SELECT BY INDEX
+      if(is.numeric(select)) {
+        file_ind <- select
+      # SELECT BY FILE NAME
+      } else {
+        file_ind <- c()
+        lapply(
+          select, 
+          function(z) {
+            file_ind <<- c(
+              file_ind,
+              .grep(
+                z, 
+                files, 
+                ignore.case = ignore.case, 
+                fixed = fixed
+              )
             )
-          )
-        }
-      )
-      if(length(file_ind) > 0){
-        files <- files[unique(file_ind)]
+          }
+        )
       }
+    } else {
+      file_ind <- seq_along(files)
     }
     
     # EXCLUDE
     if (!is.null(exclude)) {
-      file_ind <- c()
-      lapply(
-        exclude, 
-        function(z) {
-          file_ind <<- c(
-            file_ind,
-            .grep(
+      # EXCLUDE BY INDEX
+      if(is.numeric(exclude)) {
+        file_ind <- file_ind[
+          !file_ind %in% abs(exclude)
+        ]
+      # EXCLUDE BY FILE NAME
+      } else {
+        excl_ind <- c()
+        lapply(
+          exclude, 
+          function(z) {
+            excl_ind <<- .grep(
               z,
               files,
               ignore.case = ignore.case,
               fixed = fixed
             )
-          )
+          }
+        )
+        if(length(excl_ind) > 0) {
+          file_ind <- file_ind[
+            !file_ind %in% excl_ind
+          ]
         }
-      )
-      if(length(file_ind) > 0){
-        files <- files[-unique(file_ind)]
       }
+    }
+    
+    # SELECT FILES
+    if(length(file_ind) == 0) {
+      stop(
+        paste0(
+          "None of the files in specified directory satisfy the file ",
+          "selection and exclusion criteria!"
+        )
+      )
+    } else {
+      files <- files[file_ind]
     }
     
     # SORTED FILE PATHS
