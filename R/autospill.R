@@ -502,7 +502,7 @@
                 spillover = spill,
                 quiet = TRUE
               )
-              # TRANSFORM NEGATIVE POPULATION
+              # TRANSFORM POSITIVE POPULATION
               if(transform) {
                 cs_pos <- cyto_transform(
                   cs_pos,
@@ -535,10 +535,55 @@
                 copy = TRUE,
                 simplify = FALSE
               )[[1]]
-              # SUBTRACT BACKGROUND
-              coef <- pos_stats - neg_stats
-              # NORMALISE
-              return(as.numeric(coef/coef[w]))
+              # BAGWELL SLOPES
+              slope <- pos_stats - neg_stats
+              slope <- as.numeric(slope/slope[w])
+              names(slope) <- channels
+              # LINEAR SLOPE
+              if(!transform) {
+                return(slope)
+              # TRANSFORMED SLOPE/SKEWNESS
+              } else {
+                return(
+                  structure(
+                    LAPPLY(
+                      names(neg_stats),
+                      function(v) {
+                        if(v %in% w) {
+                          return(1)
+                        } else {
+                          yp <- c(neg_stats[w], pos_stats[w])
+                          intp <- neg_stats[v] - slope[v] * neg_stats[w]
+                          xp <- c(intp + slope[v] * yp[1],
+                                  intp + slope[v] * yp[2])
+                          if(yp[1] == yp[2] || xp[1] == xp[2]) {
+                            return(0)
+                          } else {
+                            ypt <- .cyto_transform(
+                              yp,
+                              trans = trans,
+                              channel = w,
+                              inverse = TRUE
+                            )
+                            xpt <- .cyto_transform(
+                              xp,
+                              trans = trans,
+                              channel = v,
+                              inverse = TRUE
+                            )
+                            return(
+                              slope[v] * (xpt[2] - xpt[1]) * 
+                                (yp[2] - yp[1]) / 
+                                ((xp[2] - xp[1])*(ypt[2] - ypt[1]))
+                            )
+                          }
+                        }
+                      }
+                    ),
+                    names = names(neg_stats)
+                  )
+                )
+              }
             }
           )
         )
