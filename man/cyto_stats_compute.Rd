@@ -22,6 +22,7 @@ cyto_stats_compute(
   markers = TRUE,
   save_as = NULL,
   select = NULL,
+  merge_by = "name",
   ...
 )
 }
@@ -107,6 +108,12 @@ NULL by default to bypass this saving step.}
 select samples using \code{\link{cyto_select}} when a \code{cytoset} or
 \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
 details.}
+
+\item{merge_by}{vector of \code{cyto_details} column names (e.g.
+c("Treatment","Concentration") indicating how the samples should be merged
+prior to computing statistics. Set this argument to "all" or NA to merge
+all samples. Set to \code{"name"} by default to compute statistics on each
+sample separately.}
 
 \item{...}{additional arguments passed to the desired statistical function.}
 }

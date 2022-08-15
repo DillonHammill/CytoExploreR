@@ -3575,9 +3575,9 @@ cyto_merge_by <- function(x,
   # CYTOSET
   x <- cyto_data_extract(
     x,
+    select = select,
     parent = parent,
     barcode = barcode,
-    copy = FALSE,
     ...
   )[[1]]
   
@@ -3594,35 +3594,16 @@ cyto_merge_by <- function(x,
     names(cs_list)[which("all" %in% names(cs_list))] <- "Combined Events"
   }
   
-  # SELECTION ------------------------------------------------------------------
-  
-  # ATTEMPT SELECTION OR RETURN ALL SAMPLES
-  if (!is.null(select)) {
-    cs_list <- lapply(
-      cs_list, 
-      function(z) {
-        tryCatch(
-          cyto_select(
-            z, 
-            select
-          ), 
-          error = function(e) {
-            z
-          }
-        )
-      }
-    )
-  }
-  
   # MERGING --------------------------------------------------------------------
   
   # CONVERT EACH GROUP TO MERGED CYTOSET/FLOWSET
-  if(.grepl("s", format)) {
+  if(.grepl("set", format)) {
     structure(
       lapply(
         seq_along(cs_list), 
         function(z){
-          do.call(
+          # CYTOSET
+          cs <- do.call(
             cyto_class(cs_list[[z]]), # flowSet() / cytoset()
             list(
               structure(
@@ -3634,6 +3615,12 @@ cyto_merge_by <- function(x,
               )
             )
           )
+          # EXPERIMENT DETAILS
+          cyto_details(cs) <- cbind(
+            cyto_details(cs),
+            cyto_details(cs_list[[z]])[1, merge_by]
+          )
+          return(cs)
         }
       ),
       names = names(cs_list)
@@ -3644,7 +3631,11 @@ cyto_merge_by <- function(x,
       lapply(
         seq_along(cs_list), 
         function(z) {
-          as(cs_list[[z]], cyto_class(cs_list[[z]][[1]])) # flowFrame|cytoframe
+          # flowFrame|cytoframe
+          as(
+            cs_list[[z]],
+            cyto_class(cs_list[[z]][[1]])
+          ) 
         }
       ),
       names = names(cs_list)

@@ -67,6 +67,11 @@
 #'   select samples using \code{\link{cyto_select}} when a \code{cytoset} or
 #'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
 #'   details.
+#' @param merge_by vector of \code{cyto_details} column names (e.g.
+#'   c("Treatment","Concentration") indicating how the samples should be merged
+#'   prior to computing statistics. Set this argument to "all" or NA to merge
+#'   all samples. Set to \code{"name"} by default to compute statistics on each
+#'   sample separately.
 #' @param ... additional arguments passed to the desired statistical function.
 #'
 #' @return data.frame or tibble containing the computed statistics in the
@@ -132,6 +137,7 @@ cyto_stats_compute <- function(x,
                                markers = TRUE,
                                save_as = NULL,
                                select = NULL,
+                               merge_by = "name",
                                ...) {
   
   # CHECKS ---------------------------------------------------------------------
@@ -154,16 +160,72 @@ cyto_stats_compute <- function(x,
     trans <- cyto_transformers_extract(x)
   }
   
+  # ALIAS
+  if(is.null(alias)) {
+    stop(
+      "Supply the names of the population(s) to 'alias'!"
+    )
+  }
+  
   # EXTRACT DATA ---------------------------------------------------------------
   
-  # ALIAS
-  alias <- cyto_data_extract(
-    x,
-    parent = alias,
-    select = select,
-    channels = channels,
-    copy = TRUE
-  )
+  # UNMERGED ALIAS
+  if(all(merge_by %in% "name")) {
+    alias <- cyto_data_extract(
+      x,
+      parent = alias,
+      select = select,
+      channels = channels,
+      copy = TRUE
+    )
+  # MERGED ALIAS
+  } else {
+    alias <- structure(
+      lapply(
+        alias,
+        function(z) {
+          # MERGED CYTOSETS
+          cs_list <- cyto_merge_by(
+            x,
+            select = select,
+            parent = z,
+            merge_by = merge_by,
+            format = "cytoset",
+            barcode = TRUE,
+            channels = channels,
+            copy = TRUE
+          )
+          # EXTRACT EXPERIMENT DETAILS - (MERGING GROUPS)
+          pd <- do.call(
+            "rbind",
+            lapply(
+              cs_list,
+              "cyto_details"
+            ) 
+          )
+          # MERGE CYTOSETS
+          cs <- cytoset(
+            structure(
+              lapply(
+                cs_list,
+                function(z) {
+                  z[[1]]
+                }
+              ),
+              names = names(cs_list)
+            )
+          )
+          # TRANSFER EXPERIMENT DETAILS - (MERGING GROUPS)
+          cyto_details(cs) <- cbind(
+            cyto_details(cs), 
+            pd[, merge_by]
+          )
+          return(cs)
+        }
+      ),
+      names = alias
+    )
+  }
   
   # ALIAS NAMES
   if(is.null(names(alias))) {
@@ -173,13 +235,63 @@ cyto_stats_compute <- function(x,
   # EXTRACT PARENT POPULATIONS
   if(cyto_class(x, "GatingSet")) {
     if(!is.null(parent)) {
-      parent <- cyto_data_extract(
-        x,
-        parent = parent,
-        select = select,
-        channels = channels,
-        copy = TRUE
-      )
+      # UNMERGED PARENT
+      if(all(merge_by %in% "name")) {
+        parent <- cyto_data_extract(
+          x,
+          parent = parent,
+          select = select,
+          channels = channels,
+          copy = TRUE
+        )
+      # MERGED PARENT
+      } else {
+        parent <- structure(
+          lapply(
+            parent,
+            function(z) {
+              # MERGED CYTOSETS
+              cs_list <- cyto_merge_by(
+                x,
+                select = select,
+                parent = z,
+                merge_by = merge_by,
+                format = "cytoset",
+                barcode = TRUE,
+                channels = channels,
+                copy = TRUE
+              )
+              # EXTRACT EXPERIMENT DETAILS - (MERGING GROUPS)
+              pd <- do.call(
+                "rbind",
+                lapply(
+                  cs_list,
+                  "cyto_details"
+                ) 
+              )
+              # MERGE CYTOSETS
+              cs <- cytoset(
+                structure(
+                  lapply(
+                    cs_list,
+                    function(z) {
+                      z[[1]]
+                    }
+                  ),
+                  names = names(cs_list)
+                )
+              )
+              # TRANSFER EXPERIMENT DETAILS - (MERGING GROUPS)
+              cyto_details(cs) <- cbind(
+                cyto_details(cs), 
+                pd[, merge_by]
+              )
+              return(cs)
+            }
+          ),
+          names = parent
+        )
+      }
       # PARENT NAMES
       if(is.null(names(parent))) {
         names(parent) <- paste0("parent-", 1:length(parent))
@@ -222,17 +334,23 @@ cyto_stats_compute <- function(x,
       grepl(paste0("^", z, "$"), stat_strip)
     }))) {
       res <- structure(
-        lapply(alias, function(z) {
-          cyto_apply(z,
-                     stat,
-                     input = "matrix",
-                     copy = FALSE,
-                     trans = trans,
-                     inverse = inverse,
-                     round = round,
-                     simplify = TRUE,
-                     ...)
-        }), names = names(alias)
+        lapply(
+          alias, 
+          function(z) {
+            cyto_apply(
+              z,
+              stat,
+              input = "matrix",
+              copy = FALSE,
+              trans = trans,
+              inverse = inverse,
+              round = round,
+              simplify = TRUE,
+              ...
+            )
+          }
+        ), 
+        names = names(alias)
       )
       # FREQUENCY
     } else if (grepl("^freq$", stat_strip)) {
@@ -272,108 +390,161 @@ cyto_stats_compute <- function(x,
         ), names = names(alias)
       )
       # FREQUENCY
-      res <- lapply(alias_counts, function(z){
-        round(z/parent_counts*100, round)
-      })
+      res <- lapply(
+        alias_counts, 
+        function(z) {
+          round(z/parent_counts*100, round)
+        }
+      )
       # GEOMEMTRIC MEAN
     } else if (grepl("^geomean$", stat_strip)) {
       res <- structure(
-        lapply(alias, function(z) {
-          y <- cyto_data_extract(z, 
-                                 format = "matrix")[[1]]
-          do.call("rbind", lapply(y, function(q) {
-            LAPPLY(unname(colnames(q)), function(r) {
-              if (.all_na(trans)) {
-                cyto_stat_geomean(q[, r, drop = FALSE], 
-                                  round = round)
-              } else if (!.all_na(trans)) {
-                if (r %in% names(trans)) {
-                  .cyto_transform(cyto_stat_mean(q[, r, drop = FALSE], 
-                                                 round = round),
-                                  channel = r,
-                                  trans = trans,
-                                  inverse = TRUE
+        lapply(
+          alias, 
+          function(z) {
+            y <- cyto_data_extract(
+              z, 
+              format = "matrix"
+            )[[1]]
+            do.call(
+              "rbind", 
+              lapply(
+                y, 
+                function(q) {
+                  LAPPLY(
+                    unname(colnames(q)),
+                    function(r) {
+                      if (.all_na(trans)) {
+                        cyto_stat_geomean(q[, r, drop = FALSE], 
+                                          round = round)
+                      } else if (!.all_na(trans)) {
+                        if (r %in% names(trans)) {
+                          .cyto_transform(
+                            cyto_stat_mean(
+                              q[, r, drop = FALSE], 
+                              round = round
+                            ),
+                            channel = r,
+                            trans = trans,
+                            inverse = TRUE
+                          )
+                        } else {
+                          cyto_stat_geomean(
+                            q[, r, drop = FALSE],
+                            round = round
+                          )
+                        }
+                      }
+                    }
                   )
-                } else {
-                  cyto_stat_geomean(q[, r, drop = FALSE],
-                                    round = round)
                 }
-              }
-            })
-          }))
-        }), names = names(alias)
+              )
+            )
+          }
+        ), 
+        names = names(alias)
       )
       # MODE
     } else if (grepl("^mode$", stat_strip)) {
       res <- structure(
-        lapply(alias, function(z) {
+        lapply(
+          alias, 
+          function(z) {
           # DENSITY - CURRENT SCALE
           d <- suppressWarnings(
-            cyto_apply(z,
-                       "cyto_stat_density",
-                       input = "matrix",
-                       smooth = smooth,
-                       bins = bins,
-                       limits = range(z[[1]], type = "instrument"),
-                       simplify = TRUE,
-                       copy = FALSE,
-                       ...)
+            cyto_apply(
+              z,
+              "cyto_stat_density",
+              input = "matrix",
+              smooth = smooth,
+              bins = bins,
+              limits = range(z[[1]], type = "instrument"),
+              simplify = TRUE,
+              copy = FALSE,
+              ...
+            )
           )
           # MODE
           cnt <- 0
-          m <- apply(d, 2, function(y){
-            # CHANNEL INDEX
-            cnt <<- cnt + 1
-            round(
-              LAPPLY(names(y), function(w){
-                if(.all_na(y[[w]])) {
-                  return(NA)
-                }
-                if(inverse == TRUE & colnames(d)[cnt] %in% names(trans)) {
-                  .cyto_transform(y[[w]]$x[y[[w]]$y == max(y[[w]]$y)],
-                                  channel = colnames(d)[cnt],
-                                  trans = trans,
-                                  inverse = TRUE)
-                } else {
-                  y[[w]]$x[y[[w]]$y == max(y[[w]]$y)]
-                }
-              }), round)
-          })
+          m <- apply(
+            d, 
+            2, 
+            function(y) {
+              # CHANNEL INDEX
+              cnt <<- cnt + 1
+              round(
+                LAPPLY(
+                  names(y), 
+                  function(w){
+                    if(.all_na(y[[w]])) {
+                      return(NA)
+                    }
+                    if(inverse == TRUE & colnames(d)[cnt] %in% names(trans)) {
+                      .cyto_transform(
+                        y[[w]]$x[y[[w]]$y == max(y[[w]]$y)],
+                        channel = colnames(d)[cnt],
+                        trans = trans,
+                        inverse = TRUE
+                      )
+                    } else {
+                      y[[w]]$x[y[[w]]$y == max(y[[w]]$y)]
+                    }
+                  }
+                ), 
+                round
+              )
+            }
+          )
           rownames(m) <- rownames(d)
           return(m)
-        }), names = names(alias)
+          }
+        ), 
+        names = names(alias)
       )
       # AUC
     } else if (grepl("^auc$", stat_strip)) {
       res <- structure(
-        lapply(alias, function(z){
-          cyto_apply(z,
-                     stat,
-                     input = "matrix",
-                     trans = trans,
-                     inverse = inverse,
-                     round = round,
-                     simplify = TRUE,
-                     smooth = smooth,
-                     bins = bins,
-                     limits = range(z[[1]], type = "instrument"),
-                     ...)
-        })
+        lapply(
+          alias, 
+          function(z){
+            cyto_apply(
+              z,
+              stat,
+              input = "matrix",
+              trans = trans,
+              inverse = inverse,
+              round = round,
+              simplify = TRUE,
+              smooth = smooth,
+              bins = bins,
+              limits = range(z[[1]], type = "instrument"),
+              ...
+            )
+          }
+        )
       )
     }
     # CUSTOM STATISTIC FUNCTION
   } else {
     res <- structure(
-      lapply(alias, function(z){
-        round(
-          cyto_apply(z,
-                     stat,
-                     input = input,
-                     trans = trans,
-                     inverse = inverse,
-                     simplify = TRUE,
-                     ...), round)
-      }), names = names(alias)
+      lapply(
+        alias, 
+        function(z){
+          round(
+            cyto_apply(
+              z,
+              stat,
+              input = input,
+              trans = trans,
+              inverse = inverse,
+              simplify = TRUE,
+              ...
+            ),
+            round
+          )
+        }
+      ), 
+      names = names(alias)
     )
   }
   
