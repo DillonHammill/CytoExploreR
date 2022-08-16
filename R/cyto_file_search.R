@@ -70,10 +70,18 @@ cyto_file_search <- function(x,
     )
   # FILES SUPPLIED
   } else {
-    file_exists(
-      file,
-      error = TRUE
+    ind <- which(
+      LAPPLY(
+        files,
+        "file_exists",
+        error = FALSE
+      )
     )
+    if(length(ind) == 0) {
+      files <- NULL
+    } else {
+      files <- files[ind]
+    }
   }
   
   # FILES FOUND

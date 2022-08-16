@@ -5825,7 +5825,11 @@ cyto_details_save <- function(x,
   
   # WRITE CSV FILE
   pd <- cyto_details(x)
-  write_to_csv(pd, save_as)
+  write_to_csv(
+    pd, 
+    save_as,
+    row.names = TRUE
+  )
   return(pd)
   
 }
