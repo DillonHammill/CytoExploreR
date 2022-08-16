@@ -524,14 +524,18 @@ cyto_gate_remove <- function(x,
   )
 
   # DESCENDANTS
-  gt_desc_rm <- unname(
-    cyto_nodes_kin(
-      gatingTemplate,
-      nodes = gt_alias_rm,
-      type = "descendants",
-      path = "auto"
-    ) 
-  )
+  if(length(gt_alias_rm) > 0) {
+    gt_desc_rm <- unname(
+      cyto_nodes_kin(
+        gatingTemplate,
+        nodes = gt_alias_rm,
+        type = "descendants",
+        path = "auto"
+      ) 
+    )
+  } else {
+    gt_desc_rm <- NULL
+  }
   
   # COMBINE ALIAS & DESCENDANTS
   gt_alias_rm <- unique(c(gt_alias_rm, gt_desc_rm))
