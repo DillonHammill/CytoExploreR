@@ -4132,7 +4132,11 @@ cyto_save <- function(x,
         )
       )
     }
-    # EMPTY DIRECTORY CHECK
+    # CREATE DIRECTORY
+    if(!dir.exists(save_as)) {
+      dir.create(save_as)
+    }
+    # NON-EMPTY DIRECTORY - TERMINATE
     if(length(list.files(save_as)) > 0) {
       # OVERWRITE
       if(is.null(overwrite)) {
@@ -4144,30 +4148,99 @@ cyto_save <- function(x,
           options = c("Y", "T")
         )
       }
-      # REPLACE DIRECTORY
-      if(overwrite){
-        unlink(
-          save_as, 
-          recursive = TRUE
-        )
-        # ABORT
-      } else {
-        invisible(NULL)
-      }
+    # EMPTY DIRECTORY
+    } else {
+      overwrite <- TRUE
     }
-    # SAVE GATINGSET
-    message(
-      paste0(
-        "Saving ",
-        cyto_class(x), 
-        " to ", 
-        save_as, 
-        "..."
+    # OVERWRITE
+    if(overwrite) {
+      # TEMP SUBDIRECTORY
+      temp_dir <-  paste0(
+        gsub(
+          "\\/$",
+          "",
+          save_as
+        ),
+        "/",
+        basename(save_as)
       )
-    )
-    suppressMessages(
-      save_gs(x, save_as)
-    )
+      # CREATE TEMP SUBDIRECTORY
+      dir.create(
+        temp_dir
+      )
+      # SAVE GATINGSET
+      message(
+        paste0(
+          "Saving ",
+          cyto_class(x), 
+          " to ", 
+          save_as, 
+          "..."
+        )
+      )
+      # WRITE TO TEMP SUBDIRECTORY
+      suppressMessages(
+        save_gs(
+          x,
+          temp_dir
+        )
+      )
+      # FILES FROM PARENT DIRECTORY
+      files <- list.files(
+        save_as,
+        full.names = FALSE
+      )
+      files <- files[!match(basename(save_as), files)]
+      # REMOVE FILES IN PARENT DIRECTORY
+      if(length(files) > 0) {
+        do.call(
+          "file.remove",
+          list(
+            paste0(
+              gsub(
+                "\\/$",
+                "",
+                save_as
+              ),
+              "/",
+              files
+            )
+          )
+        )
+      }
+      # RELOCATE FILES IN TEMP TO SAVE_AS
+      files <- list.files(
+        temp_dir,
+        full.names = FALSE
+      )
+      lapply(
+        files,
+        function(z) {
+          file.copy(
+            from = paste0(
+              gsub(
+                "\\/$",
+                "",
+                temp_dir
+              ),
+              "/",
+              files
+            ),
+            to = paste0(
+              gsub(
+                "\\/$",
+                "",
+                save_as
+              ),
+              "/",
+              files
+            )
+          )
+        }
+      )
+      # REMOVE TEMP SUBDIRECTORY
+      unlink(temp_dir, recursive = TRUE)
+    }
     # RETURN GATINGSET - INVISIBLE DOES NOT TERMINATE FUNCTION
     invisible(x)
   # WRITE FCS FILES
