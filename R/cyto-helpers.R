@@ -3616,7 +3616,7 @@ cyto_merge_by <- function(x,
             )
           )
           # EXPERIMENT DETAILS
-          if(!all(merge_by == "all")) {
+          if(!all(merge_by == "all") | .all_na(merge_by)) {
             cyto_details(cs) <- cbind(
               cyto_details(cs),
               cyto_details(cs_list[[z]])[1, merge_by, drop = FALSE]
