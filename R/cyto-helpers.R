@@ -3616,10 +3616,12 @@ cyto_merge_by <- function(x,
             )
           )
           # EXPERIMENT DETAILS
-          cyto_details(cs) <- cbind(
-            cyto_details(cs),
-            cyto_details(cs_list[[z]])[1, merge_by]
-          )
+          if(!all(merge_by == "all")) {
+            cyto_details(cs) <- cbind(
+              cyto_details(cs),
+              cyto_details(cs_list[[z]])[1, merge_by, drop = FALSE]
+            )
+          }
           return(cs)
         }
       ),
