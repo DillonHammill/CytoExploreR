@@ -160,13 +160,6 @@ cyto_stats_compute <- function(x,
     trans <- cyto_transformers_extract(x)
   }
   
-  # ALIAS
-  if(is.null(alias)) {
-    stop(
-      "Supply the names of the population(s) to 'alias'!"
-    )
-  }
-  
   # EXTRACT DATA ---------------------------------------------------------------
   
   # UNMERGED ALIAS
