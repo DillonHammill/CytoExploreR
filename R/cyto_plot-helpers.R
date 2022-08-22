@@ -1977,6 +1977,11 @@ cyto_plot_calibrate <- function(x,
   # CHANNELS
   if(is.null(channels)) {
     channels <- cyto_channels(x)
+  } else {
+    channels <- cyto_channels_extract(
+      x,
+      channels = channels
+    )
   }
   
   # TRANSFORMERS
@@ -2170,9 +2175,13 @@ cyto_plot_calibrate_reset <- function(){
     files <- temp_files[grepl("cyto_.*calibrate.rds", 
                               temp_files,
                               ignore.case = TRUE)]
-    file.remove(paste0(temp_dir,
-                       .Platform$file.sep,
-                       files))
+    file.remove(
+      paste0(
+        temp_dir,
+        .Platform$file.sep,
+        files
+      )
+    )
   }
   
 }
