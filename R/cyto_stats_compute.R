@@ -209,10 +209,13 @@ cyto_stats_compute <- function(x,
             )
           )
           # TRANSFER EXPERIMENT DETAILS - (MERGING GROUPS)
-          cyto_details(cs) <- cbind(
-            cyto_details(cs), 
-            pd[, merge_by]
-          )
+          if(!all(merge_by %in% "all") & !.all_na(merge_by)) {
+            print(merge_by)
+            cyto_details(cs) <- cbind(
+              cyto_details(cs), 
+              pd[, merge_by, drop = FALSE]
+            )
+          }
           return(cs)
         }
       ),
