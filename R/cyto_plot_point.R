@@ -189,6 +189,8 @@ cyto_plot_point <- function(x,
     )
   }
   
+  # TODO: SORT EVENTS BASED ON POINT_SIZE
+  
   # POINT_COL ------------------------------------------------------------------
   
   # GET POINT COLOURS - PASS KEY_SCALE & BKDE2D
@@ -262,8 +264,21 @@ cyto_plot_point <- function(x,
               x = exprs[, args$channels[1]],
               y = exprs[, args$channels[2]],
               pch = args$point_shape[z],
-              cex = args$point_size[z],
-              col = args$point_col[[z]]
+              cex = if(cyto_class(args$point_size, "list", TRUE)) {
+                args$point_size[[z]]
+              } else {
+                args$point_size[z]
+              },
+              col = if(args$point_shape[z] %in% c(21:25)) {
+                "black"
+              } else {
+                args$point_col[[z]]
+              },
+              bg = if(args$point_shape[z] %in% c(21:25)) {
+                args$point_col[[z]]
+              } else {
+                "black"
+              }
             )
           # SCATTERMORE POINTS - LACK PCH CONTROL
           } else {
@@ -279,7 +294,11 @@ cyto_plot_point <- function(x,
                   size = dev_size,
                   xlim = usr[1:2],
                   ylim = usr[3:4],
-                  cex = 0.5 * args$point_size[[z]],
+                  cex = if(cyto_class(args$point_size, "list", TRUE)){
+                    0.5 * args$point_size[[z]][1]
+                  }else {
+                    0.5 * args$point_size[z]
+                  },
                   rgba = col2rgb(
                     args$point_col[[z]], 
                     alpha = TRUE

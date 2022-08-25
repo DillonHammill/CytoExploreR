@@ -277,6 +277,9 @@ cyto_gate_indices <- function(x,
   # ADD PARENT NODE
   nodes <- c(parent, nodes)
   
+  # TODO: DROP PARENT AS FACTOR LEVEL IF REMOVED
+  # TODO: REPLACE AMBIGUOUS NODES WITH SMALLEST NODE? OR OTHER?
+  
   # EXTRACT POPULATION INDICIES
   structure(
     lapply(
@@ -316,7 +319,7 @@ cyto_gate_indices <- function(x,
                 }
               }
             ),
-            levels = nodes
+            levels = nodes # INCLUDES PARENT
           )
         # DROP PARENT
         } else {
