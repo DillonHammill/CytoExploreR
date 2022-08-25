@@ -238,7 +238,7 @@ cyto_plot_point <- function(x,
             LAPPLY(
               args$channels,
               function(v) {
-                grepl("^Sample.*ID.*$", v)
+                grepl("^Sample-ID$", v) # NOT FLOWJO SAMPLE IDS
               }
             )
           )
