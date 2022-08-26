@@ -1041,8 +1041,8 @@ cyto_channel_match <- function(x,
     # PARENTS MISSING
     ind <- which(is.na(pd$parent))
     # RESTRICT TO AVAILABLE SAMPLES ONLY
-    ind <- which(x_ind %in% intersect(ind, x_ind)) # HERE
-    
+    pd_ind <- intersect(ind, x_ind)
+    ind <- which(x_ind %in% pd_ind) # HER
     if(length(ind) > 0) {
       # TERMINAL NODES
       pops <- cyto_nodes(
@@ -1064,7 +1064,7 @@ cyto_channel_match <- function(x,
         dimnames(pop_stats) <- list(rownames(pop_stats), pops)
       }
       # PARENT - TERMINAL NODE MOST EVENTS
-      pd$parent[ind] <- pops[
+      pd$parent[pd_ind] <- pops[
         apply(
           pop_stats,
           1,
