@@ -167,29 +167,60 @@ cyto_plot_point <- function(x,
     )
   }
   
-  # BASE LAYER - CHANNEL/MARKER - EXACT MATCHES ONLY
+  # SORT EVENTS BY COLOUR AND|OR SIZE
+  sort_by <- c()
   if(args$point_col[1] %in% c(cyto_channels(args$x[[1]]),
                               cyto_markers(args$x[[1]]))) {
-    # CONVERT TO CHANNEL
-    args$point_col[1] <- cyto_channels_extract(
-      args$x[[1]],
-      channels = args$point_col[1]
-    )
-    # SORT EVENTS - X[[1]] - CYTOSET
-    cyto_exprs(args$x[[1]]) <- list(
-      cyto_exprs(args$x[[1]])[[1]][
-        order(
+    sort_by <- c(sort_by, "col")
+  }
+  if(cyto_class(args$point_size, "list", TRUE)) {
+    sort_by <- c(sort_by, "size")
+  }
+  
+  # TODO: SORTING ONLY PERFORMED ON BASE LAYER
+  
+  # SORTING REQUIRED
+  if(length(sort_by) > 0) {
+    # TWO WAY SORT - SIZE & COLOUR
+    if(length(sort_by) == 2) {
+      ind <- order(
+        -args$point_size[[1]],
+        cyto_exprs(
+          args$x[[1]],
+          channels = args$point_col[1],
+          drop = TRUE
+        )[[1]]
+      )
+    # SINGLE WAY SORT
+    } else {
+      # SIZE
+      if(sort_by %in% "size") {
+        ind <- order(
+          -args$point_size[[1]]
+        )
+      # COLOUR
+      } else {
+        ind <- order(
           cyto_exprs(
             args$x[[1]],
             channels = args$point_col[1],
             drop = TRUE
           )[[1]]
-        ),
+        )
+      }
+    }
+    # SORT EVENTS
+    cyto_exprs(args$x[[1]]) <- list(
+      cyto_exprs(args$x[[1]])[[1]][
+        ind,
       ]
     )
+    # SORT POINT_SIZE - POINT_COL HANDLED LATER
+    if(cyto_class(args$point_size, "list", TRUE)) {
+      args$point_size[[1]] <- args$point_size[[1]][ind]
+    }
+    rm(ind)
   }
-  
-  # TODO: SORT EVENTS BASED ON POINT_SIZE
   
   # POINT_COL ------------------------------------------------------------------
   
