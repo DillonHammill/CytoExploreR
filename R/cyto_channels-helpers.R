@@ -1041,7 +1041,7 @@ cyto_channel_match <- function(x,
     # PARENTS MISSING
     ind <- which(is.na(pd$parent))
     # RESTRICT TO AVAILABLE SAMPLES ONLY
-    ind <- ind[ind %in% x_ind]
+    ind <- intersect(ind, x_ind)  # HERE
     if(length(ind) > 0) {
       # TERMINAL NODES
       pops <- cyto_nodes(
