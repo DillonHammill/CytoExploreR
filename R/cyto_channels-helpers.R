@@ -1038,11 +1038,8 @@ cyto_channel_match <- function(x,
   
   # GROUPS/PARENTS IGNORED FOR CYTOSETS
   if(cyto_class(x, "GatingSet")) {
-    # PARENTS MISSING
-    ind <- which(is.na(pd$parent))
-    # RESTRICT TO AVAILABLE SAMPLES ONLY
-    pd_ind <- intersect(ind, x_ind)
-    ind <- which(x_ind %in% pd_ind) # HER
+    # SAMPLES WITH PARENTS MISSING
+    ind <- which(is.na(pd$parent[x_ind]))
     if(length(ind) > 0) {
       # TERMINAL NODES
       pops <- cyto_nodes(
@@ -1064,7 +1061,7 @@ cyto_channel_match <- function(x,
         dimnames(pop_stats) <- list(rownames(pop_stats), pops)
       }
       # PARENT - TERMINAL NODE MOST EVENTS
-      pd$parent[pd_ind] <- pops[
+      pd$parent[x_ind[ind]] <- pops[
         apply(
           pop_stats,
           1,
@@ -1073,9 +1070,9 @@ cyto_channel_match <- function(x,
       ]
     }
     # GROUPS MISSING - DEFAULT TO PARENTS
-    ind <- which(is.na(pd$group))
+    ind <- which(is.na(pd$group[x_ind]))
     if(length(ind) > 0) {
-      pd$group[ind] <- pd$parent[ind]
+      pd$group[x_ind[ind]] <- pd$parent[x_ind[ind]]
     }
   }
   
