@@ -23,6 +23,7 @@ cyto_stats_compute(
   save_as = NULL,
   select = NULL,
   merge_by = "name",
+  events = 1,
   ...
 )
 }
@@ -114,6 +115,10 @@ c("Treatment","Concentration") indicating how the samples should be merged
 prior to computing statistics. Set this argument to "all" or NA to merge
 all samples. Set to \code{"name"} by default to compute statistics on each
 sample separately.}
+
+\item{events}{numeric to control the proportion or number of events to use
+when computing the specified statistic, set to 1 by default to use all
+events.}
 
 \item{...}{additional arguments passed to the desired statistical function.}
 }

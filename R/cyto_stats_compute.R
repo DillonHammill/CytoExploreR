@@ -72,6 +72,9 @@
 #'   prior to computing statistics. Set this argument to "all" or NA to merge
 #'   all samples. Set to \code{"name"} by default to compute statistics on each
 #'   sample separately.
+#' @param events numeric to control the proportion or number of events to use
+#'   when computing the specified statistic, set to 1 by default to use all
+#'   events.
 #' @param ... additional arguments passed to the desired statistical function.
 #'
 #' @return data.frame or tibble containing the computed statistics in the
@@ -138,6 +141,7 @@ cyto_stats_compute <- function(x,
                                save_as = NULL,
                                select = NULL,
                                merge_by = "name",
+                               events = 1,
                                ...) {
   
   # CHECKS ---------------------------------------------------------------------
@@ -169,7 +173,12 @@ cyto_stats_compute <- function(x,
       parent = alias,
       select = select,
       channels = channels,
-      copy = TRUE
+      copy = TRUE,
+      events = if(!is.null(parent)) {
+        1
+      } else {
+        events
+      }
     )
   # MERGED ALIAS
   } else {
@@ -186,7 +195,12 @@ cyto_stats_compute <- function(x,
             format = "cytoset",
             barcode = FALSE, # ADDS UNNECESSARY SAMPLE-ID COLUMN
             channels = channels,
-            copy = TRUE
+            copy = TRUE,
+            events = if(!is.null(parent)) {
+              1
+            } else {
+              events
+            }
           )
           # EXTRACT EXPERIMENT DETAILS - (MERGING GROUPS)
           pd <- do.call(
@@ -349,7 +363,7 @@ cyto_stats_compute <- function(x,
         ), 
         names = names(alias)
       )
-      # FREQUENCY
+    # FREQUENCY
     } else if (grepl("^freq$", stat_strip)) {
       # PARENTAL COUNTS
       parent_counts <- structure(
@@ -393,7 +407,7 @@ cyto_stats_compute <- function(x,
           round(z/parent_counts*100, round)
         }
       )
-      # GEOMEMTRIC MEAN
+    # GEOMEMTRIC MEAN
     } else if (grepl("^geomean$", stat_strip)) {
       res <- structure(
         lapply(
@@ -441,7 +455,7 @@ cyto_stats_compute <- function(x,
         ), 
         names = names(alias)
       )
-      # MODE
+    # MODE
     } else if (grepl("^mode$", stat_strip)) {
       res <- structure(
         lapply(
@@ -498,7 +512,7 @@ cyto_stats_compute <- function(x,
         ), 
         names = names(alias)
       )
-      # AUC
+    # AUC
     } else if (grepl("^auc$", stat_strip)) {
       res <- structure(
         lapply(
@@ -521,7 +535,7 @@ cyto_stats_compute <- function(x,
         )
       )
     }
-    # CUSTOM STATISTIC FUNCTION
+  # CUSTOM STATISTIC FUNCTION
   } else {
     res <- structure(
       lapply(
