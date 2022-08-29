@@ -2269,6 +2269,10 @@ cyto_transform_extract <- function(x,
 #' @param path can be either \code{"auto"} or \code{"full"} to control whether
 #'   the extracted list should be labelled with the shortest or complete path to
 #'   each population in parent.
+#' @param decompensate logical indicating whether applied compensation should be
+#'   removed from the data prior to extraction, set to FALSE by default.
+#'   Optionally, users can supply a named of list of spillover matrices when a
+#'   cytoset is supplied to remove compensation from the extracted data.
 #'
 #' @return either a list of cytosets, list of cytoframe lists or a list of raw
 #'   data matrix lists.
@@ -2321,7 +2325,8 @@ cyto_data_extract <- function(x,
                               barcode = FALSE,
                               overwrite = NULL,
                               seed = NULL,
-                              path = "auto") {
+                              path = "auto",
+                              decompensate = FALSE) {
   
   # PARENT - CYTO_STATS_COMPUTE ALIAS NULL
   if(is.null(parent)) {
@@ -2345,6 +2350,13 @@ cyto_data_extract <- function(x,
   # SELECT
   if(!is.null(select) & !cyto_class(x, "flowFrame")) {
     x <- cyto_select(x, select)
+  }
+  
+  # EXTRACT SPILLOVER MATRICES
+  if(cyto_class(x, "GatingSet")) {
+    spill <- cyto_spillover_extract(x)
+  } else {
+    spill <- NULL
   }
   
   # CYTOFRAME/CYTOSET LIST
@@ -2414,13 +2426,31 @@ cyto_data_extract <- function(x,
         )
       }
       # TRANSFORM
-      if(inverse & !.all_na(trans)) {
+      if(!.all_na(trans) & inverse) {
         cs <- cyto_transform(
           cs,
           trans = trans,
           inverse = inverse,
           plot = FALSE,
           quiet = TRUE
+        )
+      }
+      # DECOMPENSATE
+      if(!all(decompensate %in% FALSE)) {
+        cs <- cyto_compensate(
+          cs,
+          spillover = if(all(decompensate %in% TRUE)) {
+            spill
+          } else {
+            decompensate
+          },
+          remove = TRUE,
+          quiet = TRUE,
+          trans = if(!.all_na(trans) & !inverse) {
+            trans
+          } else {
+            NA
+          }
         )
       }
       # FLOWFRAME - INTERNAL BACKWARDS COMPATIBILITY
@@ -3602,19 +3632,75 @@ cyto_merge_by <- function(x,
       lapply(
         seq_along(cs_list), 
         function(z){
-          # CYTOSET
-          cs <- do.call(
-            cyto_class(cs_list[[z]]), # flowSet() / cytoset()
-            list(
-              structure(
-                list(
-                  as(cs_list[[z]], 
-                     cyto_class(cs_list[[z]][[1]])) # flowFrame|cytoframe
-                ),
-                names = names(cs_list)[z]
+          # SOM CYTOSET | GATINGSET
+          if("SOM_counts" %in% cyto_channels(cs_list[[z]])) {
+            # EXTRACT SOM CODES & DIME REDUCTION
+            SOM <- cyto_exprs(
+              cs_list[[z]][[1]],
+              channels = cyto_channels(
+                cs_list[[z]],
+                exclude = "SOM_counts"
+              ),
+              drop = FALSE
+            )
+            # COUNT MATRIX
+            SOM_counts <- do.call(
+              "cbind",
+              cyto_apply(
+                cs_list[[z]],
+                function(w) {
+                  return(w)
+                },
+                input = "matrix",
+                channels = "SOM_counts",
+                simplify = FALSE,
+                copy = FALSE
               )
             )
-          )
+            # EXTRACT & SUM COUNTS FOR GROUP
+            SOM_counts <- apply(
+              SOM_counts,
+              1,
+              "sum"
+            )
+            # APPEND COUNTS
+            SOM <- cbind(
+              SOM,
+              "SOM_counts" = SOM_counts
+            )
+            # CREATE NEW CYTOSET
+            cs <- do.call(
+              cyto_class(cs_list[[z]]), # flowSet()|cytoset()
+              list(
+                structure(
+                  list(
+                    as(
+                      SOM,
+                      cyto_class(cs_list[[z]][[1]]) # flowFrame|cytoframe
+                    )
+                  ),
+                  names = names(cs_list)[z]
+                )
+              )
+            )
+          # CYTOSET | GATINGSET
+          } else {
+            # CYTOSET
+            cs <- do.call(
+              cyto_class(cs_list[[z]]), # flowSet()|cytoset()
+              list(
+                structure(
+                  list(
+                    as(
+                      cs_list[[z]], 
+                      cyto_class(cs_list[[z]][[1]])  # flowFrame|cytoframe
+                    )
+                  ),
+                  names = names(cs_list)[z]
+                )
+              )
+            )
+          }
           # EXPERIMENT DETAILS
           if(!all(merge_by %in% "all") & !.all_na(merge_by)) {
             cyto_details(cs) <- cbind(
@@ -3629,19 +3715,71 @@ cyto_merge_by <- function(x,
     )
   # CONVERT EACH GROUP TO CYTOFRAME
   } else {
-    structure(
-      lapply(
-        seq_along(cs_list), 
-        function(z) {
-          # flowFrame|cytoframe
-          as(
-            cs_list[[z]],
-            cyto_class(cs_list[[z]][[1]])
-          ) 
-        }
-      ),
-      names = names(cs_list)
-    )
+    # SOM CYTOSET|GATINGSET
+    if("SOM_counts" %in% cyto_channels(cs_list[[z]])) {
+      structure(
+        lapply(
+          seq_along(cs_list),
+          function(z) {
+            # EXTRACT SOM CODES & DIME REDUCTION
+            SOM <- cyto_exprs(
+              cs_list[[z]][[1]],
+              channels = cyto_channels(
+                cs_list[[z]],
+                exclude = "SOM_counts"
+              ),
+              drop = FALSE
+            )
+            # COUNT MATRIX
+            SOM_counts <- do.call(
+              "cbind",
+              cyto_apply(
+                cs_list[[z]],
+                function(w) {
+                  return(w)
+                },
+                input = "matrix",
+                channels = "SOM_counts",
+                simplify = FALSE,
+                copy = FALSE
+              )
+            )
+            # EXTRACT & SUM COUNTS FOR GROUP
+            SOM_counts <- apply(
+              SOM_counts,
+              1,
+              "sum"
+            )
+            # APPEND COUNTS
+            SOM <- cbind(
+              SOM,
+              "SOM_counts" = SOM_counts
+            )
+            # CYTOFRAME
+            as(
+              SOM,
+              cyto_class(cs_list[[z]][[1]])
+            ) 
+          }
+        ),
+        names = names(cs_list)
+      )
+    # CYTOSET | GATINGSET
+    } else {
+      structure(
+        lapply(
+          seq_along(cs_list), 
+          function(z) {
+            # flowFrame|cytoframe
+            as(
+              cs_list[[z]],
+              cyto_class(cs_list[[z]][[1]])
+            ) 
+          }
+        ),
+        names = names(cs_list)
+      )
+    }
   }
   
 }
@@ -4065,16 +4203,19 @@ cyto_split <- function(x,
 #'   for each event within \code{x}, set to \code{Sample-ID} channel by default.
 #' @param names a vector of file names for the new FCS files. \code{names} is
 #'   also passed to \code{cyto_split()} if \code{split = TRUE} to provides the
-#'   original names for the split samples prior to writing new FCS
-#'   files.
+#'   original names for the split samples prior to writing new FCS files.
 #' @param overwrite logical flag to control how \code{save_as} should be handled
 #'   if files already exist in this directory, users will be asked interactively
 #'   if \code{overwrite} is not manually supplied here.
+#' @param inverse logical indicating whether inverse transformations should be
+#'   applied to the data prior to export to obtain data on the original linear
+#'   scale, set to FALSE by default.
+#' @param decompensate logical indicating whether applied compensation should be
+#'   removed from the data prior to extraction, set to FALSE by default.
+#'   Optionally, users can supply a named of list of spillover matrices when a
+#'   \code{cytoset} is supplied to remove compensation from the extracted data.
 #' @param ... additional arguments passed to \code{\link{cyto_data_extract}} to
-#'   allow control over how the data is formatted prior to saving. Setting
-#'   \code{inverse = TRUE} will export data on the linear scale but be sure to
-#'   set \code{copy = TRUE} as well if you only want to inverse data
-#'   transformations for export but leave your data unchanged.
+#'   allow control over how the data is formatted prior to saving.
 #'
 #' @return a GatingHierarchy, GatingSet or a list of cytosets.
 #'
@@ -4108,6 +4249,8 @@ cyto_save <- function(x,
                       id = NULL,
                       names = NULL,
                       overwrite = NULL,
+                      inverse = FALSE,
+                      decompensate = FALSE,
                       ...) {
   
   # PARENT
@@ -4253,6 +4396,13 @@ cyto_save <- function(x,
       parent = parent,
       format = "cytoset",
       path = "auto",
+      inverse = inverse,
+      copy = if(inverse | !all(decompensate %in% FALSE)) {
+        TRUE
+      } else {
+        FALSE
+      },
+      decompensate = decompensate,
       ...
     )
     # FORMAT NAMES - FILE FOLDER NAMES DROP / & SPACES
@@ -5940,6 +6090,9 @@ cyto_details_save <- function(x,
 #'   prior to applying compensation for fluorescent spillover, set to FALSE by
 #'   default. Setting this argument to TRUE will leave the supplied data
 #'   untouched and return a copy of the data with compensation applied.
+#' @param trans an object of class \code{transformerList} containing the
+#'   transformer definitions that have been applied to the data. \code{trans} is
+#'   only required for objects of class \code{cytoframe} or \code{cytoset}.
 #' @param quiet logical indicating whether messages should be printed, set to
 #'   FALSE by default to print messages.
 #' @param ... not in use.
@@ -5996,6 +6149,7 @@ cyto_compensate.GatingSet <- function(x,
                                       select = 1,
                                       remove = FALSE,
                                       copy = FALSE,
+                                      trans = NA,
                                       quiet = FALSE,
                                       ...) {
   
@@ -6025,7 +6179,9 @@ cyto_compensate.GatingSet <- function(x,
   }
   
   # TRANSFORMATIONS
-  trans <- cyto_transformers_extract(x)
+  if(.all_na(trans)) {
+    trans <- cyto_transformers_extract(x)
+  }
   
   # CYTOSET
   cs <- cyto_data_extract(
@@ -6138,6 +6294,7 @@ cyto_compensate.flowSet <- function(x,
                                     remove = FALSE,
                                     copy = FALSE,
                                     quiet = FALSE,
+                                    trans = NA,
                                     ...) {
   
   # PREPARE SPILLOVER MATRIX
@@ -6150,6 +6307,17 @@ cyto_compensate.flowSet <- function(x,
   # COPY
   if(copy) {
     x <- cyto_copy(x)
+  }
+  
+  # INVERSE TRANSFORMATIONS
+  if(!.all_na(trans)) {
+    x <- cyto_transform(
+      x,
+      trans = trans,
+      inverse = TRUE,
+      plot = FALSE,
+      quiet = TRUE
+    )
   }
   
   # REMOVE COMPENSATION
@@ -6170,8 +6338,23 @@ cyto_compensate.flowSet <- function(x,
     return(x)
   # APPLY COMPENSATION
   } else if (remove == FALSE) {
-    flowCore::compensate(x, spill)
+    x <- flowCore::compensate(x, spill)
   }
+  
+  # RE-APPLY TRANSFORMATIONS
+  if(!.all_na(trans)) {
+    x <- cyto_transform(
+      x,
+      trans = trans,
+      inverse = FALSE,
+      plot = FALSE,
+      quiet = TRUE
+    )
+  }
+  
+  # RETURN COMPENSATED | DECOMPENSATED DATA
+  return(x)
+  
 }
 
 #' @rdname cyto_compensate
@@ -6182,6 +6365,7 @@ cyto_compensate.flowFrame <- function(x,
                                       remove = FALSE,
                                       copy = FALSE,
                                       quiet = FALSE,
+                                      trans = NA,
                                       ...) {
   
   # PREPARE SPILLOVER MATRIX
@@ -6195,13 +6379,39 @@ cyto_compensate.flowFrame <- function(x,
     x <- cyto_copy(x)
   }
   
+  # INVERSE TRANSFORMATIONS
+  if(!.all_na(trans)) {
+    x <- cyto_transform(
+      x,
+      trans = trans,
+      inverse = TRUE,
+      plot = FALSE,
+      quiet = TRUE
+    )
+  }
+  
   # REMOVE COMPENSATION
   if (remove == TRUE) {
-    decompensate(x, spill)
+    x <- decompensate(x, spill)
     # APPLY COMPENSATION
   } else if (remove == FALSE) {
-    flowCore::compensate(x, spill)
+    x <- flowCore::compensate(x, spill)
   }
+  
+  # RE-APPLY TRANSFORMATIONS
+  if(!.all_na(trans)) {
+    x <- cyto_transform(
+      x,
+      trans = trans,
+      inverse = FALSE,
+      plot = FALSE,
+      quiet = TRUE
+    )
+  }
+  
+  # RETURN COMPENSATED | DECOMPENSATED DATA
+  return(x)
+  
 }
 
 ## .CYTO_SPILLOVER_PREPARE -----------------------------------------------------

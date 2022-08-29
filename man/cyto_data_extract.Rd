@@ -20,7 +20,8 @@ cyto_data_extract(
   barcode = FALSE,
   overwrite = NULL,
   seed = NULL,
-  path = "auto"
+  path = "auto",
+  decompensate = FALSE
 )
 }
 \arguments{
@@ -83,6 +84,11 @@ supplied.}
 \item{path}{can be either \code{"auto"} or \code{"full"} to control whether
 the extracted list should be labelled with the shortest or complete path to
 each population in parent.}
+
+\item{decompensate}{logical indicating whether applied compensation should be
+removed from the data prior to extraction, set to FALSE by default.
+Optionally, users can supply a named of list of spillover matrices when a
+cytoset is supplied to remove compensation from the extracted data.}
 }
 \value{
 either a list of cytosets, list of cytoframe lists or a list of raw
