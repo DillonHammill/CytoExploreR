@@ -274,11 +274,32 @@ cyto_gate_indices <- function(x,
     )
   }
 
+  # NODE PRIORITY
+  queue <- structure(
+    lapply(
+      nodes,
+      function(z) {
+        # FULL PATH NODE
+        node <- cyto_nodes_convert(
+          x,
+          nodes = z,
+          path = "full"
+        )
+        # NODE FRAGMENTS
+        splt <- strsplit(
+          node,
+          "\\/"
+        )[[1]]
+        length(splt[!.empty(splt)])
+      }
+    ),
+    names = nodes
+  )
+  
   # ADD PARENT NODE
   nodes <- c(parent, nodes)
   
   # TODO: DROP PARENT AS FACTOR LEVEL IF REMOVED
-  # TODO: REPLACE AMBIGUOUS NODES WITH SMALLEST NODE? OR OTHER?
   
   # EXTRACT POPULATION INDICIES
   structure(
@@ -303,13 +324,16 @@ cyto_gate_indices <- function(x,
                 i <- which(v)
                 # CONFLICT
                 if(length(i) > 2) {
-                  warning(
-                    paste0(
-                      "Replacing ambiguous cluster labels with ",
-                      parent, "!"
-                    )
+                  # CHECK NODE PRIORITY
+                  return(
+                    colnames(ind)[
+                      which.max(
+                        unlist(
+                          queue[colnames(ind)]
+                        )
+                      )
+                    ]
                   )
-                  return(colnames(ind)[1])
                 # PARENT
                 } else if(length(i) == 1) {
                   return(colnames(ind)[i])
