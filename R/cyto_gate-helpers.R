@@ -273,7 +273,10 @@ cyto_gate_indices <- function(x,
       path = "auto"
     )
   }
-
+  
+  # ADD PARENT NODE
+  nodes <- c(parent, nodes)
+  
   # NODE PRIORITY
   queue <- structure(
     lapply(
@@ -295,9 +298,6 @@ cyto_gate_indices <- function(x,
     ),
     names = nodes
   )
-  
-  # ADD PARENT NODE
-  nodes <- c(parent, nodes)
   
   # TODO: DROP PARENT AS FACTOR LEVEL IF REMOVED
   
@@ -329,7 +329,7 @@ cyto_gate_indices <- function(x,
                     colnames(ind)[
                       which.max(
                         unlist(
-                          queue[colnames(ind)]
+                          queue[colnames(ind)[i]]
                         )
                       )
                     ]
