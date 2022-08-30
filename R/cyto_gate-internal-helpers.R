@@ -52,17 +52,17 @@
   xmin <- lims[1]
   xmax <- lims[2]
   xrng <- xmax - xmin
-  xpad <- (xrng - xrng/1.04)/2 # 2% BUFFER EITHER SIDE
-  xmin <- xmin + 0.5 * xpad # 1% BUFFER
-  xmax <- xmax - 0.5 * xpad # 1% BUFFER
+  xpad <- (xrng - xrng/1.04) # 4% BUFFER EITHER SIDE
+  xmin <- xmin + 0.5 * xpad # 2% BUFFER
+  xmax <- xmax - 0.5 * xpad # 2% BUFFER
   
   # Y LIMITS
   ymin <- lims[3]
   ymax <- lims[4]
   yrng <- ymax - ymin
-  ypad <- (yrng - yrng/1.04)/2 # 2% BUFFER EITHER SIDE
-  ymin <- ymin + 0.5 * ypad # 1% BUFFER
-  ymax <- ymax - 0.5 * ypad # 1% BUFFER
+  ypad <- (yrng - yrng/1.04) # 4% BUFFER EITHER SIDE
+  ymin <- ymin + 0.5 * ypad # 2% BUFFER
+  ymax <- ymax - 0.5 * ypad # 2% BUFFER
   
   # PREPARE GATE ---------------------------------------------------------------
   
@@ -158,17 +158,17 @@
   xmin <- lims[1]
   xmax <- lims[2]
   xrng <- xmax - xmin
-  xpad <- (xrng - xrng/1.04)/2 # 2% BUFFER EITHER SIDE
-  xmin <- xmin + 0.5 * xpad # 1% BUFFER
-  xmax <- xmax - 0.5 * xpad # 1% BUFFER
+  xpad <- (xrng - xrng/1.04) # 4% BUFFER EITHER SIDE
+  xmin <- xmin + 0.5 * xpad # 2% BUFFER
+  xmax <- xmax - 0.5 * xpad # 2% BUFFER
   
   # Y LIMITS
   ymin <- lims[3]
   ymax <- lims[4]
   yrng <- ymax - ymin
-  ypad <- (yrng - yrng/1.04)/2 # 2% BUFFER EITHER SIDE
-  ymin <- ymin + 0.5 * ypad # 1% BUFFER
-  ymax <- ymax - 0.5 * ypad # 1% BUFFER
+  ypad <- (yrng - yrng/1.04) # 4% BUFFER EITHER SIDE
+  ymin <- ymin + 0.5 * ypad # 2% BUFFER
+  ymax <- ymax - 0.5 * ypad # 2% BUFFER
   
   # PREPARE GATE ---------------------------------------------------------------
   
@@ -277,17 +277,17 @@
   xmin <- lims[1]
   xmax <- lims[2]
   xrng <- xmax - xmin
-  xpad <- (xrng - xrng/1.04)/2 # 2% BUFFER EITHER SIDE
-  xmin <- xmin + 0.5 * xpad # 1% BUFFER
-  xmax <- xmax - 0.5 * xpad # 1% BUFFER
+  xpad <- (xrng - xrng/1.04) # 4% BUFFER EITHER SIDE
+  xmin <- xmin + 0.5 * xpad # 2% BUFFER
+  xmax <- xmax - 0.5 * xpad # 2% BUFFER
   
   # Y LIMITS
   ymin <- lims[3]
   ymax <- lims[4]
   yrng <- ymax - ymin
-  ypad <- (yrng - yrng/1.04)/2 # 2% BUFFER EITHER SIDE
-  ymin <- ymin + 0.5 * ypad # 1% BUFFER
-  ymax <- ymax - 0.5 * ypad # 1% BUFFER
+  ypad <- (yrng - yrng/1.04) # 4% BUFFER EITHER SIDE
+  ymin <- ymin + 0.5 * ypad # 2% BUFFER
+  ymax <- ymax - 0.5 * ypad # 2% BUFFER
   
   # PREPARE GATE ---------------------------------------------------------------
   
@@ -370,17 +370,17 @@
   xmin <- lims[1]
   xmax <- lims[2]
   xrng <- xmax - xmin
-  xpad <- (xrng - xrng/1.04)/2 # 2% BUFFER EITHER SIDE
-  xmin <- xmin + 0.5 * xpad # 1% BUFFER
-  xmax <- xmax - 0.5 * xpad # 1% BUFFER
+  xpad <- (xrng - xrng/1.04) # 4% BUFFER EITHER SIDE
+  xmin <- xmin + 0.5 * xpad # 2% BUFFER
+  xmax <- xmax - 0.5 * xpad # 2% BUFFER
   
   # Y LIMITS
   ymin <- lims[3]
   ymax <- lims[4]
   yrng <- ymax - ymin
-  ypad <- (yrng - yrng/1.04)/2 # 2% BUFFER EITHER SIDE
-  ymin <- ymin + 0.5 * ypad # 1% BUFFER
-  ymax <- ymax - 0.5 * ypad # 1% BUFFER
+  ypad <- (yrng - yrng/1.04) # 4% BUFFER EITHER SIDE
+  ymin <- ymin + 0.5 * ypad # 2% BUFFER
+  ymax <- ymax - 0.5 * ypad # 2% BUFFER
   
   # PREPARE GATE ---------------------------------------------------------------
   

@@ -65,18 +65,18 @@ cyto_plot_gate.rectangleGate <- function(gate,
   xmin <- lims[1]
   xmax <- lims[2]
   xrng <- xmax - xmin
-  xpad <- (xrng - xrng / 1.04) / 2
-  xmin <- xmin + 0.5 * xpad # 1% BUFFER
-  xmax <- xmax - 0.5 * xpad # 1% BUFFER
+  xpad <- (xrng - xrng / 1.04)
+  xmin <- xmin + 0.5 * xpad # 2% BUFFER
+  xmax <- xmax - 0.5 * xpad # 2% BUFFER
   xrng <- xmax - xmin
   
   # Y LIMITS
   ymin <- lims[3]
   ymax <- lims[4]
   yrng <- ymax - ymin
-  ypad <- (yrng - yrng / 1.04) / 2
-  ymin <- ymin + 0.5 * ypad # 1% BUFFER
-  ymax <- ymax - 0.5 * ypad # 1% BUFFER
+  ypad <- (yrng - yrng / 1.04)
+  ymin <- ymin + 0.5 * ypad # 2% BUFFER
+  ymax <- ymax - 0.5 * ypad # 2% BUFFER
   yrng <- ymax - ymin
   
   # CYTO_PLOT_THEME ------------------------------------------------------------
@@ -195,18 +195,18 @@ cyto_plot_gate.polygonGate <- function(gate,
   xmin <- lims[1]
   xmax <- lims[2]
   xrng <- xmax - xmin
-  xpad <- (xrng - xrng / 1.04) / 2
-  xmin <- xmin + 0.5 * xpad # 1% BUFFER
-  xmax <- xmax - 0.5 * xpad # 1% BUFFER
+  xpad <- (xrng - xrng / 1.04)
+  xmin <- xmin + 0.5 * xpad # 2% BUFFER
+  xmax <- xmax - 0.5 * xpad # 2% BUFFER
   xrng <- xmax - xmin
   
   # Y LIMITS
   ymin <- lims[3]
   ymax <- lims[4]
   yrng <- ymax - ymin
-  ypad <- (yrng - yrng / 1.04) / 2
-  ymin <- ymin + 0.5 * ypad # 1% BUFFER
-  ymax <- ymax - 0.5 * ypad # 1% BUFFER
+  ypad <- (yrng - yrng / 1.04)
+  ymin <- ymin + 0.5 * ypad # 2% BUFFER
+  ymax <- ymax - 0.5 * ypad # 2% BUFFER
   yrng <- ymax - ymin
   
   
@@ -344,18 +344,18 @@ cyto_plot_gate.ellipsoidGate <- function(gate,
   xmin <- lims[1]
   xmax <- lims[2]
   xrng <- xmax - xmin
-  xpad <- (xrng - xrng / 1.04) / 2
-  xmin <- xmin + 0.5 * xpad # 1% BUFFER
-  xmax <- xmax - 0.5 * xpad # 1% BUFFER
+  xpad <- (xrng - xrng / 1.04)
+  xmin <- xmin + 0.5 * xpad # 2% BUFFER
+  xmax <- xmax - 0.5 * xpad # 2% BUFFER
   xrng <- xmax - xmin
   
   # Y LIMITS
   ymin <- lims[3]
   ymax <- lims[4]
   yrng <- ymax - ymin
-  ypad <- (yrng - yrng / 1.04) / 2
-  ymin <- ymin + 0.5 * ypad # 1% BUFFER
-  ymax <- ymax - 0.5 * ypad # 1% BUFFER
+  ypad <- (yrng - yrng / 1.04)
+  ymin <- ymin + 0.5 * ypad # 2% BUFFER
+  ymax <- ymax - 0.5 * ypad # 2% BUFFER
   yrng <- ymax - ymin
   
   

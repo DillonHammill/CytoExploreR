@@ -11,12 +11,12 @@
 #'   the input space, set to 30 by default.
 #' @param theta set to 0 for exact t-SNE. If non-zero, then will use either
 #'   Barnes Hut or FIt-SNE based on nbody_algo. If Barnes Hut, then this
-#'   determins the accuracy of BH approximation. Set to 0.5 by default.
+#'   determines the accuracy of BH approximation. Set to 0.5 by default.
 #' @param max_iter number of iterations of t-SNE to run, set to 750 by default.
-#' @param fft_not_bh if theta is nonzero, this determins whether to use FIt-SNE
+#' @param fft_not_bh if theta is nonzero, this determines whether to use FIt-SNE
 #'   or Barnes Hut approximation, set to TRUE by default for FIt-SNE.
 #' @param ann_not_vptree use vp-trees (as in bhtsne) or approximate nearest
-#'   neighbors (default). Set to be TRUE for approximate nearest neighbors.
+#'   neighbors (default). Set to be TRUE for approximate nearest neighbours.
 #' @param exaggeration_factor coefficient for early exaggeration (>1), set to 12
 #'   by default.
 #' @param no_momentum_during_exag set to 0 to use momentum and other

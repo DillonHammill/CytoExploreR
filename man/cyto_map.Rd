@@ -14,6 +14,7 @@ cyto_map(
   events = 1,
   label = NULL,
   merge_by = "all",
+  nodes = NULL,
   seed = NULL,
   inverse = FALSE,
   trans = NA,
@@ -78,6 +79,12 @@ be merged prior to performing dimension-reduction, set to \code{"all"} by
 default to create a single dimension-reduced map for all samples.
 Alternatively, a different dimension-reduced map will be created for each
 group of samples merged by \code{cyto-merge_by}.}
+
+\item{nodes}{a vector of population names representing descendant clustered
+populations of the specified \code{parent}. If supplied, a vector of
+cluster labels will be generated and passed to \code{Haisu} to provide
+improved embedding using any of the natively supported non-linear dimension
+reduction algorithms.}
 
 \item{seed}{numeric passed to \code{cyto_data_extract} to ensure consistent
 sampling between runs, set to NULL by default to off this feature.}

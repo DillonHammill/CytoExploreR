@@ -13,6 +13,8 @@ cyto_save(
   id = NULL,
   names = NULL,
   overwrite = NULL,
+  inverse = FALSE,
+  decompensate = FALSE,
   ...
 )
 }
@@ -46,18 +48,23 @@ for each event within \code{x}, set to \code{Sample-ID} channel by default.}
 
 \item{names}{a vector of file names for the new FCS files. \code{names} is
 also passed to \code{cyto_split()} if \code{split = TRUE} to provides the
-original names for the split samples prior to writing new FCS
-files.}
+original names for the split samples prior to writing new FCS files.}
 
 \item{overwrite}{logical flag to control how \code{save_as} should be handled
 if files already exist in this directory, users will be asked interactively
 if \code{overwrite} is not manually supplied here.}
 
+\item{inverse}{logical indicating whether inverse transformations should be
+applied to the data prior to export to obtain data on the original linear
+scale, set to FALSE by default.}
+
+\item{decompensate}{logical indicating whether applied compensation should be
+removed from the data prior to extraction, set to FALSE by default.
+Optionally, users can supply a named of list of spillover matrices when a
+\code{cytoset} is supplied to remove compensation from the extracted data.}
+
 \item{...}{additional arguments passed to \code{\link{cyto_data_extract}} to
-allow control over how the data is formatted prior to saving. Setting
-\code{inverse = TRUE} will export data on the linear scale but be sure to
-set \code{copy = TRUE} as well if you only want to inverse data
-transformations for export but leave your data unchanged.}
+allow control over how the data is formatted prior to saving.}
 }
 \value{
 a GatingHierarchy, GatingSet or a list of cytosets.

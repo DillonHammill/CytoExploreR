@@ -49,15 +49,15 @@ the input space, set to 30 by default.}
 
 \item{theta}{set to 0 for exact t-SNE. If non-zero, then will use either
 Barnes Hut or FIt-SNE based on nbody_algo. If Barnes Hut, then this
-determins the accuracy of BH approximation. Set to 0.5 by default.}
+determines the accuracy of BH approximation. Set to 0.5 by default.}
 
 \item{max_iter}{number of iterations of t-SNE to run, set to 750 by default.}
 
-\item{fft_not_bh}{if theta is nonzero, this determins whether to use FIt-SNE
+\item{fft_not_bh}{if theta is nonzero, this determines whether to use FIt-SNE
 or Barnes Hut approximation, set to TRUE by default for FIt-SNE.}
 
 \item{ann_not_vptree}{use vp-trees (as in bhtsne) or approximate nearest
-neighbors (default). Set to be TRUE for approximate nearest neighbors.}
+neighbors (default). Set to be TRUE for approximate nearest neighbours.}
 
 \item{stop_early_exag_iter}{when to switch off early exaggeration, set to 250
 by default.}

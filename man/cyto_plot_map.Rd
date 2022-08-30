@@ -14,6 +14,7 @@ cyto_plot_map(
   order = "channels",
   point_col = NA,
   point_col_scale = NA,
+  point_size = 2,
   layout,
   header,
   title,
@@ -63,6 +64,9 @@ of each plot, set to all fluorescent channels by default.}
 \item{point_col_scale}{vector of colours to use for the colour scale within
 each plot. \code{point_col_scale} can also be supplied as a list of length
 \code{point_col} to use a different colour scale for each marker/channel.}
+
+\item{point_size}{numeric to control the size of points in 2-D scatter plots
+set to 2 by default.}
 
 \item{layout}{a vector of the length 2 of form \code{c(#rows, #columns)} or a
 matrix indicating the dimensions of the grid for plotting.}

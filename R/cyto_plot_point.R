@@ -23,7 +23,10 @@
 #'   \code{"."} by default to maximise plotting speed.  See
 #'   \code{\link[graphics:par]{pch}} for alternatives.
 #' @param point_size numeric to control the size of points in 2-D scatter plots
-#'   set to 2 by default.
+#'   set to 2 by default. Optionally a list containing the point sizes for every
+#'   point or list named with a channel/marker and scaling factor \code{e.g.
+#'   list("SOM_counts" = 300)}. SOM counts will be scaled as proportions within
+#'   each cytoframe and applied to the point size scaling factor.
 #' @param point_col_scale vector of ordered colours to use for the density
 #'   colour gradient of points.
 #' @param point_col_smooth logical indicating whether the 2D binned counts
@@ -167,14 +170,28 @@ cyto_plot_point <- function(x,
     )
   }
   
-  # SORT EVENTS BY COLOUR AND|OR SIZE
+  # SORT EVENTS BY COLOUR
   sort_by <- c()
   if(args$point_col[1] %in% c(cyto_channels(args$x[[1]]),
                               cyto_markers(args$x[[1]]))) {
     sort_by <- c(sort_by, "col")
   }
+  
+  # SORT EVENTS BY SIZE
   if(cyto_class(args$point_size, "list", TRUE)) {
     sort_by <- c(sort_by, "size")
+    # CHANNEL + SCALING FACTOR
+    if(!is.null(names(args$point_size[1])) & 
+       length(args$point_size[[1]]) == 1) {
+      fct <- args$point_size[[1]]
+      args$point_size[[1]] <- cyto_exprs(
+        args$x[[1]][[1]],
+        channels = names(args$point_size[1]),
+        drop = TRUE
+      )
+      args$point_size[[1]] <- (args$point_size[[1]]/sum(args$point_size[[1]])) *
+        fct
+    }
   }
   
   # TODO: SORTING ONLY PERFORMED ON BASE LAYER
@@ -209,10 +226,11 @@ cyto_plot_point <- function(x,
         )
       }
     }
-    # SORT EVENTS
+    # SORT EVENTS - COPY REQUIRED
+    args$x[[1]] <- cyto_copy(args$x[[1]])
     cyto_exprs(args$x[[1]]) <- list(
-      cyto_exprs(args$x[[1]])[[1]][
-        ind,
+      cyto_exprs(args$x[[1]], drop = FALSE)[[1]][
+        ind, , drop = FALSE
       ]
     )
     # SORT POINT_SIZE - POINT_COL HANDLED LATER

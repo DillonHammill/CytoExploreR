@@ -671,7 +671,19 @@
       lapply(
         x,
         function(z) {
-          if(!cyto_class(z, c("flowSet", "GatingSet"))){
+          if(cyto_class(z, "list", TRUE)) {
+            z <- structure(
+              lapply(
+                z,
+                function(w) {
+                  if(!cyto_class(w, c("flowSet"))) {
+                    as(w, "cytoset")
+                  }
+                }
+              ),
+              names = names(z)
+            )
+          } else if(!cyto_class(z, c("flowSet", "GatingSet"))){
             z <- as(z, "cytoset")
           }
           return(z)
@@ -1198,7 +1210,7 @@
         if(!.all_na(z)) {
           # RANGE
           rng <- diff(z)
-          pad <- (rng - rng / 1.04) / 2
+          pad <- (rng - rng / 1.04)
           return(
             c(z[1] - pad,
               z[2] + pad)
@@ -2219,7 +2231,7 @@
   xmin <- lims[1]
   xmax <- lims[2]
   xrng <- xmax - xmin
-  xpad <- (xrng - xrng / 1.04) / 2 # 2% BUFFER
+  xpad <- (xrng - xrng / 1.04) # 4% BUFFER
   xmin <- xmin + xpad
   xmax <- xmax - xpad
   xrng <- xmax - xmin
@@ -2228,7 +2240,7 @@
   ymin <- lims[3]
   ymax <- lims[4]
   yrng <- ymax - ymin
-  ypad <- (yrng - yrng / 1.04) / 2 # 2% BUFFER
+  ypad <- (yrng - yrng / 1.04) # 4% BUFFER
   ymin <- ymin + ypad
   ymax <- ymax - ypad
   yrng <- ymax - ymin
@@ -3065,7 +3077,16 @@
       x = legend_x,
       y = cnt + 0.6 * lgnd_height,
       legend = paste0("   ", rev(legend_text)), # HACKY WAY TO ALIGN TEXT
-      col = rev(legend_point_col),
+      col = if(any(point_shape %in% c(21:25))) {
+        "black"
+      } else {
+        rev(legend_point_col)
+      },
+      bg = if(any(point_shape %in% c(21:25))) {
+        rev(legend_point_col)
+      } else {
+        "black"
+      },
       pch = rev(point_shape),
       pt.cex = 2.4,
       xpd = TRUE,
@@ -3537,6 +3558,8 @@
                                  key_title = "",
                                  axes_trans = NA) {
   
+  # KEY_SCALE -> 2% BUFFERING EITHER SIDE
+  
   # 1D | SPECTRA - REMOVE KEY 
   if(length(channels) != 2) {
     return(
@@ -3563,22 +3586,26 @@
   # X AXES LIMITS REQUIRED - CROP GRID
   if(any(is.na(xlim))) {
     xlim <- .par("usr")[[1]][1:2]
+    xpad <- 0
   } else {
     # BUFFER XLIM - 4% MATCH PLOT LIMITS
+    xpad <- (diff(xlim) - diff(xlim) / 1.04)
     xlim <- c(
-      min(xlim) - (diff(xlim) - diff(xlim) / 1.04) / 2,
-      max(xlim) + (diff(xlim) - diff(xlim) / 1.04) / 2
+      min(xlim) - xpad,
+      max(xlim) + xpad
     )
   }
   
   # Y AXES LIMITS REQUIRED - CROP GRID
   if(any(is.na(ylim))) {
     ylim <- .par("usr")[[1]][3:4]
+    ypad <- 0
   } else {
     # BUFFER YLIM - 4% MATCH PLOT LIMITS
+    ypad <- (diff(ylim) - diff(ylim) / 1.04)
     ylim <- c(
-      min(ylim) - (diff(ylim) - diff(ylim) / 1.04) / 2,
-      max(ylim) + (diff(ylim) - diff(ylim) / 1.04) / 2
+      min(ylim) - ypad,
+      max(ylim) + ypad
     )
   }
   
@@ -3702,14 +3729,23 @@
               # PREPARE AXIS TICKS & LABELS
             } else {
               pad <- (diff(key_range[[z]]) - diff(key_range[[z]])/1.04)/2
+              # AXES_TEXT ADDS 4% PADDING 
               k <- .cyto_plot_axes_text(
                 channels = point_col[[1]],
-                axes_range = list(key_range[[z]]),
+                axes_range = list(
+                  c(
+                    min(key_range[[z]]) + pad,
+                    max(key_range[[z]]) - pad
+                  )
+                ),
                 axes_trans = axes_trans,
                 rescale = key_y,
                 format = TRUE
               )[[1]]
-              k$range <- c(min(key_range[[z]]) - pad, max(key_range[[z]]) + pad)
+              k$range <- c(
+                min(key_range[[z]]) - pad,
+                max(key_range[[z]]) + pad
+              )
               k$title <- if(.empty(key_title[z])) {
                 unname(
                   cyto_markers_extract(
@@ -3795,13 +3831,22 @@
               # PREPARE AXIS TICKS & LABELS
             } else {
               pad <- (diff(key_range[[z]]) - diff(key_range[[z]])/1.04)/2
+              # AXES_TEXT ADDS 4% PADDING
               k <- .cyto_plot_axes_text(
                 channels = NA,
-                axes_range = list(key_range[[z]]),
+                axes_range = list(
+                  c(
+                    min(key_range[[z]]) + pad,
+                    max(key_range[[z]]) - pad
+                  )
+                ),
                 rescale = key_y,
                 format = TRUE
               )[[1]]
-              k$range <- c(min(key_range[[z]]) - pad, max(key_range[[z]]) + pad)
+              k$range <- c(
+                min(key_range[[z]]) - pad, 
+                max(key_range[[z]]) + pad
+              )
               k$title <- key_title[z]
               k$key <- key
               k$label <- unname(k$label)
@@ -3874,14 +3919,22 @@
                 # PREPARE AXIS TICKS & LABELS
               } else {
                 pad <- (diff(key_range[[z]]) - diff(key_range[[z]])/1.04)/2
+                # AXES_TEXT ADDS 4% BUFFER
                 k <- .cyto_plot_axes_text(
                   channels = NA,
-                  axes_range = list(key_range[[z]]),
+                  axes_range = list(
+                    c(
+                      min(key_range[[z]]) + pad,
+                      max(key_range[[z]]) - pad
+                    )
+                  ),
                   rescale = key_y,
                   format = TRUE
                 )[[1]]
-                k$range <- c(min(key_range[[z]]) - pad, 
-                             max(key_range[[z]]) + pad)
+                k$range <- c(
+                  min(key_range[[z]]) - pad, 
+                  max(key_range[[z]]) + pad
+                )
                 k$title <- if(.empty(key_title[z])) {
                   "count"
                 } else {
@@ -3903,9 +3956,12 @@
             seq_along(key_range),
             function(z){
               pad <- (diff(c(0,1)) - diff(c(0,1))/1.04)/2
+              # AXES_TEXT ADDS 4% PADDING
               k <- .cyto_plot_axes_text(
                 channels = NA,
-                axes_range = list(c(0, 1)),
+                axes_range = list(
+                  c(0 + pad, 1 - pad)
+                ),
                 rescale = key_y,
                 format = TRUE
               )[[1]]
@@ -4053,13 +4109,16 @@
   }
   
   # COMBINED/ALL EVENTS
-  title <- LAPPLY(title, function(z){
-    if(!.all_na(z)) {
-      z <- gsub("^all", "Combined Events", z)
-      z <- gsub("root", "All Events", z)
+  title <- LAPPLY(
+    title, 
+    function(z){
+      if(!.all_na(z)) {
+        z <- gsub("^all", "Combined Events", z)
+        z <- gsub("root", "All Events", z)
+      }
+      return(z)
     }
-    return(z)
-  })
+  )
   
   return(title)
 }
@@ -4210,7 +4269,12 @@
   }
   
   # BASE LAYER EVENTS 
-  N <- nrow(cyto_exprs(x[[1]][[1]]))
+  N <- nrow(
+    cyto_exprs(
+      x[[1]][[1]],
+      drop = FALSE
+    )
+  )
   
   # POINT_COL - MARKERS | CHANNELS | COLOURS
   if(cyto_class(args$point_col[[1]], "character")) {
@@ -4238,7 +4302,7 @@
           # USED STORED SETTINGS
           if(args$point_col[[1]] %in% colnames(cal)) {
             rng <- cal[, args$point_col[[1]]]
-            pad <- (diff(rng) - diff(rng)/1.04)/2
+            pad <- (diff(rng) - diff(rng)/1.04)
             args$key_scale <- list(
               range = c(min(rng) - pad,
                         max(rng) + pad),
@@ -4254,7 +4318,7 @@
               copy = FALSE,
               input = "matrix"
             )[, 1]
-            pad <- (diff(rng) - diff(rng)/1.04)/2
+            pad <- (diff(rng) - diff(rng)/1.04)
             args$key_scale <- list(
               range = c(min(rng) - pad, max(rng) + pad),
               label = NA,
@@ -4315,7 +4379,7 @@
         if(!"key_scale" %in% names(args)) {
           # USE POINT_COL RANGE
           rng <- range(args$point_col[[1]])
-          pad <- (diff(rng) - diff(rng)/1.04)/2
+          pad <- (diff(rng) - diff(rng)/1.04)
           args$key_scale <- list(
             range = c(min(rng) - pad, max(rng) + pad),
             label = NA,
@@ -4365,7 +4429,7 @@
           if(!"key_scale" %in% names(args)) {
             # USE RANGE OF COUNTS FOR SCALING
             rng <- range(args$bkde2d$counts)
-            pad <- (diff(rng) - diff(rng)/1.04)/2
+            pad <- (diff(rng) - diff(rng)/1.04)
             args$key_scale <- list(
               range = c(min(rng) - pad,
                         max(rng) + pad),
@@ -4453,7 +4517,7 @@
         if(!"key_scale" %in% names(args)) {
           # USE POINT_COL RANGE
           rng <- c(0, 1)
-          pad <- (diff(rng) - diff(rng)/1.04)/2
+          pad <- (diff(rng) - diff(rng)/1.04)
           args$key_scale <- list(
             range = c(min(rng) - pad,
                       max(rng) + pad),
@@ -4479,7 +4543,7 @@
       if(!"key_scale" %in% names(args)) {
         # USE POINT_COL RANGE
         rng <- c(1, nlevels(args$point_col[[1]]))
-        pad <- (diff(rng) - diff(rng)/1.04)/2
+        pad <- (diff(rng) - diff(rng)/1.04)
         args$key_scale <- list(
           range = c(min(rng) - pad,
                     max(rng) + pad),

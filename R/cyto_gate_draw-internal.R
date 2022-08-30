@@ -396,14 +396,14 @@
   # X LIMITS + BUFFER
   par_xlim <- par_usr[1:2]
   par_xrng <- par_xlim[2] - par_xlim[1]
-  par_xpad <- (par_xrng - par_xrng / 1.04) / 2
+  par_xpad <- (par_xrng - par_xrng / 1.04)
   par_xmin <- par_xlim[1] + 0.5 * par_xpad
   par_xmax <- par_xlim[2] - 0.5 * par_xpad
   
   # Y LIMITS + BUFFER
   par_ylim <- par_usr[3:4]
   par_yrng <- par_ylim[2] - par_ylim[1]
-  par_ypad <- (par_yrng - par_yrng / 1.04) / 2
+  par_ypad <- (par_yrng - par_yrng / 1.04)
   par_ymin <- par_ylim[1] + 0.5 * par_ypad
   par_ymax <- par_ylim[2] - 0.5 * par_ypad
   

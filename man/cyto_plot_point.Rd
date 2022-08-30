@@ -57,7 +57,10 @@ details. Sample selection occurs prior to grouping with \code{merge_by}.}
 \code{\link[graphics:par]{pch}} for alternatives.}
 
 \item{point_size}{numeric to control the size of points in 2-D scatter plots
-set to 2 by default.}
+set to 2 by default. Optionally a list containing the point sizes for every
+point or list named with a channel/marker and scaling factor \code{e.g.
+list("SOM_counts" = 300)}. SOM counts will be scaled as proportions within
+each cytoframe and applied to the point size scaling factor.}
 
 \item{point_col_scale}{vector of ordered colours to use for the density
 colour gradient of points.}
