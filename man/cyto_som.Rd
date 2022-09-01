@@ -83,7 +83,7 @@ a cytoset or GatingSet containing the code vectors for every sample
 }
 \description{
 \code{cyto_som()} provides an intuitive way to map data stored in a
-\code{cytoset}, \code{GatingHierarchy} or \code{GatingSet} into a
+\code{cytoset}, \code{GatingHierarchy} or \code{GatingSet} into a compressed
 self-organising map (SOM). The SOM is trained on the combined data from the
 population specified by \code{parent} in the required \code{channels} using
 the requested proportion or number of \code{events}. The codebook vectors

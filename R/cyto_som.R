@@ -3,7 +3,7 @@
 #' Train a self-organising map (SOM) on cytometry data
 #'
 #' \code{cyto_som()} provides an intuitive way to map data stored in a
-#' \code{cytoset}, \code{GatingHierarchy} or \code{GatingSet} into a
+#' \code{cytoset}, \code{GatingHierarchy} or \code{GatingSet} into a compressed
 #' self-organising map (SOM). The SOM is trained on the combined data from the
 #' population specified by \code{parent} in the required \code{channels} using
 #' the requested proportion or number of \code{events}. The codebook vectors
@@ -253,12 +253,14 @@ cyto_som <- function(x,
       # RECONSTRUCT SOM FROM CODES
       som <- structure(
         list(
-          codes = codes,
+          codes = list(codes),
+          data = list(codes),
           whatmap = 1,
           user.weights = 1,
           dist.fcts = "sumofsquares",
           maxNA.fraction = 0
-        )
+        ),
+        class = "kohonen"
       )
     # INVALID SOM
     } else {
@@ -303,9 +305,12 @@ cyto_som <- function(x,
         x_train,
         grid = grid,
         rlen = rlen,
-        alpha = alpha
+        alpha = alpha,
+        keep.data = FALSE
       )
     )
+    # MATCH ABOVE
+    som$data <- list(som$codes[[1]])
     # COMPATIBILITY WITH SUPPLIED SOM
     som_trans <- trans
     # SOM CODE VECTORS
@@ -481,6 +486,11 @@ cyto_som <- function(x,
       plot = FALSE,
       quiet = TRUE
     )
+  # LINEAR GATINGSET
+  } else {
+    if(cyto_class(x, "GatingSet")) {
+      x_som <- GatingSet(x_som)
+    }
   }
   
   # GATINGTEMPLATE
@@ -499,19 +509,48 @@ cyto_som <- function(x,
 
 #' Map data to a gated self-organising map (SOM)
 #'
+#' \code{cyto_som()} provides a way to compress the original data into a more
+#' manageable format for downstream processing. \code{cyto_gate_som()} transfers
+#' the gates from a gated SOM \code{GatingSet} produced by \code{cyto_som()}
+#' back onto the original data stored in a separate \code{GatingSet}.
+#'
 #' @param x an object of class
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' 
-#'   
-#'   
+#' @param parent name of the parent population which should be gated using the
+#'   SOM, ideally the same population used to train the SOM in
+#'   \code{cyto_som()}.
+#' @param som object of class \code{GatingSet} containing the codebook vectors
+#'   for the trained SOM.
+#' @param alias name(s) of the populations gated on the SOM that should be
+#'   transferred back onto the original data, set to the \code{descendants} of
+#'   the \code{"root"} node by default.
+#' @param channels name(s) of the channel(s) or marker(s) that should be used to
+#'   map the data to the SOM, ideally the same set of channels used to train the
+#'   SOM in \code{cyto_som()}.
+#' @param hidden logical to indicate whether hidden nodes be included as
+#'   descendants in \code{alias} when \code{alias} is not manually supplied, set
+#'   to TRUE by default.
+#' @param ... additional arguments passed to \code{cyto_som()} to train a new
+#'   SOM when a \code{som} is not supplied manually.
+#'
+#' @return a GatingSet containing the original data with gates inherited from
+#'   the gated SOM.
+#'
+#' @importFrom flowWorkspace gs_pop_add
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @noRd
+#' @seealso \code{\link{cyto_som}}
+#'
+#' @export
 cyto_gate_som <- function(x,
                           parent = "root",
                           som = NULL,
-                          alias = NULL) {
+                          alias = NULL,
+                          channels = NULL,
+                          hidden = TRUE,
+                          ...) {
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -522,10 +561,50 @@ cyto_gate_som <- function(x,
     )
   }
   
-  # SOM REQUIRED
-  if(!cyto_class(som, "GatingSet")) {
+  # SOM MISSING
+  if(is.null(som)) {
+    # TRAIN A NEW SOM?
+    opt <- cyto_enquire(
+      paste(
+        "'som' must be a trained SOM returned by cyto_som(). Do you want to ",
+        "train a new SOM? (Y|N)"
+      ),
+      options = c("T", "Y", "TRUE")
+    )
+    # TRAIN NEW SOM
+    if(opt) {
+      som <- cyto_som(
+        x,
+        parent = parent,
+        ...
+      )
+    # SOM REQUIRED
+    } else {
+      return(NULL)
+    }
+  # SOM CHECKS
+  } else {
+    # GATINGSET REQUIRED
+    if(!cyto_class(som, "GatingSet") & length(som) != length(x)) {
+      stop(
+        "'som' must be a GatingSet object created by cyto_som()!"
+      )
+    }
+  }
+  
+  # CHANNELS MISSING
+  if(is.null(channels)) {
     stop(
-      "'som' must be a GatingSet created by cyto_som()!"
+      paste0(
+        "Supply the name(s) of the channels or markers used to train the SOM ",
+        "to 'channels'."
+      )
+    )
+  # CONVERT CHANNELS
+  } else {
+    channels <- cyto_channels_extract(
+      x,
+      channels = channels
     )
   }
   
@@ -537,14 +616,132 @@ cyto_gate_som <- function(x,
     )
   )  
   
-  # SOM PREPARTION -------------------------------------------------------------
-  
-  # SOM MAPPING ----------------------------------------------------------------
+  # KOHONEN
+  cyto_require(
+    "kohonen",
+    source = "CRAN",
+    ref = paste0(
+      "Wehrens, R., & Buydens, L. M. C. (2007). Self- and Super-organizing ",
+      "Maps in R: The kohonen Package. Journal of Statistical Software, ",
+      "21(5), 1–19."
+    )
+  )
   
   # SOM GATING -----------------------------------------------------------------
-  
 
+  # CREATE GATES
+  gate <- structure(
+    lapply(
+      seq_along(x),
+      function(z) {
+        # ALIAS
+        if(is.null(alias)) {
+          alias <- cyto_nodes_kin(
+            x, 
+            nodes = "root",
+            type = "descendants",
+            hidden = hidden
+          )
+        }
+        # SOM CODES -> LINEAR SCALE
+        som_codes <- cyto_data_extract(
+          som,
+          select = z,
+          parent = "root",
+          channels = channels,
+          format = "matrix",
+          markers = FALSE,
+          inverse = TRUE,
+          copy = TRUE
+        )[[1]][[1]]
+        # UNGATED SOM
+        if(length(alias) == 0) {
+          # DEFAULT SOM LABELS
+          som_labels <- paste0(
+            "SOM-",
+            1:nrow(som_codes)
+          )
+          # GATED SOM
+        } else {
+          # PREPARE ALIAS
+          if(any(alias %in% "root")) {
+            ind <- which(alias %in% "root")
+            alias[ind] <- paste0(
+              "SOM-",
+              ind
+            )
+          }
+          # EXTRACT LABELS
+          som_labels <- cyto_gate_indices(
+            som,
+            select = z,
+            parent = "root",
+            nodes = alias,
+            labels = TRUE
+          )[[1]]
+        }
+        # RECONSTRUCT SOM
+        SOM <- structure(
+          list(
+            codes = list(som_codes),
+            data = list(som_codes),
+            whatmap = 1,
+            user.weights = 1,
+            dist.fcts = "sumofsquares",
+            maxNA.fraction = 0
+          ),
+          class = "kohonen"
+        )
+        # EXTRACT DATA -> LINEAR SCALE
+        exprs <- cyto_data_extract(
+          x,
+          select = z,
+          parent = parent,
+          channels = channels,
+          format = "matrix",
+          markers = FALSE,
+          inverse = TRUE,
+          copy = TRUE
+        )[[1]][[1]]
+        # MAP DATA TO SOM
+        som_ind <- cyto_func_call(
+          "predict",
+          list(
+            SOM,
+            newdata = data.matrix(
+              exprs
+            )
+          )
+        )$unit.classif
+        # PREPARE GATE
+        res <- as(
+          factor(
+            som_labels[som_ind],
+            levels = unique(
+              som_labels
+            )
+          ),
+          "filterResult"
+        )
+        res@filterId <- "cyto_gate_som"
+        res@frameId <- cyto_names(x)[z]
+        return(res)
+      }
+    ),
+    names= cyto_names(x)
+  )
+
+  # ADD GATES TO GATINGSET
+  gs_pop_add(
+    x,
+    parent = parent,
+    gate = gate
+  )
   
+  # # RECOMPUTE
+  # suppressMessages(
+  #   recompute(gs)
+  # )
   
   # RETURN SOM GATED GATINGSET
   return(x)

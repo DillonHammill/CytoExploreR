@@ -548,7 +548,6 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL,
   if(active){
     cyto_gatingTemplate_active(gatingTemplate)
   }
-  
   # RETURN EMPTY DATA.TABLE
   invisible(
     cyto_gatingTemplate_read(
