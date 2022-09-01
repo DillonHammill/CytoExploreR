@@ -45,9 +45,13 @@
 #'   neighbours (sNN) graph using HGC::SNN.construction() and igraph to compute
 #'   the layout co-ordinates for the graph}}
 #' @param scale optional argument to scale each channel prior to computing
-#'   dimension-reduced co-ordinates, options include \code{"range"},
-#'   \code{"mean"}, \code{"median"} or \code{"zscore"}. Set to \code{"range"} by
-#'   default, scaling can be turned off by setting this argument to NULL.
+#'   dimension-reduced co-ordinates, options include \code{"global"},
+#'   \code{"range"}, \code{"mean"}, \code{"median"} or \code{"zscore"}. Set to
+#'   \code{"global"} by default, scaling can be turned off by setting this
+#'   argument to FALSE. Global scaling preserves the structure of the data as
+#'   expected on the linear scale without having to apply inverse data
+#'   transformations to the entire dataset. Scaling is only required when some
+#'   channels have been transformed and \code{inverse = FALSE}.
 #' @param events number or proportion of events to map, can optionally be
 #'   supplied per cytoframe for more fine control over how the data is sampled
 #'   prior to mapping. Set to 1 by default to map all events.
@@ -59,6 +63,11 @@
 #'   default to create a single dimension-reduced map for all samples.
 #'   Alternatively, a different dimension-reduced map will be created for each
 #'   group of samples merged by \code{cyto-merge_by}.
+#' @param nodes a vector of population names representing descendant clustered
+#'   populations of the specified \code{parent}. If supplied, a vector of
+#'   cluster labels will be generated and passed to \code{Haisu} to provide
+#'   improved embedding using any of the natively supported non-linear dimension
+#'   reduction algorithms.
 #' @param seed numeric passed to \code{cyto_data_extract} to ensure consistent
 #'   sampling between runs, set to NULL by default to off this feature.
 #' @param inverse logical to indicate whether the data should be inverse
@@ -92,10 +101,11 @@ cyto_map <- function(x,
                      select = NULL,
                      channels = NULL,
                      type = "UMAP",
-                     scale = "range",
+                     scale = "global",
                      events = 1,
                      label = NULL,
                      merge_by = "all",
+                     nodes = NULL,
                      seed = NULL,
                      inverse = FALSE,
                      trans = NA,
@@ -214,6 +224,14 @@ cyto_map <- function(x,
     }
   }
   
+  # NODES
+  if(!is.null(nodes) & !cyto_class(x, "GatingSet")) {
+    nodes <- NULL
+    warning(
+      "'nodes' is only supported for GatingSet objects!"
+    )
+  }
+  
   # MAP EACH GROUP
   x_map_chans <- c()
   x_data_map <- structure(
@@ -223,11 +241,11 @@ cyto_map <- function(x,
         # CYTO_DATA TO MAP
         cyto_data <- x_data_groups[[z]]
         # CYTOFRAME CONTAINER
-        cf <- cyto_data_extract(
+        cs <- cyto_data_extract(
           cyto_data,
           parent = parent,
-          format = "cytoframe",
-          coerce = TRUE,
+          format = "cytoset",
+          coerce = FALSE,
           events = events,
           barcode = TRUE,
           overwrite = TRUE,
@@ -235,26 +253,127 @@ cyto_map <- function(x,
           trans = trans,
           inverse = inverse,
           copy = FALSE
-        )[[1]][[1]]
+        )[[1]]
+        # COERCE - SAMPLING ABOVE
+        cf <- cyto_coerce(
+          cs,
+          format = "cytoframe"
+        )
+        # NODES (HAISU FUTURE SUPPORT) - MATCH SAMPLED EVENTS
+        if(!is.null(nodes)) {
+          # PYTHON UNAVAILABLE
+          if(!cyto_func_call("reticulate::py_available")) {
+            nodes <- NULL
+            warning(
+              paste0(
+                "python must be available to use Haisu for dimensionality ",
+                "reduction!"
+              )
+            )
+          # HAISU PYTHON
+          } else {
+            # CLUSTER LABELS
+            nodes <- unlist(
+              cyto_gate_indices(
+                cyto_data,
+                parent = parent,
+                nodes = nodes,
+                labels = TRUE
+              )
+            )
+            # ALL EVENT IDS
+            ids <- cyto_data_extract(
+              cyto_data,
+              parent = parent,
+              format = "matrix",
+              channels = "Event-ID",
+              coerce = TRUE,
+              trans = trans,
+              inverse = inverse,
+              copy = FALSE
+            )[[1]][[1]]
+            # RESTRICT NODES TO SAMPLED IDS
+            nodes <- nodes[
+              ids %in% cyto_exprs(
+                cf, 
+                channels = "Event-ID",
+                drop = TRUE
+              )
+            ]
+            rm(ids)
+          }
+        }
         # RAW DATA
         cf_exprs <- cyto_exprs(
           cf,
           channels = channels,
           drop = FALSE
         )
-        # RE-SCALE DATA
-        if(!is.null(scale)) {
+        # SCALE TRANSFORMED DATA
+        if(!scale %in% FALSE & !inverse & any(channels %in% names(trans))) {
           message(
             paste0(
               "Performing ",
               scale,
-              " normalisation on channels..."
+              " scaling on channels..."
             )
           )
-          cf_exprs <- cyto_stat_scale(
-            cf_exprs,
-            type = scale
-          )
+          # GLOBAL SCALING
+          if(scale %in% "global") {
+            # LINEAR CHANNEL LIMITS
+            cnt <- 0
+            limits <- apply(
+              cf_exprs,
+              2,
+              function(z) {
+                cnt <<- cnt + 1
+                rng <- range(z)
+                # INVERSE TRANSFORM -> LINEAR SCALE
+                if(colnames(cf_exprs)[cnt] %in% names(trans)) {
+                  rng <- .cyto_transform(
+                    rng,
+                    channel = colnames(cf_exprs)[cnt],
+                    trans = trans,
+                    inverse = TRUE
+                  )
+                }
+                return(rng)
+              }
+            )
+            # GLOBAL LIMITS ON LINEAR SCALE
+            limits <- range(limits)
+            # APPLY GLOBAL SCALING
+            cnt <- 0
+            cf_exprs <- apply(
+              cf_exprs,
+              2,
+              function(z) {
+                cnt <<- cnt + 1
+                rng <- limits
+                # GLOBAL LIMITS ON TRANSFORMED SCALE
+                if(colnames(cf_exprs)[cnt] %in% names(trans)) {
+                  rng <- .cyto_transform(
+                    rng,
+                    channel = colnames(cf_exprs)[cnt],
+                    trans = trans,
+                    inverse = FALSE
+                  )
+                }
+                # RESCALE DATA
+                cyto_stat_rescale(
+                  z,
+                  scale = c(0,1),
+                  limits = rng
+                )
+              }
+            )
+          # CONVENTIONAL SCALING
+          } else {
+            cf_exprs <- cyto_stat_scale(
+              cf_exprs,
+              type = scale
+            )
+          }
         }
         # PERFORM MAPPING
         coords <- .cyto_map(
@@ -262,14 +381,22 @@ cyto_map <- function(x,
           type = type,
           seed = seed,
           label = label,
+          nodes = nodes,
           ...
         )
         x_map_chans <<- colnames(coords)
-        # APPEND NEW PARAMETERS
-        cf <- cyto_cbind(
-          cf, 
-          coords
-        )
+        # REPLACING AN EXISTING EMBEDDING
+        if(all(colnames(coords) %in% cyto_channels(cf))) {
+          cf_exprs <- cyto_exprs(cf)
+          cf_exprs[, colnames(coords)] <- coords
+          cyto_exprs(cf) <- cf_exprs
+        # APPEND A NEW EMBEDDING 
+        } else {
+          cf <- cyto_cbind(
+            cf, 
+            coords
+          )
+        }
         # SPLIT - CYTOSET
         cyto_split(
           cf,
@@ -366,6 +493,7 @@ cyto_map <- function(x,
                       type = "UMAP",
                       seed = NULL,
                       label = NULL,
+                      nodes = NULL,
                       ...){
   
   # SEED
@@ -383,6 +511,22 @@ cyto_map <- function(x,
       names(args)
     )
   ]
+  
+  # NODES
+  if(is.null(nodes)) {
+    args <- args[-match("nodes", names(args))]
+  # HAISU ONLY SUPPORTED TSNE | UMAP | PHATE
+  } else {
+    # REMOVE NODES FROM ARGUMENTS
+    if(is.character(type)) {
+      if(!grepl("^UMAP$|^t-?SNE$|^PHATE$", type, ignore.case = TRUE)) {
+        args <- args[-match("nodes", names(args))]
+        stop(
+          "'nodes' can only be used with 'type' set to UMAP, t-SNE or PHATE!"
+        )
+      }
+    }
+  }
   
   # LABEL
   if(is.null(label)) {

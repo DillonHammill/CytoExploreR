@@ -10,7 +10,7 @@ cyto_map(
   select = NULL,
   channels = NULL,
   type = "UMAP",
-  scale = "range",
+  scale = "global",
   events = 1,
   label = NULL,
   merge_by = "all",
@@ -62,9 +62,13 @@ neighbours (sNN) graph using HGC::SNN.construction() and igraph to compute
 the layout co-ordinates for the graph}}}
 
 \item{scale}{optional argument to scale each channel prior to computing
-dimension-reduced co-ordinates, options include \code{"range"},
-\code{"mean"}, \code{"median"} or \code{"zscore"}. Set to \code{"range"} by
-default, scaling can be turned off by setting this argument to NULL.}
+dimension-reduced co-ordinates, options include \code{"global"},
+\code{"range"}, \code{"mean"}, \code{"median"} or \code{"zscore"}. Set to
+\code{"global"} by default, scaling can be turned off by setting this
+argument to FALSE. Global scaling preserves the structure of the data as
+expected on the linear scale without having to apply inverse data
+transformations to the entire dataset. Scaling is only required when some
+channels have been transformed and \code{inverse = FALSE}.}
 
 \item{events}{number or proportion of events to map, can optionally be
 supplied per cytoframe for more fine control over how the data is sampled

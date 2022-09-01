@@ -30,8 +30,6 @@
 #'   \code{channels_y}. On the other hand, setting \code{order = "groups"} will
 #'   plot each channel on a separate page with a plot for each group in
 #'   \code{merge_by}.
-#' @param point_size numeric to control the size of points in 2-D scatter plots
-#'   set to 2 by default.
 #' @param point_col names of the channels or markers to use for the colour scale
 #'   of each plot, set to all fluorescent channels by default.
 #' @param point_col_scale vector of colours to use for the colour scale within
@@ -130,7 +128,6 @@ cyto_plot_map <- function(x,
                           order = "channels",
                           point_col = NA,
                           point_col_scale = NA,
-                          point_size = 2,
                           layout,
                           header,
                           title,
@@ -223,9 +220,6 @@ cyto_plot_map <- function(x,
       names = point_col
     )
   }
-  
-  # POINT_SIZE PER PANEL
-  point_size <- rep(point_size, length(x) * length(point_col))
   
   # LAYOUT
   if(missing(layout)) {
@@ -375,7 +369,6 @@ cyto_plot_map <- function(x,
                    } else {
                      FALSE
                    },
-                   point_size = point_size[w],
                    point_col = point_col[w],
                    point_col_scale = point_col_scale[[w]],
                    ...
@@ -419,7 +412,6 @@ cyto_plot_map <- function(x,
                   } else {
                     FALSE
                   },
-                  point_size = point_size[z],
                   point_col = point_col[z],
                   point_col_scale = point_col_scale[[z]],
                   ...

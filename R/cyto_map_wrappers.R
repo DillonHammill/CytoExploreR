@@ -1,8 +1,182 @@
+## HAISU -----------------------------------------------------------------------
+
+#' HAISU
+#' @noRd
+.cyto_map_haisu <- function(x,
+                            nodes = NULL,
+                            factor = 0.15,
+                            metric = "euclidean",
+                            n_jobs = -1L,
+                            ...) {
+  
+  # NODES REQUIRED
+  if(is.null(nodes)) {
+    stop(
+      "'nodes' must be supplied to use Haisu for dimenionality reduction!"
+    )
+  }
+  
+  # IGRAPH REQUIRED - MST GRAPH & ADJACENCY MATRIX
+  cyto_require(
+    "igraph",
+    source = "CRAN"
+  )
+  
+  # NODES
+  nodes <- as.character(nodes)
+  
+  # PARTITION DATA
+  x_split <- structure(
+    lapply(
+      unique(nodes),
+      function(z) {
+        x[
+          match(z, nodes), , drop = FALSE
+        ]
+      }
+    ),
+    names = unique(nodes)
+  )
+  
+  # COMPUTE CENTROIDS
+  x_split <- do.call(
+    "rbind",
+    lapply(
+      x_split,
+      function(z) {
+        apply(
+          z,
+          2,
+          "median"
+        )
+      }
+    )
+  )
+  
+  # COMPUTE DISTANCE MATRIX
+  adj <- cyto_func_call(
+    "stats::dist",
+    list(
+      x_split
+    )
+  )
+  
+  # BUILD ADJACENCY GRAPH
+  adj <- cyto_func_call(
+    "igraph::graph.adjacency",
+    list(
+      as.matrix(adj),
+      mode = "undirected",
+      weighted = TRUE
+    )
+  )
+  
+  # MST TREE
+  adj <- cyto_func_call(
+    "igraph::minimum.spanning.tree",
+    list(
+      adj,
+      algorithm = "prim"
+    )
+  )
+  
+  # EXTRACT ADJACENCY MATRIX
+  adj <- cyto_func_call(
+    "igraph::as_adjacency_matrix",
+    list(
+      adj
+    )
+  )
+  
+  # INSTALL HAISU REQUIREMENTS -------------------------------------------------
+  cyto_require(
+    "numpy",
+    python = TRUE,
+    pip = TRUE
+  )
+  
+  cyto_require(
+    "sys",
+    python = TRUE,
+    pip = TRUE
+  )
+  
+  cyto_require(
+    "networkx",
+    python = TRUE,
+    pip = TRUE
+  )
+  
+  cyto_require(
+    "sklearn.metrics",
+    python = TRUE,
+    pip = TRUE
+  )
+  
+  cyto_require(
+    "scipy",
+    python = TRUE,
+    pip = TRUE
+  )
+  
+  cyto_require(
+    "shapely",
+    python = TRUE,
+    pip = TRUE
+  )
+  
+  cyto_require(
+    "scipy.spatial",
+    python = TRUE,
+    pip = TRUE
+  )
+  
+  cyto_require(
+    "multiprocessing",
+    python = TRUE,
+    pip = TRUE
+  )
+  
+  cyto_require(
+    "ctypes",
+    python = TRUE,
+    pip = TRUE
+  )
+  
+  HAISU <- function(){}
+  
+  # IMPORT HAISU PYTHON SCRIPT
+  reticulate::source_python(
+    "https://raw.githubusercontent.com/Cobanoglu-Lab/Haisu/master/Haisu.py"
+  )
+
+  # INITIALISE HAISU
+  h <- HAISU(
+    unique(nodes),
+    adj
+  )
+  
+  # RUN HAISU
+  h$get_pairwise_matrix(
+    x,
+    as.character(nodes),
+    factor = factor,
+    transpose = TRUE,
+    normalize = FALSE,
+    metric = metric,
+    n_jobs = n_jobs
+  )
+
+}
+
 ## UMAP ------------------------------------------------------------------------
 
 #' UMAP
 #' @noRd
 .cyto_map_umap <- function(x,
+                           nodes = NULL,
+                           metric = "euclidean",
+                           factor = 0.15,
                            ...) {
   
   # CHECK PYTHON MODULE
@@ -18,6 +192,23 @@
     import = "umap.umap_"
   )
   
+  # HAISU
+  if(!is.null(nodes) & !is.null(py_umap)) {
+    # COMPUTE PAIRWISE MATRIX
+    x <- cyto_func_execute(
+      ".cyto_map_haisu",
+      list(
+        x = x,
+        nodes = nodes,
+        metric = metric,
+        factor = factor,
+        ...
+      )
+    )
+    # SET METRIC TO PRECOMPUTED
+    metric <- "precomputed"
+  }
+  
   # PYTHON MODULE LOADED
   if(!is.null(py_umap)) {
     # MESSAGE
@@ -25,9 +216,14 @@
       "Using umap-learn python module to compute UMAP co-ordinates..."
     )
     # CONFIGURE UMAP - MODIFY PARAMETERS AS NECESSARY
-    umap <- py_umap$UMAP(...)
+    umap <- py_umap$UMAP(
+      metric = metric,
+      ...
+    )
     # APPLY UMAP TO DATASET
-    res <- umap$fit_transform(data.matrix(x))
+    res <- umap$fit_transform(
+      data.matrix(x)
+    )
   # RESORT TO UWOT
   } else {
     # UWOT
@@ -44,10 +240,15 @@
     message(
       "Using uwot::umap() to compute UMAP co-ordinates..."
     )
+    # HAISU NOT SUPPORTED - METRIC != "PRECOMPUTED"
     # UMAP CO-ORDINATES
     res <- cyto_func_call(
       "uwot::umap",
-      list(x, ...)
+      list(
+        x,
+        metric = metric,
+        ...
+      )
     )
   }
   
@@ -277,6 +478,9 @@
 #' PHATE
 #' @noRd
 .cyto_map_phate <- function(x,
+                            nodes = NULL,
+                            factor = 0.15,
+                            knn_dist = "euclidean",
                             n_jobs = -2L,
                             ...) {
   
@@ -292,6 +496,23 @@
     pip = TRUE
   )
   
+  # HAISU
+  if(!is.null(nodes) & !is.null(py_phate)) {
+    # COMPUTE PAIRWISE MATRIX
+    x <- cyto_func_execute(
+      ".cyto_map_haisu",
+      list(
+        x = x,
+        nodes = nodes,
+        metric = knn_dist,
+        factor = factor,
+        ...
+      )
+    )
+    # SET METRIC TO PRECOMPUTED
+    knn_dist <- "precomputed"
+  }
+  
   # PHATE UNAVAILABLE
   if(is.null(py_phate)) {
     stop(
@@ -305,6 +526,7 @@
     )
     # CONFIGURE TRIMAP - MODIFY PARAMETERS AS NECESSARY
     phate <- py_phate$PHATE(
+      knn_dist = knn_dist,
       n_jobs = n_jobs,
       ...
     )
@@ -326,6 +548,9 @@
 #' t-SNE
 #' @noRd
 .cyto_map_tsne <- function(x,
+                           nodes = NULL,
+                           factor = 0.15,
+                           metric = "euclidean",
                            n_jobs = -2L,
                            num_threads = 0,
                            ...) {
@@ -344,7 +569,24 @@
     ),
     import = "openTSNE"
   )
-
+  
+  # HAISU
+  if(!is.null(nodes) & !is.null(py_tsne)) {
+    # COMPUTE PAIRWISE MATRIX
+    x <- cyto_func_execute(
+      ".cyto_map_haisu",
+      list(
+        x = x,
+        nodes = nodes,
+        metric = metric,
+        factor = factor,
+        ...
+      )
+    )
+    # SET METRIC TO PRECOMPUTED
+    metric <- "precomputed"
+  }
+  
   # PYTHON MODULE LOADED
   if(!is.null(py_tsne)) {
     # MESSAGE
@@ -353,6 +595,7 @@
     )
     # CONFIGURE UMAP - MODIFY PARAMETERS AS NECESSARY
     tsne <- py_tsne$TSNE(
+      metric = metric,
       n_jobs = n_jobs,
       ...
     )
@@ -375,6 +618,8 @@
     message(
       "Using Rtsne::Rtsne() to compute t-SNE co-ordinates..."
     )
+    # HAISU NOT SUPPORTED - CANNOT PASS PRECOMPUTED MATRIX
+    # USE IS_DISTANCE?
     # TSNE CO-ORDINATES
     res <- cyto_func_call(
       "Rtsne::Rtsne",
@@ -384,7 +629,7 @@
         check_duplicates = FALSE,
         ...
       )
-    )
+    )$Y
   }
   
   # PREPARE CO-ORDINATES
@@ -464,7 +709,7 @@
 #' PCA
 #' @noRd
 .cyto_map_pca <- function(x,
-                           ...) {
+                          ...) {
   
   # RTSNE
   cyto_require(
