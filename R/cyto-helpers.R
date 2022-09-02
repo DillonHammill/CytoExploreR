@@ -3000,11 +3000,8 @@ cyto_match <- function(x,
     args <- args[!names(args) %in% "exclude"]
   }
   
-  # EXPERIMENT DETAILS
-  pd <- cyto_details(x)
-  
   # INDICES/NAMES
-  if(length(args) == 1 & (is.null(names(args)) | .empty(names(args)))) {
+  if(length(args) == 1 & .empty(names(args), null = TRUE)) {
     # NULL
     if(is.null(unlist(args))) {
       ind <- seq_along(x)
@@ -3013,6 +3010,8 @@ cyto_match <- function(x,
       ind <- unlist(args)
     # UNNAMED CHARACTERS
     } else {
+      # EXPERIMENT DETAILS
+      pd <- cyto_details(x)
       # MATCH NAMES - ROWNAMES/NAME/PARTIAL
       ind <- LAPPLY(unlist(args), function(z){
         # ROWNAMES - EXACT
@@ -3047,6 +3046,8 @@ cyto_match <- function(x,
     }
   # EXPERIMENTAL VARIABLES
   } else {
+    # EXPERIMENT DETAILS
+    pd <- cyto_details(x)
     # INDICES PER VARIABLE
     ind <- lapply(
       names(args), 
