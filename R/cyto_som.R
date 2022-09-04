@@ -37,8 +37,9 @@
 #' @param map passed to the \code{type} argument of cyto_map() to perform
 #'   dimensionality reduction on the SOM code vectors, set to \code{"t-SNE"} by
 #'   default. Alternatively, a vector of channel names indicating the
-#'   dimension-reduced channels in a supplied \code{som} that should be
-#'   inherited by the new SOM. Refer to \code{\link{cyto_map}} or details.
+#'   dimension-reduced channels in a supplied \code{som} or the supplied data
+#'   that should be inherited by the new SOM. Refer to \code{\link{cyto_map}} or
+#'   details.
 #' @param trans object of class \code{transformerList} containing the
 #'   transformers applied to the supplied data, only required for objects of
 #'   class \code{cytoset}.
@@ -280,7 +281,11 @@ cyto_som <- function(x,
     x_train <- cyto_data_extract(
       x,
       parent = parent,
-      channels = channels,
+      channels = if(length(map) > 1) {
+        c(channels, map)
+      } else {
+        channels
+      },
       trans = trans,
       inverse = TRUE,
       format = "matrix",
@@ -302,7 +307,7 @@ cyto_som <- function(x,
     som <- cyto_func_call(
       "kohonen::som",
       list(
-        x_train,
+        x_train[, channels, drop = FALSE],
         grid = grid,
         rlen = rlen,
         alpha = alpha,
@@ -316,7 +321,40 @@ cyto_som <- function(x,
     # SOM CODE VECTORS
     codes <- som$codes[[1]]
     # DIMENSIONALITY REDUCTION
-    coords <- NULL
+    if(length(map) > 1) {
+      # MAP -> CHANNELS
+      map <- cyto_channels_extract(
+        x,
+        channels = map
+      )
+      # MAP TO DATA EMBEDDING
+      if(all(map %in% colnames(x_train))) {
+        coords <- do.call(
+          "cbind",
+          structure(
+            lapply(
+              map,
+              function(z) {
+                cyto_impute(
+                  train = x_train[, channels, drop = FALSE],
+                  test = codes,
+                  channels = channels,
+                  labels = x_train[, z, drop = TRUE],
+                  k = 5,
+                  scale = NULL
+                )
+              }
+            ),
+            names = map
+          )
+        )
+        colnames(coords) <- map
+      } else {
+        coords <- NULL
+      }
+    } else {
+      coords <- NULL
+    }
   }
   
   # CODES CYTOSET --------------------------------------------------------------
@@ -345,7 +383,7 @@ cyto_som <- function(x,
       codes,
       channels = channels,
       type = map,
-      scale = FALSE,   # NO SCLAING REQUIRED
+      scale = FALSE,   # NO SCALING REQUIRED
       events = 1,
       merge_by = "all",
       trans = trans,

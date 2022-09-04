@@ -50,8 +50,9 @@ training the SOM, set to 1 by default to use all available events.}
 \item{map}{passed to the \code{type} argument of cyto_map() to perform
 dimensionality reduction on the SOM code vectors, set to \code{"t-SNE"} by
 default. Alternatively, a vector of channel names indicating the
-dimension-reduced channels in a supplied \code{som} that should be
-inherited by the new SOM. Refer to \code{\link{cyto_map}} or details.}
+dimension-reduced channels in a supplied \code{som} or the supplied data
+that should be inherited by the new SOM. Refer to \code{\link{cyto_map}} or
+details.}
 
 \item{trans}{object of class \code{transformerList} containing the
 transformers applied to the supplied data, only required for objects of
