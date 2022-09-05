@@ -1577,6 +1577,16 @@ cyto_transform.default <- function(x,
         transform_list
       )
     )
+    # # UPDATE CYTOEXPLORER_TRANSFORMERS KEYWORD
+    # lapply(
+    #   seq_along(x),
+    #   function(z) {
+    #     keyword(x[[z]])[["CytoExploreR_transformers"]] <- 
+    #       cyto_transformers_deparse(
+    #         transformer_list
+    #       )
+    #   }
+    # )
   # TRANSFORM GATINGHIERARCHY OR GATINGSET
   } else if (cyto_class(x, "GatingSet")) {
     # TRANSFORMERS
@@ -1605,6 +1615,13 @@ cyto_transform.default <- function(x,
             transform_list
           )
         )
+        # # UPDATE CYTOEXPLORER_TRANSFORMERS KEYWORD
+        # lapply(
+        #   seq_along(cs),
+        #   function(z) {
+        #     keyword(cs[[z]])[["CytoExploreR_transformers"]] <- ""
+        #   }
+        # )
         # REMOVE COMPENSATION
         if(!is.null(spill)) {
           cs <- cyto_compensate(
@@ -1635,6 +1652,16 @@ cyto_transform.default <- function(x,
             quiet = TRUE
           )
         }
+        # # UPDATE CYTOEXPLORER_TRANSFORMERS KEYWORD
+        # lapply(
+        #   seq_along(cs),
+        #   function(z) {
+        #     keyword(cs[[z]])[["CytoExploreR_transformers"]] <- 
+        #       cyto_transformers_deparse(
+        #         transformer_list
+        #       )
+        #   }
+        # )
         # RECONSTRUCT GATINGSET - REQUIRED ELSE GATINGTEMPLATE GATES EXIST
         x <- GatingSet(cs)
         # APPLY COMPENSATION
@@ -1782,6 +1809,8 @@ cyto_transform.transformList <- function(x,
                                          quiet = FALSE,
                                          ...) {
   
+  # INTERNAL USE ONLY
+  
   # Added for backwards compatibility - flowFrame/flowSet objects only
   if (cyto_class(x, "GatingSet")) {
     stop(
@@ -1908,6 +1937,16 @@ cyto_transform.transformerList <- function(x,
           transform_list
         )
       )
+      # # UPDATE CYTOEXPLORER_TRANSFORMERS KEYWORD
+      # lapply(
+      #   seq_along(x),
+      #   function(z) {
+      #     keyword(x[[z]])[["CytoExploreR_transformers"]] <- 
+      #       cyto_transformers_deparse(
+      #         transformer_list
+      #       )
+      #   }
+      # )
     }
   # TRANSFORM GATINGHIERARCHY OR GATINGSET
   } else if (cyto_class(x, "GatingSet")) {
@@ -1941,6 +1980,13 @@ cyto_transform.transformerList <- function(x,
             transform_list
           )
         )
+        # # UPDATE CYTOEXPLORER_TRANSFORMERS KEYWORD
+        # lapply(
+        #   seq_along(cs),
+        #   function(z) {
+        #     keyword(cs[[z]])[["CytoExploreR_transformers"]] <- ""
+        #   }
+        # )
         # REMOVE COMPENSATION
         if(!is.null(spill)) {
           cs <- cyto_compensate(
@@ -1971,6 +2017,16 @@ cyto_transform.transformerList <- function(x,
             quiet = TRUE
           )
         }
+        # # UPDATE CYTOEXPLORER_TRANSFORMERS KEYWORD
+        # lapply(
+        #   seq_along(cs),
+        #   function(z) {
+        #     keyword(cs[[z]])[["CytoExploreR_transformers"]] <- 
+        #       cyto_transformers_deparse(
+        #         transformer_list
+        #       )
+        #   }
+        # )
         # RECONSTRUCT GATINGSET - REQUIRED ELSE GATINGTEMPLATE GATES EXIST
         x <- GatingSet(cs)
         # APPLY COMPENSATION
@@ -3635,12 +3691,17 @@ cyto_merge_by <- function(x,
         function(z){
           # SOM CYTOSET | GATINGSET
           if("SOM_counts" %in% cyto_channels(cs_list[[z]])) {
-            # EXTRACT SOM CODES & DIME REDUCTION
+            # EXTRACT SOM CODES & DIM REDUCTION
             SOM <- cyto_exprs(
               cs_list[[z]][[1]],
               channels = cyto_channels(
                 cs_list[[z]],
-                exclude = "SOM_counts"
+                exclude = c(
+                  "SOM_counts",
+                  "SOM_freq",
+                  "Event",
+                  "Sample"
+                )
               ),
               drop = FALSE
             )
@@ -3667,7 +3728,8 @@ cyto_merge_by <- function(x,
             # APPEND COUNTS
             SOM <- cbind(
               SOM,
-              "SOM_counts" = SOM_counts
+              "SOM_counts" = SOM_counts,
+              "SOM_freq" = SOM_counts/sum(SOM_counts)
             )
             # CREATE NEW CYTOSET
             cs <- do.call(
@@ -3727,7 +3789,12 @@ cyto_merge_by <- function(x,
               cs_list[[z]][[1]],
               channels = cyto_channels(
                 cs_list[[z]],
-                exclude = "SOM_counts"
+                exclude = c(
+                  "SOM_counts",
+                  "SOM_freq",
+                  "Event",
+                  "Sample"
+                )
               ),
               drop = FALSE
             )
@@ -3754,7 +3821,8 @@ cyto_merge_by <- function(x,
             # APPEND COUNTS
             SOM <- cbind(
               SOM,
-              "SOM_counts" = SOM_counts
+              "SOM_counts" = SOM_counts,
+              "SOM_freq" = SOM_counts/sum(SOM_counts)
             )
             # CYTOFRAME
             as(

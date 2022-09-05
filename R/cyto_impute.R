@@ -66,6 +66,7 @@ cyto_impute <- function(train = NULL,
                         ...) {
   
   # TODO: MAKE EFFICIENT BY CONSTRUCTING KNN CLASSIFIER ONCE
+  # TODO: CROSS VAILDATION TO ALLOW TUNING OF K
   
   # CHANNELS
   if(is.null(channels)) {

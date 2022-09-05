@@ -383,7 +383,7 @@ cyto_som <- function(x,
       codes,
       channels = channels,
       type = map,
-      scale = FALSE,   # NO SCALING REQUIRED
+      scale = FALSE,   # NO SCLAING REQUIRED
       events = 1,
       merge_by = "all",
       trans = trans,
@@ -468,7 +468,7 @@ cyto_som <- function(x,
           )
           tbl <- table(res)
           cnts[as.numeric(names(tbl))] <- tbl
-          # PREPARE DATA - LINEAR CODES + DIM REDUCTION + COUNTS
+          # PREPARE DATA - LINEAR CODES + DIM REDUCTION + COUNTS + PROPORTIONS
           as(
             cbind(
               cyto_exprs(
@@ -477,11 +477,15 @@ cyto_som <- function(x,
                 drop = FALSE
               ),
               cols = matrix(
-                unname(cnts),
-                ncol = 1,
+                c(
+                  unname(cnts),
+                  unname(cnts)/sum(cnts)
+                ),
+                byrow = FALSE,
+                ncol = 2,
                 dimnames = list(
                   NULL,
-                  "SOM_counts"
+                  c("SOM_counts", "SOM_freq")
                 )
               )
             ),

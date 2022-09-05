@@ -567,15 +567,17 @@ cyto_transformers_extract <- function(x){
   
   # GATINGHIERARCHY
   if(cyto_class(x, "GatingHierarchy", TRUE)){
-    transformers <- gh_get_transformations(x, 
-                                           only.function = FALSE)
+    transformers <- gh_get_transformations(
+      x, 
+      only.function = FALSE
+    )
     if(length(transformers) != 0){
       transformers <- cyto_transformers_combine(transformers)
-    }else{
+    } else {
       transformers <- NA
     }
-    # FLOWFRAME/FLOWSET
-  }else{
+  # FLOWFRAME/FLOWSET
+  } else {
     transformers <- NA
   }
   
@@ -616,6 +618,56 @@ cyto_transformers_combine <- function(...) {
   
   # Return transformations in a single transformerList for cyto_transform
   return(transformer_list)
+  
+}
+
+## CYTO_TRANSFORMERS_DEPARSE ---------------------------------------------------
+
+#' Convert transformerList into character string
+#'
+#' @param trans object of class transformerList containing transformer
+#'   definitions.
+#'
+#' @return a character string defining the transformerList object.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @noRd
+cyto_transformers_deparse <- function(trans) {
+  
+  # SEPARATOR REQUIRED FOR SPLITTING -> '***'
+  paste0(
+    deparse(
+      trans
+    ),
+    collapse = "***"
+  )
+  
+}
+
+## CYTO_TRANSFORMERS_PARSE -----------------------------------------------------
+
+#' Convert a character string of transformers into transformerList
+#'
+#' @param trans a charcter string defining a transformerList as created using
+#'   \code{cyto_transformers_deparse()}.
+#'   
+#' @return a transformerList object containing the transformer definitions.
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @noRd
+cyto_transformers_parse <- function(trans) {
+  
+  eval(
+    parse(
+      text = strsplit(
+        trans,
+        "***",
+        fixed = TRUE
+      )[[1]]
+    )
+  )
   
 }
 

@@ -810,6 +810,12 @@
     )
   )
   
+  # REQUIRE IGRAPH
+  cyto_require(
+    "igraph",
+    source = "CRAN"
+  )
+  
   # CONSTRUCT GRAPH
   g <- cyto_func_call(
     "igraph::graph_from_edgelist",
@@ -821,10 +827,12 @@
   
   # LAYOUT
   set.seed(2022)
-  args$graph <- g
   res <- cyto_func_execute(
     "igraph::layout_with_fr",
-    args
+    list(
+      graph = g,
+      ...
+    )
   )
   colnames(res) <- paste0(
     "kNN-",
@@ -862,7 +870,7 @@
   
   # ARGUMENTS
   args <- list(
-    data = x,
+    mat = x,
     k = k,
     ...
   )
@@ -879,7 +887,7 @@
     list(
       snn,
       mode = "undirected",
-      weigthed = TRUE
+      weighted = TRUE
     )
   )
   
