@@ -10,7 +10,7 @@ cyto_map(
   select = NULL,
   channels = NULL,
   type = "UMAP",
-  scale = "global",
+  scale = "range",
   events = 1,
   label = NULL,
   merge_by = "all",

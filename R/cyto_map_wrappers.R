@@ -786,7 +786,7 @@
   # COMPUTE KNN
   knn <- .cyto_knn(
     x,
-    k = k,
+    k = as.integer(k),
     ...
   )
   

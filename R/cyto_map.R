@@ -101,7 +101,7 @@ cyto_map <- function(x,
                      select = NULL,
                      channels = NULL,
                      type = "UMAP",
-                     scale = "global",
+                     scale = "range",
                      events = 1,
                      label = NULL,
                      merge_by = "all",
@@ -310,7 +310,7 @@ cyto_map <- function(x,
           drop = FALSE
         )
         # SCALE TRANSFORMED DATA
-        if(!scale %in% FALSE & !inverse & any(channels %in% names(trans))) {
+        if(!scale %in% FALSE) {
           message(
             paste0(
               "Performing ",
