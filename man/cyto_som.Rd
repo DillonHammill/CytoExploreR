@@ -16,6 +16,7 @@ cyto_som(
   map = "t-SNE",
   trans = NA,
   som = NULL,
+  scale = "range",
   plot = TRUE,
   gatingTemplate = NULL,
   ...
@@ -64,6 +65,11 @@ mapped. If the parameters defined by \code{map} are located, the existing
 dimension-reduced co-ordinates will be transferred to the new SOM. The data
 will be mapped to the existing SOM by computing the distance to the nearest
 node using the parameters defined by \code{channels}.}
+
+\item{scale}{optional argument to scale each channel prior to computing the
+SOM, options include \code{FALSE}, \code{"range"}, \code{"mean"},
+\code{"median"} or \code{"zscore"}. Set to \code{"range"} by default,
+scaling can be turned off by setting this argument to FALSE.}
 
 \item{plot}{logical indicating whether the constructed SOM should be plotted
 in the channels produced by \code{map}, set to TRUE by default.}

@@ -49,6 +49,10 @@
 #'   dimension-reduced co-ordinates will be transferred to the new SOM. The data
 #'   will be mapped to the existing SOM by computing the distance to the nearest
 #'   node using the parameters defined by \code{channels}.
+#' @param scale optional argument to scale each channel prior to computing the
+#'   SOM, options include \code{FALSE}, \code{"range"}, \code{"mean"},
+#'   \code{"median"} or \code{"zscore"}. Set to \code{"range"} by default,
+#'   scaling can be turned off by setting this argument to FALSE.
 #' @param plot logical indicating whether the constructed SOM should be plotted
 #'   in the channels produced by \code{map}, set to TRUE by default.
 #' @param gatingTemplate name of a gatingTemplate csv file to set as the active
@@ -122,9 +126,12 @@ cyto_som <- function(x,
                      map = "t-SNE",
                      trans = NA,
                      som = NULL,
+                     scale = "range",
                      plot = TRUE,
                      gatingTemplate = NULL,
                      ...) {
+  
+  # NOTE: SOMs ARE LINEAR AND OPTIONALLY SCALED UNTIL SAVING TRANSFORMERS FIXED
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -196,6 +203,8 @@ cyto_som <- function(x,
   
   # SOM TRAINING ---------------------------------------------------------------
   
+  # SOM ON LINEAR SCALE & SCALED - COVER CASE WHERE TRANSFORMERS LOST
+  
   # SOM SUPPLIED
   if(!is.null(som)) {
     # SOM CODES SUPPLIED
@@ -204,7 +213,7 @@ cyto_som <- function(x,
       som_trans <- cyto_transformers_extract(
         som
       )
-      # SOM -> LINEAR SCALE
+      # SOM -> LINEAR SCALE (SCALED)
       codes <- cyto_data_extract(
         som,
         select = 1,
@@ -251,6 +260,17 @@ cyto_som <- function(x,
         codes <- codes[, channels]
         coords <- NULL
       }
+      # SOM RANGES ORIGINAL SCALE
+      som_rng <- cyto_stat_range(
+        codes[, channels, drop = FALSE]
+      )
+      # SCALE SOM PARAMETERS
+      if(!scale %in% FALSE) {
+        codes[, channels] <- cyto_stat_scale(
+          codes[, chnanels, drop = FALSE],
+          type = scale
+        )
+      }
       # RECONSTRUCT SOM FROM CODES
       som <- structure(
         list(
@@ -295,6 +315,18 @@ cyto_som <- function(x,
       markers = FALSE,
       copy = TRUE
     )[[1]][[1]]
+    # RANGES ON ORIGINAL SCALE
+    som_rng <- cyto_stat_range(
+      x_train[, channels, drop = FALSE]
+    )
+    # SCALE
+    if(!scale %in% FALSE) {
+      # NEW SCALE
+      x_train[, channels] <- cyto_stat_scale(
+        x_train[, channels, drop = FALSE],
+        type = scale
+      )
+    }
     # SOM GRID
     grid <- cyto_func_call(
       "kohonen::somgrid",
@@ -337,11 +369,11 @@ cyto_som <- function(x,
               function(z) {
                 cyto_impute(
                   train = x_train[, channels, drop = FALSE],
-                  test = codes,
+                  test = codes[, channels, drop = FALSE],
                   channels = channels,
                   labels = x_train[, z, drop = TRUE],
                   k = 5,
-                  scale = NULL
+                  scale = NULL # SCALING NOT REQUIRED
                 )
               }
             ),
@@ -362,7 +394,7 @@ cyto_som <- function(x,
   # NUMBER OF CODES
   N <- nrow(codes)
   
-  # CONVERT CODES TO CYTOSET ON LINEAR SCALE
+  # CONVERT CODES TO CYTOSET ON LINEAR SCALE & SCALED
   codes <- cytoset(
     structure(
       list(
@@ -407,18 +439,6 @@ cyto_som <- function(x,
     )
   }
   
-  # PLOT -----------------------------------------------------------------------
-  
-  # PLOT SOM 
-  if(plot) {
-    cyto_plot(
-      codes,
-      channels = map,
-      point_shape = 21,
-      point_size = 2.5
-    )
-  }
-  
   # SOM MAPPING ----------------------------------------------------------------
   
   # MAP DATA TO SOM
@@ -451,6 +471,13 @@ cyto_som <- function(x,
             markers = FALSE,
             copy = TRUE
           )[[1]][[1]]
+          # SCALE DATA
+          if(!scale %in% FALSE) {
+            exprs[, channels] <- cyto_stat_scale(
+              exprs[, channels, drop = FALSE],
+              type = scale
+            )
+          }
           # MAP DATA TO SOM
           res <- cyto_func_call(
             "predict",
@@ -468,14 +495,23 @@ cyto_som <- function(x,
           )
           tbl <- table(res)
           cnts[as.numeric(names(tbl))] <- tbl
+          # EXTRACT SOM CODES
+          res <- cyto_exprs(
+            codes[[1]],
+            channels = c(channels, map),
+            drop = FALSE
+          )
+          # MAP SOM CODES BACK TO LINEAR SCALE
+          if(!scale %in% FALSE) {
+            res[, channels] <- cyto_stat_rescale(
+              res[, channels, drop = FALSE],
+              scale = som_rng
+            )
+          }
           # PREPARE DATA - LINEAR CODES + DIM REDUCTION + COUNTS + PROPORTIONS
           as(
             cbind(
-              cyto_exprs(
-                codes[[1]],
-                channels = c(channels, map),
-                drop = FALSE
-              ),
+              res,
               cols = matrix(
                 c(
                   unname(cnts),
@@ -539,6 +575,20 @@ cyto_som <- function(x,
   if(!is.null(gatingTemplate)) {
     cyto_gatingTemplate_active(
       gatingTemplate
+    )
+  }
+  
+  # PLOT -----------------------------------------------------------------------
+  
+  # PLOT SOM 
+  if(plot) {
+    cyto_plot(
+      x_som,
+      parent = "root",
+      select = 1,
+      channels = map,
+      point_shape = 21,
+      point_size = 2.5
     )
   }
   

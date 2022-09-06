@@ -64,7 +64,7 @@ the layout co-ordinates for the graph}}}
 \item{scale}{optional argument to scale each channel prior to computing
 dimension-reduced co-ordinates, options include \code{"global"},
 \code{"range"}, \code{"mean"}, \code{"median"} or \code{"zscore"}. Set to
-\code{"global"} by default, scaling can be turned off by setting this
+\code{"range"} by default, scaling can be turned off by setting this
 argument to FALSE. Global scaling preserves the structure of the data as
 expected on the linear scale without having to apply inverse data
 transformations to the entire dataset. Scaling is only required when some
