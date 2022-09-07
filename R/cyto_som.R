@@ -503,9 +503,20 @@ cyto_som <- function(x,
           )
           # MAP SOM CODES BACK TO LINEAR SCALE
           if(!scale %in% FALSE) {
-            res[, channels] <- cyto_stat_rescale(
+            cnt <- 0
+            res[, channels] <- apply(
               res[, channels, drop = FALSE],
-              scale = som_rng
+              2,
+              function(z) {
+                cnt <<- cnt + 1
+                # MAP VALUES TO SOM_RNG - SOM RANGE MAY BE SET ON DATA [0, 1]
+                z <- (z - min(som_rng[, cnt]))/(diff(som_rng[, cnt]))
+                # RESCALE ONTO ORIGINAL SCALE
+                cyto_stat_rescale(
+                  z,
+                  scale = som_rng[, cnt]
+                )
+              }
             )
           }
           # PREPARE DATA - LINEAR CODES + DIM REDUCTION + COUNTS + PROPORTIONS
