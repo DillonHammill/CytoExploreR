@@ -270,6 +270,9 @@ cyto_som <- function(x,
           codes[, chnanels, drop = FALSE],
           type = scale
         )
+        som_scaled_rng <- cyto_stat_range(
+          codes[, channels, drop = FALSE]
+        )
       }
       # RECONSTRUCT SOM FROM CODES
       som <- structure(
@@ -325,6 +328,9 @@ cyto_som <- function(x,
       x_train[, channels] <- cyto_stat_scale(
         x_train[, channels, drop = FALSE],
         type = scale
+      )
+      som_scaled_rng <- cyto_stat_range(
+        x_train[, channels, drop = FALSE]
       )
     }
     # SOM GRID
@@ -511,8 +517,8 @@ cyto_som <- function(x,
                 cnt <<- cnt + 1
                 # MAP VALUES TO SOM_RNG - SOM RANGE MAY BE SET ON DATA [0, 1]
                 rng <- c(
-                  (min(z) - min(som_rng[, cnt]))/diff(som_rng[, cnt]),
-                  (max(z) - min(som_rng[, cnt]))/diff(som_rng[, cnt])
+                  (min(z) - min(som_scaled_rng[, cnt]))/diff(som_scaled_rng[, cnt]),
+                  (max(z) - min(som_scaled_rng[, cnt]))/diff(som_scaled_rng[, cnt])
                 )
                 # RESCALE ONTO ORIGINAL SCALE
                 cyto_stat_rescale(
