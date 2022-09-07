@@ -510,11 +510,17 @@ cyto_som <- function(x,
               function(z) {
                 cnt <<- cnt + 1
                 # MAP VALUES TO SOM_RNG - SOM RANGE MAY BE SET ON DATA [0, 1]
-                z <- (z - min(som_rng[, cnt]))/(diff(som_rng[, cnt]))
+                rng <- c(
+                  (min(z) - min(som_rng[, cnt]))/diff(som_rng[, cnt]),
+                  (max(z) - min(som_rng[, cnt]))/diff(som_rng[, cnt])
+                )
                 # RESCALE ONTO ORIGINAL SCALE
                 cyto_stat_rescale(
                   z,
-                  scale = som_rng[, cnt]
+                  scale = c(
+                    min(som[, cnt]) + min(rng) * diff(som[, cnt]),
+                    min(som[, cnt]) + max(rng) * diff(som[, cnt])
+                  )
                 )
               }
             )
