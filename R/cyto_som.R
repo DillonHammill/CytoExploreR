@@ -518,8 +518,8 @@ cyto_som <- function(x,
                 cyto_stat_rescale(
                   z,
                   scale = c(
-                    min(som[, cnt]) + min(rng) * diff(som[, cnt]),
-                    min(som[, cnt]) + max(rng) * diff(som[, cnt])
+                    min(som_rng[, cnt]) + min(rng) * diff(som_rng[, cnt]),
+                    min(som_rng[, cnt]) + max(rng) * diff(som_rng[, cnt])
                   )
                 )
               }
