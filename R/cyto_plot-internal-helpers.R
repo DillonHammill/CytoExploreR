@@ -3082,7 +3082,7 @@
       } else {
         rev(legend_point_col)
       },
-      bg = if(any(point_shape %in% c(21:25))) {
+      pt.bg = if(any(point_shape %in% c(21:25))) {
         rev(legend_point_col)
       } else {
         "black"
