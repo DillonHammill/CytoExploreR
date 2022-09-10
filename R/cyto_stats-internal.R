@@ -865,6 +865,18 @@ cyto_stat_scale <- function(x,
                             type = "range",
                             ...) {
   
+  # BYPASS SCALING
+  if(is.null(type)) {
+    return(x)
+  } else if(type %in% FALSE) {
+    return(x)
+  }
+  
+  # DEFAULT SCALING METHOD
+  if(type %in% TRUE) {
+    type <- "range"
+  }
+  
   # VECTOR
   if(is.null(dim(x))) {
     # RANGE

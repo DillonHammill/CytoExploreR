@@ -13,6 +13,7 @@ cyto_impute(
   k = 5,
   method = "dist",
   scale = "range",
+  inverse = FALSE,
   ...
 )
 }
@@ -43,9 +44,16 @@ graph, set to 5 by default.}
 performing kNN classification, set to \code{"dist"} by default.}
 
 \item{scale}{method to use to scale the channels of training and testing data
-prior to constructing the kNN graph, set to \code{"range"} by default.}
+prior to constructing the kNN graph, options include \code{FALSE},
+\code{"range"}, \code{"median"}, \code{"mean"} or \code{"z-score"}. Set to
+\code{"range"} by default.}
 
-\item{...}{not in use.}
+\item{inverse}{logical indicating whether inverse transformations should be
+applied to the training and testing data prior to imputation, set to FALSE
+by default.}
+
+\item{...}{additional arguments passed to \code{cyto_data_extract()} when
+extracting the training and testing data.}
 }
 \value{
 a mtrix containing the imputed labels or values.
@@ -55,7 +63,6 @@ Impute values or labels using k nearest neighbours
 }
 \examples{
 \dontrun{
-
 # Traning and testing data
 ind <- 1:nrow(iris)
 train_ind <- sample(ind, ceiling(0.8 * nrow(iris)))
@@ -76,9 +83,11 @@ cyto_impute(
   iris[train_ind, 4],
   channels = colnames(iris)[1:3]
 )
-
 }
 
+}
+\seealso{
+\code{\link{cyto_data_extract}}
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)

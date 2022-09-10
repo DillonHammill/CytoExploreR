@@ -133,6 +133,8 @@ cyto_som <- function(x,
   
   # NOTE: SOMs ARE LINEAR AND OPTIONALLY SCALED UNTIL SAVING TRANSFORMERS FIXED
   
+  # TODO: PASS MAP DIRECTLY TO SOM?
+  
   # CHECKS ---------------------------------------------------------------------
   
   # CYTOSET | GATINGSET ONLY
@@ -379,7 +381,7 @@ cyto_som <- function(x,
                   channels = channels,
                   labels = x_train[, z, drop = TRUE],
                   k = 5,
-                  scale = NULL # SCALING NOT REQUIRED
+                  scale = FALSE # SCALING NOT REQUIRED
                 )
               }
             ),
@@ -517,8 +519,10 @@ cyto_som <- function(x,
                 cnt <<- cnt + 1
                 # MAP VALUES TO SOM_RNG - SOM RANGE MAY BE SET ON DATA [0, 1]
                 rng <- c(
-                  (min(z) - min(som_scaled_rng[, cnt]))/diff(som_scaled_rng[, cnt]),
-                  (max(z) - min(som_scaled_rng[, cnt]))/diff(som_scaled_rng[, cnt])
+                  (min(z) - min(som_scaled_rng[, cnt]))/
+                    diff(som_scaled_rng[, cnt]),
+                  (max(z) - min(som_scaled_rng[, cnt]))/
+                    diff(som_scaled_rng[, cnt])
                 )
                 # RESCALE ONTO ORIGINAL SCALE
                 cyto_stat_rescale(
@@ -611,7 +615,8 @@ cyto_som <- function(x,
       select = 1,
       channels = map,
       point_shape = 21,
-      point_size = 2.5
+      point_size = 2.5,
+      title = "Self-Organising Map (SOM)"
     )
   }
   
@@ -666,6 +671,8 @@ cyto_gate_som <- function(x,
                           channels = NULL,
                           hidden = TRUE,
                           ...) {
+  
+  # TODO: OPTIONAL RENAMING OF POPULATIONS IN ORIGINAL GATINGSET (CLASHES)
   
   # CHECKS ---------------------------------------------------------------------
   

@@ -21,16 +21,23 @@
 #' @param method determines whether to use \code{"dist"} or \code{"vote"} when
 #'   performing kNN classification, set to \code{"dist"} by default.
 #' @param scale method to use to scale the channels of training and testing data
-#'   prior to constructing the kNN graph, set to \code{"range"} by default.
-#' @param ... not in use.
+#'   prior to constructing the kNN graph, options include \code{FALSE},
+#'   \code{"range"}, \code{"median"}, \code{"mean"} or \code{"z-score"}. Set to
+#'   \code{"range"} by default.
+#' @param inverse logical indicating whether inverse transformations should be
+#'   applied to the training and testing data prior to imputation, set to FALSE
+#'   by default.
+#' @param ... additional arguments passed to \code{cyto_data_extract()} when
+#'   extracting the training and testing data.
 #'
 #' @return a mtrix containing the imputed labels or values.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
+#' @seealso \code{\link{cyto_data_extract}}
+#'
 #' @examples
 #' \dontrun{
-#'
 #' # Traning and testing data
 #' ind <- 1:nrow(iris)
 #' train_ind <- sample(ind, ceiling(0.8 * nrow(iris)))
@@ -51,7 +58,6 @@
 #'   iris[train_ind, 4],
 #'   channels = colnames(iris)[1:3]
 #' )
-#'
 #' }
 #'
 #' @export
@@ -63,6 +69,7 @@ cyto_impute <- function(train = NULL,
                         k = 5,
                         method = "dist",
                         scale = "range",
+                        inverse = FALSE,
                         ...) {
   
   # TODO: MAKE EFFICIENT BY CONSTRUCTING KNN CLASSIFIER ONCE
@@ -88,7 +95,9 @@ cyto_impute <- function(train = NULL,
       channels = channels,
       coerce = TRUE,
       events = 1,
-      format = "matrix"
+      format = "matrix",
+      inverse = inverse,
+      ...
     )[[1]][[1]]
   }
   
@@ -100,7 +109,9 @@ cyto_impute <- function(train = NULL,
       channels = channels,
       coerce = TRUE,
       events = 1,
-      format = "matrix"
+      format = "matrix",
+      inverse = inverse,
+      ...
     )[[1]][[1]]
   }
   
@@ -109,7 +120,7 @@ cyto_impute <- function(train = NULL,
   test <- data.matrix(test)
   
   # SCALE
-  if (!is.null(scale)) {
+  if (!scale %in% FALSE) {
     train <- cyto_stat_scale(
       train,
       type = scale
@@ -157,7 +168,6 @@ cyto_impute <- function(train = NULL,
                 searchtype = "standard"
               )
             )
-            rm(list = c("test", "train"))
             # LABEL MEMBERSHIP PROBABILITIES
             label_mat <- matrix(
               label[knn$nn.idx],
@@ -165,7 +175,7 @@ cyto_impute <- function(train = NULL,
             )
             knn.prob <- switch(
               method,
-              ## P(y_j | x_i) = sum(1/d(nn_i) * (y(nn_i) == y_j)) / sum(1/d(nn_i))
+              # P(y_j | x_i) = sum(1/d(nn_i)*(y(nn_i) == y_j))/sum(1/d(nn_i))
               'dist' = {
                 sapply(
                   levels(label), 
@@ -193,10 +203,15 @@ cyto_impute <- function(train = NULL,
             )
             knn.prob <- as.matrix(do.call('cbind.data.frame', knn.prob))
             knn.prob <- sweep(knn.prob, 1, rowSums(knn.prob), "/")
-            rm(list = c('knn', 'label_mat'))
-            gc()
+            # CLEAR MEMORY
+            rm(knn, label_mat)
             # ASSIGN label
-            res <- levels(label)[max.col(knn.prob, ties.method = "first")]
+            res <- levels(label)[
+              max.col(
+                knn.prob, 
+                ties.method = "first"
+              )
+            ]
             res <- factor(res, levels(label))
             # REGRESSION
           } else {
@@ -216,7 +231,6 @@ cyto_impute <- function(train = NULL,
                 algorithm = "kd_tree"
               )
             )
-            rm(list = c("test", "train"))
             # NEW VALUES
             res <- res$pred
           }
