@@ -39,9 +39,9 @@
     }
     # KNN
     knn <- skl$NearestNeighbors(
-      n_neighbors = k,
+      n_neighbors = as.integer(k),
       algorithm = method,
-      n_jobs = n_jobs,
+      n_jobs = as.integer(n_jobs),
       ...
     )
     knn <- knn$fit(

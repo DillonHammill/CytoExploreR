@@ -67,6 +67,7 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @importFrom flowWorkspace cytoset GatingSet
+#' @importFrom flowCore keyword<-
 #'
 #' @seealso \code{\link{cyto_map}}
 #'
@@ -131,9 +132,9 @@ cyto_som <- function(x,
                      gatingTemplate = NULL,
                      ...) {
   
-  # NOTE: SOMs ARE LINEAR AND OPTIONALLY SCALED UNTIL SAVING TRANSFORMERS FIXED
+  # TODO: SOM KEYWORD
   
-  # TODO: PASS MAP DIRECTLY TO SOM?
+  # NOTE: SOMs ARE LINEAR AND OPTIONALLY SCALED UNTIL SAVING TRANSFORMERS FIXED
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -536,7 +537,7 @@ cyto_som <- function(x,
             )
           }
           # PREPARE DATA - LINEAR CODES + DIM REDUCTION + COUNTS + PROPORTIONS
-          as(
+          cf <- as(
             cbind(
               res,
               cols = matrix(
@@ -554,6 +555,11 @@ cyto_som <- function(x,
             ),
             "cytoframe"
           )
+          # SET SOM KEYWORD -> STORE DIMENSIONS
+          keyword(cf)[["CytoExploreR_SOM"]] <- paste0(
+            grid[1], "x", grid[2]
+          )
+          return(cf)
         }
       ),
       names = cyto_names(x)

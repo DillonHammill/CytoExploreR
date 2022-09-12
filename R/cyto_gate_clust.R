@@ -13,7 +13,7 @@
 #'   labels these populations. \code{cyto_gate_clust()} will automatically
 #'   append \code{alias} with integers to generate unique names for each of the
 #'   clustered populations. If \code{alias} is not supplied,
-#'   \code{cyto_gate_clust} will instead resort to using the name of the
+#'   \code{cyto_gate_clust()} will instead resort to using the name of the
 #'   function supplied to \code{type}.
 #' @param channels names of the channels or markers to be be passed to the
 #'   clustering algorithm during the gating step.
@@ -54,7 +54,7 @@
 #' @param scale optional argument to scale each channel prior to passing data to
 #'   the specified clustering algorithm, options include \code{"range"},
 #'   \code{"mean"}, \code{"median"} or \code{"zscore"}. Set to \code{"range"} by
-#'   default, scaling can be turned off by setting this argument to NULL.
+#'   default, scaling can be turned off by setting this argument to FALSE.
 #' @param ... additional arguments passed to the clustering algorithm supplied
 #'   to \code{type}, refer to the documentation for the relevant clustering
 #'   algorithm for more details.
@@ -87,8 +87,6 @@ cyto_gate_clust <- function(x,
                             scale = "range",
                             ...){
   
-  # TODO: ADD SCALE ARGUMENT
-  
   # CHECKS ---------------------------------------------------------------------
   
   # GATINGSET REQUIRED
@@ -111,6 +109,11 @@ cyto_gate_clust <- function(x,
   
   # CURRENT NODES
   nodes <- cyto_nodes(x, path = "auto")
+  
+  # DEFAULT ALIAS -> TYPE
+  if(is.null(alias)) {
+    alias <- cyto_func_name(type)
+  }
   
   # GATINGTEMPLATE CHECKS
   if(cyto_class(x, "GatingSet")) {
@@ -143,103 +146,6 @@ cyto_gate_clust <- function(x,
       "clustering algorithm to the ", parent, " population..."
     )
   )
-  
-  # DEFAULT ALGORITHM TYPES
-  if(is.character(type)) {
-    # FLOWSOM
-    if(grepl("^FlowSOM$", type, ignore.case = TRUE)) {
-      # LOAD FLOWSOM
-      cyto_require(
-        "FlowSOM",
-        source = "BioC",
-        repo = "SofieVG/FlowSOM",
-        ref = paste0(
-          "Van Gassen S, et al. (2015). FlowSOM: Using self-organising maps ",
-          "for visualisation and interpretation of cytometry data. Cytometry ",
-          "A 87(7) 10.1002/cyto.a.22625"
-        )
-      )
-    # IMMUNOCLUST
-    } else if(grepl("^ImmunoClust$", type, ignore.case = TRUE)) {
-      # LOAD IMMUNOCLUST
-      cyto_require(
-        "immunoClust",
-        source = "BioC",
-        ref = paste0(
-          "Sorensen T, et al. (2015). immunoClust--An automated analysis ",
-          "pipeline for the identification of immunophenotypic signatures ",
-          "in high-dimensional cytometric datasets. Cytometry A 87(7) ",
-          "10.1002/cyto.a.22626"
-        )
-      )
-    # KMEANS
-    } else if(grepl("^kmeans$", type, ignore.case = TRUE)) {
-      # USES STATS::KMEANS()
-    # DBSCAN 
-    } else if(grepl("^dbscan$|^hdbscan$|^SNN$", type, ignore.case = TRUE)) {
-      # LOAD DBSCAN
-      cyto_require(
-        "dbscan",
-        source = "CRAN",
-        ref = paste0(
-          "Hahsler M, Piekenbrock M, Doran D (2019). dbscan: Fast ",
-          "Density-Based Clustering with R. Journal of Statistical Software, ",
-          "91(1), 1–30. doi: 10.18637/jss.v091.i01"
-        )
-      )
-      # PREPARE TYPE
-      if(grepl("^SNN$", type, ignore.case = TRUE)) {
-        type <- "dbscan::sNNclust"
-      } else {
-        type <- paste0(
-          "dbscan::",
-          tolower(type)
-        )
-      }
-      # INPUT FORMAT
-      input <- "matrix"
-    # HIERARCHICAL GRAPH BASED CLUSTERING
-    } else if(grepl("^HGC$", type, ignore.case = TRUE)) {
-      # LOAD DENDEXTEND - CUTREE
-      cyto_require(
-        "dendextend",
-        source = "CRAN"
-      )
-      # LOAD HGC
-      cyto_require(
-        "HGC",
-        source = "github",
-        repo = "XuegongLab/HGC@HGC4oldRVersion",
-        ref = paste0(
-          "Ziheng Zou, Kui Hua, Xuegong Zhang (2021) HGC: fast hierarchical ",
-          "clustering for large-scale single-cell data, Bioinformatics ",
-          "37(21)"
-        )
-      )
-    # RCLUSTERPP
-    } else if(grepl("^rclusterpp$", type, ignore.case = TRUE)) {
-      # LOAD RCLUSTERPP
-      cyto_require(
-        "Rclusterpp",
-        source = "CRAN"
-      )
-    # FLOWPEAKS
-    } else if(grepl("^flowpeaks$", type, ignore.case = TRUE)) {
-      # LOAD FLOWPEAKS
-      cyto_require(
-        "flowPeaks",
-        source = "BioC",
-        ref = paste0(
-          "Ge Y. et al (2012) flowPeaks: a fast unsupervised clustering for ",
-          "flow cytometry data via K-means and density peak fnding. ",
-          "Bioinformatics 8(15):2052-8."
-        )
-      )
-      type <- "flowPeaks::flowPeaks"
-      input <- "matrix"
-      slot <- "peaks.cluster"
-    }
-  }
   
   # GATINGTEMPLATE ENTRIES -----------------------------------------------------
   
@@ -378,7 +284,12 @@ cyto_gate_clust <- function(x,
         parent,
         path = "auto",
         showHidden = TRUE
-      )
+      ),
+      "som" = if(length(cyto_keyword(gs[[1]])[["CytoExploreR_SOM"]]) > 0) {
+        TRUE
+      } else {
+        FALSE
+      }
     )
   )
   
@@ -434,90 +345,174 @@ cyto_gate_clust <- function(x,
     )
   }
   
-  # SCALE
-  if(!is.null(scale)) {
-    if(!scale %in% FALSE) {
-      cyto_exprs(fr) <- cyto_stat_scale(
-        cyto_exprs(
-          fr,
-          channels = params,
-          drop = FALSE
-        ),
-        type = scale
-      )
-    }
+  # PRECAUTIONARY - DON'T MODIFY DATA IN PLACE
+  if(cyto_class(fr, "cytoframe")) {
+    fr <- cyto_copy(fr)
   }
+  
+  # SOM - USE FIRST SAMPLE
+  if(pp_res$som) {
+    fr <- fr[1:pp_res$counts[[1]], ]
+  }
+  
+  # INVERSE TRANSFORM
+  if(inverse & !.all_na(pp_res$trans)) {
+    fr <- cyto_transform(
+      fr,
+      trans = pp_res$trans,
+      inverse = inverse,
+      plot = FALSE,
+      quiet = TRUE
+    )
+  }
+  
+  # SCALE DATA -> CLUSTERING ALGORITHM
+  if(!scale %in% FALSE) {
+    cyto_exprs(fr) <- cyto_stat_scale(
+      cyto_exprs(
+        fr,
+        channels = params,
+        drop = FALSE
+      ),
+      type = scale
+    )
+  }
+  
+  # PULL DOWN OPTIONAL ARGUMENTS
+  args <- list(...)
   
   # DEFAULT CLUSTERING METHODS
   if(is.character(type)) {
+    # SOM
+    if(grepl("^SOM$", type, ignore.case = TRUE)) {
+      # PREPARE DATA
+      args$x <- cyto_data_extract(
+        fr,
+        format = "matrix",
+        channels = params,
+        inverse = FALSE, # DONE
+        events = events,
+        seed = seed,
+        copy = FALSE
+      )[[1]][[1]]
+      # CONSTRUCT SOM
+      gate <- cyto_func_call(
+        ".cyto_clust_SOM",
+        args = args
+      )
     # FLOWSOM
-    if(grepl("^FlowSOM$", type, ignore.case = TRUE)) {
-      # TODO: CHECK DIMENSIONS OF SOM REQUIRED?
-      # FLOWSOM DEFAULT ARGUMENTS
-      args_default <- list(
-        compensate = FALSE,
-        transform = FALSE,
-        scale = FALSE,
-        silent = FALSE,
-        seed = 56
-      )
-      # COMBINE INCOMING ARGUMENTS
-      args <- list(...)
-      args <- c(
-        args,
-        args_default[!names(args_default) %in% names(args)]
-      )
-      # PREPARE DATA - INVERSE DATA OPTIONAL
-      fr_clust <- cyto_data_extract(
+    } else if(grepl("^FlowSOM$", type, ignore.case = TRUE)) {
+      # DROP COMPENSATE & TRANSFORM & SEED ARGUMENTS -> USE WRAPPER DEFAULTS
+      args <- args[
+        !names(args) %in% c("compensate", "transform", "seed", "colsToUse")
+      ]
+      # PREPARE DATA
+      args$x <- cyto_data_extract(
         fr,
         format = "flowFrame",
         channels = params,
-        trans = pp_res$trans,
-        inverse = ifelse(args$transform, TRUE, FALSE),
+        inverse = FALSE, # DONE
         events = events,
+        seed = seed,
         copy = FALSE
       )[[1]][[1]]
-      # ADD DATA TO ARGUMENTS
-      args <- c(
-        list(fr_clust),
-        args
-      )
-      # RUN FLOWSOM
-      res <- cyto_func_call(
-        "FlowSOM::FlowSOM",
-        args
-      )
-      # CLUSTERS
+      # APPLY FLOWSOM ALGORITHM
       gate <- cyto_func_call(
-        "FlowSOM::GetMetaclusters",
-        list(res)
+        ".cyto_clust_FlowSOM",
+        args = args
+      )
+    # PYPHENOGRAPH 
+    } else if(grepl("^pyphenograph", type, ignore.case = TRUE)) {
+      # PREPARE DATA
+      args$x <- cyto_data_extract(
+        fr,
+        format = "matrix",
+        channels = params,
+        inverse = FALSE, # DONE
+        events = events,
+        seed = seed,
+        copy = FALSE
+      )[[1]][[1]]
+      # APPLY PYTHON PHENOGRAPH
+      gate <- cyto_func_call(
+        ".cyto_clust_pyphenograph",
+        args = args
+      )
+    # RPHENOGRAPH 
+    } else if(grepl("^phenograph$|^rphenograph", type, ignore.case = TRUE)) {
+      # PREPARE DATA
+      args$x <- cyto_data_extract(
+        fr,
+        format = "matrix",
+        channels = params,
+        inverse = FALSE, # DONE
+        events = events,
+        seed = seed,
+        copy = FALSE
+      )[[1]][[1]]
+      # APPLY PYTHON PHENOGRAPH
+      gate <- cyto_func_call(
+        ".cyto_clust_rphenograph",
+        args = args
+      )
+    # DEPECHER
+    } else if(grepl("^depeche", type, ignore.case = TRUE)) {
+      # PREPARE DATA
+      args$x <- cyto_data_extract(
+        fr,
+        format = "matrix",
+        channels = params,
+        inverse = FALSE, # DONE
+        events = events,
+        seed = seed,
+        copy = FALSE
+      )[[1]][[1]]
+      # APPLY PYTHON PHENOGRAPH
+      gate <- cyto_func_call(
+        ".cyto_clust_depeche",
+        args = args
       )
     # IMMUNOCLUST
     } else if(grepl("^ImmunoClust$", type, ignore.case = TRUE)) {
+      # TODO: WILL SCALING AFFECT TRANSFORMATIONS WITHIN IMMUNOCLUST?
       # PREPARE DATA - INVERSE DATA REQUIRED
-      fr_clust <- cyto_data_extract(
+      args$fcs <- cyto_data_extract(
         fr,
         format = "flowFrame",
         channels = params,
         trans = pp_res$trans,
-        inverse = TRUE,
+        inverse = FALSE, # DONE
         events = events,
         copy = FALSE
       )[[1]][[1]]
-      # IMMUNOCLUST ARGUMENTS
-      args <- list(
-        fr_clust,
-        ...
-      )
       # RUN IMMUNOCLUST
       gate <- cyto_func_call(
         "immunoClust::cell.process",
-        args
+        args = args
       )@label
+    # DBSCAN
+    } else if(grepl("^(hdbscan|dbscan|SNNclust)$", type, ignore.case = TRUE)) {
+      # PREPARE DATA
+      args$x <- cyto_data_extract(
+        fr,
+        format = "matrix",
+        channels = params,
+        inverse = FALSE, # DONE
+        events = events,
+        seed = seed,
+        copy = FALSE
+      )[[1]][[1]]
+      # TYPE OF ALGORITHM REQUIRED
+      args$type <- type
+      # APPLY DBSCAN
+      gate <- cyto_func_call(
+        ".cyto_clust_dbscan",
+        args = args
+      )
     # KMEANS  
     } else if(grepl("^kmeans$", type, ignore.case = TRUE)) {
       # PREPARE DATA - MATRIX REQUIRED
-      fr_clust <- cyto_data_extract(
+      args$x <- cyto_data_extract(
         fr,
         format = "matrix",
         channels = params,
@@ -526,90 +521,32 @@ cyto_gate_clust <- function(x,
         events = events,
         copy = FALSE
       )[[1]][[1]]
-      # ARGUMENTS
-      args <- list(
-        fr_clust,
-        ...
-      )
       # RUN KMEANS
       gate <- cyto_func_call(
-        "stats::kmeans",
-        args
-      )$cluster
+        ".cyto_clust_kmeans",
+        args = args
+      )
     # HGC
     } else if(grepl("^HGC$", type, ignore.case = TRUE)) {
-      # HGC WRAPPER - ADD N ARGUMENT FOR CLUSTERS
-      hgc_fun <- function(x, ...) {
-        # ARGUMENTS
-        args <- list(...)
-        args$mat <- x
-        # K REQUIRED
-        if(!"n" %in% names(args)) {
-          stop(
-            paste0(
-              "The number of clusters must be specified to 'n' for HGC ",
-              "clustering!"
-            )
-          )
-        }
-        # SCALE
-        args$x <- cyto_stat_scale(
-          args$x,
-          type = "range"
-        )
-        # SNN TREE
-        SNN <- cyto_func_execute(
-          "HGC::SNN.Construction",
-          args
-        )
-        args$G <- SNN
-        # DENDROGRAM
-        tree <- cyto_func_execute(
-          "HGC::HGC.dendrogram",
-          args
-        )
-        # K - CLUSTERS
-        args$k <- args$n
-        args$tree <- tree
-        # CUT DENDROGRAM
-        cyto_func_execute(
-          "dendextend::cutree",
-          args
-        )
-      }
       # EXTRACT DATA MATRIX
-      fr_clust <- cyto_data_extract(
+      args$x <- cyto_data_extract(
         fr,
         format = "matrix",
         channels = params,
         trans = pp_res$trans,
-        inverse = FALSE,
+        inverse = FALSE, # DONE
         events = events,
         copy = FALSE
       )[[1]][[1]]
-      # ARGUMENTS
-      args <- list(
-        fr_clust,
-        ...
-      )
       # RUN HGC
       gate <- cyto_func_call(
-        hgc_fun,
-        args
+        ".cyto_clust_hgc",
+        args = args
       )
     # RCLUSTERPP
     }else if(grepl("^rclusterpp$", type, ignore.case = TRUE)) {
-      # CHECK ARGUMENTS - K REQUIRED
-      if(!"k" %in% names(args)) {
-        stop(
-          paste0(
-            "Rclusterpp requires argument 'k' to indicate the desired number ",
-            "of clusters!"
-          )
-        )
-      }
       # EXTRACT DATA MATRIX
-      fr_clust <- cyto_data_extract(
+      args$x <- cyto_data_extract(
         fr,
         format = "matrix",
         channels = params,
@@ -618,20 +555,71 @@ cyto_gate_clust <- function(x,
         events = events,
         copy = FALSE
       )[[1]][[1]]
-      # ARGUMENTS
-      args <- list(
-        x = fr_clust,
-        ...
-      )
       # RUN RCLUSTERCPP HCLUST
       tree <- cyto_func_execute(
         "Rclusterpp::Rclusterpp.hclust",
         args
       )
       # CUT TREE
-      res <- cyto_func_execute(
+      gate <- cyto_func_execute(
         "stats::cutree",
-        c(args, list("tree" = tree))
+        args = c(
+          args, 
+          list(
+            "tree" = tree
+          )
+        )
+      )
+    # FLOWPEAKS
+    } else if(grepl("^flowPeaks$", type, ignore.case = TRUE)) {
+      # EXTRACT DATA MATRIX
+      args$x <- cyto_data_extract(
+        fr,
+        format = "matrix",
+        channels = params,
+        trans = pp_res$trans,
+        inverse = FALSE, # DONE
+        events = events,
+        copy = FALSE
+      )[[1]][[1]]
+      # FLOWPEAKS
+      gate <- cyto_func_call(
+        ".cyto_clust_flowpeaks",
+        args = args
+      )
+    # MSTKNN
+    } else if(grepl("^mstknn$", type, ignore.case = TRUE)) {
+      # EXTRACT DATA MATRIX
+      args$x <- cyto_data_extract(
+        fr,
+        format = "matrix",
+        channels = params,
+        trans = pp_res$trans,
+        inverse = FALSE, # DONE
+        events = events,
+        copy = FALSE
+      )[[1]][[1]]
+      # MSTKNN
+      gate <- cyto_func_call(
+        ".cyto_clust_mstknn",
+        args = args
+      )
+    # SPECTRUM 
+    } else if(grepl("^spectrum$", type, ignore.case = TRUE)) {
+      # EXTRACT DATA MATRIX
+      args$x <- cyto_data_extract(
+        fr,
+        format = "matrix",
+        channels = params,
+        trans = pp_res$trans,
+        inverse = FALSE, # DONE
+        events = events,
+        copy = FALSE
+      )[[1]][[1]]
+      # SPECTRUM
+      gate <- cyto_func_call(
+        ".cyto_clust_spectrum",
+        args = args
       )
     # CONVERT TYPE TO FUNCTION
     } else {
@@ -642,12 +630,12 @@ cyto_gate_clust <- function(x,
   # NON-STANDARD CLUSTERING ALGORITHM
   if(is.function(type)) {
     # CONVERT DATA TO REQUIRED FORMAT - DATA RESTRICTED TO CHANNELS
-    fr_clust <- cyto_data_extract(
+    x <- cyto_data_extract(
       fr,
       format = input,
       channels = params,
       trans = pp_res$trans,
-      inverse = inverse,
+      inverse = FALSE, # DONE
       events = events,
       copy = FALSE,
     )[[1]][[1]]
@@ -655,7 +643,10 @@ cyto_gate_clust <- function(x,
     gate <- cyto_slot(
       cyto_func_call(
         type,
-        list(fr_clust, ...)
+        args = c(
+          list(x), # UNNAMED!
+          args
+        )
       ),
       slot = slot
     )
@@ -675,12 +666,27 @@ cyto_gate_clust <- function(x,
   if(length(gate) != BiocGenerics::nrow(fr)) {
     gate <- factor(
       cyto_impute(
-        train = fr_clust,
-        test = fr,
+        train = args$x,
+        test = cyto_data_extract(
+          fr,
+          format = "matrix",
+          channels = params,
+          inverse = FALSE, # DONE
+          copy = FALSE
+        )[[1]][[1]],
         labels = gate,
         k = impute,
-        channels = params
+        channels = params,
+        scale = FALSE
       )[, 1]
+    )
+  }
+  
+  # SOM - DUPLICATE LABELS PER SAMPLE
+  if(pp_res$som) {
+    gate <- rep(
+      gate,
+      length(pp_res$counts)
     )
   }
   

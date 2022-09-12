@@ -3690,7 +3690,7 @@ cyto_merge_by <- function(x,
         seq_along(cs_list), 
         function(z){
           # SOM CYTOSET | GATINGSET
-          if("SOM_counts" %in% cyto_channels(cs_list[[z]])) {
+          if(length(cyto_keyword(cs_list[[z]], "CytoExploreR_SOM")) > 0) {
             # EXTRACT SOM CODES & DIM REDUCTION
             SOM <- cyto_exprs(
               cs_list[[z]][[1]],
@@ -3779,7 +3779,7 @@ cyto_merge_by <- function(x,
   # CONVERT EACH GROUP TO CYTOFRAME
   } else {
     # SOM CYTOSET|GATINGSET
-    if("SOM_counts" %in% cyto_channels(cs_list[[z]])) {
+    if(length(cyto_keyword(cs_list[[z]], "CytoExploreR_SOM")) > 0) {
       structure(
         lapply(
           seq_along(cs_list),
@@ -8709,10 +8709,16 @@ cyto_require <- function(x,
         # BiocManager::install(x, ...)
       }
     }
+    # IMPORT REQUIRED
+    if(!isNamespaceLoaded(x)) {
+      import <- TRUE
+    } else {
+      import <- FALSE
+    }
     # LOAD PACKAGE
     requireNamespace(x)
-    # REFERENCE
-    if(!is.null(ref)) {
+    # ONLY REFERENCE ON IMPORT
+    if(!is.null(ref) & import) {
       message(ref)
     }
     return(NULL)
@@ -8790,3 +8796,71 @@ cyto_progress <- function(pb = NULL,
   return(pb)
   
 }
+
+## CYTO_KEYWORD ----------------------------------------------------------------
+
+#' Extract a keyword from a cytoframe, cytoset or GatingSet
+#'
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[FlowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[FlowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param ... additional arguments passed to \code{flowCore::keyword()} or
+#'   \code{flowWorkspace::keyword()} including \code{keyword} which indicates
+#'   the name of a specific keyword to extract.
+#'
+#' @return a list of extract keywords.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' library(CytoExploreRData)
+#'
+#' cyto_keyword(
+#'   Activation[[1]],
+#'   "SPILL"
+#' )
+#'
+#' @export
+cyto_keyword <- function(x,
+                         ...) {
+  
+  # FLOWCORE KEYWORD
+  if(cyto_class(x, c("flowFrame", "flowSet"))) {
+    cyto_func_call(
+      "flowCore::keyword",
+      list(
+        x,
+        ...
+      )
+    )
+  # FLOWWORKSPACE KEYWORD
+  } else {
+    cyto_func_call(
+      "flowWorkspace::keyword",
+      list(
+        x,
+        ...
+      )
+    )
+  }
+  
+}
+
+#' # CYTO_KEYWORD REPLACEMENT METHOD ----------------------------------------------
+#' 
+#' #' @noRd
+#' "cyto_keyword<-" <- function(object,
+#'                              value) {
+#'   
+#'   if(cyto_class(object, c("flowFrame", "flowSet"))) {
+#'     flowCore::keyword(object) <- value
+#'   } else {
+#'     flowWorkspace::keyword(object) <- value
+#'   }
+#'   
+#' }
+#' 
+#' #' @noRd
+#' #' @export
+#' "cyto_keyword<-"

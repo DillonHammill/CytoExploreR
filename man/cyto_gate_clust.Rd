@@ -36,7 +36,7 @@ determined post gating, supply a single character string to \code{alias} to
 labels these populations. \code{cyto_gate_clust()} will automatically
 append \code{alias} with integers to generate unique names for each of the
 clustered populations. If \code{alias} is not supplied,
-\code{cyto_gate_clust} will instead resort to using the name of the
+\code{cyto_gate_clust()} will instead resort to using the name of the
 function supplied to \code{type}.}
 
 \item{channels}{names of the channels or markers to be be passed to the
@@ -88,7 +88,7 @@ to 5 by default.}
 \item{scale}{optional argument to scale each channel prior to passing data to
 the specified clustering algorithm, options include \code{"range"},
 \code{"mean"}, \code{"median"} or \code{"zscore"}. Set to \code{"range"} by
-default, scaling can be turned off by setting this argument to NULL.}
+default, scaling can be turned off by setting this argument to FALSE.}
 
 \item{...}{additional arguments passed to the clustering algorithm supplied
 to \code{type}, refer to the documentation for the relevant clustering
