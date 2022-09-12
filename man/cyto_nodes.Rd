@@ -4,7 +4,16 @@
 \alias{cyto_nodes}
 \title{Names of gated populations in gatingTemplate/GatingHierarchy/GatingSet}
 \usage{
-cyto_nodes(x, path = "full", terminal = FALSE, hidden = FALSE, ...)
+cyto_nodes(
+  x,
+  path = "full",
+  terminal = FALSE,
+  hidden = FALSE,
+  select = NULL,
+  exclude = NULL,
+  ignore.case = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class
@@ -23,6 +32,18 @@ should be returned, set to FALSE by default.}
 included, set to FALSE by default. \code{hidden} acts in place of the
 \code{showHidden} argument for consistency with other CytoExploreR APIs.}
 
+\item{select}{either a vector indices or character strings for partial
+matching to the \code{path} nodes to extract the required nodes, set to
+NULL by default to select all nodes.}
+
+\item{exclude}{either a vector indices or character strings for partial
+matching to the \code{path} nodes to prevent extraction of certain nodes,
+set to NULL by default to include all nodes.}
+
+\item{ignore.case}{logical indicating whether case should be ignored when
+selecting nodes using the \code{select} or \code{exclude} arguments, set to
+TRUE by default.}
+
 \item{...}{additional arguments passed to
 \code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}} or
 \code{\link[openCyto:gt_get_nodes]{gt_get_nodes}}.}
@@ -32,5 +53,6 @@ character vector of gated node/population names.
 }
 \description{
 \code{cyto_nodes} is simply an autocomplete-friendly wrapper for
-\code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}}.
+\code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}} with
+additional \code{select} and \code{exclude} arguments for node selection.
 }

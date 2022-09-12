@@ -6652,7 +6652,8 @@ cyto_compensate.flowFrame <- function(x,
 #' Names of gated populations in gatingTemplate/GatingHierarchy/GatingSet
 #'
 #' \code{cyto_nodes} is simply an autocomplete-friendly wrapper for
-#' \code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}}.
+#' \code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}} with
+#' additional \code{select} and \code{exclude} arguments for node selection.
 #'
 #' @param x object of class
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}},
@@ -6666,6 +6667,15 @@ cyto_compensate.flowFrame <- function(x,
 #' @param hidden logical to control whether the paths to hidden nodes should be
 #'   included, set to FALSE by default. \code{hidden} acts in place of the
 #'   \code{showHidden} argument for consistency with other CytoExploreR APIs.
+#' @param select either a vector indices or character strings for partial
+#'   matching to the \code{path} nodes to extract the required nodes, set to
+#'   NULL by default to select all nodes.
+#' @param exclude either a vector indices or character strings for partial
+#'   matching to the \code{path} nodes to prevent extraction of certain nodes,
+#'   set to NULL by default to include all nodes.
+#' @param ignore.case logical indicating whether case should be ignored when
+#'   selecting nodes using the \code{select} or \code{exclude} arguments, set to
+#'   TRUE by default.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}} or
 #'   \code{\link[openCyto:gt_get_nodes]{gt_get_nodes}}.
@@ -6680,6 +6690,9 @@ cyto_nodes <- function(x,
                        path = "full",
                        terminal = FALSE,
                        hidden = FALSE,
+                       select = NULL,
+                       exclude = NULL,
+                       ignore.case = TRUE,
                        ...) {
   
   # GATINGHIERARCHY
@@ -6822,8 +6835,66 @@ cyto_nodes <- function(x,
     nodes <- unname(nodes)
   }
   
+  # NODE INDICES
+  ind <- seq_along(nodes)
+  
+  # SELECT
+  if(!is.null(select)) {
+    ind <- unique(
+      LAPPLY(
+        select, 
+        function(z){
+          # INDEX
+          if(is.numeric(z)) {
+            z
+          # NODE
+          } else {
+            which(
+              suppressWarnings(
+                .grepl(
+                  z, 
+                  nodes, 
+                  ignore.case = ignore.case,
+                  ...
+                )
+              )
+            )
+          }
+        }
+      )
+    )
+  }
+  
+  # EXCLUDE
+  if(!is.null(exclude)) {
+    ind_rm <- unique(
+      LAPPLY(
+        exclude, 
+        function(z){
+          # INDEX
+          if(is.numeric(z)) {
+            z
+          # NODE
+          } else {
+            which(
+              suppressWarnings(
+                .grepl(
+                  z, 
+                  nodes, 
+                  ignore.case = ignore.case,
+                  ...
+                )
+              )
+            )
+          }
+        }
+      )
+    )
+    ind <- ind[!ind %in% ind_rm]
+  }
+  
   # NODE PATHS
-  return(nodes)
+  return(nodes[ind])
   
 }
 
