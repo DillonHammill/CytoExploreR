@@ -195,7 +195,7 @@
   cyto_require(
     "Rphenograph",
     source = "GitHUb",
-    repo = "JinmiaoChenLab/Rphenograph",
+    repo = "DillonHammill/Rphenograph",
     ref = paste0(
       "Levine, J. et al. (2018) Data-Driven Phenotypic Dissection of AML ",
       "Reveals Progenitor-like Cells that Correlate with Prognosis. ",
@@ -213,7 +213,7 @@
     )
   )
   
-  # PREPARE GATE - ORDER & OUTLIERS
+  # PREPARE GATE - ORDER & OUTLIERS -> IN CASE INCORRECT RPHENOGRAPH
   gate <- rep(0, nrow(x))
   gate[
     as.numeric(
@@ -225,7 +225,6 @@
       )$name
     )
   ] <- res[[2]]$membership
-  
   
   return(gate)
   
