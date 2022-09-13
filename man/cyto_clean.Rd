@@ -4,7 +4,7 @@
 \alias{cyto_clean}
 \title{Apply anomaly detection algorithms to obtain clean cytometry data}
 \usage{
-cyto_clean(x, type = "flowAI", ...)
+cyto_clean(x, type = "flowAI", channels = NULL, trans = NA, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
@@ -16,7 +16,12 @@ supplied.}
 
 \item{type}{the method to use when cleaning the data, options include
 \code{"flowAI"}, \code{"flowClean"}, \code{"flowCut"} or \code{"PeacoQC"},
-set to \code{"flowAI"} by default.}
+set to \code{"flowAI"} by default. 2param trans object of class
+transformerList containing the definitions of the transformations already
+applied to the supplied \code{cytoset}.}
+
+\item{channels}{names of the channel(s) or marker(s) to clean, must include
+the \code{Time} parameter for flow rate checks.}
 
 \item{...}{additional arguments passed to \code{flowAI::flow_auto_qc},
 \code{flowClean::flowClean}, \code{flowCut::flowCut} or

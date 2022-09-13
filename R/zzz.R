@@ -73,6 +73,12 @@
     )
     # CYTO_GATE_CLEAN
     openCyto::register_plugins(
+      fun = .pp_cyto_gate_clean,
+      methodName = "pp_cyto_gate_clean",
+      dep = NA,
+      "preprocessing"
+    )
+    openCyto::register_plugins(
       fun = .cyto_gate_clean,
       methodName = "cyto_gate_clean"
     )

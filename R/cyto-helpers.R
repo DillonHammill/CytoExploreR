@@ -571,7 +571,11 @@ cyto_load <- function(path = ".",
 #'   supplied.
 #' @param type the method to use when cleaning the data, options include
 #'   \code{"flowAI"}, \code{"flowClean"}, \code{"flowCut"} or \code{"PeacoQC"},
-#'   set to \code{"flowAI"} by default.
+#'   set to \code{"flowAI"} by default. 2param trans object of class
+#'   transformerList containing the definitions of the transformations already
+#'   applied to the supplied \code{cytoset}.
+#' @param channels names of the channel(s) or marker(s) to clean, must include
+#'   the \code{Time} parameter for flow rate checks.
 #' @param ... additional arguments passed to \code{flowAI::flow_auto_qc},
 #'   \code{flowClean::flowClean}, \code{flowCut::flowCut} or
 #'   \code{PeacoQC::PeacoQC}.
@@ -619,18 +623,46 @@ cyto_load <- function(path = ".",
 #' @export
 cyto_clean <- function(x,
                        type = "flowAI",
+                       channels = NULL,
+                       trans = NA,
                        ...) {
   
-  # EXTRACT DATA
-  if(cyto_class(x, "GatingSet")) {
-    cyto_data <- cyto_data_extract(
+  # CHANNELS
+  if(is.null(channels)) {
+    channels <- cyto_channels(
       x,
-      parent = "root",
-      copy = FALSE
-    )[["root"]]
+      exclude = c(
+        "Event",
+        "Sample"
+      )
+    )
   } else {
-    cyto_data <- x
+    # CONVERT CHANNELS
+    channels <- cyto_channels_extract(
+      x,
+      channels = channels
+    )
+    # TIME CHANNEL REQUIRED
+    if(!any(grepl("Time", channels, ignore.case = TRUE))) {
+      stop(
+        "'channels' must include the 'Time' parameter."
+      )
+    }
   }
+  
+  # TRANSFORMERS
+  if(.all_na(trans)) {
+    trans <- cyto_transformers_extract(x)
+  }
+  
+  # EXTRACT DATA -> CYTOSET
+  cyto_data <- cyto_data_extract(
+    x,
+    parent = "root",
+    format = "cytoset",
+    channels = channels,
+    copy = FALSE
+  )[[1]]
   
   # FLOWAI
   if(.grepl("ai", type)) {
@@ -650,7 +682,9 @@ cyto_clean <- function(x,
           cyto_data,
           "flowAI::flow_auto_qc",
           input = "cytoframe",
-          copy = FALSE,
+          trans = trans,
+          inverse = TRUE,
+          copy = TRUE,
           html_report = FALSE,
           mini_report = FALSE,
           fcs_QC = FALSE,
@@ -677,7 +711,9 @@ cyto_clean <- function(x,
       "flowClean::clean",
       input = "flowFrame",
       slot = "frame",
-      copy = FALSE,
+      trans = trans,
+      inverse = TRUE,
+      copy = TRUE,
       diagnostic = FALSE, 
       ...
     )
@@ -699,6 +735,8 @@ cyto_clean <- function(x,
       cyto_data,
       "flowCut::flowCut",
       input = "flowFrame",
+      trans = trans,
+      inverse = FALSE,
       slot = "frame",
       copy = FALSE,
       Plot = "None", 
@@ -752,6 +790,8 @@ cyto_clean <- function(x,
         return(fr[["FinalFF"]])
       },
       input = "flowFrame",
+      trans = trans,
+      inverse = FALSE,
       copy = FALSE
     )
   }

@@ -29,6 +29,11 @@
 #'   to match the current behaviour in \code{openCyto}.
 #' @param slot provides flexibility over how the resulting logical vector is
 #'   obtained from the object returned by the custom gating function.
+#' @param trans object of class transformerList containing the definitions of
+#'   transformers already applied to the supplied data, only required for
+#'   \code{cytoset} objects.
+#' @param inverse logical indicating whether inverse data transformations should
+#'   be applied to the data prior to cleaning, set to FALSE by default.
 #' @param ... additional arguments to passed to the gating function.
 #'
 #' @importFrom openCyto gs_add_gating_method
@@ -91,6 +96,8 @@ cyto_gate_clean <- function(x,
                             gatingTemplate = NULL,
                             input = "flowFrame",
                             slot = NULL,
+                            trans = NA,
+                            inverse = FALSE,
                             ...) {
   
   # CHECKS ---------------------------------------------------------------------
@@ -123,6 +130,11 @@ cyto_gate_clean <- function(x,
       x, 
       channels
     )
+  }
+  
+  # TRANSFORMERS
+  if(.all_na(trans)) {
+    trans <- cyto_transformers_extract(x)
   }
   
   # GATINGTEMPLATE CHECKS
@@ -175,6 +187,8 @@ cyto_gate_clean <- function(x,
           " 32(16)."
         )
       )
+      input <- "flowFrame"
+      inverse <- TRUE
     # FLOWCUT
     } else if(grepl("^FlowCut$", type, ignore.case = TRUE)) {
       # LOAD FLOWCUT
@@ -189,6 +203,8 @@ cyto_gate_clean <- function(x,
           " versus fluorescence analysis. bioRxiv"
         )
       )
+      input <- "flowFrame"
+      inverse <- FALSE
     # FLOWCLEAN
     } else if(grepl("^FlowClean$", type, ignore.case = TRUE)) {
       # LOAD FLOWCLEAN
@@ -203,6 +219,8 @@ cyto_gate_clean <- function(x,
           " in flow cytometry data. Cytometry A 89(5)"
         )
       )
+      input <- "flowFrame"
+      inverse <- TRUE
     # PEACOQC
     } else if(grepl("^PeacoQC$", type, ignore.case = TRUE)) {
       # LOAD PEACOQC
@@ -215,6 +233,8 @@ cyto_gate_clean <- function(x,
           "quality cytometry data. Cytometry A."
         )
       )
+      input <- "flowFrame"
+      inverse <- FALSE
     }
   }
   
@@ -235,12 +255,13 @@ cyto_gate_clean <- function(x,
           "input" = input,
           "params" = channels,
           "slot" = slot,
+          "inverse" = inverse,
           "openCyto.minEvents" = -1,
           ...
         ),
         groupBy = NA,
         collapseDataForGating = FALSE,
-        preprocessing_method = NA,
+        preprocessing_method = "pp_cyto_gate_clean",
         preprocessing_args =  NA
       )
     )
@@ -257,5 +278,223 @@ cyto_gate_clean <- function(x,
   
   # RETURN GATINGSET
   return(x)
+  
+}
+
+#' Preprocessing method to pass transformers to gating function
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
+#' @noRd
+.pp_cyto_gate_clean <- function(fs,
+                                gs,
+                                gm,
+                                channels,
+                                groupBy = NA,
+                                isCollapse = NA,
+                                ...) {
+  
+  return(
+    list(
+      cyto_transformers_extract(gs)
+    )
+  )
+  
+}
+
+#' Anomaly detection algorithm plugin for openCyto
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
+#' @noRd
+.cyto_gate_clean <- function(fr,
+                             pp_res,
+                             channels,
+                             type = "PeacoQC",
+                             input = "flowFrame",
+                             params = NULL,
+                             slot = NULL,
+                             inverse = FALSE,
+                             ...) {
+  
+  # BYPASS EMPTY CYTOFRAMES
+  if(nrow(fr) == 0) {
+    return(logical(0))
+  }
+  
+  # CHANNELS FOR GATING PASSED THROUGH PARAMS ARGUMENT
+  if(is.null(params)) {
+    params <- cyto_channels(
+      fr,
+      exclude = c(
+        "Event",
+        "Sample"
+      )
+    )
+  }
+  
+  # TODO: MORE FLEXIBLE MATCHING TO INPUT
+  # CONVERT DATA TO REQUIRED FORMAT - DATA RESTRICTED TO CHANNELS
+  if(!cyto_class(fr, input, TRUE)) {
+    fr <- cyto_data_extract(
+      fr,
+      format = input,
+      channels = params,
+      trans = pp_res$trans,
+      inverse = inverse,
+      copy = TRUE
+    )[[1]][[1]]
+  }
+  
+  # DISPATCH BASED ON TYPE - DEFAULT METHODS
+  if(is.character(type)) {
+    # FLOWAI
+    if(grepl("^FlowAI$", type, ignore.case = TRUE)) {
+      # FLOWAI ARGUMENTS - DEFAULTS
+      args_default <- list(
+        output = 3,
+        html_report = FALSE,
+        mini_report = FALSE,
+        fcs_QC = FALSE,
+        folder_results = FALSE
+      )
+      # COMBINE INCOMING ARGUMENTS
+      args <- list(...)
+      args <- c(
+        list(fr),
+        args,
+        args_default[!names(args_default) %in% names(args)]
+      )
+      # RUN FLOWAI - REMOVAL INDICES
+      remove <- suppressPrint(
+        cyto_func_call(
+          "flowAI::flow_auto_qc",
+          args
+        )[[1]]
+      )
+      # LOGICAL VECTOR
+      gate <- rep(TRUE, nrow(fr))
+      if(length(remove) > 0) {
+        gate[remove] <- FALSE
+      }
+      return(gate)
+    # FLOWCUT
+    } else if(grepl("^FlowCut$", type, ignore.case = TRUE)) {
+      # FLOWCUT ARGUMENTS - DEFAULTS
+      args_default <- list(
+        Plot = "None"
+      )
+      # COMBINE INCOMING ARGUMENTS
+      args <- list(...)
+      args <- c(
+        list(fr),
+        args,
+        args_default[!names(args_default) %in% names(args)]
+      )
+      # RUN FLOWAI - REMOVAL INDICES
+      remove <- invisible(
+        capture.output(
+          cyto_func_call(
+            "flowCut::flowCut",
+            args
+          )[["ind"]]
+        )
+      )
+      # LOGICAL VECTOR
+      gate <- rep(TRUE, nrow(fr))
+      if(length(remove) > 0) {
+        gate[remove] <- FALSE
+      }
+      return(gate)
+    # FLOWCLEAN
+    } else if(grepl("^FlowClean", type, ignore.case = TRUE)) {
+      # FLOWCUT ARGUMENTS - DEFAULTS
+      args_default <- list(
+        filePrefixWithDir = cyto_names(fr),
+        ext = ".fcs",
+        diagnostic = FALSE
+      )
+      # COMBINE INCOMING ARGUMENTS
+      args <- list(...)
+      args <- c(
+        list(fr),
+        args,
+        args_default[!names(args_default) %in% names(args)]
+      )
+      # RUN FLOWCLEAN
+      gate <- invisible(
+        capture.output(
+          cyto_exprs(
+            cyto_func_call(
+              "flowClean::clean",
+              args
+            ),
+            "GoodVsBad",
+            drop = TRUE
+          ) < 10000
+        )
+      )
+      # LOGICAL VECTOR
+      return(gate)
+    # PEACOQC
+    } else if(grepl("^PeacoQC", type, ignore.case = TRUE)) {
+      # PEACOQC ARGUMENTS - DEFAULTS
+      args_default <- list(
+        output = "full",  # MARGIN INDICES
+        channels = cyto_channels(fr),
+        plot = FALSE,
+        save_fcs = FALSE
+      )
+      # COMBINE INCOMING ARGUMENTS
+      args <- list(...)
+      args <- c(
+        args,
+        args_default[!names(args_default) %in% names(args)]
+      )
+      # EVENT INDICES
+      ind <- seq_len(nrow(fr))
+      # REMOVE MARGINS - LIST(FR, INDICES)
+      res <- cyto_func_execute(
+        "PeacoQC::RemoveMargins",
+        args = c(
+          list("ff" = fr),
+          args
+        )
+      )
+      # REMOVE MARGIN EVENTS
+      if(length(res[[2]]) > 0) {
+        ind <- ind[-c(res[[2]])]
+      }
+      # RUN PEACOQC
+      keep <- cyto_func_execute(
+        "PeacoQC::PeacoQC",
+        args = c(
+          list("ff" = res[[1]]),
+          args
+        )
+      )[["GoodCells"]]
+      # INDICES TO KEEP
+      if(length(keep) > 0) {
+        ind <- ind[keep]
+      }
+      gate <- rep(FALSE, nrow(fr))
+      if(length(ind) > 0) {
+        gate[ind] <- TRUE
+      }
+      return(gate)
+    }
+  }
+  
+  # NON-DEFAULT TYPE
+  gate <- cyto_slot(
+    cyto_func_call(
+      type,
+      list(fr, ...)
+    ),
+    slot = slot
+  )
+  
+  # RETURN LOGICAL VECTOR
+  return(gate)
   
 }

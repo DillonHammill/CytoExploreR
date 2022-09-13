@@ -233,7 +233,11 @@ cyto_gate_clust <- function(x,
 }
 
 #' Preprocessing method to pass sample counts to clustering plugin
+#' 
 #' @importFrom flowWorkspace gs_pop_get_children
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
 #' @noRd
 .pp_cyto_gate_clust <- function(fs,
                                 gs,
@@ -297,7 +301,10 @@ cyto_gate_clust <- function(x,
   
 }
 
-#' openCyto plugin
+#' Clustering openCyto plugin
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
 #' @noRd
 .cyto_gate_clust <- function(fr,
                              pp_res,

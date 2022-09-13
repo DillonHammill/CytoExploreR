@@ -13,6 +13,8 @@ cyto_gate_clean(
   gatingTemplate = NULL,
   input = "flowFrame",
   slot = NULL,
+  trans = NA,
+  inverse = FALSE,
   ...
 )
 }
@@ -51,6 +53,13 @@ to match the current behaviour in \code{openCyto}.}
 
 \item{slot}{provides flexibility over how the resulting logical vector is
 obtained from the object returned by the custom gating function.}
+
+\item{trans}{object of class transformerList containing the definitions of
+transformers already applied to the supplied data, only required for
+\code{cytoset} objects.}
+
+\item{inverse}{logical indicating whether inverse data transformations should
+be applied to the data prior to cleaning, set to FALSE by default.}
 
 \item{...}{additional arguments to passed to the gating function.}
 }
