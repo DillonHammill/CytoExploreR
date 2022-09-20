@@ -538,6 +538,7 @@ cyto_load <- function(path = ".",
     # CYTOSET
     x <- load_cytoset_from_fcs(
       files = normalizePath(files),
+      emptyValue = FALSE,
       ...
     )
     

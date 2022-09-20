@@ -21,9 +21,9 @@
 #'   algorithm to apply or a function to perform the clustering. Natively
 #'   supported clustering algorithms include \code{"rphenograph"},
 #'   \code{"pyphenograph"}, \code{"dbscan"}, \code{"hdbscan"}, \code{"SNN"},
-#'   \code{"flowPeaks"} \code{"FlowSOM"}, \code{"kmeans"}, \code{"HGC"},
-#'   \code{"Rclusterpp"} , \code{"depeche"}, \code{"SOM"}, \code{"MSTKNN"},
-#'   \code{"Spectrum"} and \code{"immunoclust"}.
+#'   \code{"jpclust"}, \code{"flowPeaks"} \code{"FlowSOM"}, \code{"kmeans"},
+#'   \code{"HGC"}, \code{"Rclusterpp"} , \code{"depeche"}, \code{"SOM"},
+#'   \code{"MSTKNN"}, \code{"Spectrum"} and \code{"immunoclust"}.
 #' @param merge_by a vector of experiment variables to merge the data into
 #'   groups prior to applying the clustering algorithm supplied to \code{type},
 #'   set to \code{"all"} by default to merge all samples prior to gating. If
@@ -448,7 +448,7 @@ cyto_gate_clust <- function(x,
         args = args
       )
     # RPHENOGRAPH 
-    } else if(grepl("^phenograph$|^rphenograph", type, ignore.case = TRUE)) {
+    } else if(grepl("^(phenograph|rphenograph)$", type, ignore.case = TRUE)) {
       # PREPARE DATA
       args$x <- cyto_data_extract(
         fr,
@@ -500,7 +500,8 @@ cyto_gate_clust <- function(x,
         args = args
       )@label
     # DBSCAN
-    } else if(grepl("^(hdbscan|dbscan|SNNclust)$", type, ignore.case = TRUE)) {
+    } else if(
+      grepl("^(hdbscan|dbscan|SNNclust|jpclust)$", type, ignore.case = TRUE)) {
       # PREPARE DATA
       args$x <- cyto_data_extract(
         fr,

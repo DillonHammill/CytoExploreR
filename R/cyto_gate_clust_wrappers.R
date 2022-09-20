@@ -195,7 +195,7 @@
   cyto_require(
     "Rphenograph",
     source = "GitHUb",
-    repo = "DillonHammill/Rphenograph",
+    repo = "JinmiaoChenLab/Rphenograph",
     ref = paste0(
       "Levine, J. et al. (2018) Data-Driven Phenotypic Dissection of AML ",
       "Reveals Progenitor-like Cells that Correlate with Prognosis. ",
@@ -319,6 +319,9 @@
   # SNNclust
   } else if(grepl("^SNNclust", type, ignore.case = TRUE)) {
     type <- "dbscan::sNNclust"
+  # JARVIS-PATRICK CLUSTERING
+  } else if(grepl("^jpclust", type, ignore.case = TRUE)) {
+    type <- "dbscan::jpclust"
   }
   
   # DBSCAN
