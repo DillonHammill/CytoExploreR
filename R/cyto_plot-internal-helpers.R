@@ -4437,21 +4437,43 @@
               at = NA
             )
           }
-          # RE-SCALE BINNED COUNTS - RANGE [0,1]
-          args$bkde2d$counts <- cyto_stat_rescale(
-            args$bkde2d$counts,
-            limits = matrix(  # USED TO SCALE INSTEAD OF LIMITS
-              args$key_scale$range,
-              nrow = 2,
-              ncol = ncol(args$bkde2d$counts)
+          # COUNT CUTOFFS PROPORTIONS (REQUIRED TO TRIM BKDE)
+          cnt <- cyto_stat_rescale(
+            args$key_scale$range,
+            scale = c(0,1),
+            limits = range(
+              args$bkde2d$counts
             )
+          )
+          # RESCALE BINNED COUNTS - RANGE [0,1]
+          args$bkde2d$counts <- matrix(
+            cyto_stat_rescale(
+              as.numeric(
+                args$bkde2d$counts
+              ),
+              scale = c(0,1),
+              limits = args$key_scale$range
+            ),
+            ncol = ncol(args$bkde2d$counts),
+            nrow = nrow(args$bkde2d$counts),
+            byrow = FALSE
           )
           # RE-SCALE BKDE - RANGE [0, 1]
           if(args$point_col_smooth) {
-            # STORE RE-SCALED BKDE IN COUNTS SLOT
-            args$bkde2d$counts <- min(args$bkde2d$counts) +
-              ((args$bkde2d$bkde - min(args$bkde2d$bkde))/
-                diff(range(args$bkde2d$bkde))) * diff(range(args$bkde2d$counts))
+            # CROP BKDE TO RANGE
+            args$bkde2d$counts <- matrix(
+              cyto_stat_rescale(
+                as.numeric(
+                  args$bkde2d$bkde
+                ),
+                scale = c(0,1),
+                limits = min(args$bkde2d$bkde) + cnt * 
+                  diff(range(args$bkde2d$bkde))
+              ),
+              ncol = ncol(args$bkde2d$counts),
+              nrow = nrow(args$bkde2d$counts),
+              byrow = FALSE
+            )
           }
           # MAP BKDE TO ROWS & ASSIGN COLOURS
           args$point_col[[1]] <- cyto_apply(
@@ -4460,7 +4482,7 @@
             input = "matrix", 
             copy = FALSE,
             simplify = FALSE,
-            bkde = args$bkde,
+            bkde = args$bkde2d,
             point_col_scale = args$point_col_scale,
             FUN = function(z,
                            bkde,
