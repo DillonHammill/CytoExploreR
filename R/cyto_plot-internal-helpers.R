@@ -1663,7 +1663,7 @@
     # KEY LABEL SPACE
     key_label_space <- 0
     if(key_scale$key %in% c(TRUE, "both")) {
-      key_label_space <- (max(nchar(key_scale$label))/2) * 0.42 * 
+      key_label_space <- 0.2 + (max(nchar(key_scale$label))/2) * 0.83 * 
         mean(key_text_size)
       if(key_label_space >  key_title_space) {
         key_label_space <- key_label_space - key_title_space
@@ -1676,7 +1676,7 @@
   
   # LEGEND TEXT
   if (legend != FALSE & !.all_na(legend_text)) {
-    mar[4] <- mar[4] + 2.5 + max(nchar(legend_text))*0.4*mean(legend_text_size)
+    mar[4] <- mar[4] + 3.0 + max(nchar(legend_text))*0.5*mean(legend_text_size)
   }
   
   # RIGHT PADDING
@@ -2969,7 +2969,7 @@
       }
       # LEGEND
       legend(
-        x = 1.07 * .par("usr")[[1]][2],
+        x = 1.1 * .par("usr")[[1]][2],
         y = cnt + 0.52 * lgnd_height,
         legend = legend_text,
         text.font = rev(legend_text_font),
@@ -3007,7 +3007,7 @@
       }
       # LEGEND - BOXES - POINT KEY TOO SMALL
       legend(
-        x = 1.08 * .par("usr")[[1]][2],
+        x = 1.1 * .par("usr")[[1]][2],
         y = cnt + 0.6 * lgnd_height,
         legend = paste0("   ", legend_text), # HACKY WAY TO ALIGN TEXT
         col = rev(legend_box_fill),
@@ -3037,17 +3037,18 @@
       )
       # ADJUST LEGEND POSITION TO KEY 
       if(key == "none") {
-        legend_x <- 1.08 * .par("usr")[[1]][2]
+        legend_x <- 1.1 * .par("usr")[[1]][2]
       # KEY - SCALE & TEXT
       } else if(key == "both") {
-        legend_x <- 1.15 * .par("usr")[[1]][2]
+        # TODO: COMPUTE USING TEXT FROM KEY_SCALE?
+        legend_x <- 1.18 * .par("usr")[[1]][2]
       # KEY - SCALE ONLY
       } else {
-        legend_x <- 1.1 * .par("usr")[[1]][2]
+        legend_x <- 1.12 * .par("usr")[[1]][2]
       }
     # NO KEY
     } else {
-      legend_x <- 1.08 * .par("usr")[[1]][2]
+      legend_x <- 1.1 * .par("usr")[[1]][2]
     }
     # GET REMAINING COLOURS
     point_col <- .cyto_plot_point_col(
@@ -3121,7 +3122,7 @@
       }
     )
     # LEGEND LOCATION - NO KEY
-    legend_x <- 1.08 * .par("usr")[[1]][2]
+    legend_x <- 1.1 * .par("usr")[[1]][2]
     # LEGEND
     legend(
       x = legend_x,
