@@ -16,12 +16,14 @@ supplied.}
 
 \item{type}{the method to use when cleaning the data, options include
 \code{"flowAI"}, \code{"flowClean"}, \code{"flowCut"} or \code{"PeacoQC"},
-set to \code{"flowAI"} by default. 2param trans object of class
-transformerList containing the definitions of the transformations already
-applied to the supplied \code{cytoset}.}
+set to \code{"flowAI"} by default.}
 
 \item{channels}{names of the channel(s) or marker(s) to clean, must include
 the \code{Time} parameter for flow rate checks.}
+
+\item{trans}{object of class
+transformerList containing the definitions of the transformations already
+applied to the supplied \code{cytoset}.}
 
 \item{...}{additional arguments passed to \code{flowAI::flow_auto_qc},
 \code{flowClean::flowClean}, \code{flowCut::flowCut} or

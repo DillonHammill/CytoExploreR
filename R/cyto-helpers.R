@@ -572,11 +572,12 @@ cyto_load <- function(path = ".",
 #'   supplied.
 #' @param type the method to use when cleaning the data, options include
 #'   \code{"flowAI"}, \code{"flowClean"}, \code{"flowCut"} or \code{"PeacoQC"},
-#'   set to \code{"flowAI"} by default. 2param trans object of class
-#'   transformerList containing the definitions of the transformations already
-#'   applied to the supplied \code{cytoset}.
+#'   set to \code{"flowAI"} by default.
 #' @param channels names of the channel(s) or marker(s) to clean, must include
 #'   the \code{Time} parameter for flow rate checks.
+#' @param trans object of class
+#'   transformerList containing the definitions of the transformations already
+#'   applied to the supplied \code{cytoset}.
 #' @param ... additional arguments passed to \code{flowAI::flow_auto_qc},
 #'   \code{flowClean::flowClean}, \code{flowCut::flowCut} or
 #'   \code{PeacoQC::PeacoQC}.
@@ -5793,9 +5794,13 @@ cyto_barcode <- function(x,
 #'   \code{flowSet},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
 #'   \code{GatingSet}.
+#' @param select selection criteria passed to \code{cyto_select()} to restrict
+#'   samples from which marker assignments should be displayed in the editor.
+#'   Used to select a specific sample when marker inconsistency exists across
+#'   samples.
 #' @param file name of csv file containing columns 'channel' and 'marker'.
-#' @param save_as name of a CSV to which the edited marker assignments should
-#'   be saved, defaults to \code{Experiment-Markers.csv} prefixed with the date
+#' @param save_as name of a CSV to which the edited marker assignments should be
+#'   saved, defaults to \code{Experiment-Markers.csv} prefixed with the date
 #'   unless \code{file} is specified or a file is found when searching the
 #'   current directory for experimental markers. Setting this argument to NA
 #'   will prevent writing of edited marker assignments to file. Custom file
@@ -5831,9 +5836,18 @@ NULL
 #' @rdname cyto_markers_edit
 #' @export
 cyto_markers_edit <- function(x,
+                              select = NULL,
                               file = NULL,
                               save_as = NULL,
                               ...) {
+  
+  # SELECT
+  if(!is.null(select)) {
+    x <- cyto_select(
+      x,
+      select
+    )
+  }
   
   # CHANNELS
   chans <- cyto_channels(x)
@@ -5865,8 +5879,15 @@ cyto_markers_edit <- function(x,
     pd <- pd_new[[1]]
   }
   
-  # CROSS CHECK EXISTING MARKER ASSIGNMENTS
+  # MARKER ASSIGNMENTS
   markers <- cyto_markers(x)
+  
+  # MARKER INCONSISTENCY
+  if(cyto_class(markers, "list", TRUE)) {
+    markers <- markers[[1]]
+  }
+  
+  # CROSS CHECK EXISTING MARKER ASSIGNMENTS
   if(length(markers) > 0) {
     lapply(
       seq_along(markers),

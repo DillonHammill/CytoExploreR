@@ -5,7 +5,7 @@
 \alias{cyto_channels_edit}
 \title{Assign marker names to cytoframe or cytoset}
 \usage{
-cyto_markers_edit(x, file = NULL, save_as = NULL, ...)
+cyto_markers_edit(x, select = NULL, file = NULL, save_as = NULL, ...)
 
 cyto_channels_edit(x, file = NULL, save_as = NULL, ...)
 }
@@ -15,10 +15,15 @@ cyto_channels_edit(x, file = NULL, save_as = NULL, ...)
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
 \code{GatingSet}.}
 
+\item{select}{selection criteria passed to \code{cyto_select()} to restrict
+samples from which marker assignments should be displayed in the editor.
+Used to select a specific sample when marker inconsistency exists across
+samples.}
+
 \item{file}{name of csv file containing columns 'channel' and 'marker'.}
 
-\item{save_as}{name of a CSV to which the edited marker assignments should
-be saved, defaults to \code{Experiment-Markers.csv} prefixed with the date
+\item{save_as}{name of a CSV to which the edited marker assignments should be
+saved, defaults to \code{Experiment-Markers.csv} prefixed with the date
 unless \code{file} is specified or a file is found when searching the
 current directory for experimental markers. Setting this argument to NA
 will prevent writing of edited marker assignments to file. Custom file
