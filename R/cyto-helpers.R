@@ -71,7 +71,7 @@ cyto_import <- function(path = ".",
   file_ext <- file_ext(file_names)
   
   # FCS FILES
-  fcs_files <- file_paths[!file_ext %in% c("", "fcs", "FCS")]
+  fcs_files <- file_paths[file_ext %in% c("", "fcs", "FCS")]
   
   # IMPORT CYTOBANK TO GATINGSET
   if(grepl("cytobank", type, ignore.case = TRUE)){
@@ -128,8 +128,8 @@ cyto_import <- function(path = ".",
       wsp_file <- file_paths[
         which(
           grepl(
+            "wsp",
             file_ext, 
-            "wsp", 
             ignore.case = TRUE
           )
         )
