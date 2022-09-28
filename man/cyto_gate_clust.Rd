@@ -19,6 +19,7 @@ cyto_gate_clust(
   events = 1,
   impute = 5,
   scale = "range",
+  seed = 2022,
   ...
 )
 }
@@ -91,6 +92,8 @@ to 5 by default.}
 the specified clustering algorithm, options include \code{"range"},
 \code{"mean"}, \code{"median"} or \code{"zscore"}. Set to \code{"range"} by
 default, scaling can be turned off by setting this argument to FALSE.}
+
+\item{seed}{numeric to set seed when \code{events != 1}.}
 
 \item{...}{additional arguments passed to the clustering algorithm supplied
 to \code{type}, refer to the documentation for the relevant clustering

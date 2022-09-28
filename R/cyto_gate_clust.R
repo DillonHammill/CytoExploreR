@@ -57,6 +57,7 @@
 #'   the specified clustering algorithm, options include \code{"range"},
 #'   \code{"mean"}, \code{"median"} or \code{"zscore"}. Set to \code{"range"} by
 #'   default, scaling can be turned off by setting this argument to FALSE.
+#' @param seed numeric to set seed when \code{events != 1}.
 #' @param ... additional arguments passed to the clustering algorithm supplied
 #'   to \code{type}, refer to the documentation for the relevant clustering
 #'   algorithm for more details.
@@ -87,6 +88,7 @@ cyto_gate_clust <- function(x,
                             events = 1,
                             impute = 5,
                             scale = "range",
+                            seed = 2022,
                             ...){
   
   # CHECKS ---------------------------------------------------------------------
@@ -190,6 +192,7 @@ cyto_gate_clust <- function(x,
           "impute" = impute,
           "events" = events,
           "scale" = scale,
+          "seed" = seed,
           "openCyto.minEvents" = -1,
           ...
         ),
@@ -318,6 +321,7 @@ cyto_gate_clust <- function(x,
                              impute = 5,
                              events = 1,
                              scale = "range",
+                             seed = 2022,
                              ...){
   
   # TODO: ADD FRAMEID TO FILTERRESULTS?
@@ -492,6 +496,7 @@ cyto_gate_clust <- function(x,
         trans = pp_res$trans,
         inverse = FALSE, # DONE
         events = events,
+        seed = seed,
         copy = FALSE
       )[[1]][[1]]
       # RUN IMMUNOCLUST
@@ -529,6 +534,7 @@ cyto_gate_clust <- function(x,
         trans = pp_res$trans,
         inverse = FALSE,
         events = events,
+        seed = seed,
         copy = FALSE
       )[[1]][[1]]
       # RUN KMEANS
@@ -546,6 +552,7 @@ cyto_gate_clust <- function(x,
         trans = pp_res$trans,
         inverse = FALSE, # DONE
         events = events,
+        seed = seed,
         copy = FALSE
       )[[1]][[1]]
       # RUN HGC
@@ -563,6 +570,7 @@ cyto_gate_clust <- function(x,
         trans = pp_res$trans,
         inverse = FALSE,
         events = events,
+        seed = seed,
         copy = FALSE
       )[[1]][[1]]
       # RUN RCLUSTERCPP HCLUST
@@ -590,6 +598,7 @@ cyto_gate_clust <- function(x,
         trans = pp_res$trans,
         inverse = FALSE, # DONE
         events = events,
+        seed = seed,
         copy = FALSE
       )[[1]][[1]]
       # FLOWPEAKS
@@ -607,6 +616,7 @@ cyto_gate_clust <- function(x,
         trans = pp_res$trans,
         inverse = FALSE, # DONE
         events = events,
+        seed = seed,
         copy = FALSE
       )[[1]][[1]]
       # MSTKNN
@@ -624,6 +634,7 @@ cyto_gate_clust <- function(x,
         trans = pp_res$trans,
         inverse = FALSE, # DONE
         events = events,
+        seed = seed,
         copy = FALSE
       )[[1]][[1]]
       # SPECTRUM
@@ -647,6 +658,7 @@ cyto_gate_clust <- function(x,
       trans = pp_res$trans,
       inverse = FALSE, # DONE
       events = events,
+      seed = seed,
       copy = FALSE,
     )[[1]][[1]]
     # APPLY CLUSTERING ALGORITHM
