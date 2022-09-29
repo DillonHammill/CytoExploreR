@@ -2930,14 +2930,14 @@ cyto_empty <- function(name = NULL,
   if (!is.null(name)) {
     identifier(fr) <- name
   }
+
+  # MARKERS
+  if(is.null(names(channels))) {
+    names(channels) <- rep(NA, length(channels))
+  }
   
   # UPDATE MARKERS
-  if(!is.null(names(channels))) {
-    channels <- channels[!names(channels) %in% c("NA", NA)]
-    if(length(channels) > 0) {
-      cyto_markers(fr) <- channels 
-    }
-  }
+  cyto_markers(fr) <- channels 
   
   # FLOWFRAME -> CYTOFRAME
   return(
