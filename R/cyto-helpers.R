@@ -7198,7 +7198,7 @@ cyto_nodes_convert <- function(x,
     # FULL ANCHOR
     anchor <- nodes_full[anchor_match]
   }
-
+  
   # CONVERT NODES
   nodes <- LAPPLY(
     nodes, 
@@ -7288,7 +7288,13 @@ cyto_nodes_convert <- function(x,
         # ANCHOR
         } else if (!is.null(anchor)) {
           # SPLIT NODE
-          node_split <- .cyto_nodes_split(node)
+          node_split <- .cyto_nodes_split(
+            gsub(
+              "^\\\\",
+              "",
+              node
+            )
+          )
           # SPLIT NODES FULL
           nodes_full_split <- .cyto_nodes_split(nodes_full)
           # SPLIT ANCHOR
@@ -7308,6 +7314,7 @@ cyto_nodes_convert <- function(x,
               }
             )
           )
+          
           # CANNOT FIND UNIQUE NODE PATH
           if (length(ind) == 0) {
             stop(
