@@ -7288,13 +7288,7 @@ cyto_nodes_convert <- function(x,
         # ANCHOR
         } else if (!is.null(anchor)) {
           # SPLIT NODE
-          node_split <- .cyto_nodes_split(
-            gsub(
-              "^\\\\",
-              "",
-              node
-            )
-          )
+          node_split <- .cyto_nodes_split(node)
           # SPLIT NODES FULL
           nodes_full_split <- .cyto_nodes_split(nodes_full)
           # SPLIT ANCHOR
@@ -7386,7 +7380,16 @@ cyto_nodes_convert <- function(x,
   nodes_split <- lapply(
     nodes, 
     function(node) {
-      node <- unlist(strsplit(node, "\\/"))
+      node <- unlist(
+        strsplit(
+          gsub(
+            "^\\\\",
+            "",
+            node
+          ), 
+          "\\/"
+        )
+      )
       node <- node[!LAPPLY(node, ".empty")]
       return(node)
     }
