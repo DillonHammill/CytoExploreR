@@ -7290,7 +7290,9 @@ cyto_nodes_convert <- function(x,
           # SPLIT NODE
           node_split <- .cyto_nodes_split(node)
           # SPLIT NODES FULL
-          nodes_full_split <- .cyto_nodes_split(nodes_full)
+          nodes_full_split <- .cyto_nodes_split(
+            nodes_full[nodes_match]
+          )
           # SPLIT ANCHOR
           anchor_split <- .cyto_nodes_split(anchor)
           # ROOT ANCHOR
@@ -7299,16 +7301,17 @@ cyto_nodes_convert <- function(x,
           }
           # NODE FRAGMENTS
           node_frag <- unique(unlist(c(anchor_split, node_split)))
-          # UNIQUE NODE EXISTS
-          ind <- which(
-            LAPPLY(
-              nodes_full_split, 
-              function(z) {
-                all(node_frag %in% z)
-              }
+          # UNIQUE NODE EXISTS - INDEX FULL NODES
+          ind <- nodes_match[
+            which(
+              LAPPLY(
+                nodes_full_split, # ONLY SEARCH NODES WITH PARTIAL MATCH
+                function(z) {
+                  all(node_frag %in% z)
+                }
+              )
             )
-          )
-          
+          ]
           # CANNOT FIND UNIQUE NODE PATH
           if (length(ind) == 0) {
             stop(
@@ -7383,7 +7386,7 @@ cyto_nodes_convert <- function(x,
       node <- unlist(
         strsplit(
           gsub(
-            "^\\\\",
+            "^\\\\", # REQUIRED
             "",
             node
           ), 
