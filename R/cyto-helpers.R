@@ -5962,12 +5962,10 @@ cyto_markers_edit <- function(x,
   }
   
   # UPDATE MARKERS
-  if (!.all_na(cyto_marks)) {
-    if (cyto_class(x, c("flowFrame", "flowSet"), TRUE)){
-      flowCore::markernames(x) <- cyto_marks
-    } else {
-      flowWorkspace::markernames(x) <- cyto_marks
-    }
+  if (cyto_class(x, c("flowFrame", "flowSet"), TRUE)){
+    flowCore::markernames(x) <- cyto_marks
+  } else {
+    flowWorkspace::markernames(x) <- cyto_marks
   }
   
   # UPDATE CHANNELS/MARKERS IN PLACE
