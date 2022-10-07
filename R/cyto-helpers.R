@@ -4446,7 +4446,7 @@ cyto_save <- function(x,
         save_as,
         full.names = FALSE
       )
-      files <- files[-match(basename(save_as), files)]
+      files <- files[!files %in% save_as]
       # REMOVE FILES IN PARENT DIRECTORY
       if(length(files) > 0) {
         do.call(
