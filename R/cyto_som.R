@@ -903,7 +903,7 @@ cyto_som_check <- function(x) {
   }
   
   # SOM KEYWORD
-  if(length(cyto_keyword(x, "CytoExploreR_SOM")) > 0) {
+  if(length(unlist(cyto_keyword(x, "CytoExploreR_SOM")) > 0)) {
     return(TRUE)
   } else {
     return(FALSE)
