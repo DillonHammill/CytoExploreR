@@ -6,6 +6,7 @@
 \usage{
 cyto_coerce(
   x,
+  select = NULL,
   events = 1,
   seed = NULL,
   barcode = FALSE,
@@ -17,6 +18,10 @@ cyto_coerce(
 }
 \arguments{
 \item{x}{\code{\link[flowWorkspace:cytoset]{cytoset}}.}
+
+\item{select}{sample selection criteria passed to \code{cyto_select} to
+subset the samples prior to coercion, set to NULL by default to coerce all
+samples.}
 
 \item{events}{numeric to control how events should be sampled when coercing
 samples. If a single value is supplied it is passed to \code{cyto_sample_n}

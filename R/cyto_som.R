@@ -875,3 +875,38 @@ cyto_gate_som <- function(x,
   return(x)
   
 }
+
+## CYTO_SOM_CHECK --------------------------------------------------------------
+
+#' Check if an object contains a Self-Organising Map (SOM)
+#'
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#'
+#' @return logical indicating whether the supplied object contains a SOM.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples 
+#' \dontrun{
+#'   library(CytoExploreRData)
+#'   cyto_som_check(Activation)
+#' }
+#'
+#' @export
+cyto_som_check <- function(x) {
+  
+  if(!cyto_class(x, c("flowFrame", "GatingHierarchy"))) {
+    x <- x[[1]]
+  }
+  
+  # SOM KEYWORD
+  if(length(cyto_keyword(x, "CytoExploreR_SOM")) > 0) {
+    return(TRUE)
+  } else {
+    return(FALSE)
+  }
+  
+}

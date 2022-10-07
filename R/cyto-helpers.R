@@ -3732,7 +3732,7 @@ cyto_merge_by <- function(x,
         seq_along(cs_list), 
         function(z){
           # SOM CYTOSET | GATINGSET
-          if(length(cyto_keyword(cs_list[[z]], "CytoExploreR_SOM")) > 0) {
+          if(cyto_som_check(cs_list[[z]])) {
             # EXTRACT SOM CODES & DIM REDUCTION
             SOM <- cyto_exprs(
               cs_list[[z]][[1]],
@@ -3821,7 +3821,7 @@ cyto_merge_by <- function(x,
   # CONVERT EACH GROUP TO CYTOFRAME
   } else {
     # SOM CYTOSET|GATINGSET
-    if(length(cyto_keyword(cs_list[[z]], "CytoExploreR_SOM")) > 0) {
+    if(cyto_som_check(cs_list[[z]])) {
       structure(
         lapply(
           seq_along(cs_list),
@@ -5006,10 +5006,20 @@ cyto_sample.flowFrame <- function(x,
     return(x)
   }
   
-  # Do nothing if no sampling required
+  # SAMPLING REQUIRED
   if (events != 1) {
-    # Number of events
-    n <- nrow(x)
+    # TOTAL EVENTS
+    if(cyto_som_check(x)) {
+      n <- sum(
+        cyto_exprs(
+          x,
+          channels = "SOM_counts",
+          drop = TRUE
+        )
+      )
+    } else {
+      n <- nrow(x)
+    }
     # n is the number of events to keep
     if (events > 1) {
       # n is too large - retain all events
@@ -5028,9 +5038,23 @@ cyto_sample.flowFrame <- function(x,
     if (!is.null(seed)) {
       set.seed(seed)
     }
-    # Sample
-    smp <- sampleFilter(size = size)
-    x <- Subset(x, smp)
+    # SOM SAMPLE
+    if(cyto_som_check(x)) {
+      exprs <- cyto_exprs(
+        x,
+        drop = FALSE
+      )
+      # TODO: ENSURE COUNTS ADD UP TO SIZE (ROUNDING)
+      exprs[, "SOM_counts"] <- round(
+        exprs[, "SOM_freq"] * size
+      )
+      exprs[, "SOM_freq"] <- exprs[, "SOM_counts"] / sum(exprs[, "SOM_counts"])
+      x <- as(exprs, "cytoframe")
+    # NORMAL SAMPLE
+    } else {
+      smp <- sampleFilter(size = size)
+      x <- Subset(x, smp)
+    }
   }
   
   return(x)
@@ -5043,14 +5067,36 @@ cyto_sample.flowSet <- function(x,
                                 seed = NULL,
                                 ...) {
   
+  # TODO: ADD SOM MINIMUM EVENTS
+  
   # SAMPLE TO MINIMUM EVENTS
   if(.all_na(events)) {
+    # EVENTS PER SAMPLE
     events <- cyto_apply(
-        x,
-        "nrow",
-        input = "matrix",
-        copy = FALSE
-      )
+      x,
+      FUN = function(z) {
+        # SOM
+        if(cyto_som_check(z)) {
+          sum(
+            cyto_exprs(
+              z,
+              channels = "SOM_counts",
+              drop = TRUE
+            )
+          )
+        } else {
+          nrow(
+            cyto_exprs(
+              z,
+              channels = 1,
+              drop = FALSE
+            )
+          )
+        }
+      },
+      input = "cytoframe",
+      copy = FALSE
+    )
     # BYPASS ZERO EVENT SAMPLING
     if(min(events) == 0) {
       warning(
@@ -5070,8 +5116,7 @@ cyto_sample.flowSet <- function(x,
     # DOWNSAMPLE TO MINIMUM EVENTS
     events <- min(events)
     message(
-      paste("Downsampling each sample to",
-            events, "events.")
+      paste("Downsampling each sample to", events, "events.")
     )
   }
   
@@ -5170,9 +5215,28 @@ cyto_sample_n <- function(x,
   # COUNTS
   counts <- cyto_apply(
     x,
-    "nrow",
+    FUN = function(z) {
+      # SOM
+      if(cyto_som_check(z)) {
+        sum(
+          cyto_exprs(
+            z,
+            channels = "SOM_counts",
+            drop = TRUE
+          )
+        )
+      } else {
+        nrow(
+          cyto_exprs(
+            z,
+            channels = 1,
+            drop = FALSE
+          )
+        )
+      }
+    },
     parent = parent,
-    input = "matrix",
+    input = "cytoframe",
     copy = FALSE
   )
 
@@ -5235,6 +5299,9 @@ cyto_sample_n <- function(x,
 #' control over the format in which the coerced data should be returned.
 #'
 #' @param x \code{\link[flowWorkspace:cytoset]{cytoset}}.
+#' @param select sample selection criteria passed to \code{cyto_select} to
+#'   subset the samples prior to coercion, set to NULL by default to coerce all
+#'   samples.
 #' @param events numeric to control how events should be sampled when coercing
 #'   samples. If a single value is supplied it is passed to \code{cyto_sample_n}
 #'   to compute the number of events to extract from each sample to obtain
@@ -5258,6 +5325,7 @@ cyto_sample_n <- function(x,
 #' @return a sampled and coerced \code{matrix}, \code{cytoframe} or
 #'   \code{cytoset}.
 #'
+#' @importFrom flowCore flowFrame
 #' @importFrom flowWorkspace flowFrame_to_cytoframe cytoset
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -5284,6 +5352,7 @@ cyto_sample_n <- function(x,
 #'
 #' @export
 cyto_coerce <- function(x,
+                        select = NULL,
                         events = 1,
                         seed = NULL,
                         barcode = FALSE,
@@ -5291,6 +5360,15 @@ cyto_coerce <- function(x,
                         name = "merge",
                         overwrite = NULL,
                         ...) {
+  
+  # SELECT
+  if(!is.null(select)) {
+    x <- cyto_select(
+      x,
+      select
+    )
+  }
+  
   # IDENTIFIERS
   ids <- cyto_names(x)
   
@@ -5312,14 +5390,6 @@ cyto_coerce <- function(x,
         "'events' must have the same length as 'x' to use custom sampling ",
         "per cytoframe!"
       )
-    )
-  }
-  
-  # REMOVE EMPTY SAMPLES
-  if(any(!names(events) %in% ids)) {
-    x <- cyto_select(
-      x,
-      list("name" = ids[ids %in% names(events)])
     )
   }
 
@@ -5358,7 +5428,34 @@ cyto_coerce <- function(x,
   if(length(x) == 1) {
     x <- x[[1]]
   } else {
-    x <- as(x, "flowFrame")
+    # COERCE SOM
+    if(cyto_som_check(x)) {
+      # EXTRACT SOM TEMPLATE
+      som <- cyto_exprs(
+        x[[1]],
+        drop = FALSE
+      )
+      # SUM COUNTS & RECOMPUTE FREQ
+      som[, "SOM_counts"] <- rowSums(
+        do.call(
+          "cbind",
+          cyto_apply(
+            x,
+            FUN = function(z) {
+              return(z)
+            },
+            input = "matrix",
+            channels = "SOM_counts",
+            simplify = FALSE
+          )
+        )
+      )
+      som[, "SOM_freq"] <- som[, "SOM_counts"] / sum(som[, "SOM_counts"])
+      # FLOWFRAME
+      x <- flowFrame(som)
+    } else {
+      x <- as(x, "flowFrame")
+    }
   }
   
   # CYTOFRAME
