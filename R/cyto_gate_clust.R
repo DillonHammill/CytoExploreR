@@ -222,6 +222,7 @@ cyto_gate_clust <- function(x,
   pop$gating_args <- CytoExploreR_.argDeparser(gating_args)
   
   # ADD POPULATIONS TO GATINGTEMPLATE
+  pop$alias <- gating_args$alias
   gt <- rbind(gt, pop)
   
   # WRITING NEW GATINGTEMPLATE ENTRIES
@@ -294,7 +295,7 @@ cyto_gate_clust <- function(x,
         path = "auto",
         showHidden = TRUE
       ),
-      "som" = if(length(cyto_keyword(gs[[1]])[["CytoExploreR_SOM"]]) > 0) {
+      "som" = if(cyto_som_check(gs)) {
         TRUE
       } else {
         FALSE
