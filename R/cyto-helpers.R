@@ -542,9 +542,6 @@ cyto_load <- function(path = ".",
       ...
     )
     
-    # BARCODE EVENTS - REQUIRED FOR CYTO_PLOT
-    x <- cyto_barcode(x, "events")
-    
     # BARCODING
     if (barcode) {
       x <- cyto_barcode(x)
