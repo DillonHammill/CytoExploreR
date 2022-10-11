@@ -6054,6 +6054,9 @@ cyto_markers_edit <- function(x,
   if (length(ind) > 0) {
     cyto_marks[ind] <- NA
   }
+
+  # EMPTY MARKERS -> CHARCTER STRINGS
+  cyto_marks[is.na(cyto_marks)] <- ""
   
   # UPDATE MARKERS
   if (cyto_class(x, c("flowFrame", "flowSet"), TRUE)){
