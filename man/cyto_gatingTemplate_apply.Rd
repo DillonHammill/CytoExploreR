@@ -4,7 +4,13 @@
 \alias{cyto_gatingTemplate_apply}
 \title{Apply gates saved in gatingTemplate to a GatingHierarchy or GatingSet}
 \usage{
-cyto_gatingTemplate_apply(x, gatingTemplate = NULL, active = TRUE, ...)
+cyto_gatingTemplate_apply(
+  x,
+  gatingTemplate = NULL,
+  active = TRUE,
+  overwrite = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{GatingHierarchy} or \code{GatingSet}.}
@@ -15,6 +21,10 @@ gates to be applied to \code{x}. This can alos be an object of class
 
 \item{active}{logical indicating whether the applied gatingTemplate should be
 set as the current active gatingTemplate set to TRUE by default.}
+
+\item{overwrite}{logical indicating whether existing gates should be removed
+prior to applying the gatingTemplate, only required when running
+CytoExploreR non-interactively.}
 
 \item{...}{additional arguments passed to
 \code{\link[openCyto:gt_gating]{gt_gating()}} including \code{start} and

@@ -44,4 +44,6 @@ Returns a list of modified gate objects with appropriate dimensions.
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

@@ -5758,6 +5758,8 @@ cyto_barcode <- function(x,
   
   # PREPARE DATA ---------------------------------------------------------------
   
+  # TODO: NON-INTERACTIVE MODE
+  
   # BARCODE?
   barcode <- TRUE
   
@@ -5768,7 +5770,7 @@ cyto_barcode <- function(x,
       # OVERWRITE
       if(!is.logical(overwrite)) {
         overwrite <- cyto_enquire(
-          "Override existing sample IDs? (Y/N): ",
+          "Overwrite existing sample IDs? (Y/N): ",
           options = c("T", "Y")
         )
       }
@@ -5814,7 +5816,7 @@ cyto_barcode <- function(x,
       # OVERWRITE
       if(!is.logical(overwrite)) {
         overwrite <- cyto_enquire(
-          "Override existing event IDs? (Y/N): ",
+          "Overwrite existing event IDs? (Y/N): ",
           options = c("T", "Y")
         )
       }

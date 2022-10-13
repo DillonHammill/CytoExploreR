@@ -668,6 +668,9 @@ cyto_gatingTemplate_edit <- function(x,
 #'   \code{gatingTemplate} if a \code{GatingSet} object is supplied.
 #' @param active logical indicating whether the applied gatingTemplate should be
 #'   set as the current active gatingTemplate set to TRUE by default.
+#' @param overwrite logical indicating whether existing gates should be removed
+#'   prior to applying the gatingTemplate, only required when running
+#'   CytoExploreR non-interactively.
 #' @param ... additional arguments passed to
 #'   \code{\link[openCyto:gt_gating]{gt_gating()}} including \code{start} and
 #'   \code{stop.at} to only apply particular gates from the gatingTemplate.
@@ -701,6 +704,7 @@ cyto_gatingTemplate_edit <- function(x,
 cyto_gatingTemplate_apply <- function(x,
                                       gatingTemplate = NULL,
                                       active = TRUE,
+                                      overwrite = NULL,
                                       ...) {
   
   # GATINGHIERARCHY/GATINGSET REQUIRED
@@ -746,6 +750,53 @@ cyto_gatingTemplate_apply <- function(x,
     file_exists(gatingTemplate, error = TRUE)
     # GATINGTEMPLATE FILE -> GATINGTEMPLATE
     gt <- suppressMessages(gatingTemplate(gatingTemplate))
+  }
+  
+  # GATINGSET CONTAINS GATES
+  if(length(cyto_nodes(x) > 1)) {
+    # EMPTY OVERWRITE & INTERACTIVE
+    if(!is.logical(overwrite)) {
+      # INTERACTIVE MODE
+      if(cyto_option("CytoExploreR_interactive")) {
+        overwrite <- cyto_enquire(
+          "Overwrite existing gates in the GatingSet? (Y/N): ",
+          options = c("T", "Y")
+        )
+      # NON-INTERACTIVE MODE
+      } else {
+        overwrite <- FALSE
+      }
+    }
+    # OVERWRITE GATES
+    if(overwrite) {
+      # MESSAGE
+      message(
+        "Removing existing gates from the GatingSet..."
+      )
+      # REMOVE GATES
+      lapply(
+        cyto_nodes_kin(
+          x,
+          nodes = "root",
+          type = "children",
+          path = "full"
+        ),
+        function(z) {
+          gs_pop_remove(
+            x,
+            z
+          )
+        }
+      )
+    # WARNING IN CASE
+    } else {
+      warning(
+        paste0(
+          "Applying a gatingTemplate to a GatingSet that already contains ",
+          "gates is not recommended - see overwrite argument."
+        )
+      )
+    }
   }
   
   # MESSAGE - APPLY GATINGTEMPLATE FILE
