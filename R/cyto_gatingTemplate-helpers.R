@@ -753,7 +753,7 @@ cyto_gatingTemplate_apply <- function(x,
   }
   
   # GATINGSET CONTAINS GATES
-  if(length(cyto_nodes(x) > 1)) {
+  if(length(cyto_nodes(x)) > 1) {
     # EMPTY OVERWRITE & INTERACTIVE
     if(!is.logical(overwrite)) {
       # INTERACTIVE MODE
