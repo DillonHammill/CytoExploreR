@@ -830,13 +830,9 @@ cyto_unmix_compute <- function(x,
     # CONSTRUCT HEATMAP - USE CYTO_PLOT_HEATMAP?
     heat_map(
       um,
-      dendrogram = "row",
-      box_col_scale = .cyto_plot_point_col_scale(),
-      legend_col_breaks = 50,
-      legend_text_breaks = c(seq(1, 50, 10), 51),
-      title = "Spectral Unmixing Matrix",
-      legend = FALSE, # spacing needs work
-      dendrogram_scale = TRUE
+      tree_y = TRUE,
+      cell_col_scale = .cyto_plot_point_col_scale(),
+      title = "Spectral Unmixing Matrix"
     )
   }
   

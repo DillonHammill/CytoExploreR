@@ -28,14 +28,13 @@
 NULL
 
 #' @noRd
-#' @export
 cyto_plot_heatmap <- function(x, 
                               ...){
   UseMethod("cyto_plot_heatmap")
 }
 
 #' @rdname cyto_plot_heatmap
-#' @export
+#' @noRd
 cyto_plot_heatmap.flowSet <- function(x, 
                                       channels = NULL,
                                       stat = "median",
@@ -85,7 +84,7 @@ cyto_plot_heatmap.flowSet <- function(x,
 }
 
 #' @rdname cyto_plot_heatmap
-#' @export
+#' @noRd
 cyto_plot_heatmap.flowFrame <- function(x, 
                                         channels = NULL,
                                         stat = "median",

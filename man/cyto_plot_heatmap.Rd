@@ -2,17 +2,16 @@
 % Please edit documentation in R/cyto_plot_heatmap.R
 \name{cyto_plot_heatmap}
 \alias{cyto_plot_heatmap}
-\alias{cyto_plot_heatmap.flowSet}
-\alias{cyto_plot_heatmap.flowFrame}
 \title{Construct a heatmap of cytometry data}
-\usage{
-\method{cyto_plot_heatmap}{flowSet}(x, channels = NULL, stat = "median", merge_by = NULL, ...)
-
-\method{cyto_plot_heatmap}{flowFrame}(x, channels = NULL, stat = "median", ...)
-}
 \arguments{
 \item{x}{obejct of class \code{flowFrame}, \code{flowSet},
 \code{GatingHierarchy} or \code{GatingSet}.}
+
+\item{alias}{names of the populations for which the statistics should be
+calculated, set to NULL by default.}
+
+\item{parent}{names of the parent populations for which frequency statistics
+should be calculated.}
 
 \item{channels}{names of the channels or markers for which statistics should
 be calculated, set all channels with assigned markers by default.}
@@ -26,12 +25,6 @@ groups prior to constructing the heatmap, set to NULL by default.}
 
 \item{...}{additional arguments passed to \code{heat_map()} to construct the
 heatmap.}
-
-\item{alias}{names of the populations for which the statistics should be
-calculated, set to NULL by default.}
-
-\item{parent}{names of the parent populations for which frequency statistics
-should be calculated.}
 }
 \description{
 The \code{HeatmapR} package is required for heatmap construction, it can be

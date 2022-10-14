@@ -1324,8 +1324,7 @@ spillSaveServer <- function(id,
     
     observe({
       input$save
-      write_to_csv(spill(),
-                   save_as)
+      write_to_csv(spill(), save_as)
     })
     
     return(reactive({spill}))

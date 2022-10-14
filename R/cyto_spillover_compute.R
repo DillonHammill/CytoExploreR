@@ -805,13 +805,9 @@ cyto_spillover_compute <- function(x,
     # CONSTRUCT HEATMAP - USE CYTO_PLOT_HEATMAP?
     heat_map(
       sp,
-      box_col_empty = "black",
-      dendrogram = FALSE,
-      box_col_scale = .cyto_plot_point_col_scale(),
-      legend_col_breaks = 50,
-      legend_text_breaks = c(seq(1, 50, 10), 51),
-      title = "Spillover Matrix",
-      legend = FALSE, # spacing needs work
+      cell_col_empty = "black",
+      cell_col_scale = .cyto_plot_point_col_scale(),
+      title = "Spillover Matrix"
     )
   }
   
