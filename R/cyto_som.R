@@ -43,6 +43,9 @@
 #' @param trans object of class \code{transformerList} containing the
 #'   transformers applied to the supplied data, only required for objects of
 #'   class \code{cytoset}.
+#' @param inverse logical indicating whether inverse transformations were
+#'   applied to the data prior to computing the dimension-reduced co-ordinates
+#'   with \code{cyto_map()}, set to FALSE by default.
 #' @param som a \code{cytoset}, \code{GatingHierarchy} or \code{GatingSet}
 #'   containing a pre-computed SOM upon which the supplied data should be
 #'   mapped. If the parameters defined by \code{map} are located, the existing
@@ -126,13 +129,12 @@ cyto_som <- function(x,
                      events = 1,
                      map = "t-SNE",
                      trans = NA,
+                     inverse = FALSE,
                      som = NULL,
                      scale = "range",
                      plot = TRUE,
                      gatingTemplate = NULL,
                      ...) {
-  
-  # TODO: SOM KEYWORD
   
   # NOTE: SOMs ARE LINEAR AND OPTIONALLY SCALED UNTIL SAVING TRANSFORMERS FIXED
   
@@ -228,7 +230,7 @@ cyto_som <- function(x,
         } else {
           som_trans
         },
-        inverse = TRUE,
+        inverse = inverse,
         copy = FALSE
       )[[1]][[1]]
     # SOM CODES SUPPLIED
@@ -313,7 +315,7 @@ cyto_som <- function(x,
         channels
       },
       trans = trans,
-      inverse = TRUE,
+      inverse = inverse,
       format = "matrix",
       events = events,
       coerce = TRUE,
@@ -403,7 +405,7 @@ cyto_som <- function(x,
   # NUMBER OF CODES
   N <- nrow(codes)
   
-  # CONVERT CODES TO CYTOSET ON LINEAR SCALE & SCALED
+  # CONVERT CODES TO CYTOSET ON LINEAR|TRANS SCALE & SCALED
   codes <- cytoset(
     structure(
       list(
@@ -472,7 +474,7 @@ cyto_som <- function(x,
             parent = parent,
             channels = channels,
             trans = trans,
-            inverse = TRUE,
+            inverse = inverse,
             format = "matrix",
             events = 1,
             coerce = FALSE,
@@ -510,7 +512,7 @@ cyto_som <- function(x,
             channels = c(channels, map),
             drop = FALSE
           )
-          # MAP SOM CODES BACK TO LINEAR SCALE
+          # MAP SOM CODES BACK TO LINEAR|TRANS SCALE
           if(!scale %in% FALSE) {
             cnt <- 0
             res[, channels] <- apply(
@@ -536,6 +538,7 @@ cyto_som <- function(x,
               }
             )
           }
+          
           # PREPARE DATA - LINEAR CODES + DIM REDUCTION + COUNTS + PROPORTIONS
           cf <- as(
             cbind(
@@ -555,6 +558,16 @@ cyto_som <- function(x,
             ),
             "cytoframe"
           )
+          # MAP SOM CODES BACK TO LINEAR SCALE
+          if(!.all_na(trans) & !inverse) {
+            cf <- cyto_transform(
+              cf,
+              trans = trans,
+              inverse = TRUE,
+              plot = FALSE,
+              quiet = TRUE
+            )
+          }
           # SET SOM KEYWORD -> STORE DIMENSIONS
           keyword(cf)[["CytoExploreR_SOM"]] <- paste0(
             grid[1], "x", grid[2]
@@ -615,15 +628,40 @@ cyto_som <- function(x,
   
   # PLOT SOM 
   if(plot) {
-    cyto_plot(
-      x_som,
-      parent = "root",
-      select = 1,
-      channels = map,
-      point_shape = 21,
-      point_size = 2.5,
-      title = "Self-Organising Map (SOM)"
-    )
+    # SAME EMBEDDING
+    if(all(map %in% cyto_channels(x))) {
+      # PLOT RAW DATA
+      cyto_plot(
+        x,
+        parent = parent,
+        merge_by = "all",
+        channels = map,
+        title = "Self Organising Map (SOM)"
+      )
+      # PLOT SOM NODES
+      cyto_plot_point(
+        x_som,
+        parent = "root",
+        select = 1,
+        channels = map,
+        events = 1,
+        point_shape = 16,
+        point_size = 1.5,
+        point_col = "black"
+      )
+    # SEPARATE EMBEDDINGS
+    } else {
+      # PLOT SOM NODES ONLY
+      cyto_plot(
+        x_som,
+        parent = "root",
+        select = 1,
+        channels = map,
+        point_shape = 21,
+        point_size = 2.5,
+        title = "Self-Organising Map (SOM)"
+      )
+    }
   }
   
   # RETURN CYTOSET | GATINGSET

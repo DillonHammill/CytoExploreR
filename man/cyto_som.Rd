@@ -15,6 +15,7 @@ cyto_som(
   events = 1,
   map = "t-SNE",
   trans = NA,
+  inverse = FALSE,
   som = NULL,
   scale = "range",
   plot = TRUE,
@@ -58,6 +59,10 @@ details.}
 \item{trans}{object of class \code{transformerList} containing the
 transformers applied to the supplied data, only required for objects of
 class \code{cytoset}.}
+
+\item{inverse}{logical indicating whether inverse transformations were
+applied to the data prior to computing the dimension-reduced co-ordinates
+with \code{cyto_map()}, set to FALSE by default.}
 
 \item{som}{a \code{cytoset}, \code{GatingHierarchy} or \code{GatingSet}
 containing a pre-computed SOM upon which the supplied data should be
