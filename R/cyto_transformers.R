@@ -585,7 +585,7 @@ cyto_transformers_extract <- function(x){
   return(transformers)
 }
 
-## CYTO_TRANSFORMER_COMBINE ----------------------------------------------------
+## CYTO_TRANSFORMERS_COMBINE ---------------------------------------------------
 
 #' Combine cyto_transformer definitions
 #'

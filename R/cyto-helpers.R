@@ -7233,7 +7233,7 @@ cyto_nodes_convert <- function(x,
       }
       # ESCAPE SPECIAL CHARACTERS
       node <- gsub(
-        "([.|()\\^{}+$*?]|\\[|\\])", 
+        "([-.|()\\^{}+$*?]|\\[|\\])", 
         "\\\\\\1",
         node
       )
@@ -7249,7 +7249,7 @@ cyto_nodes_convert <- function(x,
     }
     # ESCAPE SPECIAL CHARACTERS
     anchor <- gsub(
-      "([.|()\\^{}+$*?]|\\[|\\])", 
+      "([-.|()\\^{}+$*?]|\\[|\\])", 
       "\\\\\\1",
       anchor
     )
