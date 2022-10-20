@@ -6941,7 +6941,11 @@ cyto_nodes <- function(x,
       nodes <- LAPPLY(
         nodes_full,
         function(node) {
-          pop <- basename(node)
+          pop <- gsub(
+            "([-.|()\\^{}+$*?]|\\[|\\])", 
+            "\\\\\\1",
+            basename(node)
+          )
           pop_match <- grep(
             paste0(
               "/",

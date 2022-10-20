@@ -17,7 +17,6 @@
 #' @importFrom purrr transpose
 #' @importFrom flowWorkspace GatingSet
 #'
-#'
 #' @noRd
 cyto_rebuild <- function(x,
                          y,
@@ -185,10 +184,9 @@ cyto_rebuild <- function(x,
       suppressMessages(
         recompute(y)
       )
-      
     }
   )
-  
+
   # RETURN REBUILT GATINGSET
   return(y)
   
