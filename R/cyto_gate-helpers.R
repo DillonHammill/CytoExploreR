@@ -425,14 +425,8 @@ cyto_gate_remove <- function(x,
   
   # GATINGTEMPLATE MISSING
   if (is.null(gatingTemplate)) {
-    gatingTemplate <- cyto_gatingTemplate_active(ask = TRUE)
+    gatingTemplate <- cyto_gatingTemplate_active(ask = FALSE)
   }
-  
-  # PARSE GATINGTEMPLATE
-  gt <- cyto_gatingTemplate_parse(
-    gatingTemplate,
-    data.table = FALSE
-  )
   
   # GATINGHIERARCHY | GATINGSET ------------------------------------------------
   
@@ -509,106 +503,108 @@ cyto_gate_remove <- function(x,
   
   # GATINGTEMPLATE -------------------------------------------------------------
   
-  # ALIAS
-  gt_alias_rm <- LAPPLY(
-    alias,
-    function(z) {
-      tryCatch(
-        cyto_nodes_convert(
-          gatingTemplate,
-          nodes = z,
-          anchor = parent,
-          path = "auto"
-        ),
-        error = function(e) {
-          NULL
-        }
-      )
-    }
-  )
-  
-  # PREPARE GATINGTEMPLATE ALIAS
-  gt_alias <- lapply(
-    seq_len(nrow(gt)), 
-    function(z) {
-      # PARSE PARENT
-      prnt <- unlist(strsplit(as.character(gt$parent[z]), ","))
-      # PARSE ALIAS
-      pops <- unlist(strsplit(as.character(gt$alias[z]), ","))
-      # ANCHOR ALIAS
-      LAPPLY(
-        prnt,
-        function(v) {
+  # GATINGTEMPLATE NOT REQUIRED
+  if(!is.null(gatingTemplate)) {
+    # PARSE GATINGTEMPLATE
+    gt <- cyto_gatingTemplate_parse(
+      gatingTemplate,
+      data.table = FALSE
+    )
+    # ALIAS
+    gt_alias_rm <- LAPPLY(
+      alias,
+      function(z) {
+        tryCatch(
           cyto_nodes_convert(
             gatingTemplate,
-            nodes = pops,
-            anchor = v,
+            nodes = z,
+            anchor = parent,
             path = "auto"
-          )
-        }
-      )
-    }
-  )
-
-  # DESCENDANTS
-  if(length(gt_alias_rm) > 0) {
-    gt_desc_rm <- unname(
-      cyto_nodes_kin(
-        gatingTemplate,
-        nodes = gt_alias_rm,
-        type = "descendants",
-        path = "auto"
-      ) 
-    )
-  } else {
-    gt_desc_rm <- NULL
-  }
-  
-  # COMBINE ALIAS & DESCENDANTS
-  gt_alias_rm <- unique(c(gt_alias_rm, gt_desc_rm))
-  
-  # UNPARSED GATINGTEMPLATE
-  gt <- cyto_gatingTemplate_read(
-    gatingTemplate,
-    # data.table = FALSE,
-    parse = FALSE
-  )
-  
-  # REMOVE ROWS MATCHING ALIAS
-  ind <- LAPPLY(
-    gt_alias,
-    function(z) {
-      any(z %in% gt_alias_rm)
-    }
-  )
-  
-  # REMOVE FROM GATINGTEMPLATE
-  if(length(gt_alias_rm) > 0 ) {
-    # INFORM POPULATION REMOVAL
-    message(
-      paste0(
-        "Removing the following gates from ",
-        ifelse(is.character(gatingTemplate) , gatingTemplate, "gatingTemplate"), 
-        ": \n",
-        paste0(
-          paste0(
-            1:length(unlist(gt_alias_rm)),
-            ". ",
-            unlist(gt_alias_rm)
           ),
-          collapse = "\n"
+          error = function(e) {
+            NULL
+          }
+        )
+      }
+    )
+    # PREPARE GATINGTEMPLATE ALIAS
+    gt_alias <- lapply(
+      seq_len(nrow(gt)), 
+      function(z) {
+        # PARSE PARENT
+        prnt <- unlist(strsplit(as.character(gt$parent[z]), ","))
+        # PARSE ALIAS
+        pops <- unlist(strsplit(as.character(gt$alias[z]), ","))
+        # ANCHOR ALIAS
+        LAPPLY(
+          prnt,
+          function(v) {
+            cyto_nodes_convert(
+              gatingTemplate,
+              nodes = pops,
+              anchor = v,
+              path = "auto"
+            )
+          }
+        )
+      }
+    )
+    # DESCENDANTS
+    if(length(gt_alias_rm) > 0) {
+      gt_desc_rm <- unname(
+        cyto_nodes_kin(
+          gatingTemplate,
+          nodes = gt_alias_rm,
+          type = "descendants",
+          path = "auto"
+        ) 
+      )
+    } else {
+      gt_desc_rm <- NULL
+    }
+    # COMBINE ALIAS & DESCENDANTS
+    gt_alias_rm <- unique(c(gt_alias_rm, gt_desc_rm))
+    # UNPARSED GATINGTEMPLATE
+    gt <- cyto_gatingTemplate_read(
+      gatingTemplate,
+      # data.table = FALSE,
+      parse = FALSE
+    )
+    # REMOVE ROWS MATCHING ALIAS
+    ind <- LAPPLY(
+      gt_alias,
+      function(z) {
+        any(z %in% gt_alias_rm)
+      }
+    )
+    # REMOVE FROM GATINGTEMPLATE
+    if(length(gt_alias_rm) > 0 ) {
+      # INFORM POPULATION REMOVAL
+      message(
+        paste0(
+          "Removing the following gates from ",
+          ifelse(is.character(gatingTemplate) , gatingTemplate, "gatingTemplate"), 
+          ": \n",
+          paste0(
+            paste0(
+              1:length(unlist(gt_alias_rm)),
+              ". ",
+              unlist(gt_alias_rm)
+            ),
+            collapse = "\n"
+          )
         )
       )
+      # REMOVE NODES FROM GATINGTEMPLATE
+      gt <- gt[!ind, , drop = FALSE]
+    }
+    
+    # UPDATE GATINGTEMPLATE
+    cyto_gatingTemplate_write(
+      gt,
+      save_as = gatingTemplate
     )
-    # REMOVE NODES FROM GATINGTEMPLATE
-    gt <- gt[!ind, , drop = FALSE]
   }
-
-  # UPDATE GATINGTEMPLATE
-  cyto_gatingTemplate_write(
-    gt,
-    save_as = gatingTemplate
-  )
   
   # RETURN GATINGSET
   return(x)
@@ -638,6 +634,8 @@ cyto_gate_rename <- function(x,
                              names = NULL,
                              gatingTemplate = NULL,
                              ...) {
+  
+  # TODO: ALLOW GATINGSET ONLY?
   
   # MISSING GATINGTEMPLATE
   if (is.null(gatingTemplate)) {
@@ -773,6 +771,7 @@ cyto_gate_copy <- function(x,
                            hidden = FALSE,
                            ...){
   
+  # TODO: ALLOW GATINGSET ONLY?
   # TODO: CHECK IF GATE ALREADY EXISTS - MESSAGE TO USE CYTO_GATE_EDIT()
   
   # CHECKS ---------------------------------------------------------------------
@@ -1036,6 +1035,8 @@ cyto_gate_bool <- function(x,
                            logic = NULL,
                            gatingTemplate = NULL,
                            ...){
+  
+  # TODO: ALLOW GATINGSET ONLY?
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -1661,9 +1662,11 @@ cyto_gate_edit <- function(x,
   if(is.null(parent)) {
     stop("Supply the name of the parental population to 'parent'.")
   } else {
-    parent <- cyto_nodes_convert(x, 
-                                 nodes = parent,
-                                 path = "full")
+    parent <- cyto_nodes_convert(
+      x, 
+      nodes = parent,
+      path = "full"
+    )
   }
   
   # ALIAS
@@ -1674,9 +1677,11 @@ cyto_gate_edit <- function(x,
     alias_new <- NULL
     alias <- LAPPLY(seq_along(alias), function(z){
       pop <- tryCatch(
-        cyto_nodes_convert(x,
-                           nodes = alias[z],
-                           path = "auto"),
+        cyto_nodes_convert(
+          x,
+          nodes = alias[z],
+          path = "auto"
+        ),
         error = function(e){
           return(NULL)
         }
@@ -1844,14 +1849,14 @@ cyto_gate_edit <- function(x,
   if(merge_by[1] == "all") {
     merge_by <- "Combined Events" # match cyto_groups
     grps <- "Combined Events"
-    # SKIP MENU IF NEW GROUPING ADDED
+  # SKIP MENU IF NEW GROUPING ADDED
   } else if(.all_na(gt_groupBy) & merge_by[1] != "all") {
     grps <- grps
-    # SKIP MENU IF GROUP HAS CHANGED
+  # SKIP MENU IF GROUP HAS CHANGED
   } else if(!.all_na(gt_groupBy) &
             !setequal(merge_by, unlist(strsplit(gt_groupBy, ":")))) {
     grps <- grps
-    # GROUPING REMAINS UNCHANGED
+  # GROUPING REMAINS UNCHANGED
   } else {
     message("Select the group(s) to edit:")
     # INTERACTIVE GROUP SELECTION
@@ -1889,123 +1894,135 @@ cyto_gate_edit <- function(x,
   
   # TITLE
   if(plot){
-    title <- rep(c(title, rep("", length(grps))), 
-                 length.out = length(grps))
+    title <- rep(
+      c(title, rep("", length(grps))), 
+      length.out = length(grps)
+    )
   }
   
   # LOOP THROUGH GROUPS
   w <- 0
-  lapply(match(grps, names(cs_lists)), function(y) {
-    w <<- w + 1
-    # CYTOSET LIST
-    cs_list <- cs_lists[[y]]
-    # EXISTING GATE LIST - EXLUDES BOOLEAN GATES
-    gate <- gates_gs[[y]]
-    # CYTO_PLOT
-    if(plot == TRUE) {
-      # TITLE
-      if(.empty(title[w])) {
-        # GROUP
-        title[w] <<- names(cs_lists)[y]
-        # PARENT POPULATION
-        if(!is.null(names(cs_lists[[y]])[1])) {
-          title[w] <<- paste(title[w], 
-                             names(cs_lists[[y]])[1], 
-                             sep = "\n")
+  lapply(
+    match(grps, names(cs_lists)), 
+    function(y) {
+      w <<- w + 1
+      # CYTOSET LIST
+      cs_list <- cs_lists[[y]]
+      # EXISTING GATE LIST - EXLUDES BOOLEAN GATES
+      gate <- gates_gs[[y]]
+      # CYTO_PLOT
+      if(plot == TRUE) {
+        # TITLE
+        if(.empty(title[w])) {
+          # GROUP
+          title[w] <<- names(cs_lists)[y]
+          # PARENT POPULATION
+          if(!is.null(names(cs_lists[[y]])[1])) {
+            title[w] <<- paste(
+              title[w], 
+              names(cs_lists[[y]])[1], 
+              sep = "\n"
+            )
+          }
+        }
+        # CYTO_PLOT
+        cyto_plot(
+          cs_list[[1]],
+          overlay = if(length(cs_list) > 1){
+            cs_list[seq_along(cs_list)[-1]]
+          } else {
+            NA
+          },
+          channels = channels,
+          axes_trans = axes_trans,
+          axes_limits = axes_limits,
+          legend = FALSE,
+          gate = gate,
+          gate_line_width = 2.5,
+          gate_line_col = "magenta",
+          gate_line_alpha = 0.8,
+          label = FALSE,
+          title = title[w],
+          ...
+        )
+      }
+      
+      # 2D INTERVAL - AXIS ARGUMENT
+      if("interval" %in% type) {
+        intvl <- rbind(
+          gate[[match("interval", type)[1]]]@min,
+          gate[[match("interval", type)[1]]]@max
+        )
+        if (all(is.finite(intvl[, 1]))) {
+          axis <- "x"
+        } else if (all(is.finite(intvl[, 2]))) {
+          axis <- "y"
         }
       }
-      # CYTO_PLOT
-      cyto_plot(
+      
+      # DRAW NEW GATES
+      gate_new <- cyto_gate_draw(
         cs_list[[1]],
-        overlay = if(length(cs_list) > 1){
-          cs_list[seq_along(cs_list)[-1]]
+        alias = if(negate){
+          c(unlist(alias), bool_alias, alias_new)
         } else {
-          NA
+          unlist(alias)
         },
         channels = channels,
-        axes_trans = axes_trans,
-        axes_limits = axes_limits,
-        legend = FALSE,
-        gate = gate,
-        gate_line_width = 2.5,
-        gate_line_col = "magenta",
-        gate_line_alpha = 0.8,
-        label = FALSE,
-        title = title[w],
-        ...
-      )
-    }
-    
-    # 2D INTERVAL - AXIS ARGUMENT
-    if("interval" %in% type) {
-      intvl <- rbind(
-        gate[[match("interval", type)[1]]]@min,
-        gate[[match("interval", type)[1]]]@max
-      )
-      if (all(is.finite(intvl[, 1]))) {
-        axis <- "x"
-      } else if (all(is.finite(intvl[, 2]))) {
-        axis <- "y"
+        type = type,
+        negate = negate,
+        axis = axis,
+        plot = FALSE,
+        gate_point_shape = gate_point_shape,
+        gate_point_size = gate_point_size,
+        gate_point_col = gate_point_col,
+        gate_point_col_alpha = gate_point_col_alpha,
+        gate_line_type = gate_line_type,
+        gate_line_width = gate_line_width,
+        gate_line_col = gate_line_col,
+        gate_line_col_alpha = gate_line_col_alpha,
+        label_text_size = label_text_size,
+        label_text_font = label_text_font,
+        label_text_col = label_text_col,
+        label_text_col_alpha = label_text_col_alpha,
+        label_fill = label_fill,
+        label_fill_alpha = label_fill_alpha
+      )[[1]]
+      
+      # REMOVE BOOLEAN GATE
+      if(negate == TRUE) {
+        if(!is.null(bool_alias) | !is.null(alias_new)) {
+          gate_new <- gate_new[-length(gate_new)]
+        }
       }
+      
+      # UPDATE GATES
+      gates_gs[[y]] <<- gate_new
     }
-    
-    # DRAW NEW GATES
-    gate_new <- cyto_gate_draw(
-      cs_list[[1]],
-      alias = if(negate){
-        c(unlist(alias), bool_alias, alias_new)
-      } else {
-        unlist(alias)
-      },
-      channels = channels,
-      type = type,
-      negate = negate,
-      axis = axis,
-      plot = FALSE,
-      gate_point_shape = gate_point_shape,
-      gate_point_size = gate_point_size,
-      gate_point_col = gate_point_col,
-      gate_point_col_alpha = gate_point_col_alpha,
-      gate_line_type = gate_line_type,
-      gate_line_width = gate_line_width,
-      gate_line_col = gate_line_col,
-      gate_line_col_alpha = gate_line_col_alpha,
-      label_text_size = label_text_size,
-      label_text_font = label_text_font,
-      label_text_col = label_text_col,
-      label_text_col_alpha = label_text_col_alpha,
-      label_fill = label_fill,
-      label_fill_alpha = label_fill_alpha
-    )[[1]]
-    
-    # REMOVE BOOLEAN GATE
-    if(negate == TRUE) {
-      if(!is.null(bool_alias) | !is.null(alias_new)) {
-        gate_new <- gate_new[-length(gate_new)]
-      }
-    }
-    
-    # UPDATE GATES
-    gates_gs[[y]] <<- gate_new
-  })
-  
+  )
   # PREPARE GATES FOR GATINGTEMPLATE
   gates_gs_transposed <- transpose(gates_gs)
   
   # WRAP GATES IN FILTER LIST
   gates_gs_transposed <- structure(
-    lapply(seq_along(gates_gs_transposed), function(z){
-      gates <- structure(
-        lapply(seq_along(gates_gs_transposed[[z]]), function(y){
-          if(!cyto_class(gates_gs_transposed[[z]][[y]], "quadGate")) {
-            filters(gates_gs_transposed[[z]][y])
-          } else {
-            gates_gs_transposed[[z]][[y]] # here
-          }
-        }),
-        names = names(gates_gs_transposed[[z]])
-      )
-    }), 
+    lapply(
+      seq_along(gates_gs_transposed), 
+      function(z){
+        gates <- structure(
+          lapply(
+            seq_along(gates_gs_transposed[[z]]),
+            function(y){
+              if(!cyto_class(gates_gs_transposed[[z]][[y]], "quadGate")) {
+                filters(gates_gs_transposed[[z]][y])
+              } else {
+                gates_gs_transposed[[z]][[y]] # here
+              }
+            }
+          ),
+          names = names(gates_gs_transposed[[z]])
+        )
+      }
+    ), 
     names = names(gates_gs_transposed)
   )
   
@@ -2038,14 +2055,14 @@ cyto_gate_edit <- function(x,
   als <- lapply(als, "paste", collapse = ",")
 
   # INDEX PARENT IN GATINTEMPLATE (FULL PATH)
-  parent_ind <- match(
-    prnt,
+  parent_ind <- which(
     cyto_nodes_convert(
       x, 
       nodes = gt$parent,
       path = "full"
-    )
+    ) %in% prnt
   )
+  
   # MODIFY GATINGTEMPLATE - GATED POPULATIONS ONLY
   for (i in seq_len(length(als))) {
     alias_ind <- match(
@@ -2056,10 +2073,12 @@ cyto_gate_edit <- function(x,
     gt[ind, gating_method := gtmd]
     gt[
       ind,
-      gating_args := CytoExploreR_.argDeparser(list(
-        gate = gates_gs_transposed[[i]],
-        openCyto.minEvents = -1
-      ))
+      gating_args := CytoExploreR_.argDeparser(
+        list(
+          gate = gates_gs_transposed[[i]],
+          openCyto.minEvents = -1
+        )
+      )
     ]
     gt[ind, collapseDataForGating := TRUE]
     gt[ind, preprocessing_method := ppmd]
@@ -2085,35 +2104,41 @@ cyto_gate_edit <- function(x,
   )
   
   # APPLY NEW GATES TO GATINGSET
-  lapply(grps, function(z) {
-    # MATCHING GROUPS
-    ind <- rownames(pd_groups[[z]])
-    # SET GATES - GATED POPULATIONS ONLY
-    lapply(seq_along(alias), function(y) {
-      # REPEAT GATES FOR EACH SAMPLE IN GROUP
-      gates_update <- rep(
-        list(gates_gs[[z]][[alias[y]]]),
-        length(x[ind])
+  lapply(
+    grps, 
+    function(z) {
+      # MATCHING GROUPS
+      ind <- rownames(pd_groups[[z]])
+      # SET GATES - GATED POPULATIONS ONLY
+      lapply(
+        seq_along(alias), 
+        function(y) {
+          # REPEAT GATES FOR EACH SAMPLE IN GROUP
+          gates_update <- rep(
+            list(gates_gs[[z]][[alias[y]]]),
+            length(x[ind])
+          )
+          names(gates_update) <- cyto_names(x[ind])
+          # ANCHOR
+          alias_anchor <- cyto_nodes_convert(
+            x,
+            nodes = alias[y],
+            anchor = parent
+          )
+          # UPDATE GATE
+          suppressMessages(
+            gs_pop_set_gate(
+              x[ind],
+              alias_anchor,
+              gates_update
+            )
+          )
+          # RECOMPUTE STATISTICS
+          suppressMessages(recompute(x[ind], alias_anchor))
+        }
       )
-      names(gates_update) <- cyto_names(x[ind])
-      # ANCHOR
-      alias_anchor <- cyto_nodes_convert(
-        x,
-        nodes = alias[y],
-        anchor = parent
-      )
-      # UPDATE GATE
-      suppressMessages(
-        gs_pop_set_gate(
-          x[ind],
-          alias_anchor,
-          gates_update
-        )
-      )
-      # RECOMPUTE STATISTICS
-      suppressMessages(recompute(x[ind], alias_anchor))
-    })
-  })
+    }
+  )
   
   # BOOLEAN GATE REQUIRED
   if(negate == TRUE) {
@@ -2168,9 +2193,11 @@ cyto_gate_edit <- function(x,
       )) {
         for(i in 1:nrow(gt_bool_chunk)) {
           # DESCENDANTS
-          bool_desc <- gh_pop_get_descendants(x[[1]], 
-                                              gt_bool_chunk[i, "alias"],
-                                              path = "auto")
+          bool_desc <- gh_pop_get_descendants(
+            x[[1]], 
+            gt_bool_chunk[i, "alias"],
+            path = "auto"
+          )
           # REMOVE BOOLEAN GATE & DESCENDANTS
           gt <- gt[!alias %in% c(gt_bool_chunk[i, "alias"], bool_desc), ]
           # REMOVE GATE(S) FROM GATINGSET
@@ -2207,8 +2234,10 @@ cyto_gate_edit <- function(x,
   # }
   
   # SAVE UPDATED GATINGTEMPLATE
-  cyto_gatingTemplate_write(gt,
-                            save_as = gatingTemplate)
+  cyto_gatingTemplate_write(
+    gt,
+    save_as = gatingTemplate
+  )
   
   # UPDATE GATINGSET GLOBALLY
   return(x)
