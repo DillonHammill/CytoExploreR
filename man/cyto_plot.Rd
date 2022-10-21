@@ -194,7 +194,7 @@ graphic device prior to plotting. Mac users will need to install
 \href{https://www.xquartz.org/}{XQuartz} for this functionality.}
 
 \item{popup_size}{a vector of length 2 to control the height and width of
-pop-up graphics device in inches, set to \code{c(10,10)} by default.}
+pop-up graphics device in inches, set to \code{c(8,8)} by default.}
 
 \item{select}{named list containing experimental variables to be used to
 select samples using \code{\link{cyto_select}} when a \code{cytoset} or

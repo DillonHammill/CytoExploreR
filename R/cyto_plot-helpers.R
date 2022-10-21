@@ -893,7 +893,7 @@ cyto_plot_new <- function(popup = NULL,
     if("popup_size" %in% names(set_pars)) {
       popup_size <- set_pars$popup_size
     } else {
-      popup_size <- c(10,10)
+      popup_size <- c(8, 8)
     }
   }
   
