@@ -15,6 +15,8 @@
 #'   \code{cyto_details_edit} to update the experimental details associated with
 #'   the loaded samples, set to TRUE by default. The name of the csv to which
 #'   these details will be supplied can also be passed to this argument.
+#' @param barcode logical indicating whether events in each sample should be
+#'   barcoded for compatibility with \code{cyto_plot()}, set to TRUE by default.
 #' @param gatingTemplate passed to \code{cyto_gatingTemplate_generate()} to
 #'   create a CytoExploreR friendly gatingTemplate based on gates applied to the
 #'   loaded samples.
@@ -26,7 +28,7 @@
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @examples 
+#' @examples
 #' \dontrun{
 #' # flowJo
 #' gs <- cyto_import(
@@ -40,6 +42,7 @@ cyto_import <- function(path = ".",
                         type = "flowJo",
                         markers = TRUE,
                         details = TRUE,
+                        barcode = TRUE,
                         gatingTemplate = NULL,
                         ...) {
   
@@ -191,10 +194,15 @@ cyto_import <- function(path = ".",
   }
   
   # BARCODE
-  gs <- cyto_barcode(
-    gs, 
-    type = "events"
-  )
+  if(barcode) {
+    gs <- cyto_barcode(
+      gs, 
+      type = "events"
+    )
+  }
+  
+  # FIX ILLEGAL NODE NAMES
+  gs <- cyto_nodes_fix(gs)
   
   # GENERATE GATINGTEMPLATE
   if(!is.null(gatingTemplate)){
@@ -286,10 +294,12 @@ cyto_export <- function(x,
     
     # CytoML MISSING
   } else {
-    stop(paste0(
-      "cyto_export requires the CytoML package ",
-      "- BiocManager::install('CytoML')"
-    ))
+    stop(
+      paste0(
+        "cyto_export() requires the CytoML package ",
+        "- BiocManager::install('CytoML')"
+      )
+    )
   }
 }
 
@@ -6839,6 +6849,8 @@ cyto_compensate.flowFrame <- function(x,
 #' @param exclude either a vector indices or character strings for partial
 #'   matching to the \code{path} nodes to prevent extraction of certain nodes,
 #'   set to NULL by default to include all nodes.
+#' @param bool can be either TRUE to only return boolean nodes, FALSE to exclude
+#'   boolean nodes or NULL to include boolean nodes with other nodes.
 #' @param ignore.case logical indicating whether case should be ignored when
 #'   selecting nodes using the \code{select} or \code{exclude} arguments, set to
 #'   TRUE by default.
@@ -6848,8 +6860,8 @@ cyto_compensate.flowFrame <- function(x,
 #'
 #' @return character vector of gated node/population names.
 #'
-#' @importFrom flowWorkspace gh_get_pop_paths gs_get_pop_paths
-#'   gh_pop_get_children gs_pop_get_children
+#' @importFrom flowWorkspace gh_get_pop_paths gh_pop_get_children
+#'   gh_pop_is_bool_gate
 #'
 #' @export
 cyto_nodes <- function(x,
@@ -6858,44 +6870,52 @@ cyto_nodes <- function(x,
                        hidden = FALSE,
                        select = NULL,
                        exclude = NULL,
+                       bool = NULL,
                        ignore.case = TRUE,
                        ...) {
   
-  # GATINGHIERARCHY
-  if (cyto_class(x, "GatingHierarchy", TRUE)) {
+  # GATINGHIERARCHY | GATINGSET
+  if (cyto_class(x, "GatingSet")) {
+    gh <- x[[1]]
+    # ALL NODES
     nodes <- gh_get_pop_paths(
-      x,
+      gh,
       path = path,
       showHidden = hidden,
       ...
     )
-    # TERMINAL NODES
-    if(terminal) {
-      nodes <- LAPPLY(
-        nodes,
-        function(node) {
-          if(length(gh_pop_get_children(x, node)) == 0) {
-            return(node)
-          } else {
-            return(NULL)
+    # BOOLEAN NODES
+    if(!is.null(bool)) {
+      # BOOLEAN NODE INDICES
+      bool_ind <- which(
+        LAPPLY(
+          nodes, 
+          function(z) {
+            if(z %in% "root") {
+              return(FALSE)
+            } else {
+              gh_pop_is_bool_gate(
+                gh,
+                z
+              )
+            }
           }
-        }
+        )
       )
+      # ONLY BOOLEAN NODES
+      if(bool) {
+        nodes <- nodes[bool_ind]
+      # REMOVE BOOLEAN NODES
+      } else {
+        nodes <- nodes[-bool_ind]
+      }
     }
-  # GATINGSET
-  } else if (cyto_class(x, "GatingSet", TRUE)) {
-    nodes <- gs_get_pop_paths(
-      x,
-      path = path,
-      showHidden = hidden,
-      ...
-    )
     # TERMINAL NODES
     if(terminal) {
       nodes <- LAPPLY(
         nodes,
         function(node) {
-          if(length(gs_pop_get_children(x, node)) == 0) {
+          if(length(gh_pop_get_children(gh, node)) == 0) {
             return(node)
           } else {
             return(NULL)
@@ -6936,6 +6956,20 @@ cyto_nodes <- function(x,
         }
       )
     )
+    # BOOLEAN NODES
+    if(!is.null(bool)) {
+      # BOOLEAN NODE INDICES -> CHECK GATING_METHOD
+      bool_ind <- which(
+        gt$gating_method %in% "boolGate"
+      )
+      # ONLY BOOLEAN NODES
+      if(bool) {
+        nodes_full <- nodes_full[bool_ind]
+        # REMOVE BOOLEAN NODES
+      } else {
+        nodes_full <- nodes_full[-bool_ind]
+      }
+    }
     # AUTO NODE PATHS
     if(path == "auto") {
       nodes <- LAPPLY(
@@ -6945,14 +6979,11 @@ cyto_nodes <- function(x,
           pop_match <- grep(
             paste0(
               "/",
-              gsub(
-                "([-.|()\\^{}+$*?]|\\[|\\])", 
-                "\\\\\\1",
-                pop
-              ),
+              .str_escape(pop),
               "$"
             ),
-            nodes_full
+            nodes_full,
+            fixed = TRUE
           )
           # NON-UNIQUE ALIAS
           if(length(pop_match) > 1) {
@@ -7066,6 +7097,265 @@ cyto_nodes <- function(x,
   
   # NODE PATHS
   return(nodes[ind])
+  
+}
+
+## CYTO_NODES_FIX --------------------------------------------------------------
+
+#' Rename nodes containing illegal characters in a GatingHierarchy or GatingSet
+#'
+#' \code{cyto_nodes_fix()} checks all nodes in a GatingHierarchy or GatingSet to
+#' remove duplicate nodes or rename nodes containing any illegal characters
+#' (including /:|,&) and update any associated logic in boolean gates.
+#' \code{cyto_nodes_fix()} is particularly useful when importing data analysed
+#' using other software platforms to ensure that the data conforms to the
+#' standards enforced within the \code{cytoverse}.
+#'
+#' @param x object of class
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#'
+#' @return a GatingHierarchy or GatingSet with node names containing only legal
+#'   characters.
+#'
+#' @importFrom flowWorkspace gs_pop_set_name gh_pop_set_name gh_pop_get_gate
+#'   gh_pop_set_gate gs_pop_set_gate
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_nodes_fix <- function(x) {
+  
+  # TODO: RECOMPUTE REQUIRED HERE?
+  # TODO: ADD SUPPORT FOR GATINGTEMPLATES AS WELL?
+  
+  # NODES - AUTO PATH
+  nodes_auto <- cyto_nodes(
+    x,
+    path = "auto"
+  )
+  
+  # DUPLICATE NODES ------------------------------------------------------------
+  
+  # DUPLICATE NODES
+  ind <- which(
+    duplicated(basename(nodes_auto))
+  )
+  
+  # RENAME DUPLICATE NODES
+  if(length(ind) > 0) {
+    message(
+      "Duplicate populations will be renamed"
+    )
+    node_match <- match(nodes_auto[ind], nodes_auto)
+    node_ind <- rep(0, unique(node_match))
+    names(node_ind) <- unique(node_match)
+    nodes_rename <- data.frame(
+      "node_full" = cyto_nodes(
+        x, 
+        path = "full"
+      )[ind],
+      "node_auto" = nodes_auto[ind],
+      "node_new" = LAPPLY(
+        node_match,
+        function(z) {
+          node_ind[as.character(z)] <<- node_ind[as.character(z)] + 1
+          paste0(
+            nodes_auto[z],
+            "-",
+            node_ind[as.character(z)]
+          )
+        }
+      ),
+      stringsAsFactors = FALSE
+    )
+    lapply(
+      seq_len(nrow(nodes_rename)),
+      function(z) {
+        args <- list(
+          "x" = x,
+          "y" = nodes_rename[z, "node_full"],
+          "value" = basename(nodes_rename[z, "node_new"])
+        )
+        if(cyto_class(x, "GatingSet", TRUE)) {
+          cyto_func_call(
+            "flowWorkspace::gs_pop_set_name",
+            args = args
+          )
+        } else {
+          cyto_func_call(
+            "flowWorkspace::gh_pop_set_name",
+            args = args
+          )
+        }
+      }
+    )
+  # NO DUPLICATE NODES
+  } else {
+    nodes_rename <- NULL
+  }
+  
+  # UPDATE NODES_AUTO
+  nodes_auto <- cyto_nodes(
+    x,
+    path = "auto"
+  )
+  
+  # ILLEGAL CHARACTERS ---------------------------------------------------------
+  
+  # CHECK FOR ILLEGAL CHARACTERS
+  ind <- grep("[\\|\\&|\\:|\\,]", nodes_auto)
+  if(length(ind) == 0) {
+    return(x)
+  }
+  
+  # FIX ILLEGAL NODES
+  message(
+    paste0(
+      "Populations in the GatingSet will be renamed to remove illegal",
+      " characters!"
+    )
+  )
+  lapply(
+    ind,
+    function(z) {
+      args <- list(
+        "x" = x,
+        "y" = cyto_nodes(
+          x,
+          path = "full"
+        )[z],
+        "value" = gsub(
+          "[\\|\\&|\\:|\\,]",
+          "",
+          basename(
+            cyto_nodes(
+              x,
+              path = "auto"
+            )[z]
+          )
+        )
+      )
+      if(cyto_class(x, "GatingSet", TRUE)) {
+        cyto_func_call(
+          "flowWorkspace::gs_pop_set_name",
+          args = args
+        )
+      } else {
+        cyto_func_call(
+          "flowWorkspace::gh_pop_set_name",
+          args = args
+        )
+      }
+    }
+  )
+  
+  # BOOLEAN LOGIC --------------------------------------------------------------
+  
+  # BOOLEAN NODES
+  nodes_bool <- cyto_nodes(
+    x,
+    path = "full",
+    bool = TRUE
+  )
+  if(length(nodes_bool) == 0) {
+    return(x)
+  }
+  
+  # UPDATE BOOLEAN LOGIC
+  gh <- x[[1]]
+  lapply(
+    nodes_bool,
+    function(z) {
+      # EXTRACT BOOLEAN GATE - ASSUME SAME GATE ACROSS SAMPLES
+      gate <- gh_pop_get_gate(
+        gh, 
+        z
+      )
+      # SPLIT OUT POPULATIONS - RENAME - REPLACE ILLEGAL - RECOMBINE
+      # RENAME IS PRIOR TO REMOVAL OF ILLEGAL CHARACTERS
+      pops <- unlist(strsplit(gate@deparse, "\\||\\&|\\!"))
+      pops <- pops[!LAPPLY(pops, ".empty")]
+      pops_new <- pops
+      # RENAME POPULATIONS
+      if(!is.null(nodes_rename)) {
+        lapply(
+          seq_len(nrow(nodes_rename)),
+          function(w) {
+            pops_new <<- gsub(
+              nodes_rename[w, "node_auto"],
+              nodes_rename[w, "node_new"],
+              pops_new,
+              fixed = TRUE
+            )
+          }
+        )
+      }
+      # REMOVE ILLEGAL CHARACTERS
+      lapply(
+        seq_along(pops_new),
+        function(w) {
+          pops_new[w] <<- gsub(
+            "[\\|\\&|\\:|\\,]",
+            "",
+            pops_new[w]
+          )
+        }
+      )
+      # REPLACE POPULATIONS IN BOOLEAN LOGIC
+      lapply(
+        seq_along(pops),
+        function(w) {
+          gate@filterId <<- gsub(
+            pops[w],
+            pops_new[w],
+            gate@filterId,
+            fixed = TRUE
+          )
+          gate@expr <- parse(
+            text = gsub(
+              pops[w],
+              pops_new[w],
+              gate@expr,
+              fixed = TRUE
+            )
+          )
+          gate@deparse <<- gsub(
+            pops[w],
+            pops_new[w],
+            gate@deparse,
+            fixed = TRUE
+          )
+        }
+      )
+      # UPDATE GATES - GATINGSET
+      if(cyto_class(x, "GatingSet", TRUE)) {
+        gs_pop_set_gate(
+          x,
+          z,
+          structure(
+            lapply(
+              seq_along(x),
+              function(z) {
+                return(gate)
+              }
+            ),
+            names = cyto_names(x)
+          )
+        )
+      # UPDATE GATES - GATINGHIERARCHY
+      } else {
+        gh_pop_set_gate(
+          x,
+          z,
+          gate
+        )
+      }
+    }
+  )
+  
+  # RETURN FIXED GATINGHIERARCHY | GATINGSET
+  return(x)
   
 }
 
@@ -7237,12 +7527,9 @@ cyto_nodes_convert <- function(x,
         node <- gsub("\\/?root\\/", "/", node)
       }
       # ESCAPE SPECIAL CHARACTERS
-      node <- gsub(
-        "([-.|()\\^{}+$*?]|\\[|\\])", 
-        "\\\\\\1",
+      .str_escape(
         node
       )
-      return(node)
     }
   )
   
@@ -7253,9 +7540,7 @@ cyto_nodes_convert <- function(x,
       anchor <- gsub("\\/?root\\/", "/", anchor)
     }
     # ESCAPE SPECIAL CHARACTERS
-    anchor <- gsub(
-      "([-.|()\\^{}+$*?]|\\[|\\])", 
-      "\\\\\\1",
+    anchor <- .str_escape(
       anchor
     )
     # ANCHOR - PREVENT PARTIAL MATCH
@@ -7416,7 +7701,8 @@ cyto_nodes_convert <- function(x,
               LAPPLY(
                 nodes_full_split, # ONLY SEARCH NODES WITH PARTIAL MATCH
                 function(z) {
-                  all(node_frag %in% z)
+                  # IDENTICAL NODE REQUIRED
+                  identical(node_frag, z)
                 }
               )
             )

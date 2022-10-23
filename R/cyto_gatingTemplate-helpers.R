@@ -217,6 +217,12 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
     stop("Supply the name of a csv file to 'gatingTemplate'.")
   }
   
+  # NODES - AUTO PATH
+  nodes_auto <- cyto_nodes(
+    x,
+    path = "auto"
+  )
+  
   # DATA.TABLE R CMD CHECK NOTE
   parent <- NULL
   alias <- NULL
@@ -230,17 +236,31 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
   # GENERATE GATINGTEMPLATE - DATA FRAME
   gt <- gh_generate_template(x)
   
+  
+  
+  # TODO: USE BOOLEAN NODES IN GATINGSET TO IDENTIFY BOOLEAN POPULATIONS
+  
+  
+  
+  
+  
+  # TODO: HANDLE CLUSTERED POPULATIONS? - NEED BOOLEAN GATE CHECK
   # BOOLEAN ENTRIES EXIST
   if(any(LAPPLY(gt$dims, ".empty"))){
     # PREPARE BOOLEAN ENTRIES
     gt_bool_chunk <- gt[LAPPLY(gt$dims, ".empty"), ]
-    gt_bool_chunk$parent <- cyto_nodes_convert(x,
-                                               nodes = gt_bool_chunk$parent,
-                                               path = "auto")
+    gt_bool_chunk$parent <- cyto_nodes_convert(
+      x,
+      nodes = gt_bool_chunk$parent,
+      path = "auto"
+    )
     gt_bool_chunk$gating_args <- LAPPLY(
-      seq_len(nrow(gt_bool_chunk)), function(z){
-        gate <- gh_pop_get_gate(x,
-                                gt_bool_chunk$alias[z])
+      seq_len(nrow(gt_bool_chunk)), 
+      function(z){
+        gate <- gh_pop_get_gate(
+          x,
+          gt_bool_chunk$alias[z]
+        )
         return(gate@deparse)
       }
     )
@@ -257,106 +277,142 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
   gt_parents <- unique(gt$parent)
   
   # GATINGTEMPLATE ENTRIES PER PARENT
-  gt_entries <- lapply(gt_parents, function(gt_parent){
-    # GATINGTEMPLATE CHUNK
-    gt_parent_chunk <- gt[gt$parent == gt_parent, ]
-    gt_parent_chunk_channels <- unique(gt_parent_chunk$dims)
-    # PREPARE ENTRIES (PER PLOT)
-    gt_entries <- lapply(gt_parent_chunk_channels, function(y){
-      gt_chunk <- gt_parent_chunk[gt_parent_chunk$dims == y, ]
-      gt_alias <- gt_chunk$alias
-      gt_channels <- unlist(strsplit(y, ","))
-      # GATES
-      gates <- lapply(gt_alias, function(w){
-        gh_pop_get_gate(x,
-                        cyto_nodes_convert(x,
-                                           nodes = w,
-                                           anchor = gt_parent,
-                                           path = "auto"))
-      })
-      names(gates) <- gt_alias
-      # GATES BELONG TO QUADGATE
-      if(length(gates) == 4 &
-         all(LAPPLY(gates, "class") == "rectangleGate")){
-        # RECTANGLES BELONG TO QUADGATE
-        if(all(LAPPLY(gates, function(v){
-          any(grepl("quad", names(attributes(v))))
-        }))){
-          gates <- list(.cyto_gate_quad_convert(gates,
-                                                channels = gt_channels))
-          names(gates) <- paste0(gt_alias, collapse = ",")
+  gt_entries <- lapply(
+    gt_parents, 
+    function(gt_parent) {
+      # GATINGTEMPLATE CHUNK
+      gt_parent_chunk <- gt[gt$parent == gt_parent, ]
+      gt_parent_chunk_channels <- unique(gt_parent_chunk$dims)
+      # PREPARE ENTRIES (PER PLOT)
+      gt_entries <- lapply(
+        gt_parent_chunk_channels,
+        function(y) {
+          gt_chunk <- gt_parent_chunk[gt_parent_chunk$dims == y, ]
+          gt_alias <- basename(gt_chunk$alias)
+          gt_channels <- unlist(strsplit(y, ","))
+          # GATES
+          gates <- lapply(
+            gt_alias, 
+            function(w) {
+              gh_pop_get_gate(
+                x,
+                cyto_nodes_convert(
+                  x,
+                  nodes = w,
+                  anchor = gt_parent,
+                  path = "auto"
+                )
+              )
+            }
+          )
+          names(gates) <- gt_alias
+          # GATES BELONG TO QUADGATE
+          if(length(gates) == 4 &
+             all(LAPPLY(gates, "class") == "rectangleGate")){
+            # RECTANGLES BELONG TO QUADGATE
+            if(all(LAPPLY(gates, function(v){
+              any(grepl("quad", names(attributes(v))))
+            }))){
+              gates <- list(
+                .cyto_gate_quad_convert(
+                  gates,
+                  channels = gt_channels
+                )
+              )
+              names(gates) <- paste0(gt_alias, collapse = ",")
+            }
+          }
+          # GATINGTEMPLATE CHUNK DATA TABLE 
+          gt_chunk_dt <- as.data.table(gt_chunk)
+          gt_entries <- lapply(
+            seq_along(gates), 
+            function(q) {
+              # GATE
+              gate <- gates[[q]]
+              # QUAD GATE
+              if(cyto_class(gate, "quadGate")){
+                # USE FIRST ROW ONLY
+                gt_entry <- gt_chunk_dt[1, ]
+                # ALIAS - "/|&:" ILLEGAL CHARCTERS
+                gt_entry[, alias := basename(
+                  cyto_nodes_convert(
+                    x,
+                    nodes = unlist(
+                      strsplit(names(gates), ",")
+                    ),
+                    anchor = gt_parent,
+                    path = "auto"
+                  )
+                  
+                )]
+                # POP
+                gt_entry[, pop := "*"]
+                # PARENT
+                gt_entry[, parent := cyto_nodes_convert(
+                  x,
+                  nodes = gt_parent,
+                  path = "auto"
+                  
+                )]
+                # GATING METHOD
+                gt_entry[, gating_method := "cyto_gate_draw"]
+                # GATING ARGS
+                gt_entry[, gating_args := CytoExploreR_.argDeparser(
+                  list(gate = gates,
+                       openCyto.minEvents  = -1)
+                )]
+                # COLLAPSE DATA FOR GATING
+                gt_entry[, collapseDataForGating := TRUE]
+                # GROUP BY
+                gt_entry[, groupBy := "NA"]
+                # PREPROCESSING METHOD
+                gt_entry[, preprocessing_method := "pp_cyto_gate_draw"]
+                # OTHER GATE TYPES
+              }else{
+                # GATINGTEMPLATE ENTRY
+                gt_entry <- gt_chunk_dt[gt_chunk_dt$alias == names(gates)[q], ]
+                # ALIAS - "/|&:" ILLEGAL CHARCTERS
+                gt_entry[, alias := basename(
+                  cyto_nodes_convert(
+                    x,
+                    nodes = names(gates)[q],
+                    anchor = gt_parent,
+                    path = "auto"
+                  )
+                  
+                )]
+                # PARENT
+                gt_entry[, parent := cyto_nodes_convert(
+                  x,
+                  nodes = gt_parent,
+                  path = "auto"
+                  
+                )]
+                # GATING METHOD
+                gt_entry[, gating_method := "cyto_gate_draw"]
+                # GATING ARGS
+                gt_entry[, gating_args := CytoExploreR_.argDeparser(
+                  list(gate = list(filters(list(gate))),
+                       openCyto.minEvents  = -1)
+                )]
+                # COLLAPSE DATA FOR GATING
+                gt_entry[, collapseDataForGating := TRUE]
+                # GROUP BY
+                gt_entry[, groupBy := "NA"]
+                # PREPROCESSING METHOD
+                gt_entry[, preprocessing_method := "pp_cyto_gate_draw"]
+              }
+              return(gt_entry)
+            }
+          )
+          gt_entries <- do.call("rbind", gt_entries)
+          return(gt_entries)
         }
-      }
-      # GATINGTEMPLATE CHUNK DATA TABLE 
-      gt_chunk_dt <- as.data.table(gt_chunk)
-      gt_entries <- lapply(seq_along(gates), function(q){
-        # GATE
-        gate <- gates[[q]]
-        # QUAD GATE
-        if(cyto_class(gate, "quadGate")){
-          # USE FIRST ROW ONLY
-          gt_entry <- gt_chunk_dt[1, ]
-          # ALIAS
-          gt_entry[, alias := cyto_nodes_convert(x,
-                                                 nodes = unlist(
-                                                   strsplit(names(gates), ",")
-                                                 ),
-                                                 anchor = gt_parent,
-                                                 path = "auto")]
-          # POP
-          gt_entry[, pop := "*"]
-          # PARENT
-          gt_entry[, parent := cyto_nodes_convert(x,
-                                                  nodes = gt_parent,
-                                                  path = "auto")]
-          # GATING METHOD
-          gt_entry[, gating_method := "cyto_gate_draw"]
-          # GATING ARGS
-          gt_entry[, gating_args := CytoExploreR_.argDeparser(
-            list(gate = gates,
-                 openCyto.minEvents  = -1)
-          )]
-          # COLLAPSE DATA FOR GATING
-          gt_entry[, collapseDataForGating := TRUE]
-          # GROUP BY
-          gt_entry[, groupBy := "NA"]
-          # PREPROCESSING METHOD
-          gt_entry[, preprocessing_method := "pp_cyto_gate_draw"]
-          # OTHER GATE
-        }else{
-          # GATINGTEMPLATE ENTRY
-          gt_entry <- gt_chunk_dt[gt_chunk_dt$alias == names(gates)[q], ]
-          # ALIAS
-          gt_entry[, alias := cyto_nodes_convert(x,
-                                                 nodes = names(gates)[q],
-                                                 anchor = gt_parent,
-                                                 path = "auto")]
-          # PARENT
-          gt_entry[, parent := cyto_nodes_convert(x,
-                                                  nodes = gt_parent,
-                                                  path = "auto")]
-          # GATING METHOD
-          gt_entry[, gating_method := "cyto_gate_draw"]
-          # GATING ARGS
-          gt_entry[, gating_args := CytoExploreR_.argDeparser(
-            list(gate = list(filters(list(gate))),
-                 openCyto.minEvents  = -1)
-          )]
-          # COLLAPSE DATA FOR GATING
-          gt_entry[, collapseDataForGating := TRUE]
-          # GROUP BY
-          gt_entry[, groupBy := "NA"]
-          # PREPROCESSING METHOD
-          gt_entry[, preprocessing_method := "pp_cyto_gate_draw"]
-        }
-        return(gt_entry)
-      })
+      )
       gt_entries <- do.call("rbind", gt_entries)
       return(gt_entries)
-    })
-    gt_entries <- do.call("rbind", gt_entries)
-    return(gt_entries)
-  })
+    }
+  )
   gt_entries <- do.call("rbind", gt_entries)
   
   # SORT GATINGTEMPLATE ENTRIES
@@ -364,23 +420,42 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
     order(match(gt_entries$parent, cyto_nodes(x, path = "auto"))), ]
   
   # ADD BOOLEAN ENTRIES
+  # TODO: USE AUTO PATHS IN GATING_ARGS LOGIC
   if(!is.null(gt_bool_chunk)){
-    lapply(seq_len(nrow(gt_bool_chunk)), function(z){
-      gate_pops <- gt_bool_chunk$gating_args[z]
-      gate_pops <- unlist(strsplit(gate_pops, "\\||\\&|\\!"))
-      gate_pops <- gate_pops[!LAPPLY(gate_pops, ".empty")]
-      ind <- LAPPLY(gate_pops, function(pop){match(pop, gt_entries$alias)})
-      ind <- max(ind)
-      gt_entries <<- rbind(gt_entries[1:ind, ],
-                           gt_bool_chunk[z, ],
-                           gt_entries[ind+1:nrow(gt_entries), , drop = TRUE])
-    })
+    lapply(
+      seq_len(nrow(gt_bool_chunk)),
+      function(z){
+        gate_pops <- gt_bool_chunk$gating_args[z]
+        gate_pops <- unlist(strsplit(gate_pops, "\\||\\&|\\!"))
+        gate_pops <- gate_pops[!LAPPLY(gate_pops, ".empty")]
+        ind <- LAPPLY(
+          gate_pops, 
+          function(pop) {
+            # FIX BOOLEAN LOGIC
+            match(
+              basename(pop),
+              gt_entries$alias
+            )
+          }
+        )
+        ind <- max(ind)
+        gt_entries <<- rbind(
+          gt_entries[1:ind, ],
+          gt_bool_chunk[z, ],
+          gt_entries[ind+1:nrow(gt_entries), , drop = TRUE]
+        )
+      }
+    )
   }
   
   # REMOVE EMPTY ROWS
-  gt_entries <- gt_entries[LAPPLY(seq_len(nrow(gt_entries)), function(z){
-    !.all_na(gt_entries[z, ])
-  }), ]
+  gt_entries <- gt_entries[
+    LAPPLY( 
+      seq_len(nrow(gt_entries)),
+      function(z) {
+        !.all_na(gt_entries[z, ])
+      }
+    ), ]
   
   # SAVE GATINGTEMPLATE
   write_to_csv(
@@ -413,6 +488,8 @@ cyto_gatingTemplate_generate.GatingSet <- function(x,
   return(gt)
   
 }
+
+
 
 ## GATINGTEMPLATE ACTIVE -------------------------------------------------------
 

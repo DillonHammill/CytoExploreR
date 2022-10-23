@@ -11,6 +11,7 @@ cyto_nodes(
   hidden = FALSE,
   select = NULL,
   exclude = NULL,
+  bool = NULL,
   ignore.case = TRUE,
   ...
 )
@@ -39,6 +40,9 @@ NULL by default to select all nodes.}
 \item{exclude}{either a vector indices or character strings for partial
 matching to the \code{path} nodes to prevent extraction of certain nodes,
 set to NULL by default to include all nodes.}
+
+\item{bool}{can be either TRUE to only return boolean nodes, FALSE to exclude
+boolean nodes or NULL to include boolean nodes with other nodes.}
 
 \item{ignore.case}{logical indicating whether case should be ignored when
 selecting nodes using the \code{select} or \code{exclude} arguments, set to
