@@ -7226,13 +7226,21 @@ cyto_nodes_fix <- function(x) {
           path = "full"
         )[z],
         "value" = gsub(
-          "[\\|\\&|\\:|\\,]",
-          "",
-          basename(
-            cyto_nodes(
-              x,
-              path = "auto"
-            )[z]
+          "\\|",
+          "or",
+          gsub(
+            "\\&",
+            "and",
+            gsub(
+              "[\\:|\\,]",
+              "",
+              basename(
+                cyto_nodes(
+                  x,
+                  path = "auto"
+                )[z]
+              )
+            )
           )
         )
       )
@@ -7296,9 +7304,17 @@ cyto_nodes_fix <- function(x) {
         seq_along(pops_new),
         function(w) {
           pops_new[w] <<- gsub(
-            "[\\|\\&|\\:|\\,]",
-            "",
-            pops_new[w]
+            "\\|",
+            "or",
+            gsub(
+              "\\&",
+              "and",
+              gsub(
+                "[\\:|\\,]",
+                "",
+                pops_new[w]
+              )
+            )
           )
         }
       )
