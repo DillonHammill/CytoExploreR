@@ -3364,7 +3364,7 @@
     # KEY X CO-ORDINATES
     key_x <- c(
       usr[2] + 0.005 * diff(usr[1:2]),
-      usr[2] + 0.005 + 0.03 * key_size[1] * diff(usr[1:2])
+      usr[2] + 0.005 * diff(usr[1:2]) + 0.03 * key_size[1] * diff(usr[1:2])
     )
     # KEY TITLE SPACE
     if(key_size[2] != 1) {
