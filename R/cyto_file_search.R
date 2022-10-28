@@ -17,7 +17,7 @@
 #' @param dir location where the search should be performed.
 #' @param rownames minimal requirement for row names in the file.
 #' @param colnames minimal requirement for column names in the file.
-#' @param ignore.cse logical passed to \code{grepl()} to indicate whether to
+#' @param ignore.case logical passed to \code{grepl()} to indicate whether to
 #'   ignore the case when matching the file name, set to TRUE by default.
 #' @param data.table logical indicating whether the imported data should be
 #'   returned as a \code{data.table} instead of a \code{data.frame}, set to

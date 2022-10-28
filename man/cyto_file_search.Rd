@@ -26,6 +26,9 @@ specified directory.}
 
 \item{rownames}{minimal requirement for row names in the file.}
 
+\item{ignore.case}{logical passed to \code{grepl()} to indicate whether to
+ignore the case when matching the file name, set to TRUE by default.}
+
 \item{data.table}{logical indicating whether the imported data should be
 returned as a \code{data.table} instead of a \code{data.frame}, set to
 FALSE by default.}
@@ -41,9 +44,6 @@ imported data.}
 
 \item{...}{additional named arguments indicating values to find in particular
 columns of the file (e.g. name = c("Activation_1.fcs")).}
-
-\item{ignore.cse}{logical passed to \code{grepl()} to indicate whether to
-ignore the case when matching the file name, set to TRUE by default.}
 }
 \value{
 NULL or a list named with the file name containing a

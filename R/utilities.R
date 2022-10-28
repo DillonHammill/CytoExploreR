@@ -325,8 +325,15 @@ suppressPrint <- function(x) {
                   x,
                   ignore.case = TRUE,
                   fixed = FALSE,
+                  escape = FALSE,
                   ...) {
   
+  # ESCAPE SPECIAL CHARACTERS
+  if(escape) {
+    pattern <- .str_escape(pattern)
+  }
+  
+  # FIXED - CASE INSENSITIVE
   if(fixed & ignore.case) {
     grep(
       tolower(pattern),
@@ -335,6 +342,7 @@ suppressPrint <- function(x) {
       fixed = TRUE,
       ...
     )
+  # NOT FIXED - CASE SENSITIVE | INSENSITIVE
   } else {
     grep(
       pattern,
@@ -355,8 +363,15 @@ suppressPrint <- function(x) {
                    x,
                    ignore.case = TRUE,
                    fixed = FALSE,
+                   escape = FALSE,
                    ...) {
   
+  # ESCAPE SPECIAL CHARACTERS
+  if(escape) {
+    pattern <- .str_escape(pattern)
+  }
+  
+  # FIXED - CASE SENSITIVE
   if(fixed & ignore.case) {
     grepl(
       tolower(pattern),
@@ -365,6 +380,7 @@ suppressPrint <- function(x) {
       fixed = TRUE,
       ...
     )
+  # NOT FIXED - CASE SENSITIVE | INSENSITIVE
   } else {
     grepl(
       pattern,
@@ -374,5 +390,74 @@ suppressPrint <- function(x) {
       ...
     )
   }
+  
+}
+
+## GSUB ------------------------------------------------------------------------
+
+#' Wrapper around gsub() to allow fixed case insensitive search
+#' @noRd
+.gsub <- function(pattern,
+                  replacement,
+                  x,
+                  ignore.case = TRUE,
+                  fixed = FALSE,
+                  escape = FALSE,
+                  ...) {
+  
+  # ESCAPE SPECIAL CHARACTERS
+  if(escape) {
+    pattern <- .str_escape(pattern)
+  }
+  
+  # FIXED - CASE SENSITIVE
+  if(fixed & ignore.case) {
+    gsub(
+      tolower(pattern),
+      replacement,
+      tolower(x),
+      ignore.case = FALSE,
+      fixed = TRUE,
+      ...
+    )
+  # NOT FIXED - CASE SENSITIVE | INSENSITIVE
+  } else {
+    grepl(
+      pattern,
+      replacement,
+      x,
+      ignore.case = ignore.case,
+      fixed = fixed,
+      ...
+    )
+  }
+  
+}
+
+## ESCAPE ----------------------------------------------------------------------
+
+#' Escape special characters in strings
+#' @noRd
+.str_escape <- function(x) {
+  
+  gsub(
+    "([-.|()\\^{}+$*?]|\\[|\\])", 
+    "\\\\\\1",
+    x
+  )
+  
+}
+
+## MATCH -----------------------------------------------------------------------
+
+#' Return all matches
+#' @noRd
+.match <- function(x,
+                   table) {
+  
+  # RETURN INTEGER(0) NO MATCH
+  which(
+    table %in% x
+  )
   
 }

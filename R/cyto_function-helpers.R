@@ -53,9 +53,11 @@ cyto_func_match <- function(FUN,
   if(is.character(FUN)) {
     if(grepl(":{2,3}", FUN)) {
       FUN <- unlist(strsplit(FUN, ":{2,3}"))
-      FUN <- get(FUN[2],
-                 envir = asNamespace(FUN[1]),
-                 mode = "function")
+      FUN <- get(
+        FUN[2],
+        envir = asNamespace(FUN[1]),
+        mode = "function"
+      )
     }
   }
   match.fun(FUN, descend = descend)
@@ -69,23 +71,48 @@ cyto_func_match <- function(FUN,
 #'   functions are also supported (i.e. "CytoExploreR::cyto_plot").
 #' @param drop a vector of arguments to be removed from the returned vector of
 #'   argument names.
+#' @param logical indicating whether a named list of default arguments should be
+#'   returned instead of a vector of argument names, set to FALSE by default.
 #'
-#' @return vector of argument names for \code{FUN} with \code{drop} arguments
-#'   removed.
+#' @return vector of argument names or a named list of argument defaults for
+#'   \code{FUN} with \code{drop} arguments removed.
+#'
+#' @importFrom methods formalArgs
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
-#' @examples 
+#' @examples
 #' cyto_fun_args("cyto_plot")
 #'
 #' @export
 cyto_func_args <- function(FUN, 
-                           drop = NA) {
-  # FORMAL ARGUMENTS
-  args <- formalArgs(cyto_func_match(FUN))
-  if(!.all_na(drop)) {
-    args <- args[!args %in% drop]
+                           drop = NA,
+                           defaults = FALSE) {
+  
+  # ARGUMENT NAMES + VALUES
+  if(defaults) {
+    args <- formals(
+      cyto_func_match(
+        FUN
+      )
+    )
+    if(!.all_na(drop)) {
+      args <- args[
+        !names(args) %in% drop
+      ]
+    }
+  # ARGUMENT NAMES
+  } else {
+    args <- formalArgs(
+      cyto_func_match(
+        FUN
+      )
+    )
+    if(!.all_na(drop)) {
+      args <- args[!args %in% drop]
+    }
   }
+
   return(args)
 }
 

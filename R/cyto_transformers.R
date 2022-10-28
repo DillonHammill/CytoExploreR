@@ -567,9 +567,15 @@ cyto_transformers_extract <- function(x){
   
   # GATINGHIERARCHY
   if(cyto_class(x, "GatingHierarchy", TRUE)){
-    transformers <- gh_get_transformations(
-      x, 
-      only.function = FALSE
+    transformers <- tryCatch(
+      gh_get_transformations(
+        x, 
+        only.function = FALSE
+      ),
+      error = function(e) {
+        warning(e$message)
+        return(NULL)
+      }
     )
     if(length(transformers) != 0){
       transformers <- cyto_transformers_combine(transformers)
@@ -704,21 +710,27 @@ cyto_transformers_parse <- function(trans) {
       trans_chans <- channels[channels %in% names(axes_trans)]
       linear_chans <- channels[!channels %in% names(axes_trans)]
       # Get remaining transformers
-      trans <- cyto_transformers_define(x,
-                                     channels = linear_chans,
-                                     type = "biex",
-                                     plot = FALSE)
+      trans <- cyto_transformers_define(
+        x,
+        channels = linear_chans,
+        type = "biex",
+        plot = FALSE
+      )
       # Combine transformers
-      axes_trans <- cyto_transformers_combine(axes_trans[trans_chans], 
-                                              trans)
+      axes_trans <- cyto_transformers_combine(
+        axes_trans[trans_chans], 
+        trans
+      )
     }
     # No transformations supplied
   }else{
     # Get biex transformers
-    axes_trans <- cyto_transformers_define(x, 
-                                        channels = channels, 
-                                        type = "biex",
-                                        plot = FALSE)
+    axes_trans <- cyto_transformers_define(
+      x, 
+      channels = channels, 
+      type = "biex",
+      plot = FALSE
+    )
     
   }
   
@@ -751,21 +763,27 @@ cyto_transformers_parse <- function(trans) {
       trans_chans <- channels[channels %in% names(axes_trans)]
       linear_chans <- channels[!channels %in% names(axes_trans)]
       # Get remaining transformers
-      trans <- cyto_transformers_define(x,
-                                     channels = linear_chans,
-                                     type = "biex",
-                                     plot = FALSE)
+      trans <- cyto_transformers_define(
+        x,
+        channels = linear_chans,
+        type = "biex",
+        plot = FALSE
+      )
       # Combine transformers
-      axes_trans <- cyto_transformers_combine(axes_trans[trans_chans], 
-                                              trans)
+      axes_trans <- cyto_transformers_combine(
+        axes_trans[trans_chans], 
+        trans
+      )
     }
     # No transformations supplied
   }else{
     # Get biex transformers
-    axes_trans <- cyto_transformers_define(x, 
-                                        channels = channels,
-                                        type = "biex",
-                                        plot = FALSE)
+    axes_trans <- cyto_transformers_define(
+      x, 
+      channels = channels,
+      type = "biex",
+      plot = FALSE
+    )
   }
   
   # Return complete transformerList
@@ -797,10 +815,12 @@ cyto_transformers_parse <- function(trans) {
     # No transformations supplied
     if(.all_na(axes_trans)){
       # Get biex transformers for all channels
-      axes_trans <- cyto_transformers_define(x, 
-                                          channels = channels, 
-                                          type = "biex",
-                                          plot = FALSE)
+      axes_trans <- cyto_transformers_define(
+        x, 
+        channels = channels, 
+        type = "biex",
+        plot = FALSE
+      )
       # Transformations supplied
     }else if(!.all_na(axes_trans)){
       # All channels covered
@@ -812,20 +832,26 @@ cyto_transformers_parse <- function(trans) {
         trans_chans <- channels[channels %in% names(axes_trans)]
         linear_chans <- channels[!channels %in% names(axes_trans)]
         # Get biex transformers for missing channels
-        trans <- cyto_transformers_define(x,
-                                       channels = linear_chans,
-                                       type = "biex",
-                                       plot = FALSE)
+        trans <- cyto_transformers_define(
+          x,
+          channels = linear_chans,
+          type = "biex",
+          plot = FALSE
+        )
         # Combine transformers into transformerList
-        axes_trans <- cyto_transformers_combine(axes_trans[trans_chans],
-                                               trans)
+        axes_trans <- cyto_transformers_combine(
+          axes_trans[trans_chans],
+          trans
+        )
         # No channels covered
       }else if(!any(channels %in% names(axes_trans))){
         # Get biex transformers for all channels
-        axes_trans <- cyto_transformers_define(x,
-                                            channels = channels,
-                                            type = "biex",
-                                            plot = FALSE)
+        axes_trans <- cyto_transformers_define(
+          x,
+          channels = channels,
+          type = "biex",
+          plot = FALSE
+        )
       }
     }
     
@@ -843,39 +869,49 @@ cyto_transformers_parse <- function(trans) {
       # No transformations supplied
       if(.all_na(axes_trans)){
         # Get biex transformers for missing channels
-        trans <- cyto_transformers_define(x,
-                                       channels = linear_chans,
-                                       type = "biex",
-                                       plot = FALSE)
+        trans <- cyto_transformers_define(
+          x,
+          channels = linear_chans,
+          type = "biex",
+          plot = FALSE
+        )
         # Combine transformers into transformerList
         axes_trans <- cyto_transformers_combine(gh_trans[gh_trans_chans], trans)
         # Some transformations supplied
       }else if(!.all_na(axes_trans)){
         # All missing transformations covered
         if(all(linear_chans %in% names(axes_trans))){
-          axes_trans <- cyto_transformers_combine(gh_trans[gh_trans_chans],
-                                                 axes_trans[linear_chans])
+          axes_trans <- cyto_transformers_combine(
+            gh_trans[gh_trans_chans],
+            axes_trans[linear_chans]
+          )
           # Some missing transformations covered
         }else if(any(linear_chans %in% names(axes_trans))){
           # Channels not covered
           trans_chans <- linear_chans[linear_chans%in% names(axes_trans)]
           extra_chans <- linear_chans[!linear_chans%in% names(axes_trans)]
           # Get biex transformers for missing channels
-          trans <- cyto_transformers_define(x,
-                                         channels = extra_chans,
-                                         type = "biex",
-                                         plot = FALSE)
+          trans <- cyto_transformers_define(
+            x,
+            channels = extra_chans,
+            type = "biex",
+            plot = FALSE
+          )
           # Combine transformers into transformerList
-          axes_trans <- cyto_transformers_combine(gh_trans[gh_trans_chans],
-                                                 axes_trans[trans_chans],
-                                                 trans)
+          axes_trans <- cyto_transformers_combine(
+            gh_trans[gh_trans_chans],
+            axes_trans[trans_chans],
+            trans
+          )
           # No missing transformations covered
         }else if(!any(linear_chans %in% names(axes_trans))){
           # Get biex transformers for all channels
-          axes_trans <- cyto_transformers_define(x,
-                                              channels = linear_chans,
-                                              type = "biex",
-                                              plot = FALSE)
+          axes_trans <- cyto_transformers_define(
+            x,
+            channels = linear_chans,
+            type = "biex",
+            plot = FALSE
+          )
         }
       }
       # Applied transformations are not in fluorescent channels
@@ -883,35 +919,45 @@ cyto_transformers_parse <- function(trans) {
       # No transformations supplied
       if(.all_na(axes_trans)){
         # Get biex transformers for all channels
-        axes_trans <- cyto_transformers_define(x,
-                                            channels = channels,
-                                            type = "biex",
-                                            plot = FALSE)
+        axes_trans <- cyto_transformers_define(
+          x,
+          channels = channels,
+          type = "biex",
+          plot = FALSE
+        )
         # Some transformations supplied
       }else if(!.all_na(axes_trans)){
         # All channels covered by axes_trans
         if(all(channels %in% names(axes_trans))){
-          axes_trans <- cyto_transformers_combine(axes_trans[channels])
+          axes_trans <- cyto_transformers_combine(
+            axes_trans[channels]
+          )
           # Some channels are covered by axes_trans
         }else if(any(channels %in% names(axes_trans))){
           # Channels not covered
           trans_chans <- channels[channels %in% names(axes_trans)]
           linear_chans <- channels[!channels %in% names(axes_trans)]
           # Get biex transformers for missing channels
-          trans <- cyto_transformers_define(x,
-                                         channels = linear_chans,
-                                         type = "biex",
-                                         plot = FALSE)
+          trans <- cyto_transformers_define(
+            x,
+            channels = linear_chans,
+            type = "biex",
+            plot = FALSE
+          )
           # Combine transformers into transformerList
-          axes_trans <- cyto_transformers_combine(axes_trans[trans_chans],
-                                                 trans)
+          axes_trans <- cyto_transformers_combine(
+            axes_trans[trans_chans],
+            trans
+          )
           # No channels covered by axes_trans
         } else if(!any(channels %in% names(axes_trans))){
           # Get biex transformers for all channels
-          axes_trans <- cyto_transformers_define(x,
-                                              channels = channels,
-                                              type = "biex",
-                                              plot = FALSE)
+          axes_trans <- cyto_transformers_define(
+            x,
+            channels = channels,
+            type = "biex",
+            plot = FALSE
+          )
         }
       }
     }

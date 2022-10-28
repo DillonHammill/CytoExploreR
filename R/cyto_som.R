@@ -646,7 +646,7 @@ cyto_som <- function(x,
         channels = map,
         events = 1,
         point_shape = 16,
-        point_size = 1.5,
+        point_size = 1,
         point_col = "black"
       )
     # SEPARATE EMBEDDINGS
