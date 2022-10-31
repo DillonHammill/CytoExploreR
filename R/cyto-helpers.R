@@ -8103,7 +8103,7 @@ cyto_nodes_kin <- function(x,
           pops <- paths[dirname(paths) %in% node]
         # DESCENDANTS
         } else if(.grepl("^d", type)) {
-          pops <- paths[.grepl(paste0("^", node), paths)]
+          pops <- paths[.grepl(paste0("^", node, "$"), paths)]
           pops <- pops[!pops %in% node]
         # PARENT
         } else if(.grepl("^p", type)) {
