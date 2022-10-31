@@ -8083,15 +8083,15 @@ cyto_nodes_kin <- function(x,
         "'hidden' will be ignored for gatingTemplates."
       )
     }
+    # FULL PATHS TO NODES IN GATINGTEMPLATE
+    paths <- cyto_nodes(
+      x,
+      path = "full"
+    )
     # RELATIVE NODES
     res <- LAPPLY(
       nodes,
       function(node) {
-        # FULL PATHS TO NODES IN GATINGTEMPLATE
-        paths <- cyto_nodes(
-          x,
-          path = "full"
-        )
         # CONVERT NODE TO FULL PATH
         node <- cyto_nodes_convert(
           x,
@@ -8103,7 +8103,12 @@ cyto_nodes_kin <- function(x,
           pops <- paths[dirname(paths) %in% node]
         # DESCENDANTS
         } else if(.grepl("^d", type)) {
-          pops <- paths[.grepl(paste0("^", node, "$"), paths)]
+          pops <- paths[
+            .grepl(
+              paste0("^", node, "/"), # REQUIRED TERMINAL / PARTIAL MATCH ISSUE
+              paste0(paths, "/")
+            )
+          ]
           pops <- pops[!pops %in% node]
         # PARENT
         } else if(.grepl("^p", type)) {

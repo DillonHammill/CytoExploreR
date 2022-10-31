@@ -27,7 +27,13 @@
   if(is.null(channels)) {
     channels <- cyto_fluor_channels(x)
     # DEFAULT - ALL AREA PARAMETERS
-    channels <- channels[grepl("-A$", channels, ignore.case = TRUE)]
+    channels <- channels[
+      .grepl(
+        "\\-A$",
+        channels,
+        ignore.case = TRUE
+      )
+    ]
   } else {
     channels <- unique(cyto_channels_extract(x, channels))
   }
