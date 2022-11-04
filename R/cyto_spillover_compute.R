@@ -82,7 +82,8 @@
 #'   accordance with \code{spillover}.
 #'
 #' @importFrom flowWorkspace cytoset
-#' @importFrom openCyto mindensity
+#' @importFrom openCyto mindensity gs_add_gating_method 
+#' @importFrom flowWorkspace gs_pop_remove
 #' @importFrom HeatmapR heat_map
 #'
 #' @examples
@@ -152,6 +153,8 @@ cyto_spillover_compute <- function(x,
 
   # TODO: SAMPLE CHECKS PERFORMED PRIOR TO GROUPING
   # FITC ON BEADS AND CELLS - BOTH KEPT 
+  
+  # TODO: SELECT ARGUMENT AND GATE STORAGE ISSUES - XSUB?
   
   # SPILLOVER ------------------------------------------------------------------
   
