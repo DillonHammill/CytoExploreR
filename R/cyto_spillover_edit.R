@@ -148,7 +148,13 @@ cyto_spillover_edit <- function(x,
   # CHANNELS
   if(is.null(channels)) {
     channels <- cyto_fluor_channels(x)
-    channels <- channels[!grepl("-H$|-W$", channels, ignore.case = TRUE)]
+    channels <- channels[
+      !grepl(
+        "\\-H$|\\-W$",
+        channels,
+        ignore.case = TRUE
+      )
+    ]
   } else {
     channels <- cyto_channels_extract(x, channels)
   }

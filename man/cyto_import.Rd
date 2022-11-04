@@ -9,6 +9,7 @@ cyto_import(
   type = "flowJo",
   markers = TRUE,
   details = TRUE,
+  barcode = TRUE,
   gatingTemplate = NULL,
   ...
 )
@@ -29,6 +30,9 @@ these details will be supplied can also be passed to this argument.}
 \code{cyto_details_edit} to update the experimental details associated with
 the loaded samples, set to TRUE by default. The name of the csv to which
 these details will be supplied can also be passed to this argument.}
+
+\item{barcode}{logical indicating whether events in each sample should be
+barcoded for compatibility with \code{cyto_plot()}, set to TRUE by default.}
 
 \item{gatingTemplate}{passed to \code{cyto_gatingTemplate_generate()} to
 create a CytoExploreR friendly gatingTemplate based on gates applied to the

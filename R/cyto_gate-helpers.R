@@ -1276,7 +1276,7 @@ cyto_gate_bool <- function(x,
 #' )
 #'
 #' # Extract T Cells gate
-#' cyto_gate_extract("Live Cells", "T Cells", gatingTemplate = gtfile)
+#' cyto_gate_extract(gs, "Live Cells", "T Cells", gatingTemplate = gtfile)
 #'
 #' @export
 cyto_gate_extract <- function(x,

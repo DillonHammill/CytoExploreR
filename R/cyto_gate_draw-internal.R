@@ -239,15 +239,20 @@
   gate_point_col <- adjustcolor(gate_point_col, gate_point_col_alpha)
   gate_line_col <- adjustcolor(gate_line_col, gate_line_col_alpha)
   
+  # ARGUMENTS
+  args <- list(...)
+  
   # COORDS - POINT BY POINT - SET 100 POINT LIMIT
   coords <- list()
   for(z in seq_len(100)){
     # SELECT POINT
-    pt <- locator(n = 1,
-                  type = "p",
-                  pch = gate_point_shape,
-                  cex = gate_point_size,
-                  col = gate_point_col)
+    pt <- locator(
+      n = 1,
+      type = "p",
+      pch = gate_point_shape,
+      cex = gate_point_size,
+      col = gate_point_col
+    )
     # POINT SELECTED ADD TO COORDS
     if(!is.null(pt)){
       pt <- do.call("cbind", pt)
@@ -257,22 +262,26 @@
     # JOIN TO PREVIOUS POINT
     if(!is.null(pt) & length(coords) > 1){
       # ADD LINE BETWEEN POINTS
-      lines(x = c(coords[[z-1]][, "x"], coords[[z]][, "x"]),
-            y = c(coords[[z-1]][, "y"], coords[[z]][, "y"]),
-            lty = gate_line_type,
-            lwd = gate_line_width,
-            col = gate_line_col)
-      # CLOSE GATE
+      lines(
+        x = c(coords[[z-1]][, "x"], coords[[z]][, "x"]),
+        y = c(coords[[z-1]][, "y"], coords[[z]][, "y"]),
+        lty = gate_line_type,
+        lwd = gate_line_width,
+        col = gate_line_col
+      )
+    # CLOSE GATE
     }else if(is.null(pt)){
       if(length(coords) < 3){
         stop("A minimum of 3 points is required to construct a polygon gate.")
       }else{
         # JOIN FIRST & LAST POINTS
-        lines(x = c(coords[[1]][, "x"], coords[[z-1]][, "x"]),
-              y = c(coords[[1]][, "y"], coords[[z-1]][, "y"]),
-              lty = gate_line_type,
-              lwd = gate_line_width,
-              col = gate_line_col)
+        lines(
+          x = c(coords[[1]][, "x"], coords[[z-1]][, "x"]),
+          y = c(coords[[1]][, "y"], coords[[z-1]][, "y"]),
+          lty = gate_line_type,
+          lwd = gate_line_width,
+          col = gate_line_col
+        )
         # TERMINATE LOOP
         break()
       }
@@ -326,11 +335,13 @@
   coords <- list()
   for(z in seq_len(2)){
     # SELECT POINT
-    pt <- locator(n = 1,
-                  type = "p",
-                  pch = gate_point_shape,
-                  cex = gate_point_size,
-                  col = gate_point_col)
+    pt <- locator(
+      n = 1,
+      type = "p",
+      pch = gate_point_shape,
+      cex = gate_point_size,
+      col = gate_point_col
+    )
     # POINT SELECTED ADD TO COORDS
     if(!is.null(pt)){
       pt <- do.call("cbind", pt)
@@ -355,11 +366,12 @@
   gate <- rectangleGate(.gate = coords, filterId = alias)
   
   # PLOT GATE
-  cyto_plot_gate(gate,
-                 channels = channels,
-                 gate_line_type = gate_line_type,
-                 gate_line_width = gate_line_width,
-                 gate_line_col = gate_line_col
+  cyto_plot_gate(
+    gate,
+    channels = channels,
+    gate_line_type = gate_line_type,
+    gate_line_width = gate_line_width,
+    gate_line_col = gate_line_col
   )
   
   # RETURN GATE OBJECT
@@ -423,11 +435,13 @@
   coords <- list()
   for(z in seq_len(2)){
     # SELECT POINT
-    pt <- locator(n = 1,
-                  type = "p",
-                  pch = gate_point_shape,
-                  cex = gate_point_size,
-                  col = gate_point_col)
+    pt <- locator(
+      n = 1,
+      type = "p",
+      pch = gate_point_shape,
+      cex = gate_point_size,
+      col = gate_point_col
+    )
     # POINT SELECTED ADD TO COORDS
     if(!is.null(pt)){
       pt <- do.call("cbind", pt)
@@ -436,46 +450,58 @@
     coords[[z]] <- pt
     # ADD LINES - X COORS + PAR_YMIN & PAR_YMAX
     if(length(channels) == 1 | axis == "x"){
-      lines(x = c(coords[[z]][, "x"], coords[[z]][, "x"]),
-            y = c(par_ymin, par_ymax),
-            lty = gate_line_type,
-            lwd = gate_line_width,
-            col = gate_line_col)
+      lines(
+        x = c(coords[[z]][, "x"], coords[[z]][, "x"]),
+        y = c(par_ymin, par_ymax),
+        lty = gate_line_type,
+        lwd = gate_line_width,
+        col = gate_line_col
+      )
     }else{
-      lines(x = c(par_xmin, par_xmax),
-            y = c(coords[[z]][, "y"], coords[[z]][, "y"]),
-            lty = gate_line_type,
-            lwd = gate_line_width,
-            col = gate_line_col)
+      lines(
+        x = c(par_xmin, par_xmax),
+        y = c(coords[[z]][, "y"], coords[[z]][, "y"]),
+        lty = gate_line_type,
+        lwd = gate_line_width,
+        col = gate_line_col
+      )
     }
     # CLOSE GATE
     if(z == 2){
       if(length(channels) == 1 | axis == "x"){
         # BOTTOM LINE
-        lines(x = c(coords[[z-1]][, "x"], coords[[z]][, "x"]),
-              y = c(par_ymin, par_ymin),
-              lty = gate_line_type,
-              lwd = gate_line_width,
-              col = gate_line_col)
+        lines(
+          x = c(coords[[z-1]][, "x"], coords[[z]][, "x"]),
+          y = c(par_ymin, par_ymin),
+          lty = gate_line_type,
+          lwd = gate_line_width,
+          col = gate_line_col
+        )
         # TOP LINE
-        lines(x = c(coords[[z-1]][, "x"], coords[[z]][, "x"]),
-              y = c(par_ymax, par_ymax),
-              lty = gate_line_type,
-              lwd = gate_line_width,
-              col = gate_line_col)
+        lines(
+          x = c(coords[[z-1]][, "x"], coords[[z]][, "x"]),
+          y = c(par_ymax, par_ymax),
+          lty = gate_line_type,
+          lwd = gate_line_width,
+          col = gate_line_col
+        )
       }else{
         # LOWER LINE
-        lines(x = c(par_xmin, par_xmin),
-              y = c(coords[[z-1]][, "y"], coords[[z]][, "y"]),
-              lty = gate_line_type,
-              lwd = gate_line_width,
-              col = gate_line_col)
+        lines(
+          x = c(par_xmin, par_xmin),
+          y = c(coords[[z-1]][, "y"], coords[[z]][, "y"]),
+          lty = gate_line_type,
+          lwd = gate_line_width,
+          col = gate_line_col
+        )
         # UPPER LINE
-        lines(x = c(par_xmax, par_xmax),
-              y = c(coords[[z-1]][, "y"], coords[[z]][, "y"]),
-              lty = gate_line_type,
-              lwd = gate_line_width,
-              col = gate_line_col)
+        lines(
+          x = c(par_xmax, par_xmax),
+          y = c(coords[[z-1]][, "y"], coords[[z]][, "y"]),
+          lty = gate_line_type,
+          lwd = gate_line_width,
+          col = gate_line_col
+        )
       }
     }
   }
@@ -691,11 +717,13 @@
   coords <- list()
   for(z in seq_len(4)){
     # SELECT POINT
-    pt <- locator(n = 1,
-                  type = "p",
-                  pch = gate_point_shape,
-                  cex = gate_point_size,
-                  col = gate_point_col)
+    pt <- locator(
+      n = 1,
+      type = "p",
+      pch = gate_point_shape,
+      cex = gate_point_size,
+      col = gate_point_col
+    )
     # POINT SELECTED ADD TO COORDS
     if(!is.null(pt)){
       pt <- do.call("cbind", pt)
@@ -939,11 +967,13 @@
                    filterId = paste(alias, collapse = "|"))
   
   # PLOT GATE
-  cyto_plot_gate(gate, 
-                 channels = channels,
-                 gate_line_type = gate_line_type,
-                 gate_line_width = gate_line_width,
-                 gate_line_col = gate_line_col)
+  cyto_plot_gate(
+    gate, 
+    channels = channels,
+    gate_line_type = gate_line_type,
+    gate_line_width = gate_line_width,
+    gate_line_col = gate_line_col
+  )
   
   # RETURN GATE OBJECT
   return(gate)
@@ -1525,11 +1555,13 @@
     gate <- polygonGate(.gate = coords, filterId = alias[x])
     
     # PLOT GATE
-    cyto_plot_gate(gate, 
-                   channels = channels,
-                   gate_line_type = gate_line_type,
-                   gate_line_width = gate_line_width,
-                   gate_line_col = gate_line_col)
+    cyto_plot_gate(
+      gate, 
+      channels = channels,
+      gate_line_type = gate_line_type,
+      gate_line_width = gate_line_width,
+      gate_line_col = gate_line_col
+    )
   })
   names(gates) <- alias
   

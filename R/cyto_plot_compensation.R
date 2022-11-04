@@ -148,7 +148,13 @@ cyto_plot_compensation <- function(x,
   # CHANNELS
   if(is.null(channels)) {
     channels <- cyto_fluor_channels(x)
-    channels <- channels[!grepl("-H$|-W$", channels, ignore.case = TRUE)]
+    channels <- channels[
+      !grepl(
+        "\\-H$|\\-W$",
+        channels,
+        ignore.case = TRUE
+      )
+    ]
   } else {
     channels <- cyto_channels_extract(x, channels)
   }
@@ -316,7 +322,11 @@ cyto_plot_compensation <- function(x,
   
   # EXPERIMENT DETAILS WITHOUT UNSTAINED
   pd_comp <- pd[
-    !grepl("Unstained", pd$channel, ignore.case = TRUE), , drop = FALSE
+    !grepl(
+      "Unstained",
+      pd$channel,
+      ignore.case = TRUE
+    ), , drop = FALSE
   ]
   
   # PREPARE GRAPHICS DEVICE ----------------------------------------------------

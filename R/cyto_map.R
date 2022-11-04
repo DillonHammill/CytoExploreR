@@ -29,13 +29,14 @@
 #'   compute t-SNE co-ordinates} \item{"FIt-SNE"}{ uses
 #'   \url{https://github.com/KlugerLab/FIt-SNE} to compute FIt-SNE co-ordinates
 #'   (some additional configuration required)}\item{"UMAP"}{ uses python
-#'   umap-learn or R uwot::umap() to compute UMAP
-#'   co-ordinates}\item{"EmbedSOM"}{ uses EmbedSOM::SOM() and
-#'   EmbedSOM::EmbedSOM() to compute EmbedSOM co-ordinates}\item{"PHATE"}{ uses
-#'   python phate to compute trajectory embedding
-#'   co-ordinates}\item{"PaCMAP"}{ uses python pacmap to compute pairwise
-#'   controlled manifold approximation co-ordinates}\item{"TriMap"}{ uses python
-#'   trimap.TRIMAP() to compute triplet constrained
+#'   umap-learn or R uwot::umap() to compute UMAP co-ordinates}\item{"UMATO"}{
+#'   uses UMATO python library to compute dimension-reduced co-ordinates using
+#'   hub points and nearest neighbour graphs}\item{"EmbedSOM"}{ uses
+#'   EmbedSOM::SOM() and EmbedSOM::EmbedSOM() to compute EmbedSOM
+#'   co-ordinates}\item{"PHATE"}{ uses python phate to compute trajectory
+#'   embedding co-ordinates}\item{"PaCMAP"}{ uses python pacmap to compute
+#'   pairwise controlled manifold approximation co-ordinates}\item{"TriMap"}{
+#'   uses python trimap.TRIMAP() to compute triplet constrained
 #'   co-ordinates}\item{"IsoMap"}{ uses python sklearn.manifold.Isomap() to
 #'   compute non-linear isomapping co-ordinates}\item{"MDS"}{ uses python
 #'   sklearn.manifold.MDS() or \code{stats::cmdscale()} to compute
@@ -571,6 +572,9 @@ cyto_map <- function(x,
     # UMAP 
     } else if(grepl("^UMAP$", type, ignore.case = TRUE)) {
       type <- ".cyto_map_umap"
+    # UMATO 
+    } else if(grepl("^UMATO$", type, ignore.case = TRUE)) {
+      type <- ".cyto_map_umato"
     # EMBEDSOM
     } else if(grepl("^Embed-?SOM$", type , ignore.case = TRUE)) {
       type <- ".cyto_map_embedsom"

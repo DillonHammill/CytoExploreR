@@ -50,9 +50,9 @@ cyto_gate_draw(
 a \code{GatingSet} object is supplied.}
 
 \item{alias}{the name(s) of the populations to be gated. If multiple
-population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple gates will
-be returned. \code{alias} is \code{NULL} by default which will halt the
-gating routine.}
+population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple gates
+will be returned. \code{alias} is \code{NULL} by default which will halt
+the gating routine.}
 
 \item{channels}{vector of channel names to use for plotting, can be of length
 1 for 1-D density histogram or length 2 for 2-D scatter plot.}
@@ -74,10 +74,10 @@ saved, set to \code{cyto_gatingTemplate_active()} by default.}
 containing populations to be overlaid onto the plot(s).}
 
 \item{merge_by}{vector of \code{\link{cyto_details}} column names (e.g.
-c("Treatment","Concentration")) indicating how the samples should be grouped
-prior to gating, set to "all" by default to apply the same gate(s) to all
-samples. If merge_by is supplied a different gate will be constructed for
-each merged group.}
+c("Treatment","Concentration")) indicating how the samples should be
+grouped prior to gating, set to "all" by default to apply the same gate(s)
+to all samples. If merge_by is supplied a different gate will be
+constructed for each merged group.}
 
 \item{group_by}{same as \code{merge_by} included for backwards compatibility
 with older versions of CytoExploreR, \code{group_by} was renamed to
@@ -90,10 +90,10 @@ determining the best location to set the drawn gate(s). Filtering steps
 should be comma separated and wrapped in a list. Refer to
 \code{\link{cyto_select}}.}
 
-\item{negate}{logical indicating whether a gatingTemplate entry should be made
-for the negated population (i.e. all events outside the constructed gates),
-set to FALSE by default. If negate is set to TRUE, a name for the negated
-population MUST be supplied at the end of the alias argument.}
+\item{negate}{logical indicating whether a gatingTemplate entry should be
+made for the negated population (i.e. all events outside the constructed
+gates), set to FALSE by default. If negate is set to TRUE, a name for the
+negated population MUST be supplied at the end of the alias argument.}
 
 \item{events}{fraction or number of events to display in the plot during the
 gating process, set to 50000 events by default.}
@@ -114,9 +114,9 @@ to \code{NA}.}
 
 \item{axes_trans}{object of class
 \code{\link[flowWorkspace:transformerList]{transformerList}} which was used
-to transform the channels of the supplied data. \code{cyto_plot} does
-not support in-line transformations and as such the transformations should
-be applied to the data prior to plotting. The transformerList is used
+to transform the channels of the supplied data. \code{cyto_plot} does not
+support in-line transformations and as such the transformations should be
+applied to the data prior to plotting. The transformerList is used
 internally to ensure that the axes on the constructed plots are
 appropriately labelled.}
 
@@ -133,15 +133,15 @@ arguments.}
 \item{gate_point_size}{numeric to control the size of the selected gate
 points, set to 1 by default.}
 
-\item{gate_point_col}{colour to use for the selected gate points, set to "red"
-by default.}
+\item{gate_point_col}{colour to use for the selected gate points, set to
+"red" by default.}
 
 \item{gate_point_col_alpha}{numeric [0,1] to control the transparency of the
 selected gate points, set to 1 by default to use solid colours.}
 
 \item{gate_line_type}{integer [0,6] to control the line type of gates, set to
-\code{1} to draw solid lines by default. See \code{\link[graphics:par]{lty}}
-for alternatives.}
+\code{1} to draw solid lines by default. See
+\code{\link[graphics:par]{lty}} for alternatives.}
 
 \item{gate_line_width}{numeric to control the line width(s) of gates, set to
 \code{2.5} by default.}
@@ -151,11 +151,11 @@ for alternatives.}
 \item{gate_line_col_alpha}{numeric [0,1] to control the transparency of the
 selected gate lines, set to 1 by default to use solid colours.}
 
-\item{label_text_size}{numeric to control the size of text in the plot labels,
-set to 1 by default.}
+\item{label_text_size}{numeric to control the size of text in the plot
+labels, set to 1 by default.}
 
-\item{label_text_font}{numeric to control the font of text in plot labels, set
-to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
+\item{label_text_font}{numeric to control the font of text in plot labels,
+set to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
 alternatives.}
 
 \item{label_text_col}{colour(s) to use for text in plot labels, set to
@@ -164,7 +164,8 @@ alternatives.}
 \item{label_text_col_alpha}{numeric [0, 1] to control the transparency of the
 text colour, set to 1 by default to remove transparency.}
 
-\item{label_fill}{fill colour(s) to use for labels, set to "white" by default.}
+\item{label_fill}{fill colour(s) to use for labels, set to "white" by
+default.}
 
 \item{label_fill_alpha}{numeric to control background fill transparency of
 label, set to 0.6 by default to introduce some transparency.}
@@ -178,11 +179,11 @@ this argument to NULL.}
 }
 \value{
 \code{cytoframe} and \code{cytoset} methods return a list of flowCore
- gate objects per group in group_by, whilst the \code{GatingSet} applies the
- constructed gates directly to the \code{GatingSet} and adds appropriate
- entries into the specified \code{gatingTemplate}. The \code{GatingSet}
- method does not return the constructed gates but instead returns
- the updated \code{GatingSet}.
+  gate objects per group in group_by, whilst the \code{GatingSet} applies the
+  constructed gates directly to the \code{GatingSet} and adds appropriate
+  entries into the specified \code{gatingTemplate}. The \code{GatingSet}
+  method does not return the constructed gates but instead returns the
+  updated \code{GatingSet}.
 }
 \description{
 \code{cyto_gate_draw} allows to users to interactive draw gates around

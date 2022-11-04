@@ -263,6 +263,52 @@
   
 }
 
+## UMATO -----------------------------------------------------------------------
+
+#' UMATO
+#' @noRd
+.cyto_map_umato <- function(x,
+                            hub_num = 20L,
+                            ...) {
+  
+  # CHECK PYTHON MODULE
+  py_umato <- cyto_require(
+    "umato",
+    python = TRUE,
+    ref = NULL,
+    import = "umato",
+    pip = TRUE
+  )
+  
+  # UMATO UNAVAILABLE
+  if(is.null(py_umato)) {
+    stop(
+      "Unable to import required pacmap module from current python environment!"
+    )
+    # UMATO
+  } else {
+    # MESSAGE
+    message(
+      "Using umato python module to compute UMATO co-ordinates..."
+    )
+    # CONFIGURE PACMAP - MODIFY PARAMETERS AS NECESSARY
+    umato <- py_umato$UMATO(
+      hub_num = as.integer(hub_num),
+      ...
+    )
+    # APPLY UMATO TO DATASET
+    res <- umato$fit_transform(
+      data.matrix(x)
+    )
+    colnames(res) <- paste0(
+      "UMATO-",
+      1:ncol(res)
+    )
+    return(res)
+  }
+  
+}
+
 ## MDS -------------------------------------------------------------------------
 
 #' MDS

@@ -106,7 +106,13 @@ cyto_gate_clust <- function(x,
   # CHANNELS
   if(is.null(channels)) {
     channels <- cyto_fluor_channels(x)
-    channels <- channels[!grepl("-H$|-W$", channels, ignore.case = TRUE)]
+    channels <- channels[
+      !grepl(
+        "\\-H$|\\-W$",
+        channels,
+        ignore.case = TRUE
+      )
+    ]
   } else {
     channels <- cyto_channels_extract(x, channels = channels)
   }

@@ -4,7 +4,7 @@
 \alias{cyto_func_args}
 \title{Extract the formal arguments of a function}
 \usage{
-cyto_func_args(FUN, drop = NA)
+cyto_func_args(FUN, drop = NA, defaults = FALSE)
 }
 \arguments{
 \item{FUN}{a function or name of a function to be called. Namespaced
@@ -12,10 +12,13 @@ functions are also supported (i.e. "CytoExploreR::cyto_plot").}
 
 \item{drop}{a vector of arguments to be removed from the returned vector of
 argument names.}
+
+\item{logical}{indicating whether a named list of default arguments should be
+returned instead of a vector of argument names, set to FALSE by default.}
 }
 \value{
-vector of argument names for \code{FUN} with \code{drop} arguments
-  removed.
+vector of argument names or a named list of argument defaults for
+  \code{FUN} with \code{drop} arguments removed.
 }
 \description{
 Extract the formal arguments of a function

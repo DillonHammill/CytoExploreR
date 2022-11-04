@@ -363,7 +363,7 @@
   )
   
   # SNN
-  if(.grepl("SNN", tree, ignore.case = TRUE)) {
+  if(.grepl("^SNN$", tree, ignore.case = TRUE)) {
     tree <- cyto_func_execute(
       "HGC::SNN.Construction",
       args = args
@@ -375,7 +375,7 @@
       args = args
     )
   # RNN
-  } else if(.grepl("RNN", tree, ignore.case = TRUE)) {
+  } else if(.grepl("^RNN$", tree, ignore.case = TRUE)) {
     tree <- cyto_func_execute(
       "HGC::RNN.Construction",
       args = args
