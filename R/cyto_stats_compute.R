@@ -547,20 +547,15 @@ cyto_stats_compute <- function(x,
       lapply(
         alias, 
         function(z){
-          round(
-            cyto_slot(
-              cyto_apply(
-                z,
-                stat,
-                input = input,
-                trans = trans,
-                inverse = inverse,
-                simplify = TRUE,
-                ...
-              ),
-              slot = slot
-            ),
-            round
+          cyto_apply(
+            z,
+            stat,
+            input = input,
+            trans = trans,
+            inverse = inverse,
+            slot = slot,
+            simplify = TRUE,
+            ...
           )
         }
       ), 
@@ -587,69 +582,88 @@ cyto_stats_compute <- function(x,
         lapply(
           seq_along(res), 
           function(z){
-          # MARKERS
-          if(markers) {
-            colnames(res[[z]]) <- LAPPLY(
-              colnames(res[[z]]),
-              function(w) {
-                if (w %in% cyto_channels(x)) {
-                  return(cyto_markers_extract(x, w))
-                } else {
-                  return(w)
+            # MARKERS
+            if(markers) {
+              colnames(res[[z]]) <- LAPPLY(
+                colnames(res[[z]]),
+                function(w) {
+                  if (w %in% cyto_channels(x)) {
+                    return(cyto_markers_extract(x, w))
+                  } else {
+                    return(w)
+                  }
                 }
-              }
-            )
-          }
-          # ABSORB ROWNAMES
-          if(grepl("\\|", rownames(res[[z]])[1])) {
-            new_cols <- do.call(
-              "rbind", 
-              strsplit(
-                rownames(res[[z]]), 
-                "\\|"
-              )
-            )[, -1, drop = FALSE] # name
-            if(ncol(new_cols) == 1) {
-              colnames(new_cols) <- gsub(
-                "cyto_stat_",
-                "", 
-                stat
-              )
-            } else {
-              colnames(new_cols) <- paste0(
-                gsub("cyto_stat_", "", stat),
-                "-",
-                1:ncol(new_cols)
               )
             }
-            res[[z]] <- data.frame(
-              new_cols, 
-              res[[z]],
-              check.names = FALSE,
-              stringsAsFactors = FALSE
+            # ABSORB ROWNAMES
+            if(grepl("\\|", rownames(res[[z]])[1])) {
+              new_cols <- do.call(
+                "rbind", 
+                strsplit(
+                  rownames(res[[z]]), 
+                  "\\|"
+                )
+              )[, -1, drop = FALSE] # name
+              if(ncol(new_cols) == 1) {
+                colnames(new_cols) <- gsub(
+                  "cyto_stat_",
+                  "", 
+                  stat
+                )
+              } else {
+                colnames(new_cols) <- paste0(
+                  gsub("cyto_stat_", "", stat),
+                  "-",
+                  1:ncol(new_cols)
+                )
+              }
+              res[[z]] <- data.frame(
+                new_cols, 
+                res[[z]],
+                check.names = FALSE,
+                stringsAsFactors = FALSE
+              )
+            }
+            # MULTIPLE STATISTICS
+            ind <- rep(
+              seq_len(
+                length(
+                  alias[[z]]
+                )
+              ),
+              each = nrow(res[[z]]) / length(alias[[z]])
             )
+            # EXPERIMENT DETAILS
+            if(details) {
+              res[[z]] <- data.frame(
+                cyto_details(
+                  alias[[z]],
+                  drop = TRUE
+                )[
+                  ind,
+                ],
+                "alias" = rep(
+                  names(res)[z], 
+                  nrow(res[[z]])
+                ),
+                res[[z]],
+                check.names = FALSE,
+                stringsAsFactors = FALSE)
+            } else {
+              res[[z]] <- data.frame(
+                "name" = cyto_names(alias[[z]])[ind],
+                "alias" = rep(names(res)[z], nrow(res[[z]])),
+                res[[z]],
+                check.names = FALSE,
+                stringsAsFactors = FALSE
+              )
+            }
+            # CANNOT HAVE ROWNAMES IN MERGED DATAFRAME
+            rownames(res[[z]]) <- NULL
+            return(res[[z]])
           }
-          # EXPERIMENT DETAILS
-          if(details) {
-            res[[z]] <- data.frame(
-              cyto_details(alias[[z]], drop = TRUE),
-              "alias" = rep(names(res)[z], nrow(res[[z]])),
-              res[[z]],
-              check.names = FALSE,
-              stringsAsFactors = FALSE)
-          } else {
-            res[[z]] <- data.frame(
-              "name" = cyto_names(alias[[z]]),
-              "alias" = rep(names(res)[z], nrow(res[[z]])),
-              res[[z]],
-              check.names = FALSE,
-              stringsAsFactors = FALSE
-            )
-          }
-          # CANNOT HAVE ROWNAMES IN MERGED DATAFRAME
-          rownames(res[[z]]) <- NULL
-          return(res[[z]])
-        }), names = names(res)
+        ),
+        names = names(res)
       ), 
       list(
         "make.row.names" = FALSE,
