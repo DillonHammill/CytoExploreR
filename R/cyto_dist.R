@@ -22,7 +22,8 @@
 #'   \code{"Jensen-Shannon"} divergence or \code{"Kolmogorov-Smirnov"} test. If
 #'   \code{alias} and \code{channels} are not specified, comparisons of the
 #'   \code{parent} populations can be made either using the default \code{"kNN"}
-#'   or alternatively \code{"SOM"} entropies.
+#'   or alternatively \code{"SOM"} entropies. The proportion of non-overlapping
+#'   events between distributions can be computed using \code{type = "overlap"}.
 #' @param merge_by a vector of experiment variables by which samples should be
 #'   merged prior to computing the desired statistic, set to \code{"name"} by
 #'   default to compare individual samples to one another.
@@ -65,6 +66,8 @@ cyto_dist <- function(x,
                       ...) {
   
   # TODO: ADD HELLINGER DISTANCE
+  # TODO: BREGMAN DIVERGENCE
+  # TODO: ADD SUPPORT FOR HEATMAPS
   
   # COMPOSITION: AITCHISON
   # DISTRIBUTIONS: WASSERSTEIN | JENSEN-SHANNON | KOLMOGOROV-SMIRNOV
@@ -339,7 +342,7 @@ cyto_dist <- function(x,
     # COMPARE PARENT CHANNEL DISTRIBUTIONS - LIST OF DISTANCE MATRICES
     } else {
       # DEFAULT STATISTIC -> WASSERSTEIN
-      if(!grepl("^(j|k|w)", type, ignore.case = TRUE)) {
+      if(!grepl("^(j|k|w|o)", type, ignore.case = TRUE)) {
         type <- "ws"
       }
       # COMPUTE CHANNEL RANGES ACROSS GROUPS - SET BANDWIDTH FOR JSD
@@ -364,6 +367,13 @@ cyto_dist <- function(x,
           function(w){
             range(w, na.rm = TRUE)
           }
+        )
+      }
+      # OVERLAPPLING PACKAGE REQUIRED
+      if(grepl("^o", type, ignore.case = TRUE)) {
+        cyto_require(
+          "overlapping",
+          source = "CRAN"
         )
       }
       # CHANNEL-WISE DISTANCE MATRIX
@@ -422,11 +432,20 @@ cyto_dist <- function(x,
                     )$statistic
                   )
                 # WASSERSTEIN 
-                } else {
+                } else if(grepl("^w", type, ignore.case = TRUE)) {
                   d[i, j] <- d[j, i] <- WSD(
                     a,
                     b
                   )
+                # OVERLAP - NON-OVERLAPPING PORTION (DISTANCE)
+                } else {
+                  d[i, j] <- d[j, i] <- 1 - cyto_func_call(
+                    "overlap",
+                    list(
+                      list(a, b),
+                      type = "1"
+                    )
+                  )$OV
                 }
               }
             }

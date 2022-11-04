@@ -48,7 +48,8 @@ can be made using either the default \code{"Wasserstein"} distance,
 \code{"Jensen-Shannon"} divergence or \code{"Kolmogorov-Smirnov"} test. If
 \code{alias} and \code{channels} are not specified, comparisons of the
 \code{parent} populations can be made either using the default \code{"kNN"}
-or alternatively \code{"SOM"} entropies.}
+or alternatively \code{"SOM"} entropies. The proportion of non-overlapping
+events between distributions can be computed using \code{type = "overlap"}.}
 
 \item{merge_by}{a vector of experiment variables by which samples should be
 merged prior to computing the desired statistic, set to \code{"name"} by
