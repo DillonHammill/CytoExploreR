@@ -39,12 +39,13 @@
 #'   the minimum number of events across groups from each group.
 #' @param heatmap logical indicating whether to plot a heatmap for each computed
 #'   distance matrix, set to TRUE by default.
-#' @param ... additional arguments passed to \code{cyto_plot_heatmap()}.
+#' @param ... additional arguments passed to \code{HeatmapR::heat_map()}.
 #'
 #' @return a distance matrix for compositional or sample comparisons, or a list
 #'   of distance matrices for each channel for distribution comparisons.
 #'
 #' @importFrom stats ks.test as.dist
+#' @importFrom HeatmapR heat_map
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -181,6 +182,11 @@ cyto_dist <- function(x,
         names(x_list)
       )
     )
+    # PROGRESS BAR
+    pb <- cyto_progress(
+      label = "cyto_dist()",
+      total = sum(seq(length(x_list), 1))
+    )
     # COMPUTE AITCHSION DISTANCES
     for(i in 1:length(x_list)) {
       for(j in i:length(x_list)) {
@@ -190,6 +196,8 @@ cyto_dist <- function(x,
             "x" = cnts[c(i, j), ]
           )
         )
+        # INCREMENT PROGRESS BAR
+        cyto_progress(pb)
       }
     }
     # CONVERT TO DISTNACE MATRIX
@@ -198,8 +206,6 @@ cyto_dist <- function(x,
         res
       )
     )
-    # HEATMAP
-    
   # DISTRIBUTIONS | PARENT
   } else {
     # EVENTS
@@ -243,6 +249,11 @@ cyto_dist <- function(x,
     )
     # COMPARE PARENT - KNN | SOM
     if(grepl("^(KNN|SOM|MS)$", type, ignore.case = TRUE)) {
+      # PROGRESS BAR
+      pb <- cyto_progress(
+        label = "cyto_dist()",
+        total = sum(seq(length(x_list), 1))
+      )
       # KNN ENTROPIES
       if(grepl("^kNN", type, ignore.case = TRUE)) {
         # ENTROPY DISTANCES
@@ -260,6 +271,7 @@ cyto_dist <- function(x,
         for(i in seq_along(x_list)) {
           for(j in i:length(x_list)) {
             if(i == j) {
+              cyto_progress(pb)
               next
             }
             # COMBINED DATA TO BUILD KNN GRAPH
@@ -330,6 +342,8 @@ cyto_dist <- function(x,
               knn,
               p = 2
             )
+            # UPDATE PROGRESS BAR
+            cyto_progress(pb)
           }
         }
         # ENTROPY DISTANCES TO DISTANCE MATRIX
@@ -376,6 +390,11 @@ cyto_dist <- function(x,
           source = "CRAN"
         )
       }
+      # PROGRESS BAR
+      pb <- cyto_progress(
+        label = "cyto_dist()",
+        total = sum(seq(length(x_list), 1)) * length(channels)
+      )
       # CHANNEL-WISE DISTANCE MATRIX
       res <- structure(
         lapply(
@@ -447,6 +466,8 @@ cyto_dist <- function(x,
                     )
                   )$OV
                 }
+                # UPDATE PROGRESS BAR
+                cyto_progress(pb)
               }
             }
             # CONVERT TO DISTANCE MATRIX
@@ -462,6 +483,14 @@ cyto_dist <- function(x,
       )
     }
   }
+  
+  # HEATMAP --------------------------------------------------------------------
+  
+  # HEATMAPR
+  heat_map(
+    res,
+    ...
+  )
   
   # DISTANCE MATRICES ----------------------------------------------------------
   

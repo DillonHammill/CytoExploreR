@@ -71,7 +71,7 @@ the minimum number of events across groups from each group.}
 \item{heatmap}{logical indicating whether to plot a heatmap for each computed
 distance matrix, set to TRUE by default.}
 
-\item{...}{additional arguments passed to \code{cyto_plot_heatmap()}.}
+\item{...}{additional arguments passed to \code{HeatmapR::heat_map()}.}
 }
 \value{
 a distance matrix for compositional or sample comparisons, or a list
