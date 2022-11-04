@@ -24,6 +24,7 @@ cyto_stats_compute(
   select = NULL,
   merge_by = "name",
   events = 1,
+  slot = NULL,
   ...
 )
 }
@@ -119,6 +120,11 @@ sample separately.}
 \item{events}{numeric to control the proportion or number of events to use
 when computing the specified statistic, set to 1 by default to use all
 events.}
+
+\item{slot}{a character string or function to apply to the output of a custom
+statistical function to extract the relevant statistics. The purpose of
+\code{slot} is to ensure that a valid vector of values is passed to
+the post-processing component of \code{cyto_stats_compute()}.}
 
 \item{...}{additional arguments passed to the desired statistical function.}
 }

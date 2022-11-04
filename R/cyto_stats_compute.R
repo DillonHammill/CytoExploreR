@@ -75,6 +75,10 @@
 #' @param events numeric to control the proportion or number of events to use
 #'   when computing the specified statistic, set to 1 by default to use all
 #'   events.
+#' @param slot a character string or function to apply to the output of a custom
+#'   statistical function to extract the relevant statistics. The purpose of
+#'   \code{slot} is to ensure that a valid vector of values is passed to
+#'   the post-processing component of \code{cyto_stats_compute()}.
 #' @param ... additional arguments passed to the desired statistical function.
 #'
 #' @return data.frame or tibble containing the computed statistics in the
@@ -142,6 +146,7 @@ cyto_stats_compute <- function(x,
                                select = NULL,
                                merge_by = "name",
                                events = 1,
+                               slot = NULL,
                                ...) {
   
   # CHECKS ---------------------------------------------------------------------
@@ -340,7 +345,8 @@ cyto_stats_compute <- function(x,
       "rcv",
       "quantile",
       "range",
-      "bin"
+      "bin",
+      "skewness"
     ), function(z) {
       grepl(paste0("^", z, "$"), stat_strip)
     }))) {
@@ -542,14 +548,17 @@ cyto_stats_compute <- function(x,
         alias, 
         function(z){
           round(
-            cyto_apply(
-              z,
-              stat,
-              input = input,
-              trans = trans,
-              inverse = inverse,
-              simplify = TRUE,
-              ...
+            cyto_slot(
+              cyto_apply(
+                z,
+                stat,
+                input = input,
+                trans = trans,
+                inverse = inverse,
+                simplify = TRUE,
+                ...
+              ),
+              slot = slot
             ),
             round
           )
@@ -569,38 +578,56 @@ cyto_stats_compute <- function(x,
       stat <- "FUN"
     }
   }
-  
+
   # POPULATION & EXPERIMENT DETAILS
   res <- do.call(
     "rbind",
     c(
       structure(
-        lapply(seq_along(res), function(z){
+        lapply(
+          seq_along(res), 
+          function(z){
           # MARKERS
           if(markers) {
-            colnames(res[[z]]) <- LAPPLY(colnames(res[[z]]), function(w) {
-              if (w %in% cyto_channels(x)) {
-                return(cyto_markers_extract(x, w))
-              } else {
-                return(w)
+            colnames(res[[z]]) <- LAPPLY(
+              colnames(res[[z]]),
+              function(w) {
+                if (w %in% cyto_channels(x)) {
+                  return(cyto_markers_extract(x, w))
+                } else {
+                  return(w)
+                }
               }
-            })
+            )
           }
           # ABSORB ROWNAMES
           if(grepl("\\|", rownames(res[[z]])[1])) {
-            new_cols <- do.call("rbind", 
-                                strsplit(rownames(res[[z]]), 
-                                         "\\|"))[, -1, drop = FALSE] # name
+            new_cols <- do.call(
+              "rbind", 
+              strsplit(
+                rownames(res[[z]]), 
+                "\\|"
+              )
+            )[, -1, drop = FALSE] # name
             if(ncol(new_cols) == 1) {
-              colnames(new_cols) <- gsub("cyto_stat_", "", stat)
+              colnames(new_cols) <- gsub(
+                "cyto_stat_",
+                "", 
+                stat
+              )
             } else {
-              colnames(new_cols) <- paste0(gsub("cyto_stat_", "", stat), "-",
-                                           1:ncol(new_cols))
+              colnames(new_cols) <- paste0(
+                gsub("cyto_stat_", "", stat),
+                "-",
+                1:ncol(new_cols)
+              )
             }
-            res[[z]] <- data.frame(new_cols, 
-                                   res[[z]],
-                                   check.names = FALSE,
-                                   stringsAsFactors = FALSE)
+            res[[z]] <- data.frame(
+              new_cols, 
+              res[[z]],
+              check.names = FALSE,
+              stringsAsFactors = FALSE
+            )
           }
           # EXPERIMENT DETAILS
           if(details) {
@@ -616,28 +643,33 @@ cyto_stats_compute <- function(x,
               "alias" = rep(names(res)[z], nrow(res[[z]])),
               res[[z]],
               check.names = FALSE,
-              stringsAsFactors = FALSE)
+              stringsAsFactors = FALSE
+            )
           }
           # CANNOT HAVE ROWNAMES IN MERGED DATAFRAME
           rownames(res[[z]]) <- NULL
           return(res[[z]])
         }), names = names(res)
       ), 
-      list("make.row.names" = FALSE,
-           stringsAsFactors = FALSE)
+      list(
+        "make.row.names" = FALSE,
+        stringsAsFactors = FALSE
+      )
     )
   )
 
   # FORMAT
   if(format == "long") {
     # LONG FORMAT REQUIRES MULTIPLE COLUMNS
-    cols <- colnames(res)[!colnames(res) %in% c("name", 
-                                                stat, 
-                                                gsub("cyto_stat_", "", stat),
-                                                "FUN", 
-                                                colnames(cyto_details(x)),
-                                                "alias"), 
-                          drop = FALSE]
+    cols <- colnames(res)[
+      !colnames(res) %in% c("name", 
+                            stat, 
+                            gsub("cyto_stat_", "", stat),
+                            "FUN", 
+                            colnames(cyto_details(x)),
+                            "alias"), 
+                          drop = FALSE
+    ]
     # KEY - CHANNEL
     if(all(cols %in% cyto_channels(x))) {
       key <- "channel"
@@ -651,10 +683,11 @@ cyto_stats_compute <- function(x,
     
     # LONG FORMAT
     if (length(cols) > 1) {
-      res <- gather(res,
-                    key = {{ key }},
-                    value = "value",
-                    all_of(cols)
+      res <- gather(
+        res,
+        key = {{ key }},
+        value = "value",
+        all_of(cols)
       )
     }
   }
