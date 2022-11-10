@@ -9,6 +9,7 @@ cyto_channels(
   select = NULL,
   exclude = NULL,
   append = FALSE,
+  escape = TRUE,
   ignore.case = TRUE,
   ...
 )
@@ -28,6 +29,10 @@ indices.}
 \item{append}{logical indicating whether the name of the channel should be
 appended to the marker names in the form \code{<marker> channel}, set to
 FALSE by default.}
+
+\item{escape}{logical to indicate whether special characters should be
+escaped prior to performing partial matching for \code{select} and
+\code{exclude}, set to TRUE by default.}
 
 \item{ignore.case}{logical indicating whether case insensitive channel
 matches should be returned, set to TRUE bu default.}

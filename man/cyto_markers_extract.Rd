@@ -10,6 +10,7 @@ cyto_markers_extract(
   skip = NULL,
   append = FALSE,
   plot = FALSE,
+  escape = TRUE,
   ignore.case = TRUE,
   ...
 )
@@ -34,6 +35,10 @@ FALSE by default.}
 \item{plot}{logical indicating whether the channels will be used to construct
 a plot, set to FALSE by default. If set to TRUE an additional check will be
 performed to ensure that only 1 or 2 \code{channels} are supplied.}
+
+\item{escape}{logical to indicate whether special characters should be
+escaped prior to performing partial marker matching, set to TRUE by
+default.}
 
 \item{ignore.case}{logical indicating whether case insensitive channel
 matches should be returned, set to TRUE bu default.}

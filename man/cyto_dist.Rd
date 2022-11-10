@@ -19,6 +19,7 @@ cyto_dist(
   k = 30,
   grid = c(14, 14),
   heatmap = TRUE,
+  markers = TRUE,
   ...
 )
 }
@@ -68,8 +69,19 @@ the \code{parent} population in each sample prior to computing the
 statistic specified by \code{type}. Setting \code{events = NA} will extract
 the minimum number of events across groups from each group.}
 
+\item{k}{number of nearest neighbours to use when constructing the kNN graph
+for comparison of \code{kNN} entropies, set to 30 by default.}
+
+\item{grid}{dimensions to use for the SOM grid when computing SOM entropies,
+set to \code{c(14, 14)}.}
+
 \item{heatmap}{logical indicating whether to plot a heatmap for each computed
 distance matrix, set to TRUE by default.}
+
+\item{markers}{logical indicating whether the named list of matrices should
+be labelled with the marker names when available, set to TRUE by default.
+Otherwise, the list of matrices will be labelled with the names of the
+channels.}
 
 \item{...}{additional arguments passed to \code{HeatmapR::heat_map()}.}
 }

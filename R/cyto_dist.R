@@ -37,8 +37,16 @@
 #'   the \code{parent} population in each sample prior to computing the
 #'   statistic specified by \code{type}. Setting \code{events = NA} will extract
 #'   the minimum number of events across groups from each group.
+#' @param k number of nearest neighbours to use when constructing the kNN graph
+#'   for comparison of \code{kNN} entropies, set to 30 by default.
+#' @param grid dimensions to use for the SOM grid when computing SOM entropies,
+#'   set to \code{c(14, 14)}.
 #' @param heatmap logical indicating whether to plot a heatmap for each computed
 #'   distance matrix, set to TRUE by default.
+#' @param markers logical indicating whether the named list of matrices should
+#'   be labelled with the marker names when available, set to TRUE by default.
+#'   Otherwise, the list of matrices will be labelled with the names of the
+#'   channels.
 #' @param ... additional arguments passed to \code{HeatmapR::heat_map()}.
 #'
 #' @return a distance matrix for compositional or sample comparisons, or a list
@@ -64,12 +72,8 @@ cyto_dist <- function(x,
                       k = 30,
                       grid = c(14,14),
                       heatmap = TRUE,
+                      markers = TRUE,
                       ...) {
-  
-  # TODO: TYPE ARGUMEMT PASSED THROUGH OVERLAP
-  # TODO: ARRANGE HEATMAPS IN GRID FOR CHANNEL COMPARISONS
-  # TODO: MARKERS AS LIST NAMES
-  # TODO: WRAP HEATMAP IN TRYCATCH
   
   # TODO: ADD HELLINGER DISTANCE
   # TODO: BREGMAN DIVERGENCE
@@ -392,7 +396,8 @@ cyto_dist <- function(x,
       if(grepl("^o", type, ignore.case = TRUE)) {
         cyto_require(
           "overlapping",
-          source = "CRAN"
+          source = "CRAN",
+          version = "2.0.0"
         )
       }
       # PROGRESS BAR
@@ -486,17 +491,48 @@ cyto_dist <- function(x,
         ),
         names = channels
       )
+      # MARKER NAMES
+      if(markers) {
+        markers <- cyto_markers(x)
+        ind <- match(names(res), names(markers))
+        if(length(ind) > 0) {
+          names(res)[ind] <- markers[names(res)[ind]]
+        }
+      }
     }
   }
   
   # HEATMAP --------------------------------------------------------------------
   
-  # HEATMAPR
+  # HEATMAPR - TRYCATCH FOR LEGEND
   if(heatmap) {
-    heat_map(
-      res,
-      ...
-    )
+    if(is.list(res)) {
+      lapply(
+        seq_along(res),
+        function(z) {
+          tryCatch(
+            heat_map(
+              res[[z]],
+              title = names(res)[z],
+              ...
+            ),
+            error = function(e) {
+              return(NULL)
+            }
+          )
+        }
+      )
+    } else {
+      tryCatch(
+        heat_map(
+          res,
+          ...
+        ),
+        error = function(e) {
+          return(NULL)
+        }
+      )
+    }
   }
   
   # DISTANCE MATRICES ----------------------------------------------------------

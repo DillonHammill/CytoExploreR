@@ -17,6 +17,9 @@
 #' @param append logical indicating whether the name of the channel should be
 #'   appended to the marker names in the form \code{<marker> channel}, set to
 #'   FALSE by default.
+#' @param escape logical to indicate whether special characters should be
+#'   escaped prior to performing partial matching for \code{select} and
+#'   \code{exclude}, set to TRUE by default.
 #' @param ignore.case logical indicating whether case insensitive channel
 #'   matches should be returned, set to TRUE bu default.
 #' @param ... additional arguments passed to \code{\link[base:grep]{grepl}} for
@@ -54,6 +57,7 @@ cyto_channels <- function(x,
                           select = NULL,
                           exclude = NULL,
                           append = FALSE,
+                          escape = TRUE,
                           ignore.case = TRUE,
                           ...){
   
@@ -89,6 +93,8 @@ cyto_channels <- function(x,
                 .grepl(
                   z, 
                   channels, 
+                  escape = escape,
+                  fixed = FALSE,
                   ignore.case = ignore.case,
                   ...
                 )
@@ -118,6 +124,8 @@ cyto_channels <- function(x,
                 .grepl(
                   z, 
                   channels, 
+                  escape = escape,
+                  fixed = FALSE,
                   ignore.case = ignore.case,
                   ...
                 )
@@ -225,6 +233,9 @@ cyto_channels <- function(x,
 #' @param append logical indicating whether the name of the channel should be
 #'   appended to the marker names in the form \code{<marker> channel}, set to
 #'   FALSE by default.
+#' @param escape logical to indicate whether special characters should be
+#'   escaped prior to performing partial matching for \code{select} and
+#'   \code{exclude}, set to TRUE by default.
 #' @param ignore.case logical indicating whether case insensitive channel
 #'   matches should be returned, set to TRUE bu default.
 #' @param ... additional arguments passed to \code{\link[base:grep]{grepl}} for
@@ -265,6 +276,7 @@ cyto_markers <- function(x,
                          select = NULL,
                          exclude = NULL,
                          append = FALSE,
+                         escape = TRUE,
                          ignore.case = TRUE,
                          ...) {
   
@@ -308,6 +320,7 @@ cyto_markers <- function(x,
                   .grepl(
                     z,
                     markers,
+                    escape = escape,
                     ignore.case = ignore.case,
                     ...
                   )
@@ -316,6 +329,7 @@ cyto_markers <- function(x,
                   .grepl(
                     z, 
                     names(markers),
+                    escape = escape,
                     ignore.case = ignore.case,
                     ...
                   )
@@ -343,6 +357,7 @@ cyto_markers <- function(x,
                   .grepl(
                     z,
                     markers,
+                    escape = escape,
                     ignore.case = ignore.case,
                     ...
                   )
@@ -351,6 +366,7 @@ cyto_markers <- function(x,
                   .grepl(
                     z, 
                     names(markers),
+                    escape = escape,
                     ignore.case = ignore.case,
                     ...
                   )
@@ -533,6 +549,9 @@ cyto_fluor_channels <- function(x,
 #' @param plot logical indicating whether the channels will be used to construct
 #'   a plot, set to FALSE by default. If set to TRUE an additional check will be
 #'   performed to ensure that only 1 or 2 \code{channels} are supplied.
+#' @param escape logical to indicate whether special characters should be
+#'   escaped prior to performing partial channel matching, set to TRUE by
+#'   default.
 #' @param ignore.case logical indicating whether case insensitive channel
 #'   matches should be returned, set to TRUE by default.
 #' @param ... additional arguments passed to \code{\link[base:grep]{grepl}} for
@@ -558,6 +577,7 @@ cyto_channels_extract <- function(x,
                                   channels, 
                                   skip = NULL,
                                   plot = FALSE,
+                                  escape = TRUE,
                                   ignore.case = TRUE,
                                   ...) {
   
@@ -571,7 +591,16 @@ cyto_channels_extract <- function(x,
   res <- c()
   for(z in seq_along(channels)) {
     # SKIP
-    if(any(.grepl(channels[z], skip, ignore.case = ignore.case, ...))) {
+    skip <- any(
+      .grepl(
+        channels[z],
+        skip,
+        escape = escape,
+        ignore.case = ignore.case,
+        ...
+      )
+    )
+    if(skip) {
       res <- c(res, channels[z])
     # INDEX
     } else if(is.numeric(channels[z])) {
@@ -596,6 +625,7 @@ cyto_channels_extract <- function(x,
           .grepl(
             channels[z],
             markers,
+            escape = escape,
             ignore.case = ignore.case,
             ...
           )
@@ -606,6 +636,7 @@ cyto_channels_extract <- function(x,
           .grepl(
             channels[z],
             chans,
+            escape = escape,
             ignore.case = ignore.case,
             ...
           )
@@ -625,8 +656,12 @@ cyto_channels_extract <- function(x,
         res <- c(res, chans[channel_ind])
       } else {
         stop(
-          paste0(channels[z], " is not a valid channel or marker for this ", 
-                 cyto_class(x, class = TRUE), "!")
+          paste0(
+            channels[z],
+            " is not a valid channel or marker for this ", 
+            cyto_class(x, class = TRUE),
+            "!"
+          )
         )
       }
     }
@@ -673,6 +708,9 @@ cyto_channels_extract <- function(x,
 #' @param plot logical indicating whether the channels will be used to construct
 #'   a plot, set to FALSE by default. If set to TRUE an additional check will be
 #'   performed to ensure that only 1 or 2 \code{channels} are supplied.
+#' @param escape logical to indicate whether special characters should be
+#'   escaped prior to performing partial marker matching, set to TRUE by
+#'   default.
 #' @param ignore.case logical indicating whether case insensitive channel
 #'   matches should be returned, set to TRUE bu default.
 #' @param ... additional arguments passed to \code{\link[base:grep]{grepl}} for
@@ -701,6 +739,7 @@ cyto_markers_extract <- function(x,
                                  skip = NULL,
                                  append = FALSE,
                                  plot = FALSE,
+                                 escape = TRUE,
                                  ignore.case = TRUE,
                                  ...) {
   
@@ -714,7 +753,16 @@ cyto_markers_extract <- function(x,
   res <- c()
   for(z in seq_along(channels)) {
     # SKIP
-    if(any(.grepl(channels[z], skip, ignore.case = ignore.case, ...))) {
+    skip <- any(
+      .grepl(
+        channels[z],
+        skip,
+        escape = escape,
+        ignore.case = ignore.case,
+        ...
+      )
+    )
+    if(skip) {
       res <- c(res, channels[z])
       names(res[length(res)]) <- channels[z] # append
     # INDEX
@@ -734,6 +782,7 @@ cyto_markers_extract <- function(x,
           .grepl(
             channels[z],
             markers,
+            escape = escape,
             ignore.case = ignore.case,
             ...
           )
@@ -741,9 +790,10 @@ cyto_markers_extract <- function(x,
       )
       channel_ind <- suppressWarnings(
         which(
-          grepl(
+          .grepl(
             channels[z],
             names(markers),
+            escape = escape,
             ignore.case = ignore.case,
             ...
           )
@@ -767,18 +817,43 @@ cyto_markers_extract <- function(x,
             )
           )
           # CHANNEL UNASSIGNED MARKER - PARTIAL
-        } else if(any(.grepl(channels[z], chans, ignore.case = ignore.case, ...))) {
+        } else if(
+          any(
+            .grepl(
+              channels[z],
+              chans, 
+              escape = escape,
+              ignore.case = ignore.case,
+              ...
+            )
+          )
+        ) {
           res <- c(
             res,
             structure(
-              chans[which(.grepl(channels[z],
-                                 chans,
-                                 ignore.case = ignore.case,
-                                 ...))],
-              names = chans[which(.grepl(channels[z],
-                                         chans,
-                                         ignore.case = ignore.case,
-                                         ...))])
+              chans[
+                which(
+                  .grepl(
+                    channels[z],
+                    chans,
+                    escape = escape,
+                    ignore.case = ignore.case,
+                    ...
+                  )
+                )
+              ],
+              names = chans[
+                which(
+                  .grepl(
+                    channels[z],
+                    chans,
+                    escape = escape,
+                    ignore.case = ignore.case,
+                    ...
+                  )
+                )
+              ]
+            )
           )
           # INVALID CHANNEL/MARKER
         } else {
@@ -849,9 +924,11 @@ cyto_channel_select <- function(x){
   opts <- c(cyto_fluor_channels(x), "Unstained")
   
   # CHANNEL TEMPLATE
-  chans <- data.frame("name" = cyto_names(x),
-                      "channel" = NA,
-                      stringsAsFactors = FALSE)
+  chans <- data.frame(
+    "name" = cyto_names(x),
+    "channel" = NA,
+    stringsAsFactors = FALSE
+  )
   
   # CHANNEL SELECTION
   chans <- data_edit(
@@ -871,8 +948,8 @@ cyto_channel_select <- function(x){
   # MISSING CHANNELS
   lapply(
     seq_along(chans[, "channel"]),
-    function(z){
-      if(is.na(chans[z, "channel"])){
+    function(z) {
+      if(is.na(chans[z, "channel"])) {
         stop(paste0("No channel selected for ", chans[z, "name"], "."))
       }
     }
@@ -966,7 +1043,13 @@ cyto_channel_match <- function(x,
   if(is.null(channels)) {
     channels <- cyto_fluor_channels(x)
     # EXCLUDE HEIGHT/WIDTH PARAMETERS
-    channels <- channels[!grepl("-H$|-W$", channels, ignore.case = TRUE)]
+    channels <- channels[
+      !grepl(
+        "\\-H$|\\-W$",
+        channels,
+        ignore.case = TRUE
+      )
+    ]
   } else {
     channels <- cyto_channels_extract(x, channels)
   }
@@ -1153,7 +1236,7 @@ cyto_channel_match <- function(x,
                       "[^[:alnum:]]",
                       "",
                       gsub(
-                        "-A$|-H$|-W$",
+                        "\\-A$|\\-H$|\\-W$",
                         "",
                         chans[q]
                       ),
@@ -1569,9 +1652,11 @@ cyto_channels_restrict <- function(x,
   if(!is.null(exclude)){
     
     # MARKERS TO REMOVE
-    channels_to_remove <- cyto_markers(x, 
-                                       select = exclude,
-                                       ...)
+    channels_to_remove <- cyto_markers(
+      x, 
+      select = exclude,
+      ...
+    )
     if(length(channels_to_remove) > 0){
       channels_to_remove <- names(channels_to_remove)
     }else{
@@ -1579,10 +1664,14 @@ cyto_channels_restrict <- function(x,
     }
     
     # CHANNELS TO REMOVE
-    channels_to_remove <- c(channels_to_remove,
-                            cyto_channels(x,
-                                          select = exclude,
-                                          ...))
+    channels_to_remove <- c(
+      channels_to_remove,
+      cyto_channels(
+        x,
+        select = exclude,
+        ...
+      )
+    )
     channels_to_remove <- unique(channels_to_remove)
     
     # UPDATE CHANNELS TO KEEP
