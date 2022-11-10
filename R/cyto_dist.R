@@ -494,9 +494,11 @@ cyto_dist <- function(x,
       # MARKER NAMES
       if(markers) {
         markers <- cyto_markers(x)
-        ind <- match(names(res), names(markers))
-        if(length(ind) > 0) {
-          names(res)[ind] <- markers[names(res)[ind]]
+        nms <- names(res)
+        ind <- which[nms %in% names(markers)]
+        if(length(ind)>0) {
+          nms[ind] <- markers[nms[ind]]
+          names(res) <- nms
         }
       }
     }
