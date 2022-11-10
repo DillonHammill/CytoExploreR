@@ -66,6 +66,11 @@ cyto_dist <- function(x,
                       heatmap = TRUE,
                       ...) {
   
+  # TODO: TYPE ARGUMEMT PASSED THROUGH OVERLAP
+  # TODO: ARRANGE HEATMAPS IN GRID FOR CHANNEL COMPARISONS
+  # TODO: MARKERS AS LIST NAMES
+  # TODO: WRAP HEATMAP IN TRYCATCH
+  
   # TODO: ADD HELLINGER DISTANCE
   # TODO: BREGMAN DIVERGENCE
   # TODO: ADD SUPPORT FOR HEATMAPS
@@ -487,10 +492,12 @@ cyto_dist <- function(x,
   # HEATMAP --------------------------------------------------------------------
   
   # HEATMAPR
-  heat_map(
-    res,
-    ...
-  )
+  if(heatmap) {
+    heat_map(
+      res,
+      ...
+    )
+  }
   
   # DISTANCE MATRICES ----------------------------------------------------------
   
