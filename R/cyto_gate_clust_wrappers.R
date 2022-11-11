@@ -603,3 +603,54 @@
   )$cluster
   
 }
+
+## CYTO_CLUST_APC --------------------------------------------------------------
+
+#' Affinity propagation clustering
+#' @noRd
+.cyto_clust_apc <- function(x,
+                            s = NULL,
+                            ...) {
+  
+  # APCLUSTER PACKAGE REQUIRED
+  cyto_require(
+    "apcluster",
+    source = " CRAN"
+  )
+  
+  # DEFAULT SIMILARITY FUNCTION
+  if(is.null(s)) {
+    s <- cyto_func_match(
+      "apcluster::negDistMat"
+    )
+  }
+  
+  # AFFINITY PROPAGATION CLUSTERING
+  res <- cyto_func_call(
+    "apcluster::apcluster",
+    args = list(
+      "x" = x,
+      s = s,
+      ...
+    )
+  )@clusters
+  
+  # PREPARE CLUSTER LABELS
+  res <- LAPPLY(
+    seq_along(res),
+    function(z) {
+      cl <- rep(
+        z,
+        length(res[[z]])
+      )
+      names(cl) <- res[[z]]
+      return(cl)
+    }
+  )
+  
+  # RETURN ORDERED CLLUSTER LABELS
+  return(
+    res[order(as.numeric(names(res)))]
+  )
+  
+}

@@ -49,7 +49,7 @@ supported clustering algorithms include \code{"rphenograph"},
 \code{"pyphenograph"}, \code{"dbscan"}, \code{"hdbscan"}, \code{"SNN"},
 \code{"jpclust"}, \code{"flowPeaks"} \code{"FlowSOM"}, \code{"kmeans"},
 \code{"HGC"}, \code{"Rclusterpp"} , \code{"depeche"}, \code{"SOM"},
-\code{"MSTKNN"}, \code{"Spectrum"} and \code{"immunoclust"}.}
+\code{"MSTKNN"}, \code{"Spectrum"}, \code{"immunoclust"} or \code{"apc"}.}
 
 \item{merge_by}{a vector of experiment variables to merge the data into
 groups prior to applying the clustering algorithm supplied to \code{type},

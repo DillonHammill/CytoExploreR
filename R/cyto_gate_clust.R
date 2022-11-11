@@ -23,7 +23,7 @@
 #'   \code{"pyphenograph"}, \code{"dbscan"}, \code{"hdbscan"}, \code{"SNN"},
 #'   \code{"jpclust"}, \code{"flowPeaks"} \code{"FlowSOM"}, \code{"kmeans"},
 #'   \code{"HGC"}, \code{"Rclusterpp"} , \code{"depeche"}, \code{"SOM"},
-#'   \code{"MSTKNN"}, \code{"Spectrum"} and \code{"immunoclust"}.
+#'   \code{"MSTKNN"}, \code{"Spectrum"}, \code{"immunoclust"} or \code{"apc"}.
 #' @param merge_by a vector of experiment variables to merge the data into
 #'   groups prior to applying the clustering algorithm supplied to \code{type},
 #'   set to \code{"all"} by default to merge all samples prior to gating. If
@@ -624,6 +624,24 @@ cyto_gate_clust <- function(x,
       # SPECTRUM
       gate <- cyto_func_call(
         ".cyto_clust_spectrum",
+        args = args
+      )
+    # AFFINITY PROPAGATION CLUSTERING
+    } else if(grepl("^apc$", type, ignore.case = TRUE)) {
+      # EXTRACT DATA MATRIX
+      args$x <- cyto_data_extract(
+        fr,
+        format = "matrix",
+        channels = params,
+        trans = pp_res$trans,
+        inverse = FALSE, # DONE
+        events = events,
+        seed = seed,
+        copy = FALSE
+      )[[1]][[1]]
+      # APCLUSTER
+      gate <- cyto_func_call(
+        ".cyto_clust_apc",
         args = args
       )
     # CONVERT TYPE TO FUNCTION
