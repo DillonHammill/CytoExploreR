@@ -76,6 +76,9 @@ cyto_gate_auto <- function(x,
                            seed = 2022,
                            ...) {
   
+  # TODO: ADD SUPPORT FOR MULTIPLE GATES
+  # TODO: ADD STANDARD MANUAL GATING TYPES -= ELLIPSE, RECTANGLE ETC
+  
   # CHECKS ---------------------------------------------------------------------
   
   # GATINGSET REQUIRED
@@ -167,6 +170,7 @@ cyto_gate_auto <- function(x,
     pop = "+",
     gating_method = "cyto_gate_auto",
     gating_args = list(
+      "alias" = alias,
       "type" = type,
       "input" = input,
       "inverse" = inverse,
@@ -262,6 +266,7 @@ cyto_gate_auto <- function(x,
 .cyto_gate_auto <- function(fr,
                             pp_res,
                             channels,
+                            alias = NULL,
                             type = "flowClust",
                             input = "flowFrame",
                             inverse = FALSE,
@@ -347,6 +352,26 @@ cyto_gate_auto <- function(x,
     # TMIX QUADRANT GATE
     } else if(grepl("^q.*tmix", type, ignore.case = TRUE)) {
       type <- "openCyto:::.gate_quad_tmix"
+    # FLOWDENSITY
+    } else if(grepl("^flowdensity", type, ignore.case = TRUE)) {
+      cyto_require(
+        "flowDensity",
+        source = "BioC"
+      )
+      message(
+        paste0(
+          "Malek M, Taghiyar MJ, Chong L, Finak G, Gottardo R, Brinkman RR. ",
+          "flowDensity: reproducing manual gating of flow cytometry data by ",
+          "automated density-based cell population identification. ",
+          "Bioinformatics. 2015 Feb 15;31(4):606-7. ",
+          "doi: 10.1093/bioinformatics/btu677."
+        )
+      )
+      if(length(channels)==2) {
+        type <- "flowDensity:::.flowDensity.2d"
+      } else {
+        type <- "flowDensity:::.flowDensity.1d"
+      }
     }
     # CONVERT TYPE TO FUNCION
     type <- cyto_func_match(type)
