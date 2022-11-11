@@ -260,29 +260,6 @@ cyto_gate_clust <- function(x,
   
   # NOTE: OUTPUT NAMES = GROUPS -> COLLAPSEDATAFORGATING = TRUE
   
-  # SAME GROUP
-  if(groupBy %in% "") {
-    groupBy <- NA 
-  }
-  
-  # GROUPING VARIABLES SEPARATED BY :
-  if(is.character(groupBy)) {
-    groupBy <- strsplit(groupBy, ":")[[1]]
-  }
-  
-  # GROUP NAME
-  grp <- cyto_groups(
-    fs,
-    group_by = groupBy,
-    details = FALSE,
-    sep = ":"
-  )
-  
-  # TODO: OPENCYTO COMPATIBILITY - COMBINED EVENTS GROUP NAME
-  if(grp %in% "Combined Events") {
-    grp <- "all"
-  }
-  
   # PP_RES - TRANSFORMERS | COUNTS | INDEX
   return(
     list(

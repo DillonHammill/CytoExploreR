@@ -93,6 +93,17 @@
       fun = .cyto_gate_clust,
       methodName = "cyto_gate_clust"
     )
+    # CYTO_GATE_AUTO
+    openCyto::register_plugins(
+      fun = .pp_cyto_gate_auto, 
+      methodName = "pp_cyto_gate_auto", 
+      dep = NA,
+      "preprocessing"
+    )
+    openCyto::register_plugins(
+      fun = .cyto_gate_auto,
+      methodName = "cyto_gate_auto"
+    )
   })
   
 }
