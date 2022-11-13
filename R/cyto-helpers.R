@@ -4148,12 +4148,18 @@ cyto_split <- function(x,
   
   # ID - MISSING
   if(is.null(id)) {
-    id <- "\\Sample.*ID$"
+    id <- "Sample.*ID$"
   }
   
   # ID - CHANNEL NAME
   if(is.character(id)) {
-    id <- cyto_channels_extract(x, id)[1] # FIRST MATCH
+    # FIRST MATCHING CHANNEL
+    id <- cyto_channels_extract(
+      x, 
+      channels = id, 
+      escape = FALSE,
+      ignore.case = TRUE
+    )[1]
   # ID - VECTOR
   } else {
     # EVENTS
