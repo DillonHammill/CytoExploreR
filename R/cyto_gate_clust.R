@@ -5,6 +5,9 @@
 #' @param x object of class
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param select sample selection criteria passed to \code{cyto_select()} to
+#'   restrict the samples prior passing the data to the specified clustering
+#'   algorithm.
 #' @param parent name of the parent population to gate using the clustering
 #'   algorithm supplied to \code{type}.
 #' @param alias names(s) to use for the newly clustered populations. For
@@ -75,6 +78,7 @@
 #'
 #' @export
 cyto_gate_clust <- function(x,
+                            select = NULL,
                             parent = NULL,
                             alias = NULL,
                             channels = NULL,
@@ -100,6 +104,14 @@ cyto_gate_clust <- function(x,
         "'cyto_gate_clust()' only supports GatingHierarchy and GatingSet ",
         "objects!"
       )
+    )
+  }
+  
+  # SELECT
+  if(!is.null(select)) {
+    x <- cyto_select(
+      x,
+      select
     )
   }
   

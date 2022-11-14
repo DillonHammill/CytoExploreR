@@ -6,6 +6,7 @@
 \usage{
 cyto_gate_som(
   x,
+  select = NULL,
   parent = "root",
   som = NULL,
   alias = NULL,
@@ -18,6 +19,10 @@ cyto_gate_som(
 \item{x}{an object of class
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+
+\item{select}{passed to \code{cyto_select()} to control which samples were
+mapped to the supplied SOM using \code{cyto_som}, set to all samples by
+default.}
 
 \item{parent}{name of the parent population which should be gated using the
 SOM, ideally the same population used to train the SOM in

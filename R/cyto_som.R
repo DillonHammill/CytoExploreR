@@ -681,6 +681,9 @@ cyto_som <- function(x,
 #' @param x an object of class
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param select passed to \code{cyto_select()} to control which samples were
+#'   mapped to the supplied SOM using \code{cyto_som}, set to all samples by
+#'   default.
 #' @param parent name of the parent population which should be gated using the
 #'   SOM, ideally the same population used to train the SOM in
 #'   \code{cyto_som()}.
@@ -709,6 +712,7 @@ cyto_som <- function(x,
 #'
 #' @export
 cyto_gate_som <- function(x,
+                          select = NULL,
                           parent = "root",
                           som = NULL,
                           alias = NULL,
@@ -717,6 +721,7 @@ cyto_gate_som <- function(x,
                           ...) {
   
   # TODO: OPTIONAL RENAMING OF POPULATIONS IN ORIGINAL GATINGSET (CLASHES)
+  # TODO: ADD SELECT CYTO_GATE_SOM()
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -724,6 +729,14 @@ cyto_gate_som <- function(x,
   if(!cyto_class(x, "GatingSet")) {
     stop(
       "cyto_gate_som() only supports GatingHierarchy or GatingSet objects!"
+    )
+  }
+  
+  # SELECT
+  if(!is.null(select)) {
+    x <- cyto_select(
+      x,
+      select
     )
   }
   
@@ -751,9 +764,13 @@ cyto_gate_som <- function(x,
   # SOM CHECKS
   } else {
     # GATINGSET REQUIRED
-    if(!cyto_class(som, "GatingSet") & length(som) != length(x)) {
+    if(!cyto_class(som, "GatingSet")) {
       stop(
         "'som' must be a GatingSet object created by cyto_som()!"
+      )
+    } else if(length(som) != length(x)) {
+      stop(
+        "The supplied 'som' must contain the same samples in 'x'!"
       )
     }
   }

@@ -6,6 +6,7 @@
 \usage{
 cyto_gate_clust(
   x,
+  select = NULL,
   parent = NULL,
   alias = NULL,
   channels = NULL,
@@ -27,6 +28,10 @@ cyto_gate_clust(
 \item{x}{object of class
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+
+\item{select}{sample selection criteria passed to \code{cyto_select()} to
+restrict the samples prior passing the data to the specified clustering
+algorithm.}
 
 \item{parent}{name of the parent population to gate using the clustering
 algorithm supplied to \code{type}.}
