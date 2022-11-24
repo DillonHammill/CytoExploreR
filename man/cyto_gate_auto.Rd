@@ -86,7 +86,15 @@ a GatingHierarchy or GatingSet with automated gates added and updated
   in the gatingTemplate.
 }
 \description{
-CytoExploreR wrapper around openCyto automated gating methods
+Perform automated using the algorithms supported by \code{openCyto} without
+the need to write any plugins. The algorithms used within
+\code{cyto_gate_auto()} behave in much the same way as they do within the
+\code{openCyto} package except that any range related arguments (e.g. min,
+max and target) expect values on the linear scale. \code{cyto_gate_auto()}
+will automatically map these values to the transformed scale prior to passing
+them to the specified \code{openCyto} gating function. Eventually, automated
+gates will be edited through the \code{cyto_gate_edit()} but in the meantime,
+users should use \code{cyto_gatingTemplate_edit()} instead.
 }
 \seealso{
 \code{\link{cyto_gate_draw}}

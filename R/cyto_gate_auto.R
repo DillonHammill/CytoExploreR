@@ -2,6 +2,16 @@
 
 #' CytoExploreR wrapper around openCyto automated gating methods
 #'
+#' Perform automated using the algorithms supported by \code{openCyto} without
+#' the need to write any plugins. The algorithms used within
+#' \code{cyto_gate_auto()} behave in much the same way as they do within the
+#' \code{openCyto} package except that any range related arguments (e.g. min,
+#' max and target) expect values on the linear scale. \code{cyto_gate_auto()}
+#' will automatically map these values to the transformed scale prior to passing
+#' them to the specified \code{openCyto} gating function. Eventually, automated
+#' gates will be edited through the \code{cyto_gate_edit()} but in the meantime,
+#' users should use \code{cyto_gatingTemplate_edit()} instead.
+#'
 #' @param x object of class
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
@@ -281,11 +291,14 @@ cyto_gate_auto <- function(x,
     fr <- cyto_copy(fr)
   }
   
+  # TRANSFORMERS
+  trans <- pp_res$trans
+  
   # INVERSE TRANSFORM
-  if(inverse & !.all_na(pp_res$trans)) {
+  if(inverse & !.all_na(trans)) {
     fr <- cyto_transform(
       fr,
-      trans = pp_res$trans,
+      trans = trans,
       inverse = inverse,
       plot = FALSE,
       quiet = TRUE
@@ -297,7 +310,7 @@ cyto_gate_auto <- function(x,
     cyto_exprs(fr) <- cyto_stat_scale(
       cyto_exprs(
         fr,
-        channels = params,
+        channels = channels,
         drop = FALSE
       ),
       type = scale
@@ -309,7 +322,7 @@ cyto_gate_auto <- function(x,
     fr,
     format = input,
     channels = channels,
-    trans = pp_res$trans,
+    trans = trans,
     inverse = inverse,
     events = events,
     seed = seed,
@@ -372,6 +385,30 @@ cyto_gate_auto <- function(x,
       } else {
         type <- "flowDensity:::.flowDensity.1d"
       }
+    }
+    # OPENCYTO EXPECTS ARGUMENTS ON TRANSFORMED SCALE
+    if(!.all_na(trans) & grepl("^openCyto", type, ignore.case = TRUE)) {
+      # ARGUMENTS TO TRANSFORM LINEAR -> TRANSFORMED SCALE
+      ind <- grep(
+        "^min$|^max$|^target$|_min$|_max$",
+        names(args)
+      )
+      # ARGUMENTS SHOULD BE OF LENGTH CHANNELS
+      lapply(
+        ind,
+        function(z) {
+          for(i in seq_along(channels)) {
+            if(channels[i] %in% names(trans)) {
+              args[[z]] <<- .cyto_transform(
+                args[[z]][i],
+                channel = channels[i],
+                trans = trans,
+                inverse = FALSE
+              )
+            }
+          }
+        }
+      )
     }
     # CONVERT TYPE TO FUNCION
     type <- cyto_func_match(type)

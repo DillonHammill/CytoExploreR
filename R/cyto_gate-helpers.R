@@ -1076,9 +1076,11 @@ cyto_gate_bool <- function(x,
       if(logic_match[z] == 0){
         return(
           trimws(
-            substr(logic_to_clean,
-                   1,
-                   logic_match[z + 1] - 1)
+            substr(
+              logic_to_clean,
+              1,
+              logic_match[z + 1] - 1
+            )
           )
         )
       }
@@ -1087,22 +1089,30 @@ cyto_gate_bool <- function(x,
         # ADJACENT OPERATORS
         if(logic_match[z + 1] - logic_match[z] == 1){
           return(
-            substr(logic_to_clean,
-                   logic_match[z],
-                   logic_match[z])
+            substr(
+              logic_to_clean,
+              logic_match[z],
+              logic_match[z]
+            )
           )
           # OPERATOR - CHUNK - OPERATOR  
         }else{
           return(
             paste0(
-              c(substr(logic_to_clean,
-                       logic_match[z],
-                       logic_match[z]),
+              c(
+                substr(
+                  logic_to_clean,
+                  logic_match[z],
+                  logic_match[z]
+                ),
                 trimws(
-                  substr(logic_to_clean,
-                         logic_match[z] + 1,
-                         logic_match[z + 1] - 1)
-                )), collapse = ""
+                  substr(
+                    logic_to_clean,
+                    logic_match[z] + 1,
+                    logic_match[z + 1] - 1
+                  )
+                )
+              ), collapse = ""
             )
           )
         }
@@ -1111,14 +1121,20 @@ cyto_gate_bool <- function(x,
       if(length(logic_match) == z){
         return(
           paste0(
-            c(substr(logic_to_clean,
-                     logic_match[z],
-                     logic_match[z]),
+            c(
+              substr(
+                logic_to_clean,
+                logic_match[z],
+                logic_match[z]
+              ),
               trimws(
-                substr(logic_to_clean,
-                       logic_match[z] + 1,
-                       nchar(logic_to_clean))
-              )), collapse = ""
+                substr(
+                  logic_to_clean,
+                  logic_match[z] + 1,
+                  nchar(logic_to_clean)
+                )
+              )
+            ), collapse = ""
           )
         )
       }
@@ -1141,9 +1157,11 @@ cyto_gate_bool <- function(x,
       LAPPLY(
         p, 
         function(y) {
-          cyto_nodes_convert(x,
-                             nodes = y,
-                             path = "auto")
+          cyto_nodes_convert(
+            x,
+            nodes = y,
+            path = "auto"
+          )
         }
       )
     }
