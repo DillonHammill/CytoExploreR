@@ -149,6 +149,8 @@ cyto_stats_compute <- function(x,
                                slot = NULL,
                                ...) {
   
+  # TODO: EXTRACT COUNT|FREQ STATISTICS FROM SOM
+  
   # CHECKS ---------------------------------------------------------------------
   
   # STATISTIC

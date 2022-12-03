@@ -30,7 +30,7 @@
 #' @param ... additional arguments passed to \code{cyto_data_extract()} when
 #'   extracting the training and testing data.
 #'
-#' @return a mtrix containing the imputed labels or values.
+#' @return a matrix containing the imputed labels or values.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -119,6 +119,7 @@ cyto_impute <- function(train = NULL,
   train <- data.matrix(train)
   test <- data.matrix(test)
   
+  # TODO: WE SHOULD REALLY BE DOING GLOBAL MIN\MAX SCALING HERE
   # SCALE
   if (!scale %in% FALSE) {
     train <- cyto_stat_scale(

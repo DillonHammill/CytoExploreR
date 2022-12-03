@@ -111,14 +111,16 @@ cyto_plot_gate.rectangleGate <- function(gate,
       gate@max <- xmax
     }
     # PLOT GATE
-    rect(xleft = gate@min,
-         xright = gate@max,
-         ybottom = ymin,
-         ytop = ymax,
-         lty = gate_line_type,
-         lwd = gate_line_width,
-         border = gate_line_col,
-         col = adjustcolor(gate_fill, gate_fill_alpha))
+    rect(
+      xleft = gate@min,
+      xright = gate@max,
+      ybottom = ymin,
+      ytop = ymax,
+      lty = gate_line_type,
+      lwd = gate_line_width,
+      border = gate_line_col,
+      col = adjustcolor(gate_fill, gate_fill_alpha)
+    )
     # 2D PLOT  
   }else if(length(channels) == 2){
     # REPLACE INFINITE X COORDS
@@ -157,14 +159,16 @@ cyto_plot_gate.rectangleGate <- function(gate,
     }
     
     # PLOT GATE
-    rect(xleft = gate@min[channels[1]],
-         xright = gate@max[channels[1]],
-         ybottom = gate@min[channels[2]],
-         ytop = gate@max[channels[2]],
-         lty = gate_line_type,
-         lwd = gate_line_width,
-         border = gate_line_col,
-         col = adjustcolor(gate_fill, gate_fill_alpha))
+    rect(
+      xleft = gate@min[channels[1]],
+      xright = gate@max[channels[1]],
+      ybottom = gate@min[channels[2]],
+      ytop = gate@max[channels[2]],
+      lty = gate_line_type,
+      lwd = gate_line_width,
+      border = gate_line_col,
+      col = adjustcolor(gate_fill, gate_fill_alpha)
+    )
   }
   
   # RETURN GATE ----------------------------------------------------------------
@@ -242,14 +246,16 @@ cyto_plot_gate.polygonGate <- function(gate,
       gate@max[channels[1]] <- xmax
     }
     # PLOT GATE
-    rect(xleft = gate@min[channels[1]],
-         xright = gate@max[channels[1]],
-         ybottom = ymin,
-         ytop = ymax,
-         lty = gate_line_type,
-         lwd = gate_line_width,
-         border = gate_line_col,
-         col = adjustcolor(gate_fill, gate_fill_alpha))
+    rect(
+      xleft = gate@min[channels[1]],
+      xright = gate@max[channels[1]],
+      ybottom = ymin,
+      ytop = ymax,
+      lty = gate_line_type,
+      lwd = gate_line_width,
+      border = gate_line_col,
+      col = adjustcolor(gate_fill, gate_fill_alpha)
+    )
     # 2D PLOT - POLYGON OR RECTANGLE
   }else if(length(channels) == 2){
     # 2D RECTANGLE GATE
@@ -269,14 +275,16 @@ cyto_plot_gate.polygonGate <- function(gate,
         gate@max[channels[2]] <- ymax
       }
       # PLOT GATE
-      rect(xleft = gate@min[channels[1]],
-           xright = gate@max[channels[1]],
-           ybottom = gate@min[channels[2]],
-           ytop = gate@max[channels[2]],
-           lty = gate_line_type,
-           lwd = gate_line_width,
-           border = gate_line_col,
-           col = adjustcolor(gate_fill, gate_fill_alpha))
+      rect(
+        xleft = gate@min[channels[1]],
+        xright = gate@max[channels[1]],
+        ybottom = gate@min[channels[2]],
+        ytop = gate@max[channels[2]],
+        lty = gate_line_type,
+        lwd = gate_line_width,
+        border = gate_line_col,
+        col = adjustcolor(gate_fill, gate_fill_alpha)
+      )
       # 2D POLYGONGATE  
     }else if(is(gate, "polygonGate")){
       # CO-ORDINATES
@@ -305,12 +313,13 @@ cyto_plot_gate.polygonGate <- function(gate,
         })
       }
       # PLOT GATE
-      polygon(x_coords,
-              y_coords,
-              lty = gate_line_type,
-              lwd = gate_line_width,
-              border = gate_line_col,
-              col = adjustcolor(gate_fill, gate_fill_alpha)
+      polygon(
+        x_coords,
+        y_coords,
+        lty = gate_line_type,
+        lwd = gate_line_width,
+        border = gate_line_col,
+        col = adjustcolor(gate_fill, gate_fill_alpha)
       )
     }
     
@@ -418,14 +427,16 @@ cyto_plot_gate.ellipsoidGate <- function(gate,
         gate@max[channels[2]] <- ymax
       }
       # PLOT GATE
-      rect(xleft = gate@min[channels[1]],
-           xright = gate@max[channels[1]],
-           ybottom = gate@min[channels[2]],
-           ytop = gate@max[channels[2]],
-           lty = gate_line_type,
-           lwd = gate_line_width,
-           border = gate_line_col,
-           col = adjustcolor(gate_fill, gate_fill_alpha))
+      rect(
+        xleft = gate@min[channels[1]],
+        xright = gate@max[channels[1]],
+        ybottom = gate@min[channels[2]],
+        ytop = gate@max[channels[2]],
+        lty = gate_line_type,
+        lwd = gate_line_width,
+        border = gate_line_col,
+        col = adjustcolor(gate_fill, gate_fill_alpha)
+      )
       # 2D ELLIPSOIDGATE  
     }else if(is(gate, "ellipsoidGate")){
       # COERCE TO POLYGONGATE
@@ -456,12 +467,13 @@ cyto_plot_gate.ellipsoidGate <- function(gate,
         })
       }
       # PLOT GATE
-      polygon(x_coords,
-              y_coords,
-              lty = gate_line_type,
-              lwd = gate_line_width,
-              border = gate_line_col,
-              col = adjustcolor(gate_fill, gate_fill_alpha)
+      polygon(
+        x_coords,
+        y_coords,
+        lty = gate_line_type,
+        lwd = gate_line_width,
+        border = gate_line_col,
+        col = adjustcolor(gate_fill, gate_fill_alpha)
       )
     }
     
@@ -602,13 +614,15 @@ cyto_plot_gate.filters <- function(gate,
   # LIST GATE METHOD -----------------------------------------------------------
   
   # PLOT GATES
-  gate <- cyto_plot_gate(gate = gate,
-                         channels = channels,
-                         gate_line_type = gate_line_type,
-                         gate_line_width = gate_line_width,
-                         gate_line_col = gate_line_col,
-                         gate_fill = gate_fill,
-                         gate_fill_alpha = gate_fill_alpha)
+  gate <- cyto_plot_gate(
+    gate = gate,
+    channels = channels,
+    gate_line_type = gate_line_type,
+    gate_line_width = gate_line_width,
+    gate_line_col = gate_line_col,
+    gate_fill = gate_fill,
+    gate_fill_alpha = gate_fill_alpha
+  )
   
   # RETURN GATE ----------------------------------------------------------------
   
@@ -673,13 +687,15 @@ cyto_plot_gate.list <- function(gate,
                           gate_fill,
                           gate_fill_alpha){
     
-    cyto_plot_gate(gate,
-                   channels = channels,
-                   gate_line_type = gate_line_type,
-                   gate_line_width = gate_line_width,
-                   gate_line_col = gate_line_col,
-                   gate_fill = gate_fill,
-                   gate_fill_alpha = gate_fill_alpha)
+    cyto_plot_gate(
+      gate,
+      channels = channels,
+      gate_line_type = gate_line_type,
+      gate_line_width = gate_line_width,
+      gate_line_col = gate_line_col,
+      gate_fill = gate_fill,
+      gate_fill_alpha = gate_fill_alpha
+    )
     
   }, gate,
   gate_line_type,

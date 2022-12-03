@@ -689,6 +689,55 @@
   
 }
 
+## NCVIS -----------------------------------------------------------------------
+
+#' NCVis
+#' @noRd
+.cyto_map_ncvis <- function(x,
+                            ...) {
+  
+  # CHECK PYTHON MODULE
+  py_ncvis <- cyto_require(
+    "ncvis",
+    python = TRUE,
+    ref = paste0(
+      "Artemenkov, A. & Panov, M. (2020) NCVis: Noise ",
+      "Contrastive Approach for Scalable Visualization. In Proceedings ",
+      "of The Web Conference 2020 (WWW '20). Association for Computing ",
+      "Machinery, New York, NY, USA, 2941–2947."
+    ),
+    import = "ncvis",
+    pip = TRUE
+  )
+  
+  # NCVIS UNAVAILABLE
+  if(is.null(py_ncvis)) {
+    stop(
+      "Unable to import required ncvis module from current python environment!"
+    )
+  # NCVIS
+  } else {
+    # MESSAGE
+    message(
+      "Using ncvis module to compute NCVis co-ordinates..."
+    )
+    # CONFIGURE  - MODIFY PARAMETERS AS NECESSARY
+    ncvis <- py_ncvis$NCVis(
+      ...
+    )
+    # APPLY NCVIS TO DATASET
+    res <- ncvis$fit_transform(
+      data.matrix(x)
+    )
+    colnames(res) <- paste0(
+      "NCVis-",
+      1:ncol(res)
+    )
+    return(res)
+  }
+  
+}
+
 ## EMBEDSOM --------------------------------------------------------------------
 
 #' EmbedSOM

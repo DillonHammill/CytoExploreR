@@ -31,20 +31,22 @@
 #'   (some additional configuration required)}\item{"UMAP"}{ uses python
 #'   umap-learn or R uwot::umap() to compute UMAP co-ordinates}\item{"UMATO"}{
 #'   uses UMATO python library to compute dimension-reduced co-ordinates using
-#'   hub points and nearest neighbour graphs}\item{"EmbedSOM"}{ uses
-#'   EmbedSOM::SOM() and EmbedSOM::EmbedSOM() to compute EmbedSOM
-#'   co-ordinates}\item{"PHATE"}{ uses python phate to compute trajectory
-#'   embedding co-ordinates}\item{"PaCMAP"}{ uses python pacmap to compute
-#'   pairwise controlled manifold approximation co-ordinates}\item{"TriMap"}{
-#'   uses python trimap.TRIMAP() to compute triplet constrained
-#'   co-ordinates}\item{"IsoMap"}{ uses python sklearn.manifold.Isomap() to
-#'   compute non-linear isomapping co-ordinates}\item{"MDS"}{ uses python
-#'   sklearn.manifold.MDS() or \code{stats::cmdscale()} to compute
-#'   multidimensional scaling co-ordinates}\item{"kNN"}{ builds a k nearest
-#'   neighbours (kNN) graph using RANN::nn2() and uses igraph to compute the
-#'   layout co-ordinates for the graph}\item{"sNN"}{ builds a shared nearest
-#'   neighbours (sNN) graph using HGC::SNN.construction() and igraph to compute
-#'   the layout co-ordinates for the graph}}
+#'   hub points and nearest neighbour graphs}\item{"NCViz"}{uses ncvis python
+#'   module to compute a noise contrastive dimenion-reduced
+#'   co-ordinates}\item{"EmbedSOM"}{ uses EmbedSOM::SOM() and
+#'   EmbedSOM::EmbedSOM() to compute EmbedSOM co-ordinates}\item{"PHATE"}{ uses
+#'   python phate to compute trajectory embedding co-ordinates}\item{"PaCMAP"}{
+#'   uses python pacmap to compute pairwise controlled manifold approximation
+#'   co-ordinates}\item{"TriMap"}{ uses python trimap.TRIMAP() to compute
+#'   triplet constrained co-ordinates}\item{"IsoMap"}{ uses python
+#'   sklearn.manifold.Isomap() to compute non-linear isomapping
+#'   co-ordinates}\item{"MDS"}{ uses python sklearn.manifold.MDS() or
+#'   \code{stats::cmdscale()} to compute multidimensional scaling
+#'   co-ordinates}\item{"kNN"}{ builds a k nearest neighbours (kNN) graph using
+#'   RANN::nn2() and uses igraph to compute the layout co-ordinates for the
+#'   graph}\item{"sNN"}{ builds a shared nearest neighbours (sNN) graph using
+#'   HGC::SNN.construction() and igraph to compute the layout co-ordinates for
+#'   the graph}}
 #' @param scale optional argument to scale each channel prior to computing
 #'   dimension-reduced co-ordinates, options include \code{"global"},
 #'   \code{"range"}, \code{"mean"}, \code{"median"} or \code{"zscore"}. Set to
@@ -599,6 +601,9 @@ cyto_map <- function(x,
     # SNN
     } else if(grepl("^SNN$", type, ignore.case = TRUE)) {
       type <- ".cyto_map_snn"
+    # NCVis
+    }else if(grepl("^NCVis$", type, ignore.case = TRUE)) {
+      type <- ".cyto_map_ncvis"
     }
   }
   

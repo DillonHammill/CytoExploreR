@@ -10,6 +10,7 @@ cyto_som(
   parent = "root",
   channels = NULL,
   grid = c(14, 14),
+  topo = "rectangular",
   rlen = 10,
   alpha = c(0.05, 0.01),
   events = 1,
@@ -40,7 +41,11 @@ the SOM, no default set so channels must be supplied manually.}
 \item{grid}{vector of length 2 indicating the dimensions of the SOM grid, set
 to \code{c(14,14)} by default.}
 
-\item{rlen}{number of time the data should be presented to the network, set
+\item{topo}{indicates whether to use \code{"rectangular"} or
+\code{"hexagonal"} topology for the SOM grid, set to \code{"rectangular"}
+by default.}
+
+\item{rlen}{number of times the data should be presented to the network, set
 to 10 by default.}
 
 \item{alpha}{learning rate, default is to decline linearly from 0.05 to 0.01
@@ -85,9 +90,6 @@ to NULL by default to bypass \code{gatingTemplate} assignment.}
 
 \item{...}{additional arguments passed to \code{cyto_map()} for
 dimensionality reduction.}
-
-\item{radius}{radius of the neighbourhood for SOM training, set to start with
-a value that covers two thirds of all unit-to-unit distances.}
 }
 \value{
 a cytoset or GatingSet containing the code vectors for every sample

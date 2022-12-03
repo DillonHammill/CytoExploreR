@@ -56,7 +56,7 @@ by default.}
 extracting the training and testing data.}
 }
 \value{
-a mtrix containing the imputed labels or values.
+a matrix containing the imputed labels or values.
 }
 \description{
 Impute values or labels using k nearest neighbours

@@ -26,12 +26,13 @@
 #'   the SOM, no default set so channels must be supplied manually.
 #' @param grid vector of length 2 indicating the dimensions of the SOM grid, set
 #'   to \code{c(14,14)} by default.
-#' @param rlen number of time the data should be presented to the network, set
+#' @param topo indicates whether to use \code{"rectangular"} or
+#'   \code{"hexagonal"} topology for the SOM grid, set to \code{"rectangular"}
+#'   by default.
+#' @param rlen number of times the data should be presented to the network, set
 #'   to 10 by default.
 #' @param alpha learning rate, default is to decline linearly from 0.05 to 0.01
 #'   over \code{rlen} updates.
-#' @param radius radius of the neighbourhood for SOM training, set to start with
-#'   a value that covers two thirds of all unit-to-unit distances.
 #' @param events indicates the number or proportion of events to use when
 #'   training the SOM, set to 1 by default to use all available events.
 #' @param map passed to the \code{type} argument of cyto_map() to perform
@@ -124,6 +125,7 @@ cyto_som <- function(x,
                      parent = "root",
                      channels = NULL,
                      grid = c(14,14),
+                     topo = "rectangular",
                      rlen = 10,
                      alpha = c(0.05, 0.01),
                      events = 1,
@@ -194,6 +196,13 @@ cyto_som <- function(x,
   
   # GRID
   grid <- rep(grid, length.out = 2)
+  
+  # TOPOLOGY
+  if(grepl("^r", topo, ignore.case = TRUE)) {
+    topo <- "rectangular"
+  } else {
+    topo <- "hexagonal"
+  }
   
   # REQUIRE KOHONEN
   cyto_require(
@@ -343,7 +352,8 @@ cyto_som <- function(x,
       "kohonen::somgrid",
       list(
         xdim = grid[1],
-        ydim = grid[2]
+        ydim = grid[2],
+        topo = topo
       )
     )
     # TRAIN SOM
