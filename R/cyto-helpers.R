@@ -690,7 +690,8 @@ cyto_clean <- function(x,
                    " de Magalhaes J, Larbi A (2016). flowAI:",
                    " automatic and interactive anomaly discerning",
                    " tools for flow cytometry data. Bioinformatics,",
-                   " 32(16).")
+                   " 32(16)."),
+      version = "1.27.3"
     )
     invisible(
       capture.output(
@@ -705,6 +706,7 @@ cyto_clean <- function(x,
           mini_report = FALSE,
           fcs_QC = FALSE,
           folder_results = FALSE,
+          emptyValue = FALSE,
           ...
         )
       )
@@ -7154,7 +7156,7 @@ cyto_nodes_fix <- function(x) {
       "Duplicate populations will be renamed"
     )
     node_match <- match(nodes_auto[ind], nodes_auto)
-    node_ind <- rep(0, unique(node_match))
+    node_ind <- rep(0, length(unique(node_match)))
     names(node_ind) <- unique(node_match)
     nodes_rename <- data.frame(
       "node_full" = cyto_nodes(

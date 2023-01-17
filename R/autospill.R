@@ -21,6 +21,8 @@
                             iter = 100,
                             trim = 0.001) {
   
+  # TODO: ADD PROGRESS BAR TO AUTOSPILL
+  
   # AUTOSPILL - COMPUTE SPILLOVER COEFFICIENTS ---------------------------------
   
   # CHANNELS
