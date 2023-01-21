@@ -2,7 +2,6 @@
 
 #' Import data from other platforms using CytoML
 #'
-#'
 #' @param path path to xml or wsp file and associated fcs files.
 #' @param type indicates the type of data to import, options include
 #'   \code{"flowJo"}, \code{"cytobank"} or \code{"diva"}. Set to \code{"flowJo"}

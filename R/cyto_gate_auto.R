@@ -53,6 +53,8 @@
 #'   \code{"mean"}, \code{"median"} or \code{"zscore"}. Set to \code{FALSE} by
 #'   default to bypass the data scaling step.
 #' @param seed numeric to set seed when \code{events != 1}.
+#' @param plot logical indicating whether the gating result should be displayed
+#'   using \code{cyto_plot()} set to TRUE by default.
 #' @param ... additional arguments passed to the automated gating function or
 #'   \code{openCyto::gs_add_gating_method()}.
 #'
@@ -84,6 +86,7 @@ cyto_gate_auto <- function(x,
                            inverse = FALSE,
                            scale = FALSE,
                            seed = 2022,
+                           plot = TRUE,
                            ...) {
   
   # TODO: ADD SUPPORT FOR MULTIPLE GATES
@@ -180,6 +183,7 @@ cyto_gate_auto <- function(x,
     pop = "+",
     gating_method = "cyto_gate_auto",
     gating_args = list(
+      "parent" = parent,
       "alias" = alias,
       "type" = type,
       "input" = input,
@@ -187,7 +191,8 @@ cyto_gate_auto <- function(x,
       "events" = events,
       "scale" = scale,
       "seed" = seed,
-      "slot" = slot
+      "slot" = slot,
+      "plot" = plot
     ),
     collapseDataForGating = TRUE,
     groupBy = group_by,
@@ -200,22 +205,38 @@ cyto_gate_auto <- function(x,
   args <- list(...)
   
   # REMOVE ILLEGAL ARGUMENTS
-  args <- args[!names(args) %in% c("gs",
-                                   "dims",
-                                   "groupBy",
-                                   "gating_method", 
-                                   "preprocessing_method",
-                                   "preprocessing_args")]
+  args <- args[
+    !names(args) %in% c(
+      "gs",
+      "dims",
+      "groupBy",
+      "gating_method", 
+      "preprocessing_method",
+      "preprocessing_args"
+    )
+  ]
   
   # PARALLEL GATING ARGUMENTS
   if(any(c("mc.cores", "parallel_type", "cl") %in% names(args))) {
     # APPEN GATING METHOD ARGUMENTS
     gm <- c(
       gm,
-      args[names(args) %in% c("mc.cores", "parallel_type", "cl")]
+      args[
+        names(args) %in% c(
+          "mc.cores",
+          "parallel_type",
+          "cl"
+        )
+      ]
     )
     # EXCLUDE FROM GATING ARGUMENTS
-    args <- args[!names(args) %in% c("mc.cores", "parallel_type", "cl")]
+    args <- args[
+      !names(args) %in% c(
+        "mc.cores", 
+        "parallel_type",
+        "cl"
+      )
+    ]
   }
   
   # GATING METHOD ARGUMENTS
@@ -233,6 +254,8 @@ cyto_gate_auto <- function(x,
     )
   }
   
+  print(gm)
+  
   # ADD POPULATIONS TO GATINGSET
   pop <- cyto_func_call(
     "gs_add_gating_method",
@@ -243,7 +266,13 @@ cyto_gate_auto <- function(x,
   gt <- rbind(gt, pop)
   
   # WRITING NEW GATINGTEMPLATE ENTRIES
-  message(paste("Re-writing", gatingTemplate, "with new gating entries..."))
+  message(
+    paste(
+      "Re-writing",
+      gatingTemplate,
+      "with new gating entries..."
+    )
+  )
   
   # SAVE UPDATED GATINGTEMPLATE
   cyto_gatingTemplate_write(gt, gatingTemplate)
@@ -263,8 +292,27 @@ cyto_gate_auto <- function(x,
                                isCollapse = NA,
                                ...) {
  
+  # GROUPBY
+  if(is.character(groupBy) & nchar(groupBy) == 0) {
+    groupBy <- NA
+  }
+  
+  # GROUPING VARIABLES SEPARATED BY COLON
+  if(is.character(groupBy)) {
+    groupBy <- unlist(strsplit(groupBy, ":"))
+  }
+  
+  # GROUP NAME
+  grp <- cyto_groups(
+    fs,
+    group_by = groupBy,
+    details = FALSE
+  )
+  
+  # RETURN - GROUP & TRANSFORMERS
   return(
     list(
+      "group" = grp,
       "trans" = cyto_transformers_extract(gs)
     )
   )
@@ -276,6 +324,7 @@ cyto_gate_auto <- function(x,
 .cyto_gate_auto <- function(fr,
                             pp_res,
                             channels,
+                            parent = "root",
                             alias = NULL,
                             type = "flowClust",
                             input = "flowFrame",
@@ -284,7 +333,10 @@ cyto_gate_auto <- function(x,
                             scale = FALSE,
                             seed = 2022,
                             slot = NULL,
+                            plot = TRUE,
                             ...) {
+  
+  # TODO: INVERSE CAUSE ISSUES WITH GATE CO-ORDINATES!
   
   # PRECAUTIONARY - DON'T MODIFY DATA IN PLACE
   if(cyto_class(fr, "cytoframe")) {
@@ -293,6 +345,9 @@ cyto_gate_auto <- function(x,
   
   # TRANSFORMERS
   trans <- pp_res$trans
+  
+  # GROUP NAME
+  grp <- pp_res$group
   
   # INVERSE TRANSFORM
   if(inverse & !.all_na(trans)) {
@@ -427,6 +482,19 @@ cyto_gate_auto <- function(x,
         }
       )
     )
+    # PLOT
+    if(plot) {
+      # TODO: CHECK FOR SUPPORTED GATE TYPES
+      cyto_plot(
+        fr,
+        channels = channels,
+        gate = gate,
+        trans = trans,
+        title = paste0(
+          grp, "\n", parent
+        )
+      )
+    }
   # UNSUPPORTED AUTOMATED GATING ALGORITHM
   } else {
     stop(

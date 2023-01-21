@@ -19,6 +19,7 @@ cyto_gate_auto(
   inverse = FALSE,
   scale = FALSE,
   seed = 2022,
+  plot = TRUE,
   ...
 )
 }
@@ -77,6 +78,9 @@ the specified automated gating algorithm, options include \code{"range"},
 default to bypass the data scaling step.}
 
 \item{seed}{numeric to set seed when \code{events != 1}.}
+
+\item{plot}{logical indicating whether the gating result should be displayed
+using \code{cyto_plot()} set to TRUE by default.}
 
 \item{...}{additional arguments passed to the automated gating function or
 \code{openCyto::gs_add_gating_method()}.}

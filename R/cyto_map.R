@@ -115,6 +115,8 @@ cyto_map <- function(x,
                      plot = TRUE,
                      ...) {
   
+  # TODO: FIX SAMPLING USING EVENTS ARGUMENT
+  
   # CHECKS ---------------------------------------------------------------------
   
   # CLASS

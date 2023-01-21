@@ -570,13 +570,13 @@
     message(
       "Using phate python module to compute PHATE co-ordinates..."
     )
-    # CONFIGURE TRIMAP - MODIFY PARAMETERS AS NECESSARY
+    # CONFIGURE PHATE - MODIFY PARAMETERS AS NECESSARY
     phate <- py_phate$PHATE(
       knn_dist = knn_dist,
       n_jobs = n_jobs,
       ...
     )
-    # APPLY TRIMAP TO DATASET
+    # APPLY PHATE TO DATASET
     res <- phate$fit_transform(
       data.matrix(x)
     )

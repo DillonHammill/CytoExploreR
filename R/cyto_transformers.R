@@ -485,13 +485,13 @@ cyto_transformers_define <- function(x,
       channels = channels,
       format = "cytoset",
       events = events,
-      coerce = TRUE
-    )
+      coerce = TRUE,
+      copy = TRUE
+    )[[1]]
     # APPLY TRANSFORMERS
     cs <- cyto_transform(
       cs,
       trans = transformer_list,
-      copy = TRUE,
       plot = FALSE,
       quiet = TRUE
     )

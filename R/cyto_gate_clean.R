@@ -185,7 +185,8 @@ cyto_gate_clean <- function(x,
           " automatic and interactive anomaly discerning",
           " tools for flow cytometry data. Bioinformatics,",
           " 32(16)."
-        )
+        ),
+        version = "1.27.3"
       )
       input <- "flowFrame"
       inverse <- TRUE
@@ -356,7 +357,8 @@ cyto_gate_clean <- function(x,
         html_report = FALSE,
         mini_report = FALSE,
         fcs_QC = FALSE,
-        folder_results = FALSE
+        folder_results = FALSE,
+        emptyValue = FALSE
       )
       # COMBINE INCOMING ARGUMENTS
       args <- list(...)
