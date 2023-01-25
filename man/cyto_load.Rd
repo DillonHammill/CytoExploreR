@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_load}
 \alias{cyto_load}
-\title{Load .fcs files into ncdfFlowSet}
+\title{Load FCS files into cytoset}
 \usage{
 cyto_load(
   path = ".",
@@ -12,6 +12,7 @@ cyto_load(
   barcode = FALSE,
   restrict = FALSE,
   copy = FALSE,
+  split = NULL,
   fixed = FALSE,
   ignore.case = TRUE,
   ...
@@ -41,6 +42,9 @@ dropped from the returned cytoset, set to FALSE by default. See
 
 \item{copy}{logical indicating whether \code{GatingSet} archives should be
 copied after loading, set to FALSE by default.}
+
+\item{split}{indicates the name of a channel by which barcoded samples should
+be split using \code{cyto_split()}.}
 
 \item{fixed}{logical passed to \code{grepl()} during file name matching in
 \code{select} and \code{exclude} to control whether an exact match is

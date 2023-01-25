@@ -304,7 +304,7 @@ cyto_export <- function(x,
 
 ## CYTO_LOAD -------------------------------------------------------------------
 
-#' Load .fcs files into ncdfFlowSet
+#' Load FCS files into cytoset
 #'
 #' \code{cyto_load} is a convenient wrapper around
 #' \code{\link[base:list.files]{list.files}} and
@@ -330,6 +330,8 @@ cyto_export <- function(x,
 #'   \code{\link{cyto_channels_restrict}}.
 #' @param copy logical indicating whether \code{GatingSet} archives should be
 #'   copied after loading, set to FALSE by default.
+#' @param split indicates the name of a channel by which barcoded samples should
+#'   be split using \code{cyto_split()}.
 #' @param fixed logical passed to \code{grepl()} during file name matching in
 #'   \code{select} and \code{exclude} to control whether an exact match is
 #'   required, set to FALSE by default for more flexible matching.
@@ -369,6 +371,7 @@ cyto_load <- function(path = ".",
                       barcode = FALSE,
                       restrict = FALSE,
                       copy = FALSE,
+                      split = NULL,
                       fixed = FALSE,
                       ignore.case = TRUE,
                       ...) {
@@ -566,6 +569,14 @@ cyto_load <- function(path = ".",
     # CHANNEL RESTRICTION
     if (restrict) {
       x <- cyto_channels_restrict(x)
+    }
+    
+    # SPLIT BARCODES - DEFAULT NAMES
+    if(!is.null(split)) {
+      x <- cyto_split(
+        x,
+        id = split
+      )
     }
   }
   
@@ -4098,7 +4109,7 @@ setAs(
 
 ## CYTO_SPLIT ------------------------------------------------------------------
 
-#' Split samples merged with cyto_merge
+#' Split samples merged with cyto_merge_by()
 #'
 #' Extract individual samples merged using \code{cyto_merge_by()} or
 #' \code{cyto_coerce()} based on \code{"Sample-ID"} column created by

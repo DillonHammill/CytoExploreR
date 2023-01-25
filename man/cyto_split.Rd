@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_split}
 \alias{cyto_split}
-\title{Split samples merged with cyto_merge}
+\title{Split samples merged with cyto_merge_by()}
 \usage{
 cyto_split(x, id = NULL, names = NULL)
 }
