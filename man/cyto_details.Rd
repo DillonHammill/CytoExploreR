@@ -4,7 +4,14 @@
 \alias{cyto_details}
 \title{Extract experiment details}
 \usage{
-cyto_details(x, convert = FALSE, drop = FALSE, factor = FALSE, ...)
+cyto_details(
+  x,
+  convert = FALSE,
+  drop = FALSE,
+  factor = FALSE,
+  select = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace-cytoset]{cytoset}},
@@ -20,6 +27,9 @@ FALSE by default.}
 
 \item{factor}{logical indicating whether characters should be converted to
 factors when convert is TRUE, set to FALSE by default.}
+
+\item{select}{sample selection criteria passed \code{cyto_select()} prior to
+extraction of experiment details.}
 
 \item{...}{additional arguments passed to
 \code{\link[utils:type.convert]{type.convert}}.}
@@ -42,10 +52,13 @@ gs <- cyto_load(
    package = "CytoExploreRData"
    )
  )
-                          
+
 # Experiment variables
 cyto_details(gs)
 
+}
+\seealso{
+\code{\link{cyto_select}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

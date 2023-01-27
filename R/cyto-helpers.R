@@ -1158,6 +1158,8 @@ cyto_class <- function(x,
 #'   FALSE by default.
 #' @param factor logical indicating whether characters should be converted to
 #'   factors when convert is TRUE, set to FALSE by default.
+#' @param select sample selection criteria passed \code{cyto_select()} prior to
+#'   extraction of experiment details.
 #' @param ... additional arguments passed to
 #'   \code{\link[utils:type.convert]{type.convert}}.
 #'
@@ -1165,7 +1167,7 @@ cyto_class <- function(x,
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom utils type.convert
-#' 
+#'
 #' @examples
 #' library(CytoExploreRData)
 #'
@@ -1176,17 +1178,20 @@ cyto_class <- function(x,
 #'    package = "CytoExploreRData"
 #'    )
 #'  )
-#'                           
+#'
 #' # Experiment variables
 #' cyto_details(gs)
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @seealso \code{\link{cyto_select}}
 #'
 #' @export
 cyto_details <- function(x,
                          convert = FALSE,
                          drop = FALSE,
                          factor = FALSE, 
+                         select = NULL,
                          ...) {
   
   # CYTOFRAME
@@ -1197,12 +1202,22 @@ cyto_details <- function(x,
     )
   }
   
+  # SELECT
+  if(!is.null(select)) {
+    x <- cyto_select(
+      x,
+      select
+    )
+  }
+  
   # EXPERIMENT VARIABLES
   pd <- pData(x)
+  
   # ROWNAMES
   if(drop) {
     rownames(pd) <- NULL
   }
+  
   # DATA.FRAME
   if(convert){
     pd <- type.convert(
@@ -1241,8 +1256,11 @@ cyto_details <- function(x,
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param select sample selection criteria passed to \code{cyto_select()} to
+#'   restrict the set of samples prior to extracting the sample names.
+#' @param ... not in use.
 #'
-#' @return names associated with the supplied object.
+#' @return sample names associated with the supplied object.
 #'
 #' @importFrom flowCore identifier
 #' @importFrom flowWorkspace sampleNames cf_get_uri
@@ -1257,69 +1275,64 @@ cyto_details <- function(x,
 #'    package = "CytoExploreRData"
 #'    )
 #'  )
-#'  
+#'
 #' # Activation cytoset
 #' cs <- cyto_data_extract(gs, "root")[["root"]]
-#'  
+#'
 #' # GatingSet
 #' cyto_names(gs)
 #'
 #' # cytoset
 #' cyto_names(cs)
-#'  
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @rdname cyto_names
+#' @seealso \code{\link{cyto_select}}
 #'
 #' @export
-cyto_names <- function(x) {
-  UseMethod("cyto_names")
-}
-
-#' @rdname cyto_names
-#' @export
-cyto_names.flowFrame <- function(x) {
-  # FLOWFRAME -> IDENTIFIER
-  if(cyto_class(x, "flowFrame", TRUE)) {
-    # IDENTIFIER - CANNOT ACCESS URI - NOT ON DISK
-    nm <- identifier(x)
-  # CYTOFRAME -> URI
-  } else {
-    nm <- file_ext_remove(
-      basename(
-        cf_get_uri(x)
+cyto_names <- function(x,
+                       select = NULL,
+                       ...) {
+  
+  # FLOWFRAME | CYTOFRAME
+  if(cyto_class(x, "flowFrame")) {
+    # FLOWFRAME -> IDENTIFIER
+    if(cyto_class(x, "flowFrame", TRUE)) {
+      # IDENTIFIER - CANNOT ACCESS URI - NOT ON DISK
+      nm <- identifier(x)
+      # CYTOFRAME -> URI
+    } else {
+      nm <- file_ext_remove(
+        basename(
+          cf_get_uri(x)
+        )
       )
+    }
+    # COMBINED EVENTS
+    if (nm == "anonymous") {
+      nm <- "Combined Events"
+    }
+    return(nm)
+  # FLOWSET | GATINGSET
+  } else if(cyto_class(x, c("flowSet", "GatingSet"))) {
+    # SELECT
+    if(!is.null(select)) {
+      x <- cyto_Select(
+        x,
+        select
+      )
+    }
+    sampleNames(x)
+  # LIST
+  } else {
+    LAPPLY(
+      x,
+      "cyto_names",
+      select = select,
+      ...
     )
   }
-  # COMBINED EVENTS
-  if (nm == "anonymous") {
-    nm <- "Combined Events"
-  }
-  return(nm)
-}
-
-#' @rdname cyto_names
-#' @export
-cyto_names.flowSet <- function(x) {
-  sampleNames(x)
-}
-
-#' @rdname cyto_names
-#' @export
-cyto_names.GatingHierarchy <- function(x) {
-  sampleNames(x)
-}
-
-#' @rdname cyto_names
-#' @export
-cyto_names.GatingSet <- function(x) {
-  sampleNames(x)
-}
-
-#' @rdname cyto_names
-#' @export
-cyto_names.list <- function(x) {
-  LAPPLY(x, "cyto_names")
+  
 }
 
 # CYTO_NAMES REPLACEMENT METHOD ------------------------------------------------
