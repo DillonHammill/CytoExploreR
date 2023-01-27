@@ -1317,7 +1317,7 @@ cyto_names <- function(x,
   } else if(cyto_class(x, c("flowSet", "GatingSet"))) {
     # SELECT
     if(!is.null(select)) {
-      x <- cyto_Select(
+      x <- cyto_select(
         x,
         select
       )
