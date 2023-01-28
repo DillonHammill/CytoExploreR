@@ -34,7 +34,9 @@ NULL by default to load all files in the specified directory.}
 files by name prior to loading, set to \code{TRUE} by default.}
 
 \item{barcode}{logical indicating whether the flowFrames should be barcoded
-using \code{cyto_barcode}, set to FALSE by default.}
+using \code{cyto_barcode}, set to FALSE by default. Alternatively,
+\code{"samples"}, \code{"events"} or \code{"both"} to control the type of
+barcoding performed by \code{cyto_barcode()}.}
 
 \item{restrict}{logical indicating whether unassigned channels should be
 dropped from the returned cytoset, set to FALSE by default. See
