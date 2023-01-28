@@ -13,8 +13,10 @@ cyto_load(
   restrict = FALSE,
   copy = FALSE,
   split = NULL,
+  events = 1,
   fixed = FALSE,
   ignore.case = TRUE,
+  seed = NULL,
   ...
 )
 }
@@ -46,6 +48,11 @@ copied after loading, set to FALSE by default.}
 \item{split}{indicates the name of a channel by which barcoded samples should
 be split using \code{cyto_split()}.}
 
+\item{events}{numeric passed to \code{cyto_sample()} to indicate the
+proportion or number of events to import from each sample, set to 1 by
+default to import all events. Setting \code{events} to NA will result in
+downsampling to the minimum number of events across samples.}
+
 \item{fixed}{logical passed to \code{grepl()} during file name matching in
 \code{select} and \code{exclude} to control whether an exact match is
 required, set to FALSE by default for more flexible matching.}
@@ -53,6 +60,10 @@ required, set to FALSE by default for more flexible matching.}
 \item{ignore.case}{logical passed to \code{grepl()} during file name matching
 in \code{select} and \code{exclude} to control whether case insensitive
 matching is required, set to TRUE by default.}
+
+\item{seed}{integer passed tp \code{set.seed()} prior to sampling with
+\code{cyto_sample()} to ensure reproducility of sampling, set to NULL by
+default to use a random sample.}
 
 \item{...}{additional arguments passed to
 \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs()}}.}

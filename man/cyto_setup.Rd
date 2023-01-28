@@ -13,6 +13,7 @@ cyto_setup(
   parse_names = FALSE,
   details = TRUE,
   events = 1,
+  seed = NULL,
   ...
 )
 }
@@ -50,10 +51,14 @@ the delimiter to this argument instead of TRUE.}
 the loaded samples, set to TRUE by default. The name of the csv to which
 these details will be supplied can also be passed to this argument.}
 
-\item{events}{numeric passed to \code{cyto_sample} to control the number or
+\item{events}{numeric passed to \code{cyto_sample()} to control the number or
 proportion of events to retain in each sample, set to 1 by default to keep
-all events. Setting \code{events} to 0 will result in downsampling to the
+all events. Setting \code{events} to NA will result in downsampling to the
 minimum number of events across samples.}
+
+\item{seed}{integer passed tp \code{set.seed()} prior to sampling with
+\code{cyto_sample()} to ensure reproducility of sampling, set to NULL by
+default to use a random sample.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_load}}.}
 }

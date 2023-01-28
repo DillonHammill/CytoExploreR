@@ -332,12 +332,19 @@ cyto_export <- function(x,
 #'   copied after loading, set to FALSE by default.
 #' @param split indicates the name of a channel by which barcoded samples should
 #'   be split using \code{cyto_split()}.
+#' @param events numeric passed to \code{cyto_sample()} to indicate the
+#'   proportion or number of events to import from each sample, set to 1 by
+#'   default to import all events. Setting \code{events} to NA will result in
+#'   downsampling to the minimum number of events across samples.
 #' @param fixed logical passed to \code{grepl()} during file name matching in
 #'   \code{select} and \code{exclude} to control whether an exact match is
 #'   required, set to FALSE by default for more flexible matching.
 #' @param ignore.case logical passed to \code{grepl()} during file name matching
 #'   in \code{select} and \code{exclude} to control whether case insensitive
 #'   matching is required, set to TRUE by default.
+#' @param seed integer passed tp \code{set.seed()} prior to sampling with
+#'   \code{cyto_sample()} to ensure reproducility of sampling, set to NULL by
+#'   default to use a random sample.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs()}}.
 #'
@@ -372,8 +379,10 @@ cyto_load <- function(path = ".",
                       restrict = FALSE,
                       copy = FALSE,
                       split = NULL,
+                      events = 1,
                       fixed = FALSE,
                       ignore.case = TRUE,
+                      seed = NULL,
                       ...) {
 
   # PATH - NAMED LIST OF MATRICES
@@ -579,6 +588,15 @@ cyto_load <- function(path = ".",
       x <- cyto_split(
         x,
         id = split
+      )
+    }
+    
+    # DOWNSAMPLE
+    if(!all(events == 1)) {
+      x <- cyto_sample(
+        x, 
+        events = events,
+        seed = seed
       )
     }
   }
@@ -890,10 +908,13 @@ cyto_clean <- function(x,
 #'   \code{cyto_details_edit} to update the experimental details associated with
 #'   the loaded samples, set to TRUE by default. The name of the csv to which
 #'   these details will be supplied can also be passed to this argument.
-#' @param events numeric passed to \code{cyto_sample} to control the number or
+#' @param events numeric passed to \code{cyto_sample()} to control the number or
 #'   proportion of events to retain in each sample, set to 1 by default to keep
-#'   all events. Setting \code{events} to 0 will result in downsampling to the
+#'   all events. Setting \code{events} to NA will result in downsampling to the
 #'   minimum number of events across samples.
+#' @param seed integer passed tp \code{set.seed()} prior to sampling with
+#'   \code{cyto_sample()} to ensure reproducility of sampling, set to NULL by
+#'   default to use a random sample.
 #' @param ... additional arguments passed to \code{\link{cyto_load}}.
 #'
 #' @return object of class
@@ -941,6 +962,7 @@ cyto_setup <- function(path = ".",
                        parse_names = FALSE,
                        details = TRUE,
                        events = 1, 
+                       seed = NULL,
                        ...) {
   
   # CYTOSET/GATINGSET
@@ -1034,7 +1056,7 @@ cyto_setup <- function(path = ".",
       x <- cyto_sample(
         x, 
         events = events,
-        seed = 56
+        seed = seed
       )
     }
     # GATINGSET
