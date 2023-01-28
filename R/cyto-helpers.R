@@ -323,10 +323,8 @@ cyto_export <- function(x,
 #'   NULL by default to load all files in the specified directory.
 #' @param sort logical indicating whether attempts should be made to sort the
 #'   files by name prior to loading, set to \code{TRUE} by default.
-#' @param barcode logical indicating whether the flowFrames should be barcoded
-#'   using \code{cyto_barcode}, set to FALSE by default. Alternatively,
-#'   \code{"samples"}, \code{"events"} or \code{"both"} to control the type of
-#'   barcoding performed by \code{cyto_barcode()}.
+#' @param barcode logical indicating whether the cytoframes should be barcoded
+#'   using \code{cyto_barcode}, set to FALSE by default.
 #' @param restrict logical indicating whether unassigned channels should be
 #'   dropped from the returned cytoset, set to FALSE by default. See
 #'   \code{\link{cyto_channels_restrict}}.
@@ -564,13 +562,10 @@ cyto_load <- function(path = ".",
     )
     
     # BARCODING
-    if(!barcode %in% FALSE) {
-      if(barcode %in% TRUE) {
-        barcode <- "samples"
-      }
+    if(barcode) {
       x <- cyto_barcode(
         x,
-        type = barcode
+        type = "samples"
       )
     }
     
