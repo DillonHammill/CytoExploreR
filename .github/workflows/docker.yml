@@ -32,4 +32,4 @@ jobs:
         context: .
         platforms: linux/amd64,linux/arm64
         push: true
-        tags: ${ DOCKER_IMAGE_VERSION }
+        tags: ${INPUT_DOCKER_IMAGE_VERSION}

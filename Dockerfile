@@ -47,6 +47,7 @@ RUN R -e "install.packages('remotes')" && \
     R -e "BiocManager::install('flowCore')" && \
     R -e "BiocManager::install('CytoML')" && \
     R -e "BiocManager::install('flowWorkspace')" && \
+    R -e "BiocManager::install('flowCore')" && \
     R -e "BiocManager::install('openCyto')" && \
     R -e "remotes::install_github('RGLab/RProtoBufLib')" && \
     R -e "remotes::install_github('RGLab/cytolib')" && \
