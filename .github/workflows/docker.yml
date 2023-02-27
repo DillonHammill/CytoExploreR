@@ -10,16 +10,26 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Docker Login
-      env: 
-        DOCKER_USER: ${{ secrets.DOCKER_USER }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: QEMU
+      uses: docker/setup-qemu-actions@v1
+    - name: Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v1
+    - name: Docker Hub Login
+      uses: docker/login-actions@v2
+      with: 
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Docker Image Tag
       run: |
-        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+        export DOCKER_IMAGE_VERSION=$(grep Version DESCRIPTION | awk '{print $2}')
+        export DOCKER_IMAGE_VERSION="v$DOCKER_IMAGE_VERSION"
     - name: CytoExploreR Docker Build & Push
-      run: |
-        export VERSION=$(grep Version DESCRIPTION | awk '{print $2}')
-        export VERSION="v$VERSION"
-        docker build -t dhammill/cytoexplorer:$VERSION .
-        docker push dhammill/cytoexplorer:$VERSION 
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ${{ DOCKER_IMAGE_VERSION }}

@@ -1,8 +1,8 @@
 # UBUNTU OS IMAGE
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 # RSTUDIO 
-FROM rocker/rstudio
+FROM rocker/rstudio:latest-daily
 
 # INSTALL DEPENDENCIES
 RUN apt-get update && apt-get install --no-install-recommends -y\
