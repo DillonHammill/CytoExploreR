@@ -25,11 +25,11 @@ jobs:
     - name: Docker Image Tag
       run: |
         export DOCKER_IMAGE_VERSION=$(grep Version DESCRIPTION | awk '{print $2}')
-        export DOCKER_IMAGE_VERSION="v$DOCKER_IMAGE_VERSION"
+        export DOCKER_IMAGE_VERSION="v${DOCKER_IMAGE_VERSION}"
     - name: CytoExploreR Docker Build & Push
       uses: docker/build-push-action@v4
       with:
         context: .
         platforms: linux/amd64,linux/arm64
         push: true
-        tags: ${{ DOCKER_IMAGE_VERSION }}
+        tags: ${ DOCKER_IMAGE_VERSION }
