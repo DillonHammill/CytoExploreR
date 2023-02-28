@@ -44,17 +44,13 @@ RUN R -e "install.packages('remotes')" && \
     R -e "install.packages('latticeExtra')" && \
     R -e "install.packages('XML')" && \
     R -e "install.packages('BiocManager')" && \
+    R -e "BiocManager::install('cytolib')" && \
     R -e "BiocManager::install('flowCore')" && \
-    R -e "BiocManager::install('CytoML')" && \
     R -e "BiocManager::install('flowWorkspace')" && \
     R -e "BiocManager::install('flowCore')" && \
+    R -e "BiocManager::install('flowClust')" && \
     R -e "BiocManager::install('openCyto')" && \
-    R -e "remotes::install_github('RGLab/RProtoBufLib')" && \
-    R -e "remotes::install_github('RGLab/cytolib')" && \
-    R -e "remotes::install_github('RGLab/flowCore')" && \
-    R -e "remotes::install_github('RGLab/flowWorkspace')" && \
-    R -e "remotes::install_github('RGLab/flowStats')" && \
-    R -e "remotes::install_github('RGLab/openCyto')" && \
+    R -e "BiocManager::install('CytoML')" && \
     R -e "remotes::install_github('DillonHammill/CytoExploreRData')" && \
     R -e "remotes::install_github('DillonHammill/flowAI')" && \
     R -e "remotes::install_github('exaexa/scattermore')" && \
