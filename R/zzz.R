@@ -12,6 +12,9 @@
   # CYTOEXPLORER PARALLEL CONFIGURATION
   # options("CytoExploreR_parallel" = NULL)
   
+  # X11 GRAPHICS DEVICE - MACOS & LINUX ONLY
+  options("CytoExploreR_X11" = "nbcairo")
+  
   # INTERACTIVE MODE
   options("CytoExploreR_interactive" = TRUE)
   

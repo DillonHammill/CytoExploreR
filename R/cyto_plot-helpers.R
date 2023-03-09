@@ -862,6 +862,8 @@ cyto_plot_new <- function(popup = NULL,
                           popup_size = NULL,
                           ...) {
   
+  # NOTE: capabilities() X11 = FALSE machine but works (cannot check)
+  
   # STORED PARAMETERS ----------------------------------------------------------
   
   # STORED GRAPHICAL PARAMETERS
@@ -1005,34 +1007,50 @@ cyto_plot_new <- function(popup = NULL,
         # Removed to allow users to use popup window non-interactively
         # if (interactive() & cyto_option("CytoExploreR_interactive")) {
           if (.Platform$OS.type == "windows") {
-            suppressWarnings(
-              dev.new(
-                height = popup_size[1],
-                width = popup_size[2],
-                unit = "in",
-                noRStudioGD = TRUE
-              )
+            tryCatch(
+              suppressWarnings(
+                dev.new(
+                  height = popup_size[1],
+                  width = popup_size[2],
+                  unit = "in",
+                  noRStudioGD = TRUE
+                )
+              ),
+              error = function(e) {
+                NULL
+              }
             )
           } else if (.Platform$OS.type == "unix") {
             if (Sys.info()["sysname"] == "Linux") {
-              # dev.new() opens slower xquarts
+              # dev.new() opens slower xquartz
               # x11 opens through R graphics - much faster rendering
               # Cairo needed for semi-transparency
               # nbcairo used for speed
-              suppressWarnings(
-                x11(
-                  height = popup_size[1],
-                  width = popup_size[2],
-                  type = "nbcairo"
-                )
+              tryCatch(
+                suppressWarnings(
+                  x11(
+                    height = popup_size[1],
+                    width = popup_size[2],
+                    type = cyto_option("CytoExploreR_X11")
+                  )
+                ),
+                error = function(e) {
+                  NULL
+                }
               )
+
             } else if (Sys.info()["sysname"] == "Darwin") {
-              suppressWarnings(
-                x11(
-                  height = popup_size[1],
-                  width = popup_size[2],
-                  type = "nbcairo"
-                )
+              tryCatch(
+                suppressWarnings(
+                  x11(
+                    height = popup_size[1],
+                    width = popup_size[2],
+                    type = cyto_option("CytoExploreR_X11")
+                  )
+                ),
+                error = function(e) {
+                  NULL
+                }
               )
             }
           }
