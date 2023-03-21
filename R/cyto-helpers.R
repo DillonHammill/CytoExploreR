@@ -9059,6 +9059,13 @@ cyto_cbind.flowFrame <- function(x,
     cols <- cols[-seq_len(nrow(cols)), ,drop = FALSE]
   }
   
+  # TYPE DOUBLE REQUIRED
+  cols <- apply(
+    cols,
+    2,
+    "as.double"
+  )
+  
   # CYTOFRAME
   if(cyto_class(x, "cytoframe", TRUE)){
     # REALIZE VIEW
@@ -9099,12 +9106,18 @@ cyto_cbind.flowSet <- function(x,
         seq_along(cyto_counts), 
         function(z){
           if(z == 1){
-            cols[1:cyto_counts[z], , drop = FALSE]
+            res <- cols[1:cyto_counts[z], , drop = FALSE]
           }else{
             start <- sum(cyto_counts[1:(z-1)]) + 1
             end <- start + cyto_counts[z] - 1
-            cols[start:end, , drop = FALSE]
+            res <- cols[start:end, , drop = FALSE]
           }
+          # CONVERT TO TYPE DOUBLE
+          apply(
+            res,
+            2,
+            "as.double"
+          )
         }
       )
       names(cols) <- cyto_names(x)
