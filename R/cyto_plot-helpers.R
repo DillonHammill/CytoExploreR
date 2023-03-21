@@ -1017,11 +1017,7 @@ cyto_plot_new <- function(popup = NULL,
                 )
               ),
               error = function(e) {
-                # SIGNAL POPUP = FALSE
-                opts <- cyto_option("cyto_plot_par")
-                opts$popup <- FALSE
-                cyto_option("cyto_plot_par", opts)
-                return(NULL)
+                dev_empty <<- .par("page")[[1]]
               }
             )
           } else if (.Platform$OS.type == "unix") {
@@ -1039,11 +1035,7 @@ cyto_plot_new <- function(popup = NULL,
                   )
                 ),
                 error = function(e) {
-                  # SIGNAL POPUP = FALSE
-                  opts <- cyto_option("cyto_plot_par")
-                  opts$popup <- FALSE
-                  cyto_option("cyto_plot_par", opts)
-                  return(NULL)
+                  dev_empty <<- .par("page")[[1]]
                 }
               )
 
@@ -1057,11 +1049,7 @@ cyto_plot_new <- function(popup = NULL,
                   )
                 ),
                 error = function(e) {
-                  # SIGNAL POPUP = FALSE
-                  opts <- cyto_option("cyto_plot_par")
-                  opts$popup <- FALSE
-                  cyto_option("cyto_plot_par", opts)
-                  return(NULL)
+                  dev_empty <<- .par("page")[[1]]
                 }
               )
             }
@@ -1103,7 +1091,7 @@ cyto_plot_new <- function(popup = NULL,
     )
   # USED DEVICE - BYPASS LAYOUT/OMA PARAMETERS
   } else {
-    # SET NEW PARAMETERS OT PARAMETERS THAT CHANGE & NOT PRIVILEGED
+    # SET NEW PARAMETERS THAT CHANGE & NOT PRIVILEGED
     shared_pars <- names(new_pars)[names(new_pars) %in% names(set_pars)]
     update_pars <- structure(
       lapply(shared_pars, function(z){
