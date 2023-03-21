@@ -1017,7 +1017,11 @@ cyto_plot_new <- function(popup = NULL,
                 )
               ),
               error = function(e) {
-                NULL
+                # SIGNAL POPUP = FALSE
+                opts <- cyto_option("cyto_plot_par")
+                opts$popup <- FALSE
+                cyto_option("cyto_plot_par", opts)
+                return(NULL)
               }
             )
           } else if (.Platform$OS.type == "unix") {
@@ -1035,7 +1039,11 @@ cyto_plot_new <- function(popup = NULL,
                   )
                 ),
                 error = function(e) {
-                  NULL
+                  # SIGNAL POPUP = FALSE
+                  opts <- cyto_option("cyto_plot_par")
+                  opts$popup <- FALSE
+                  cyto_option("cyto_plot_par", opts)
+                  return(NULL)
                 }
               )
 
@@ -1049,7 +1057,11 @@ cyto_plot_new <- function(popup = NULL,
                   )
                 ),
                 error = function(e) {
-                  NULL
+                  # SIGNAL POPUP = FALSE
+                  opts <- cyto_option("cyto_plot_par")
+                  opts$popup <- FALSE
+                  cyto_option("cyto_plot_par", opts)
+                  return(NULL)
                 }
               )
             }
