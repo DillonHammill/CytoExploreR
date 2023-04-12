@@ -6759,18 +6759,21 @@ cyto_compensate.flowFrame <- function(x,
         spill <- rep(spill, length(x))
         names(spill) <- cyto_names(x)
       } else {
-        spill <- lapply(
-          cyto_names(x), 
-          function(y) {
-            sm <- cyto_spillover_extract(x[y])[[1]]
-            if (is.null(sm)) {
-              stop(paste0(
-                "Unable to extract spillover matrix from ",
-                cyto_names(x[y]), "."
-              ))
+        spill <- structure(
+          lapply(
+            cyto_names(x), 
+            function(y) {
+              sm <- cyto_spillover_extract(x[y])[[1]]
+              if (is.null(sm)) {
+                stop(paste0(
+                  "Unable to extract spillover matrix from ",
+                  cyto_names(x[y]), "."
+                ))
+              }
+              return(sm)
             }
-            return(sm)
-          }
+          ),
+          names = cyto_names(x)
         )
       }
     }
