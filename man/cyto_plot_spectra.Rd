@@ -6,7 +6,7 @@
 \usage{
 cyto_plot_spectra(
   x,
-  parent = "root",
+  parent,
   channels,
   axes_trans = NA,
   axes_limits = "machine",

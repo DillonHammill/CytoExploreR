@@ -50,7 +50,7 @@
 #'
 #' @export
 cyto_plot_spectra <- function(x,
-                              parent = "root",
+                              parent,
                               channels,
                               axes_trans = NA,
                               axes_limits = "machine",
@@ -88,25 +88,52 @@ cyto_plot_spectra <- function(x,
   }
   
   # EXTRACT PARENTAL POPULATIONS PER CONTROL
-  if("parent" %in% colnames(pd)) {
-    args$x <- cytoset(
-      structure(
-        lapply(
-          seq_along(x),
-          function(z) {
-            # CYTOFRAME
-            cyto_data_extract(
-              x[z],
-              parent = pd[z, "parent"],
-              format = "cytoset",
-              copy = FALSE
-            )[[1]][[1]]
-          }
-        ),
-        names = cyto_names(x)
-      )
-    )
+  if(missing(parent)) {
+    if("parent" %in% colnames(pd)) {
+      parent <- pd[, "parent"]
+    } else {
+      parent <- "root"
+    }
   }
+  
+  # PARENT PER CONTROL
+  parent <- rep(
+    parent,
+    length.out = length(x)
+  )
+  
+  # EXTRACT PARENT PER CONTROL
+  args$x <- cytoset(
+    structure(
+      lapply(
+        seq_along(x),
+        function(z) {
+          pop <- parent[z]
+          # CHECK PARENT EXISTS
+          if(cyto_class(x, "GatingSet")) {
+            pop <- tryCatch(
+              cyto_nodes_convert(
+                gs,
+                nodes = pop,
+                path = "auto"
+              ),
+              error = function(e) {
+                return("root")
+              }
+            )
+          }
+          # CYTOFRAME
+          cyto_data_extract(
+            x[z],
+            parent = pop,
+            format = "cytoset",
+            copy = FALSE
+          )[[1]][[1]]
+        }
+      ),
+      names = cyto_names(x)
+    )
+  )
   
   # CALL CYTO_PLOT()
   cyto_func_call(
