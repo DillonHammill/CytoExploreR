@@ -254,8 +254,6 @@ cyto_gate_auto <- function(x,
     )
   }
   
-  print(gm)
-  
   # ADD POPULATIONS TO GATINGSET
   pop <- cyto_func_call(
     "gs_add_gating_method",
@@ -471,16 +469,30 @@ cyto_gate_auto <- function(x,
   
   # CUSTOM AUTOMATED GATING ALGORITHM
   if(is.function(type)) {
+    # CHANNELS ARGUMENT REQUIRED
+    type_args <- cyto_func_args(type)
+    if("channels" %in% type_args) {
+      args <- c(
+        args,
+        list("channels" = channels)
+      )
+    } else if("channel" %in% type_args) {
+      args <- c(
+        args,
+        list("channel" = channels)
+      )
+    }
     # APPLY AUTOMATED GATING ALGORITHM
     gate <- cyto_slot(
       cyto_func_call(
         type,
-        args = if("channels" %in% cyto_func_args(type)) {
-          args <- c(args, list("channels" = channels))
-        } else {
-          args
-        }
+        args = args
       )
+    )
+    # NOTE: ORDER MAY NEED CHANGING FOR QUADRANTS
+    gate@filterId <- paste0(
+      alias,
+      collapse = "|"
     )
     # PLOT
     if(plot) {
