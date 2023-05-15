@@ -452,7 +452,7 @@ cyto_gate_auto <- function(x,
         function(z) {
           for(i in seq_along(channels)) {
             if(channels[i] %in% names(trans)) {
-              args[[z]] <<- .cyto_transform(
+              args[[z]][i] <<- .cyto_transform(
                 args[[z]][i],
                 channel = channels[i],
                 trans = trans,
