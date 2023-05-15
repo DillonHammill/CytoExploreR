@@ -487,8 +487,9 @@ cyto_gate_remove <- function(x,
           "\n"
         )
       )
+      # REMOVE LEAF NODES FIRST!
       lapply(
-        gs_alias,
+        rev(gs_alias),
         function(z) {
           suppressMessages(
             gs_pop_remove(
