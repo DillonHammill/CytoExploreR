@@ -487,16 +487,18 @@ cyto_gate_remove <- function(x,
           "\n"
         )
       )
-      # REMOVE LEAF NODES FIRST!
+      # REMOVE EXISTING NODES ONLY
       lapply(
-        rev(gs_alias),
+        gs_alias,
         function(z) {
-          suppressMessages(
-            gs_pop_remove(
-              x, 
-              z
+          if(z %in% cyto_nodes(x, path = "auto")) {
+            suppressMessages(
+              gs_pop_remove(
+                x, 
+                z
+              )
             )
-          )
+          }
         }
       )
     }
