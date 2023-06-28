@@ -27,6 +27,12 @@
 #' @param merge_by a vector of experiment variables by which samples should be
 #'   merged prior to computing the desired statistic, set to \code{"name"} by
 #'   default to compare individual samples to one another.
+#' @param scale optional argument to scale each channel prior to computing
+#'   distances, options include \code{"global"}, \code{"range"}, \code{"mean"},
+#'   \code{"median"} or \code{"zscore"}. Set to \code{"range"} by default,
+#'   scaling can be turned off by setting this argument to FALSE. Global scaling
+#'   preserves the structure of the data as expected on the linear scale without
+#'   having to apply inverse data transformations to the entire dataset.
 #' @param trans an object of class \code{transformerList} containing the
 #'   transformer definitions for transformations already applied to the supplied
 #'   cytoset.

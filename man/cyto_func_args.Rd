@@ -13,8 +13,9 @@ functions are also supported (i.e. "CytoExploreR::cyto_plot").}
 \item{drop}{a vector of arguments to be removed from the returned vector of
 argument names.}
 
-\item{logical}{indicating whether a named list of default arguments should be
-returned instead of a vector of argument names, set to FALSE by default.}
+\item{defaults}{logical indicating whether a named list of default arguments
+should be returned instead of a vector of argument names, set to FALSE by
+default.}
 }
 \value{
 vector of argument names or a named list of argument defaults for

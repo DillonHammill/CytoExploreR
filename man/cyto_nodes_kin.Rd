@@ -18,7 +18,7 @@ cyto_nodes_kin(
 \item{x}{object of class
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}},
-\code{\link[openCyto:gatinGtemplate-class]{gatingTemplate}} or the name of
+\code{\link[openCyto:gatingTemplate-class]{gatingTemplate}} or the name of
 a gatingTemplate CSV file.}
 
 \item{nodes}{vector of nodes for which the relative nodes should be returned.}

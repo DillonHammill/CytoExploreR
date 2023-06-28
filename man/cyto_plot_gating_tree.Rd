@@ -33,6 +33,9 @@ statistics.}
 "circle", "ellipse", "database", "box" or "text". Set to circles by
 default.}
 
+\item{point_cols}{default colour palette from which colours should be chosen
+for each node in the gating tree.}
+
 \item{point_col}{vector of colours to use for each node.}
 
 \item{point_col_alpha}{fill transparency for each node, set to 0.5 by

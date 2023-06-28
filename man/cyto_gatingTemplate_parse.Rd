@@ -4,7 +4,7 @@
 \alias{cyto_gatingTemplate_parse}
 \title{Convert parsed gatingTemplate into a format compatible with CytoExploreR}
 \usage{
-cyto_gatingTemplate_parse(gatingTemplate, data.table = TRUE)
+cyto_gatingTemplate_parse(gatingTemplate, data.table = TRUE, ...)
 }
 \arguments{
 \item{gatingTemplate}{gatingTemplate object or the name of a gatingTemplate

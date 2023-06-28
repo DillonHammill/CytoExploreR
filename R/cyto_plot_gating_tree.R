@@ -12,6 +12,8 @@
 #' @param stat used in \code{GatingHierachy} method to add either "percent" or
 #'   "count" statistics onto the gating tree, set to NULL by default to exclude
 #'   statistics.
+#' @param point_cols default colour palette from which colours should be chosen
+#'   for each node in the gating tree.
 #' @param point_shape vector of shapes to use for each node, can be either
 #'   "circle", "ellipse", "database", "box" or "text". Set to circles by
 #'   default.

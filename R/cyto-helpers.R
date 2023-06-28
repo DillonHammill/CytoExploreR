@@ -7972,7 +7972,7 @@ cyto_nodes_ancestor <- function(x,
 #' @param x object of class
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}},
-#'   \code{\link[openCyto:gatinGtemplate-class]{gatingTemplate}} or the name of
+#'   \code{\link[openCyto:gatingTemplate-class]{gatingTemplate}} or the name of
 #'   a gatingTemplate CSV file.
 #' @param nodes vector of nodes for which the relative nodes should be returned.
 #' @param type options include \code{"children"}, \code{"parent"},
