@@ -1203,21 +1203,37 @@ cyto_gatingTemplate_write <- function(gatingTemplate = NULL,
   
   # SAVE_AS
   if(is.null(save_as)){
-    stop("Supply the name of the csv file to 'save_as'.")
+    stop(
+      "Supply the name of the csv file to 'save_as'."
+    )
   }else{
-    save_as <- file_ext_append(save_as, ".csv")
+    save_as <- file_ext_append(
+      save_as,
+      ".csv"
+    )
   }
   
   # READ GATINGTEMPLATE
   if(cyto_class(gatingTemplate, c("character", "gatingTemplate"))){
-    gatingTemplate <- cyto_gatingTemplate_read(gatingTemplate,
-                                               data.table = TRUE)
+    gatingTemplate <- cyto_gatingTemplate_read(
+      gatingTemplate,
+      data.table = TRUE
+    )
   }
   
   # HANDLE NAs
-  gatingTemplate$groupBy[LAPPLY(gatingTemplate$groupBy, ".empty")] <- "NA"
+  gatingTemplate$groupBy[
+    LAPPLY(
+      gatingTemplate$groupBy,
+      ".empty"
+    )
+  ] <- "NA"
   gatingTemplate$preprocessing_args[
-    LAPPLY(gatingTemplate$preprocessing_args, ".empty")] <- "NA"
+    LAPPLY(
+      gatingTemplate$preprocessing_args,
+      ".empty"
+    )
+  ] <- "NA"
   
   # WRITE GATINGTEMPLATE
   write_to_csv(
@@ -1244,8 +1260,6 @@ cyto_gatingTemplate_write <- function(gatingTemplate = NULL,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @importFrom openCyto CytoExploreR_.preprocess_row
-#'
 #' @examples 
 #' \dontrun{
 #' library(CytoExploreRData)
@@ -1255,7 +1269,10 @@ cyto_gatingTemplate_write <- function(gatingTemplate = NULL,
 #'
 #' @export
 cyto_gatingTemplate_parse <- function(gatingTemplate,
-                                      data.table = TRUE) {
+                                      data.table = TRUE,
+                                      ...) {
+  
+  # TODO: UPDATE .PREPROCESS_ROW IMPORT WHEN AVAILABLE IN OPENCYTO
   
   # READ IN GATINGTEMPLATE
   gt <- cyto_gatingTemplate_read(
@@ -1268,7 +1285,7 @@ cyto_gatingTemplate_parse <- function(gatingTemplate,
     seq_len(nrow(gt)),
     function(z) {
       # OPENCYTO PARSING|EXPANSION
-      gt_chunk <- CytoExploreR_.preprocess_row(
+      gt_chunk <- openCyto:::.preprocess_row(
         gt[z, ]
       )
       # CYTO_GATE_CLUST - PULL ALIAS FROM GATING_ARGS
@@ -1286,7 +1303,10 @@ cyto_gatingTemplate_parse <- function(gatingTemplate,
         )
         # REPLACE * ALIAS ENTRY
         gt_chunk$alias <- rep(
-          paste0(gating_args$alias,  collapse = ","), 
+          paste0(
+            gating_args$alias,
+            collapse = ","
+          ), 
           nrow(gt_chunk)
         )
       }
