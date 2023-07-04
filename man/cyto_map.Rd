@@ -62,7 +62,8 @@ co-ordinates}\item{"kNN"}{ builds a k nearest neighbours (kNN) graph using
 RANN::nn2() and uses igraph to compute the layout co-ordinates for the
 graph}\item{"sNN"}{ builds a shared nearest neighbours (sNN) graph using
 HGC::SNN.construction() and igraph to compute the layout co-ordinates for
-the graph}}}
+the graph}\item{"MST"}{ builds a minimum spanning tree using the igraph 
+package}}}
 
 \item{scale}{optional argument to scale each channel prior to computing
 dimension-reduced co-ordinates, options include \code{"global"},

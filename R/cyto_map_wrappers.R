@@ -1000,3 +1000,82 @@
   return(res)
   
 }
+
+## MST -------------------------------------------------------------------------
+
+#' MST
+#' @noRd
+.cyto_map_mst <- function(x,
+                          method = "euclidean",
+                          ...) {
+  
+  # IGRAPH
+  cyto_require(
+    "igraph",
+    source = "CRAN"
+  )
+  
+  # DISTANCE MATRIX
+  d <- as.matrix(
+    dist(
+      x,
+      method = method
+    )
+  )
+  
+  # GRAPH
+  g <- cyto_func_call(
+    "igraph::graph.adjacency",
+    list(
+      d,
+      mode = "undirected",
+      weighted = TRUE
+    )
+  )
+  
+  # MST
+  mst <- cyto_func_call(
+    "igraph::minimum.spanning.tree",
+    list(
+      g
+    )
+  )
+  
+  # WEIGHTS
+  w <- cyto_func_call(
+    "igraph::edge.attributes",
+    list(
+      mst
+    )
+  )$weight
+  w <- w/mean(w)
+  
+  # UPDATE WEIGHTS
+  cyto_func_call(
+    "igraph::edge.attributes<-",
+    list(
+      graph = mst,
+      value = list(
+        weight = w
+      )
+    )
+  )
+  
+  # LAYOUT
+  res <- cyto_func_call(
+    "igraph::layout.kamada.kawai",
+    list(
+      coords = as.matrix(
+        expand.grid(
+          seq_len(ceiling(sqrt(nrow(x)))),
+          seq_len(ceiling(sqrt(nrow(x))))
+        )
+      ),
+      mst
+    )
+  )
+  colnames(res) <- c("MST-1", "MST-2")
+  
+  return(res)
+  
+}

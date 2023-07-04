@@ -46,7 +46,8 @@
 #'   RANN::nn2() and uses igraph to compute the layout co-ordinates for the
 #'   graph}\item{"sNN"}{ builds a shared nearest neighbours (sNN) graph using
 #'   HGC::SNN.construction() and igraph to compute the layout co-ordinates for
-#'   the graph}}
+#'   the graph}\item{"MST"}{ builds a minimum spanning tree using the igraph 
+#'   package}}
 #' @param scale optional argument to scale each channel prior to computing
 #'   dimension-reduced co-ordinates, options include \code{"global"},
 #'   \code{"range"}, \code{"mean"}, \code{"median"} or \code{"zscore"}. Set to
@@ -606,6 +607,9 @@ cyto_map <- function(x,
     # NCVis
     }else if(grepl("^NCVis$", type, ignore.case = TRUE)) {
       type <- ".cyto_map_ncvis"
+    # MST
+    } else if(grepl("^MST$", type, ignore.case = TRUE)) {
+      type <- ".cyto_map_mst"
     }
   }
   
@@ -816,7 +820,7 @@ cyto_map <- function(x,
 #       )
 #     )
 # 
-#   # t-SNE ----------------------------------------------------------------------
+#   # t-SNE --------------------------------------------------------------------
 #   } else if(type == "t-SNE" ) {
 # 
 #     # RANN REQUIRED - NN2()
