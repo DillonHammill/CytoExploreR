@@ -3837,21 +3837,33 @@ cyto_merge_by <- function(x,
               "SOM_counts" = SOM_counts,
               "SOM_freq" = SOM_counts/sum(SOM_counts)
             )
+            # CREATE NEW CYTOFRAME
+            cf <- as(
+              SOM,
+              cyto_class(cs_list[[z]][[1]]) # flowFrame|cytoframe
+            )
+            cyto_keyword(
+              cf,
+              keyword = "CytoExploreR_SOM",
+              value = cyto_keyword(
+                cs_list[[z]][[1]],
+                "CytoExploreR_SOM"
+              )
+            )
             # CREATE NEW CYTOSET
             cs <- do.call(
               cyto_class(cs_list[[z]]), # flowSet()|cytoset()
               list(
                 structure(
                   list(
-                    as(
-                      SOM,
-                      cyto_class(cs_list[[z]][[1]]) # flowFrame|cytoframe
-                    )
+                    cf
                   ),
                   names = names(cs_list)[z]
                 )
               )
             )
+            # TRANSFER MARKERNAMES
+            
           # CYTOSET | GATINGSET
           } else {
             # CYTOSET
@@ -3976,10 +3988,25 @@ setAs(
   "cytoset",
   "cytoframe",
   function(from){
-    flowFrame_to_cytoframe(
+    # SOM CHECK
+    som <- cyto_som_check(from)
+    # CYTOFRAME COERCION
+    cf <- flowFrame_to_cytoframe(
       as(from, "flowFrame"),
       emptyValue = FALSE
     )
+    # SOM KEYWORD
+    if(som) {
+      cyto_keyword(
+        som,
+        keyword = "CytoExploreR_SOM",
+        value = cyto_keyword(
+          from[[1]],
+          "CytoExploreR_SOM"
+        )
+      )
+    }
+    return(cf)
   }
 )
 
@@ -3995,10 +4022,25 @@ setAs(
   "flowSet",
   "cytoframe",
   function(from){
-    flowFrame_to_cytoframe(
+    # SOM CHECK
+    som <- cyto_som_check(from)
+    # CYTOFRAME COERCION
+    cf <- flowFrame_to_cytoframe(
       as(from, "flowFrame"),
       emptyValue = FALSE
     )
+    # SOM KEYWORD
+    if(som) {
+      cyto_keyword(
+        cf,
+        keyword = "CytoExploreR_SOM",
+        value = cyto_keyword(
+          from[[1]],
+          keyword = "CytoExploreR_SOM"
+        )
+      )
+    }
+    return(cf)
   }
 )
 
@@ -5430,6 +5472,13 @@ cyto_coerce <- function(x,
                         name = "merge",
                         overwrite = NULL,
                         ...) {
+  
+  # CYTOSET ONLY
+  if(!cyto_class(x, "flowSet")) {
+    stop(
+      "cyto_coerce() only accepts flowSet or cytoset objects!"
+    )
+  }
   
   # SELECT
   if(!is.null(select)) {
@@ -9439,9 +9488,15 @@ cyto_progress <- function(pb = NULL,
 #'   \code{\link[FlowWorkspace:cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[FlowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param keyword the name of the keyword to extract.
+#' @param value optional repplacement value for the keyword.
 #' @param ... additional arguments passed to \code{flowCore::keyword()} or
 #'   \code{flowWorkspace::keyword()} including \code{keyword} which indicates
 #'   the name of a specific keyword to extract.
+#'
+#' @importFrom flowCore keyword<-
+#' @importFrom flowWorkspace cf_keyword_set cs_keyword_set gh_keyword_set
+#'   gs_keyword_set
 #'
 #' @return a list of extract keywords.
 #'
@@ -9457,44 +9512,47 @@ cyto_progress <- function(pb = NULL,
 #'
 #' @export
 cyto_keyword <- function(x,
+                         keyword,
+                         value,
                          ...) {
+  
+  # TODO: use keyword insert when value missing?
   
   # FLOWCORE KEYWORD
   if(cyto_class(x, c("flowFrame", "flowSet"))) {
-    cyto_func_call(
-      "flowCore::keyword",
-      list(
-        x,
-        ...
-      )
+    val <- flowCore::keyword(
+      x,
+      keyword,
+      ...
     )
   # FLOWWORKSPACE KEYWORD
   } else {
-    cyto_func_call(
-      "flowWorkspace::keyword",
-      list(
-        x,
-        ...
-      )
+    val <- flowWorkspace::keyword(
+      x,
+      keyword,
+      ...
     )
   }
   
+  # UPDATE KEYWORD
+  if(!missing(value)) {
+    if(cyto_class(x, c("flowFrame", "flowSet"))) {
+      keyword(x)[[keyword]] <- value
+    } else if(cyto_class(x, "cytoframe")) {
+      cf_keyword_set(x, keyword, value)
+    } else if(cyto_class(x, "cytoset")) {
+      cs_keyword_set(x, keyword, value)
+    } else if(cyto_class(x, "GatingHierarchy")) {
+      gh_keyword_set(x, keyword, value)
+    } else if(cyto_class(x, "GatingSet")) {
+      flowWorkspace::gs_keyword_set(x, keyword, value)
+    }
+  # CURRENT KEYWORD VALUE
+  } else {
+    value <- val
+  }
+  
+  # RETURN KEYWORD VALUE
+  return(value)
+  
 }
-
-#' # CYTO_KEYWORD REPLACEMENT METHOD ----------------------------------------------
-#' 
-#' #' @noRd
-#' "cyto_keyword<-" <- function(object,
-#'                              value) {
-#'   
-#'   if(cyto_class(object, c("flowFrame", "flowSet"))) {
-#'     flowCore::keyword(object) <- value
-#'   } else {
-#'     flowWorkspace::keyword(object) <- value
-#'   }
-#'   
-#' }
-#' 
-#' #' @noRd
-#' #' @export
-#' "cyto_keyword<-"

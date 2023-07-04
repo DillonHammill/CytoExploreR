@@ -62,7 +62,7 @@
 #' @importFrom flowCore exprs
 #' @importFrom graphics par rasterImage points
 #' @importFrom grDevices col2rgb dev.size
-#' @importFrom stats rnorm
+#' @importFrom stats rnorm dist
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -265,6 +265,7 @@ cyto_plot_point <- function(x,
     # DEVICE SIZE
     dev_size <- as.integer(dev.size("px") / dev.size("in") * .par("pin")[[1]])
   }
+
   
   # POINT & CONTOUR LINES LAYERS -----------------------------------------------
   
@@ -278,6 +279,100 @@ cyto_plot_point <- function(x,
         format = "matrix",
         copy = FALSE
       )[[1]][[1]]
+      # SOM MST TREE - BASE LAYER ONLY
+      if(z == 1 & cyto_som_check(args$x[[z]])) {
+        # MST CHANNELS REQUIRED
+        if(all(grepl("MST", args$channels, ignore.case = TRUE))) {
+          # IGRAPH REQUIRED -> REBUILD GRAPH (EDGELIST REQUIRED)
+          cyto_require(
+            "igraph",
+            source = "CRAN"
+          )
+          # DISTANCE MATRIX
+          # NOTE: CHANNELS INFERRED BASED ON SOM_COUNTS LOCATION + MAP CHANNELS
+          d <- as.matrix(
+            dist(
+              cyto_stat_scale(
+                exprs[, colnames(exprs)[
+                  1:(match("SOM_counts", colnames(exprs)) - 3)
+                ], drop = FALSE],
+                type = "range"
+              ),
+              method = "euclidean"
+            )
+          )
+          # GRAPH
+          g <- cyto_func_call(
+            "igraph::graph.adjacency",
+            list(
+              d,
+              mode = "undirected",
+              weighted = TRUE
+            )
+          )
+          # MST
+          mst <- cyto_func_call(
+            "igraph::minimum.spanning.tree",
+            list(
+              g
+            )
+          )
+          # WEIGHTS
+          w <- cyto_func_call(
+            "igraph::edge.attributes",
+            list(
+              mst
+            )
+          )$weight
+          w <- w/mean(w)
+          # UPDATE WEIGHTS
+          cyto_func_call(
+            "igraph::edge.attributes<-",
+            list(
+              graph = mst,
+              value = list(
+                weight = w
+              )
+            )
+          )
+          # GRAPH EDGELIST
+          edges <- as.data.frame(
+            cyto_func_call(
+              "igraph::as_edgelist",
+              list(
+                mst
+              )
+            ),
+            stringsAsFactors = FALSE
+          )
+          # LAYOUT FROM SOM
+          layout <- exprs[, args$channels, drop = FALSE]
+          # LINE COORDINATES
+          lines <- lapply(
+            seq_len(nrow(edges)), 
+            function(w) {
+              node_ids <- as.numeric(edges[w, ])
+              c(layout[node_ids[1], 1],
+                layout[node_ids[1], 2],
+                layout[node_ids[2], 1],
+                layout[node_ids[2], 2]
+              )
+            }
+          )
+          lines <- do.call("rbind", lines)
+          colnames(lines) <- c("x", "y", "xend", "yend")
+          # LINES - NOT CUSTOMISABLE (STANDARD LINES)
+          lapply(
+            seq_len(nrow(lines)),
+            function(w) {
+              lines(
+                x = lines[w, c("x", "xend")],
+                y = lines[w, c("y", "yend")]
+              )
+            }
+          )
+        }
+      }
       # POINTS - SKIP NO EVENTS
       if(!is.null(nrow(exprs))) {
         # POINTS - BYPASS EMPTY CYTOFRAME

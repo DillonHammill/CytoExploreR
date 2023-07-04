@@ -125,6 +125,22 @@ cyto_map <- function(x,
     x <- as(x, "cytoset")
   }
   
+  # SOM CHECK
+  som <- cyto_keyword(
+    x[[1]],
+    "CytoExploreR_SOM"
+  )
+  # SOM GRID DIMENSIONS
+  grid <- NULL
+  if(length(som) > 0) {
+    grid <- as.numeric(
+      strsplit(
+        som,
+        "x"
+      )[[1]]
+    )
+  }
+  
   # CHANNELS
   if(is.null(channels)) {
     channels <- cyto_channels(
@@ -262,7 +278,12 @@ cyto_map <- function(x,
         )[[1]]
         # COERCE - SAMPLING ABOVE
         cf <- cyto_coerce(
-          cs,
+          # SOM - USE FIRST SAMPLE ONLY
+          if(length(som) > 0) {
+            cs[1]
+          } else {
+            cs
+          },
           format = "cytoframe"
         )
         # NODES (HAISU FUTURE SUPPORT) - MATCH SAMPLED EVENTS
@@ -388,6 +409,7 @@ cyto_map <- function(x,
           seed = seed,
           label = label,
           nodes = nodes,
+          grid = grid,
           ...
         )
         x_map_chans <<- colnames(coords)
@@ -403,11 +425,26 @@ cyto_map <- function(x,
             coords
           )
         }
+        # SOM - CYTOSET
+        if(length(som) > 0) {
+          cs <- cyto_cbind(
+            cs,
+            do.call(
+              "rbind",
+              rep(
+                list(coords),
+                length(cs)
+              )
+            )
+          )
         # SPLIT - CYTOSET
-        cyto_split(
-          cf,
-          names = names[[z]]
-        )
+        } else {
+          cs <- cyto_split(
+            cf,
+            names = names[[z]]
+          )
+        }
+        return(cs)
       }
     ),
     names = names(x_data_groups)
@@ -439,16 +476,17 @@ cyto_map <- function(x,
         function(z) {
           # CYTOFRAME 
           if(x_names[z] %in% x_data_map_names) {
-            cyto_convert(
+            cf <- cyto_convert(
               x_data_map[[match(x_names[z], x_data_map_names)]]
             )
           # EMPTY CYTOFRAME
           } else {
-            cyto_empty(
+            cf <- cyto_empty(
               x_names[z],
               x_data_map_chans
             )
           }
+          return(cf)
         }
       ),
       names = x_names
@@ -483,7 +521,12 @@ cyto_map <- function(x,
       x,
       parent = parent,
       channels = x_map_chans[1:2],
-      merge_by = "all"
+      merge_by = "all",
+      point_shape  = if(length(som) > 0) {
+        21
+      } else {
+        "."
+      }
     )
   }
   
@@ -500,6 +543,7 @@ cyto_map <- function(x,
                       seed = NULL,
                       label = NULL,
                       nodes = NULL,
+                      grid = NULL,
                       ...){
   
   # SEED
@@ -610,6 +654,15 @@ cyto_map <- function(x,
     # MST
     } else if(grepl("^MST$", type, ignore.case = TRUE)) {
       type <- ".cyto_map_mst"
+    }
+    # MST SOM GRID ARGUMENT
+    if(!type %in% ".cyto_map_mst") {
+      args <- args[
+        -match(
+          "grid",
+          names(args)
+        )
+      ]
     }
   }
   

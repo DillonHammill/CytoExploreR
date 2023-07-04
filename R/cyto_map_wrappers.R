@@ -1007,7 +1007,15 @@
 #' @noRd
 .cyto_map_mst <- function(x,
                           method = "euclidean",
+                          grid = NULL,
                           ...) {
+  
+  # GRID REQUIRED
+  if(is.null(grid)) {
+    stop(
+      "SOM grid dimensions must be supplied to construct MST tree!"
+    )
+  }
   
   # IGRAPH
   cyto_require(
@@ -1061,14 +1069,17 @@
     )
   )
   
+  # TODO: SOM GRID MAY NOT BE SYMMETRICAL? need to accept grid dimensions and
+  # inherit from SOM keyword
+  
   # LAYOUT
   res <- cyto_func_call(
     "igraph::layout.kamada.kawai",
     list(
       coords = as.matrix(
         expand.grid(
-          seq_len(ceiling(sqrt(nrow(x)))),
-          seq_len(ceiling(sqrt(nrow(x))))
+          seq_len(grid[1]),
+          seq_len(grid[2])
         )
       ),
       mst

@@ -194,9 +194,6 @@ cyto_som <- function(x,
   # EXPERIMENT DETAILS
   pd <- cyto_details(x)
   
-  # GRID
-  grid <- rep(grid, length.out = 2)
-  
   # TOPOLOGY
   if(grepl("^r", topo, ignore.case = TRUE)) {
     topo <- "rectangular"
@@ -251,6 +248,13 @@ cyto_som <- function(x,
         )
       )
     }
+    # EXTRACT GRID SIZE
+    grid <- as.numeric(
+      strsplit(
+        som,
+        "x"
+      )[[1]]
+    )
     # VALID SOM
     if(all(channels %in% colnames(codes)) & nrow(codes) == prod(grid)) {
       # DIMENSION REDUCTION SUPPLIED
@@ -314,6 +318,8 @@ cyto_som <- function(x,
   
   # SOM REQUIRED
   if(is.null(som)) {
+    # GRID
+    grid <- rep(grid, length.out = 2)
     # DATA TO TRAIN NEW SOM -> LINEAR SCALE
     x_train <- cyto_data_extract(
       x,
@@ -348,7 +354,7 @@ cyto_som <- function(x,
       )
     }
     # SOM GRID
-    grid <- cyto_func_call(
+    som_grid <- cyto_func_call(
       "kohonen::somgrid",
       list(
         xdim = grid[1],
@@ -361,7 +367,7 @@ cyto_som <- function(x,
       "kohonen::som",
       list(
         x_train[, channels, drop = FALSE],
-        grid = grid,
+        grid = som_grid,
         rlen = rlen,
         alpha = alpha,
         keep.data = FALSE

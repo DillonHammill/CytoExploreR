@@ -4,13 +4,17 @@
 \alias{cyto_keyword}
 \title{Extract a keyword from a cytoframe, cytoset or GatingSet}
 \usage{
-cyto_keyword(x, ...)
+cyto_keyword(x, keyword, value, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
 \code{\link[FlowWorkspace:cytoset]{cytoset}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[FlowWorkspace:GatingSet-class]{GatingSet}}.}
+
+\item{keyword}{the name of the keyword to extract.}
+
+\item{value}{optional repplacement value for the keyword.}
 
 \item{...}{additional arguments passed to \code{flowCore::keyword()} or
 \code{flowWorkspace::keyword()} including \code{keyword} which indicates
