@@ -288,13 +288,13 @@ cyto_plot_point <- function(x,
             "igraph",
             source = "CRAN"
           )
-          # DISTANCE MATRIX
-          # NOTE: CHANNELS INFERRED BASED ON SOM_COUNTS LOCATION + MAP CHANNELS
+          # TODO: MAYBE ALL USED CHANNELS SHOULD BE ASSIGNED AS MARKERS IN CYTO_SOM()
+          # DISTANCE MATRIX - ANY -A|-H|-W CHANNELS INCLUDED
           d <- as.matrix(
             dist(
               cyto_stat_scale(
                 exprs[, colnames(exprs)[
-                  1:(match("SOM_counts", colnames(exprs)) - 3)
+                  grepl("\\-H$|\\-W$|\\-A$", colnames(exprs))
                 ], drop = FALSE],
                 type = "range"
               ),
