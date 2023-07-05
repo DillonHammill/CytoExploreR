@@ -5570,8 +5570,19 @@ cyto_coerce <- function(x,
         )
       )
       som[, "SOM_freq"] <- som[, "SOM_counts"] / sum(som[, "SOM_counts"])
+      # SOM KEYWORD
+      som_keyword <- cyto_keyword(
+        x[[1]],
+        keyword = "CytoExploreR_SOM"
+      )
       # FLOWFRAME
       x <- flowFrame(som)
+      # SOM KEYWORD
+      cyto_keyword(
+        x,
+        keyword = "CytoExploreR_SOM",
+        value = som_keyword
+      )
     } else {
       x <- as(x, "flowFrame")
     }
