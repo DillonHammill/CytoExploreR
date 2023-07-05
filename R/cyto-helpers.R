@@ -3848,7 +3848,7 @@ cyto_merge_by <- function(x,
               value = cyto_keyword(
                 cs_list[[z]][[1]],
                 "CytoExploreR_SOM"
-              )
+              )[[1]]
             )
             # CREATE NEW CYTOSET
             cs <- do.call(
@@ -4003,7 +4003,7 @@ setAs(
         value = cyto_keyword(
           from[[1]],
           "CytoExploreR_SOM"
-        )
+        )[[1]]
       )
     }
     return(cf)
@@ -4037,7 +4037,7 @@ setAs(
         value = cyto_keyword(
           from[[1]],
           keyword = "CytoExploreR_SOM"
-        )
+        )[[1]]
       )
     }
     return(cf)
@@ -5574,7 +5574,7 @@ cyto_coerce <- function(x,
       som_keyword <- cyto_keyword(
         x[[1]],
         keyword = "CytoExploreR_SOM"
-      )
+      )[[1]]
       # FLOWFRAME
       x <- flowFrame(som)
       # SOM KEYWORD
@@ -9531,7 +9531,26 @@ cyto_keyword <- function(x,
                          value,
                          ...) {
   
-  # TODO: use keyword insert when value missing?
+  # RETURN ALL KEYWORD VALUE PAIRS
+  if(missing(keyword)) {
+    # FLOWCORE KEYWORD
+    if(cyto_class(x, c("flowFrame", "flowSet"))) {
+      return(
+        flowCore::keyword(
+          x,
+          ...
+        )
+      )
+      # FLOWWORKSPACE KEYWORD
+    } else {
+      return(
+        flowWorkspace::keyword(
+          x,
+          ...
+        )
+      )
+    }
+  }
   
   # FLOWCORE KEYWORD
   if(cyto_class(x, c("flowFrame", "flowSet"))) {
@@ -9549,6 +9568,43 @@ cyto_keyword <- function(x,
     )
   }
   
+  # CONVERT MATRIX TO LIST OF NAMED KEYWORDS
+  if(cyto_class(val, "matrix")) {
+    val <- structure(
+      lapply(
+        keyword,
+        function(z) {
+          if(z %in% colnames(val)) {
+            structure(
+              val[, z, drop = TRUE],
+              names = rownames(val)
+            )
+          } else {
+            NULL
+          }
+        }
+      ),
+      names = keyword
+    )
+  # LIST NAMED WITH KEYWORD - VALUES PER SAMPLE
+  } else if(cyto_class(val, "list", TRUE)) {
+    if(all(names(val) %in% cyto_names(x))) {
+      val <- structure(
+        lapply(
+          keyword,
+          function(z) {
+            if(all(LAPPLY(val, "is.null"))) {
+              return(NULL)
+            } else {
+              do.call("c", val)
+            }
+          }
+        ),
+        names = keyword
+      )
+    }
+  }
+  
   # UPDATE KEYWORD
   if(!missing(value)) {
     if(cyto_class(x, c("flowFrame", "flowSet"))) {
@@ -9562,6 +9618,13 @@ cyto_keyword <- function(x,
     } else if(cyto_class(x, "GatingSet")) {
       flowWorkspace::gs_keyword_set(x, keyword, value)
     }
+    # LIST OF KEYWORD VALUE PAIRS
+    value <- structure(
+      list(
+        value
+      ),
+      names = keyword
+    )
   # CURRENT KEYWORD VALUE
   } else {
     value <- val

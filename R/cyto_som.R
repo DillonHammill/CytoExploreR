@@ -652,7 +652,13 @@ cyto_som <- function(x,
         parent = parent,
         merge_by = "all",
         channels = map,
-        title = "Self Organising Map (SOM)"
+        title = paste0(
+          "SOM - ",
+          paste0(
+            grid,
+            collapse = "x"
+          )
+        )
       )
       # PLOT SOM NODES
       cyto_plot_point(
@@ -675,7 +681,13 @@ cyto_som <- function(x,
         channels = map,
         point_shape = 21,
         point_size = 2.5,
-        title = "Self-Organising Map (SOM)"
+        title = paste0(
+          "SOM - ",
+          paste0(
+            grid,
+            collapse = "x"
+          )
+        )
       )
     }
   }
@@ -974,7 +986,7 @@ cyto_som_check <- function(x) {
   }
   
   # SOM KEYWORD
-  if(length(unlist(cyto_keyword(x, "CytoExploreR_SOM")) > 0)) {
+  if(length(cyto_keyword(x, "CytoExploreR_SOM")[[1]]) > 0) {
     return(TRUE)
   } else {
     return(FALSE)

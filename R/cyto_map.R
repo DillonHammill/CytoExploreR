@@ -129,7 +129,7 @@ cyto_map <- function(x,
   som <- cyto_keyword(
     x[[1]],
     "CytoExploreR_SOM"
-  )
+  )[[1]]
   # SOM GRID DIMENSIONS
   grid <- NULL
   if(length(som) > 0) {
