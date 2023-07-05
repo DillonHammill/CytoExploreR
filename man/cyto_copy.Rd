@@ -19,8 +19,12 @@ Copy a cytoset, cytoframe or GatingSet
 library(CytoExploreRData)
 
 # Activation Gatingset
-gs <- load_gs(system.file("extdata/Activation-GatingSet",
-                          package = "CytoExploreRData"))
+gs <- load_gs(
+  system.file(
+    "extdata/Activation-GatingSet",
+    package = "CytoExploreRData"
+  )
+)
 
 gs_copy <- cyto_copy(gs)
 

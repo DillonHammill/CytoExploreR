@@ -507,6 +507,7 @@ cyto_map <- function(x,
     x <- cyto_rebuild(
       x = x,
       y = x_data_map,
+      trans = trans,
       inverse = inverse
     )
   # CYTOSET

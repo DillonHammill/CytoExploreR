@@ -7,6 +7,10 @@
 #'   events.
 #' @param y extracted object of class
 #'   \code{\link[flowWorkspace:cytoset]{cytoset}}.
+#' @param trans object of class \code{transformerList} containing the
+#'   definitions of the transformers already applied to \code{x}. \code{trans}
+#'   may need to be supplied manually in cases where the reference
+#'   \code{GatingSet} may have been cloned and the transformer definitions lost.
 #' @param inverse indicates whether the extracted data has already be inverse
 #'   transformed onto a linear scale, set to FALSE by default.
 #'
@@ -20,6 +24,7 @@
 #' @noRd
 cyto_rebuild <- function(x,
                          y,
+                         trans = NA,
                          inverse = FALSE) {
   
   # X - REFERENCE GATINGSET
@@ -56,8 +61,13 @@ cyto_rebuild <- function(x,
     spill <- spill[cyto_names(y)]
   }
   
-  # REFERENCE TRANSFORMERS
-  trans <- cyto_transformers_extract(x)
+  # GATINGSET TRANSFORMERS
+  gs_trans <- cyto_transformers_extract(x)
+  
+  # FAVOUR ATTACHED TRANSFORMERS OVER MANUAL ONES
+  if(!.all_na(gs_trans)) {
+    trans <- gs_trans
+  }
   
   # MESSAGE
   message(
