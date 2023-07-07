@@ -227,7 +227,10 @@ cyto_plot_compensation <- function(x,
       channels = channels
     )
   }
-  pd <- pd[match(rownames(pd), rownames(cyto_details(x))), , drop = FALSE]
+  nms <- rownames(cyto_details(x))[
+    rownames(cyto_details(x)) %in% rownames(pd)
+  ]
+  pd <- pd[match(nms, rownames(pd)), , drop = FALSE]
   
   # UPDATE EXPERIMENT DETAILS
   cyto_details(x) <- pd
