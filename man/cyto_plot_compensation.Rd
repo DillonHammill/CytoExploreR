@@ -54,8 +54,8 @@ details.}
 \code{"both"} or \code{"none"} to allow control over which data is overlaid
 onto the plots, set to \code{"both"} by default.}
 
-\item{channels}{names of the channels or markers in which comensation should
-be visualised, set to all area fluorescentce parameter by default.}
+\item{channels}{names of the channels or markers in which compensation should
+be visualised, set to all area fluorescence parameter by default.}
 
 \item{spillover}{a matrix or name of a CSV file containing the spillover
 coefficients that should be applied to the data when \code{compensate} is
