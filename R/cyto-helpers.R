@@ -9352,7 +9352,7 @@ cyto_require <- function(x,
     # NO PYTHON
     } else {
       warning(
-        ""
+        "Python is not available - py_available() must be TRUE!"
       )
       return(NULL)
     }
@@ -9385,8 +9385,11 @@ cyto_require <- function(x,
     if(inst) {
       # MESSAGE
       message(
-        paste0("Installing required package: ",
-               x, "...")
+        paste0(
+          "Installing required package: ",
+          x,
+          "..."
+        )
       )
       # GITHUB - REPO
       if(!is.null(repo)) {
@@ -9394,17 +9397,19 @@ cyto_require <- function(x,
           install.packages("remotes")
         }
         cyto_func_call("remotes::install_github", list(repo, ...))
-        # remotes::install_github(repo, ...)
         # CRAN
       } else if(grepl("^c", source, ignore.case = TRUE)){
         install.packages(x, ...)
-        # BIOCONDUCTOR
+      # BIOCONDUCTOR
       } else if (grepl("^b", source, ignore.case = TRUE)) {
         if(!"BiocManager" %in% pkgs$Package) {
           install.packages("BiocManager", ...)
         }
         cyto_func_call("BiocManager::install", list(x, ...))
-        # BiocManager::install(x, ...)
+      } else {
+        stop(
+          "Cannot install required package: ", x, "!"
+        )
       }
     }
     # IMPORT REQUIRED
