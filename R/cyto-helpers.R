@@ -957,19 +957,17 @@ cyto_setup <- function(path = ".",
   
   # CYTOSET/GATINGSET
   message(
-    paste0(
-      "Loading ",
-      ifelse(
-        cyto_class(
-          path, 
-          "list", 
-          TRUE
-        ),
-        "data",
-        "FCS files"
-      ), 
-      " into a GatingSet..."
-    )
+    "Loading ",
+    ifelse(
+      cyto_class(
+        path, 
+        "list", 
+        TRUE
+      ),
+      "data",
+      "FCS files"
+    ), 
+    " into a GatingSet..."
   )
   x <- cyto_load(
     path = path, 
@@ -1018,7 +1016,7 @@ cyto_setup <- function(path = ".",
   }
   
   # FLOWSET LOADED
-  if (cyto_class(x, "flowSet")) {
+  if (cyto_class(x, c("flowSet", "cytoset"))) {
     # RESTRICT CHANNELS
     if (restrict != FALSE) {
       if(restrict == TRUE){
@@ -1210,10 +1208,11 @@ cyto_details <- function(x,
                          ...) {
   
   # CYTOFRAME
-  if(cyto_class(x, "flowFrame")) {
+  if(cyto_class(x, c("flowFrame", "cytoframe"))) {
     stop(
-      paste0("'cyto_details' cannot be extracted from ",
-             cyto_class(x, class = TRUE), " objects!")
+      "'cyto_details' cannot be extracted from ",
+      cyto_class(x, class = TRUE),
+      " objects!"
     )
   }
   
@@ -1310,7 +1309,7 @@ cyto_names <- function(x,
                        ...) {
   
   # FLOWFRAME | CYTOFRAME
-  if(cyto_class(x, "flowFrame")) {
+  if(cyto_class(x, c("flowFrame", "cytoframe"))) {
     # FLOWFRAME -> IDENTIFIER
     if(cyto_class(x, "flowFrame", TRUE)) {
       # IDENTIFIER - CANNOT ACCESS URI - NOT ON DISK
@@ -1329,7 +1328,7 @@ cyto_names <- function(x,
     }
     return(nm)
   # FLOWSET | GATINGSET
-  } else if(cyto_class(x, c("flowSet", "GatingSet"))) {
+  } else if(cyto_class(x, c("flowSet", "cytoset", "GatingSet"))) {
     # SELECT
     if(!is.null(select)) {
       x <- cyto_select(
@@ -1385,14 +1384,14 @@ cyto_names <- function(x,
 #'
 #' @export
 "cyto_names<-" <- function(x, value) {
-  if(cyto_class(x, "flowFrame")) {
+  if(cyto_class(x, c("flowFrame", "cytoframe"))) {
     identifier(x) <- value
   } else if (cyto_class(x, c("flowSet", "GatingHierarchy", "GatingSet"))) {
     sampleNames(x) <- value
   } else {
     stop(
-      paste0("'cyto_names' cannot be replaced for objects of class ", 
-             cyto_class(x, class = TRUE), "!")
+      "'cyto_names' cannot be replaced for objects of class ", 
+      cyto_class(x, class = TRUE), "!"
     )
   }
   return(x)
@@ -1483,9 +1482,11 @@ cyto_names_parse <- function(x,
     vars <- paste0("var_", seq_len(var_length))
   }else{
     if(length(vars) != var_length){
-      stop(paste0("Require ",
-                  var_length, 
-                  " variable names to 'vars' to update cyto_details."))
+      stop(
+        "Require ",
+        var_length, 
+        " variable names to 'vars' to update cyto_details."
+      )
     }
   }  
   
@@ -1615,10 +1616,8 @@ cyto_transform.default <- function(x,
     # WARNING TRANSFORMATION OF CYTOFRAME/CYTOSET OBJECTS
     if(!quiet & !cyto_class(x, "GatingSet")) {
       warning(
-        paste(
-          "Automatically transforming cytoframe/cytoset objects",
-          "is not recommended as transformation definitions will be lost."
-        )
+        "Automatically transforming cytoframe/cytoset objects ",
+        "is not recommended as transformation definitions will be lost."
       )
     }
     # INVERSE TRANSFORM GATINGHIERARCHY/GATINGSET
@@ -1646,11 +1645,9 @@ cyto_transform.default <- function(x,
   # MESSAGE
   if(!quiet)(
     message(
-      paste0(
-        "Applying ", 
-        ifelse(inverse, "inverse ", ""),
-        "data transformations..."
-      )
+      "Applying ", 
+      ifelse(inverse, "inverse ", ""),
+      "data transformations..."
     )
   )
   
@@ -1660,7 +1657,7 @@ cyto_transform.default <- function(x,
   }
   
   # TRANSFORM FLOWFRAME OR FLOWSET
-  if (cyto_class(x, c("flowFrame", "flowSet"))) {
+  if (cyto_class(x, c("flowFrame", "cytoframe", "flowSet", "cytoset"))) {
     # Extract transformations from transformerList to transformList
     transform_list <- cyto_transform_extract(
       transformer_list,
@@ -1673,16 +1670,6 @@ cyto_transform.default <- function(x,
         transform_list
       )
     )
-    # # UPDATE CYTOEXPLORER_TRANSFORMERS KEYWORD
-    # lapply(
-    #   seq_along(x),
-    #   function(z) {
-    #     keyword(x[[z]])[["CytoExploreR_transformers"]] <- 
-    #       cyto_transformers_deparse(
-    #         transformer_list
-    #       )
-    #   }
-    # )
   # TRANSFORM GATINGHIERARCHY OR GATINGSET
   } else if (cyto_class(x, "GatingSet")) {
     # TRANSFORMERS
@@ -1711,13 +1698,6 @@ cyto_transform.default <- function(x,
             transform_list
           )
         )
-        # # UPDATE CYTOEXPLORER_TRANSFORMERS KEYWORD
-        # lapply(
-        #   seq_along(cs),
-        #   function(z) {
-        #     keyword(cs[[z]])[["CytoExploreR_transformers"]] <- ""
-        #   }
-        # )
         # REMOVE COMPENSATION
         if(!is.null(spill)) {
           cs <- cyto_compensate(
@@ -1748,16 +1728,6 @@ cyto_transform.default <- function(x,
             quiet = TRUE
           )
         }
-        # # UPDATE CYTOEXPLORER_TRANSFORMERS KEYWORD
-        # lapply(
-        #   seq_along(cs),
-        #   function(z) {
-        #     keyword(cs[[z]])[["CytoExploreR_transformers"]] <- 
-        #       cyto_transformers_deparse(
-        #         transformer_list
-        #       )
-        #   }
-        # )
         # RECONSTRUCT GATINGSET - REQUIRED ELSE GATINGTEMPLATE GATES EXIST
         x <- GatingSet(cs)
         # APPLY COMPENSATION
@@ -1795,10 +1765,9 @@ cyto_transform.default <- function(x,
                     ),
                     error = function(e) {
                       message(
-                        paste0(
-                          "Transformation of ", cyto_class(z$gate),
-                          " objects is not currently supported!"
-                        )
+                        "Transformation of ", 
+                        cyto_class(z$gate),
+                        " objects is not currently supported!"
                       )
                       return(z$gate)
                     }
@@ -1832,10 +1801,8 @@ cyto_transform.default <- function(x,
                           ),
                           error = function(e) {
                             message(
-                              paste0(
-                                "Transformation of ", cyto_class(z$gate),
-                                " objects is not currently supported!"
-                              )
+                              "Transformation of ", cyto_class(z$gate),
+                              " objects is not currently supported!"
                             )
                             return(z$gate)
                           }
@@ -1910,21 +1877,17 @@ cyto_transform.transformList <- function(x,
   # Added for backwards compatibility - flowFrame/flowSet objects only
   if (cyto_class(x, "GatingSet")) {
     stop(
-      paste(
-        "GatingHierarchy and GatingSet objects require transformerList",
-        "objects to apply transformations."
-      )
+      "GatingHierarchy and GatingSet objects require transformerList",
+      "objects to apply transformations."
     )
   }
   
   # MESSAGE
   if(!quiet){
     message(
-      paste0(
-        "Applying ", 
-        ifelse(inverse, "inverse ", ""),
-        "data transformations..."
-      )
+      "Applying ", 
+      ifelse(inverse, "inverse ", ""),
+      "data transformations..."
     )
   }
   
@@ -1934,7 +1897,7 @@ cyto_transform.transformList <- function(x,
   }
   
   # TRANSFORM FLOWFRAME OR FLOWSET
-  if (cyto_class(x, c("flowFrame", "flowSet"))) {
+  if (cyto_class(x, c("flowFrame", "cytoframe", "flowSet", "cytoset"))) {
     # VALID TRANSFORMERS ONLY
     if(any(names(trans) %in% cyto_channels(x))) {
       # RESTRICT TRANSFORMERS - SUBSETTED DATA MAY LACK CHANNELS
@@ -2000,11 +1963,9 @@ cyto_transform.transformerList <- function(x,
   # MESSAGE
   if(!quiet){
     message(
-      paste0(
-        "Applying ", 
-        ifelse(inverse, "inverse ", ""),
-        "data transformations..."
-      )
+      "Applying ", 
+      ifelse(inverse, "inverse ", ""),
+      "data transformations..."
     )
   }
   
@@ -2014,7 +1975,7 @@ cyto_transform.transformerList <- function(x,
   }
   
   # TRANSFORM FLOWFRAME OR FLOWSET
-  if (cyto_class(x, c("flowFrame", "flowSet"))) {
+  if (cyto_class(x, c("flowFrame", "cytoframe", "flowSet", "cytoset"))) {
     # VALID TRANSFORMERS ONLY
     if(any(names(trans) %in% cyto_channels(x))) {
       # RESTRICT TRANSFORMERS - SUBSETTED DATA MAY LACK CHANNELS
@@ -2033,16 +1994,6 @@ cyto_transform.transformerList <- function(x,
           transform_list
         )
       )
-      # # UPDATE CYTOEXPLORER_TRANSFORMERS KEYWORD
-      # lapply(
-      #   seq_along(x),
-      #   function(z) {
-      #     keyword(x[[z]])[["CytoExploreR_transformers"]] <- 
-      #       cyto_transformers_deparse(
-      #         transformer_list
-      #       )
-      #   }
-      # )
     }
   # TRANSFORM GATINGHIERARCHY OR GATINGSET
   } else if (cyto_class(x, "GatingSet")) {
@@ -2076,13 +2027,6 @@ cyto_transform.transformerList <- function(x,
             transform_list
           )
         )
-        # # UPDATE CYTOEXPLORER_TRANSFORMERS KEYWORD
-        # lapply(
-        #   seq_along(cs),
-        #   function(z) {
-        #     keyword(cs[[z]])[["CytoExploreR_transformers"]] <- ""
-        #   }
-        # )
         # REMOVE COMPENSATION
         if(!is.null(spill)) {
           cs <- cyto_compensate(
@@ -2113,16 +2057,6 @@ cyto_transform.transformerList <- function(x,
             quiet = TRUE
           )
         }
-        # # UPDATE CYTOEXPLORER_TRANSFORMERS KEYWORD
-        # lapply(
-        #   seq_along(cs),
-        #   function(z) {
-        #     keyword(cs[[z]])[["CytoExploreR_transformers"]] <- 
-        #       cyto_transformers_deparse(
-        #         transformer_list
-        #       )
-        #   }
-        # )
         # RECONSTRUCT GATINGSET - REQUIRED ELSE GATINGTEMPLATE GATES EXIST
         x <- GatingSet(cs)
         # APPLY COMPENSATION
@@ -2160,10 +2094,8 @@ cyto_transform.transformerList <- function(x,
                     ),
                     error = function(e) {
                       message(
-                        paste0(
-                          "Transformation of ", cyto_class(z$gate),
-                          " objects is not currently supported!"
-                        )
+                        "Transformation of ", cyto_class(z$gate),
+                        " objects is not currently supported!"
                       )
                       return(z$gate)
                     }
@@ -2197,10 +2129,8 @@ cyto_transform.transformerList <- function(x,
                           ),
                           error = function(e) {
                             message(
-                              paste0(
-                                "Transformation of ", cyto_class(z$gate),
-                                " objects is not currently supported!"
-                              )
+                              "Transformation of ", cyto_class(z$gate),
+                              " objects is not currently supported!"
                             )
                             return(z$gate)
                           }
@@ -2282,19 +2212,19 @@ cyto_transform.transformerList <- function(x,
   if(is.null(trans)){
     return(x)
     # NO TRANSFORMERS
-  }else if(.all_na(trans)){
+  } else if(.all_na(trans)) {
     return(x)
     # TRANSFORMER TO USE
-  }else{
+  } else {
     if(is.null(channel)){
       stop("Indicate which transformer to apply through 'channel' argument.")
     }
   }
   
   # TRANSFORMER
-  if(channel %in% names(trans)){
+  if(channel %in% names(trans)) {
     transformer <- trans[[channel]]
-  }else{
+  } else {
     return(x)
   }
   
@@ -2302,10 +2232,10 @@ cyto_transform.transformerList <- function(x,
   ind <- which(!is.na(x))
   
   # TRANSFORM
-  if(inverse == FALSE){
+  if(inverse == FALSE) {
     x[ind] <- transformer$transform(x[ind])
     # INVERSE TRANSFORM  
-  }else{
+  } else {
     x[ind] <- transformer$inverse(x[ind])
   }
   
@@ -2430,7 +2360,7 @@ cyto_transform_extract <- function(x,
 #'   data matrix lists.
 #'
 #' @importFrom flowWorkspace gs_pop_get_data cf_get_uri cytoframe_to_flowFrame
-#'   cytoset_to_flowSet
+#'   cytoset_to_flowSet flowFrame_to_cytoframe flowSet_to_cytoset
 #' @importFrom flowCore flowSet
 #'
 #' @examples
@@ -2500,7 +2430,7 @@ cyto_data_extract <- function(x,
   }
   
   # SELECT
-  if(!is.null(select) & !cyto_class(x, "flowFrame")) {
+  if(!is.null(select) & !cyto_class(x, c("flowFrame", "cytoframe"))) {
     x <- cyto_select(x, select)
   }
   
@@ -2512,7 +2442,7 @@ cyto_data_extract <- function(x,
   }
   
   # CYTOFRAME/CYTOSET LIST
-  if(cyto_class(x, c("flowFrame", "flowSet"))) {
+  if(cyto_class(x, c("flowFrame", "cytoframe", "flowSet", "cytoset"))) {
     cs_list <- list(
       cyto_convert(x) # SLOW WITH OLD DATA STRUCTURES
     )
@@ -2556,15 +2486,19 @@ cyto_data_extract <- function(x,
         )
       }
       # COERCE - NAME WITH PARENT - BYPASS CYTOFRAME
-      if(coerce & cyto_class(cs, "flowSet")) {
+      if(coerce & cyto_class(cs, c("flowSet", "cytoset"))) {
         # SAMPLE COERCED CYTOSET
         cs <- cyto_coerce(
           cs,
           format = "cytoset",
           events = events,
-          name = ifelse(is.null(names(cs_list)), 
-                        paste0("merge-", id),
-                        paste0(names(cs_list)[id], "-merge")),
+          name = ifelse(
+            is.null(
+              names(cs_list)
+            ), 
+            paste0("merge-", id),
+            paste0(names(cs_list)[id], "-merge")
+          ),
           barcode = FALSE,
           seed = seed
         )
@@ -2607,91 +2541,125 @@ cyto_data_extract <- function(x,
       }
       # FLOWFRAME - INTERNAL BACKWARDS COMPATIBILITY
       if(.grepl("flowFrame", format)) {
-        # CYTOFRAME -> FLOWFRAME
-        if(cyto_class(cs, "flowFrame")) {
+        # FLOWFRAME|CYTOFRAME -> FLOWFRAME
+        if(cyto_class(cs, c("flowFrame", "cytoframe"))) {
           structure(
             list(
-              cytoframe_to_flowFrame(cs)
+              if(cyto_class(cs, "flowFrame", TRUE)) {
+                cs
+              } else {
+                cytoframe_to_flowFrame(cs)
+              }
             ),
             names = cyto_names(cs)
           )
-        # CYTOSET -> FLOWFRAME
+        # FLOWSET|CYTOSET -> FLOWFRAME
         } else {
           structure(
             lapply(
               cyto_names(cs), 
               function(z) {
-                cs[[z]]
+                if(cyto_class(cs, "flowSet", TRUE)) {
+                  cs[[z]]
+                } else {
+                  cytoframe_to_flowFrame(cs[[z]])
+                }
               }
             ), names = cyto_names(cs)
           )
         }
       # FLOWSET - INTERNAL BACKWARDS COMPATIBILITY
       } else if(.grepl("flowSet", format)) {
-        # CYTOFRAME -> FLOWSET
-        if(cyto_class(cs, "flowFrame")) {
+        # FLOFRAME|CYTOFRAME -> FLOWSET
+        if(cyto_class(cs, c("flowFrame", "cytoframe"))) {
           flowSet(
-            cytoframe_to_flowFrame(
+            if(cyto_class(cs, "flowFrame", TRUE)) {
               cs
-            )
+            } else {
+              cytoframe_to_flowFrame(cs)
+            }
           )
-        # CYTOSET -> FLOWSET
+        # FLOWSET|CYTOSET -> FLOWSET
         } else {
-          cytoset_to_flowSet(
+          if(cyto_class(cs, "flowSet", TRUE)) {
             cs
-          )
+          } else {
+            cytoset_to_flowSet(cs)
+          }
         }
       # CYTOFRAME
       } else if(.grepl("cytoframe", format)) {
-        # CYTOFRAME -> CYTOFRAME
-        if(cyto_class(cs, "flowFrame")) {
+        # FLOWFRAME|CYTOFRAME -> CYTOFRAME
+        if(cyto_class(cs, c("flowFrame", "cytoframe"))) {
           structure(
             list(
-              cs
+              if(cyto_class(cs, "flowFrame")) {
+                flowFrame_to_cytoframe(cs)
+              } else {
+                cs
+              }
             ),
             names = cyto_names(cs)
           )
-        # CYTOSET -> CYTOFRAME
+        # FLOWSET|CYTOSET -> CYTOFRAME
         } else {
           structure(
             lapply(
               cyto_names(cs), 
               function(z) {
-                cs[[z]]
+                if(cyto_class(cs, "flowSet")) {
+                  flowFrame_to_cytoframe(cs[[z]])
+                } else {
+                  cs[[z]]
+                }
               }
             ), names = cyto_names(cs)
           )
         }
       # CYTOSET
       } else if(.grepl("cytoset", format)) {
-        # CYTOFRAME -> CYTOSET
-        if(cyto_class(cs, "flowFrame")) {
+        # FLOWFRAME|CYTOFRAME -> CYTOSET
+        if(cyto_class(cs, c("flowFrame", "cytoframe"))) {
           cytoset(
             structure(
-              list(cs), 
+              list(
+                if(cyto_class(cs, "flowFrame")) {
+                  flowFrame_to_cytoframe(cs)
+                } else {
+                  cs
+                }
+              ), 
               names = cyto_names(cs)
             )
           )
-        # CYTOSET -> CYTOSET
+        # FLOWSET|CYTOSET -> CYTOSET
         } else {
           if(split) {
             structure(
               lapply(
                 seq_along(cs), 
                 function(z) {
-                  cs[z]
+                  if(cyto_class(cs[z], "flowSet")) {
+                    flowSet_to_cytoset(cs[z])
+                  } else {
+                    cs[z]
+                  }
                 }
               ), 
               names = cyto_names(cs)
             )
           } else {
-            cs
+            if(cyto_class(cs, "flowSet")) {
+              flowSet_to_cytoset(cs)
+            } else {
+              cs
+            }
           }
         }
       # MATRIX | TIBBLE | DATA.FRAME | DATA.TABLE
       } else {
-        # CYTOFRAME -> MATRIX
-        if(cyto_class(cs, "flowFrame")) {
+        # FLOWFRAME|CYTOFRAME -> MATRIX
+        if(cyto_class(cs, c("flowFrame", "cytoframe"))) {
           structure(
             list(
               cyto_exprs(
@@ -2703,7 +2671,7 @@ cyto_data_extract <- function(x,
             ), 
             names = cyto_names(cs)
           )
-        # CYTOSET -> MATRIX
+        # FLOWSET|CYTOSET -> MATRIX
         } else {
           structure(
             lapply(
