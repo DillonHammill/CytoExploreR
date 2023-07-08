@@ -264,42 +264,42 @@ cyto_export <- function(x,
                         ...) {
   
   # CytoML
-  if (requireNamespace("CytoML")) {
-    
-    # FILE NAME
-    if (is.null(save_as)) {
-      stop("Supply either a wsp or xml file name to 'save_as'.")
-    } else {
-      # FLOWJO EXPORT BY DEFAULT
-      save_as <- file_ext_append(save_as, ".wsp")
-    }
-    
-    # SAVE
-    if (file_ext(save_as) == "xml") {
-      message("Saving GatingSet to Cytobank XML file...")
-      CytoML::gatingset_to_cytobank(
-        x, 
-        save_as,
-        ...
-      )
-    } else if (file_ext(save_as) == "wsp") {
-      message("Saving GatingSet to flowJo workspace file...")
-      CytoML::gatingset_to_flowjo(
-        x, 
-        save_as,
-        ...
-      )
-    }
-    
-    # CytoML MISSING
+  cyto_require(
+    "CytoML",
+    source = "BioC",
+    repo = "RGLab/CytoML",
+    ref = paste(
+      "Finak G, Jiang W, Gottardo R (2018). CytoML for cross-platform",
+      "cytometry data sharing. Cytometry A,",
+      "93(12)."
+    )
+  )
+  
+  # FILE NAME
+  if (is.null(save_as)) {
+    stop("Supply either a wsp or xml file name to 'save_as'.")
   } else {
-    stop(
-      paste0(
-        "cyto_export() requires the CytoML package ",
-        "- BiocManager::install('CytoML')"
-      )
+    # FLOWJO EXPORT BY DEFAULT
+    save_as <- file_ext_append(save_as, ".wsp")
+  }
+  
+  # SAVE
+  if (file_ext(save_as) == "xml") {
+    message("Saving GatingSet to Cytobank XML file...")
+    CytoML::gatingset_to_cytobank(
+      x, 
+      save_as,
+      ...
+    )
+  } else if (file_ext(save_as) == "wsp") {
+    message("Saving GatingSet to flowJo workspace file...")
+    CytoML::gatingset_to_flowjo(
+      x, 
+      save_as,
+      ...
     )
   }
+  
 }
 
 ## CYTO_LOAD -------------------------------------------------------------------
