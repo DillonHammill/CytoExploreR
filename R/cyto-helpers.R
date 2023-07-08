@@ -400,7 +400,7 @@ cyto_load <- function(path = ".",
           path,
           function(z) {
             # DATA.FRAME -> MATRIX
-            if(! cyto_class(z, "matrix", TRUE)) {
+            if(!cyto_class(z, "matrix", TRUE)) {
               z <- data.matrix(z)
             }
             # CONVERT TO CYTOFRAME
@@ -414,7 +414,6 @@ cyto_load <- function(path = ".",
         names = names(path)
       )
     )
-    
     # RETURN CYTOSET
     return(x)
   }
@@ -4086,6 +4085,27 @@ setAs(
   }
 )
 
+#' data.table to cytoframe
+#' 
+#' @importFrom flowWorkspace flowFrame_to_cytoframe
+#' @importFrom flowCore flowFrame
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @noRd
+setAs(
+  "data.table",
+  "cytoframe",
+  function(from) {
+    flowFrame_to_cytoframe(
+      flowFrame(
+        data.matrix(from)
+      ),
+      emptyValue = FALSE
+    )
+  }
+)
+
 #' data.frame to cytoset
 #' 
 #' @importFrom flowWorkspace cytoset cf_get_uri
@@ -4120,6 +4140,31 @@ setAs(
 #' @noRd
 setAs(
   "matrix",
+  "cytoset",
+  function(from) {
+    cf <- as(from, "cytoframe")
+    cytoset(
+      structure(
+        list(cf),
+        names = file_ext_remove(
+          basename(
+            cf_get_uri(cf)
+          )
+        )
+      )
+    )
+  }
+)
+
+#' data.table to cytoset
+#' 
+#' @importFrom flowWorkspace cytoset cf_get_uri
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @noRd
+setAs(
+  "data.table",
   "cytoset",
   function(from) {
     cf <- as(from, "cytoframe")
