@@ -399,16 +399,7 @@ cyto_load <- function(path = ".",
         lapply(
           path,
           function(z) {
-            # DATA.FRAME -> MATRIX
-            if(!cyto_class(z, "matrix", TRUE)) {
-              z <- data.matrix(z)
-            }
-            # CONVERT TO CYTOFRAME
-            cyto_convert(
-              flowFrame(
-                z
-              )
-            )
+            as(z, "cytoframe")
           }
         ),
         names = names(path)
@@ -475,8 +466,10 @@ cyto_load <- function(path = ".",
     files_ind <- which(!files_ext %in% c("", "fcs", "FCS"))
     # NO VALID FILES
     if(length(files_ind) == length(files)){
-      stop(paste0(path,
-                  " does not contain any valid FCS files."))
+      stop(
+        path,
+        " does not contain any valid FCS files."
+      )
     }
     # EXCLUDE IRRELEVANT FILES
     if(length(files_ind) > 0){
@@ -541,10 +534,8 @@ cyto_load <- function(path = ".",
     # SELECT FILES
     if(length(file_ind) == 0) {
       stop(
-        paste0(
-          "None of the files in specified directory satisfy the file ",
-          "selection and exclusion criteria!"
-        )
+        "None of the files in specified directory satisfy the file ",
+        "selection and exclusion criteria!"
       )
     } else {
       files <- files[file_ind]
