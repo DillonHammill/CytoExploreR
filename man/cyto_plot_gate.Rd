@@ -7,6 +7,7 @@
 \alias{cyto_plot_gate.polygonGate}
 \alias{cyto_plot_gate.ellipsoidGate}
 \alias{cyto_plot_gate.quadGate}
+\alias{cyto_plot_gate.multiRangeGate}
 \alias{cyto_plot_gate.filters}
 \alias{cyto_plot_gate.list}
 \title{Plot Gate Objects onto an Existing cyto_plot}
@@ -57,6 +58,16 @@
   ...
 )
 
+\method{cyto_plot_gate}{multiRangeGate}(
+  gate,
+  channels = NULL,
+  gate_line_type = 1,
+  gate_line_width = 2.5,
+  gate_line_col = "red",
+  gate_fill = "white",
+  gate_fill_alpha = 0
+)
+
 \method{cyto_plot_gate}{filters}(
   gate,
   channels = NULL,
@@ -83,7 +94,8 @@
 \item{gate}{gate object of class
 \code{\link[flowCore:rectangleGate-class]{rectangleGate}},
 \code{\link[flowCore:polygonGate-class]{polygonGate}},
-\code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}, \code{list} or
+\code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}},
+\code{multiRangeGate} \code{list} or
 \code{\link[flowCore:filters-class]{filters}}.}
 
 \item{...}{not in use.}

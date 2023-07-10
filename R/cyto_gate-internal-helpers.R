@@ -30,10 +30,15 @@
                                       text_y = NA) {
   
   # CANNOT COMPUTE GATE CENTER - FILTER
-  matrix(c(text_x, text_y),
-         ncol = 2,
-         byrow = FALSE,
-         dimnames = list(NULL, c("x","y")))
+  matrix(
+    c(
+      text_x,
+      text_y
+    ),
+    ncol = 2,
+    byrow = FALSE,
+    dimnames = list(NULL, c("x","y"))
+  )
   
 }
 
@@ -134,9 +139,14 @@
   # RETURN GATE CENTER ---------------------------------------------------------
   
   # GATE CENTER MATRIX
-  text_xy <- matrix(c(text_x, text_y),
-                    ncol = 2,
-                    byrow = FALSE)
+  text_xy <- matrix(
+    c(
+      text_x,
+      text_y
+    ),
+    ncol = 2,
+    byrow = FALSE
+  )
   colnames(text_xy) <- c("x", "y")
   
   # RETURN GATE CENTER MATRIX
@@ -252,9 +262,13 @@
   # RETURN GATE CENTER ---------------------------------------------------------
   
   # GATE CENTER MATRIX
-  text_xy <- matrix(c(text_x, text_y),
-                    ncol = 2,
-                    byrow = FALSE
+  text_xy <- matrix(
+    c(
+      text_x,
+      text_y
+    ),
+    ncol = 2,
+    byrow = FALSE
   )
   colnames(text_xy) <- c("x", "y")
   
@@ -345,9 +359,13 @@
   # RETURN GATE CENTER ---------------------------------------------------------
   
   # GATE CENTER MATRIX
-  text_xy <- matrix(c(text_x, text_y),
-                    ncol = 2,
-                    byrow = FALSE,
+  text_xy <- matrix(
+    c(
+      text_x,
+      text_y
+    ),
+    ncol = 2,
+    byrow = FALSE,
   )
   colnames(text_xy) <- c("x", "y")
   
@@ -457,6 +475,120 @@
 }
 
 #' @noRd
+.cyto_gate_center.multiRangeGate <- function(x,
+                                             channels,
+                                             text_x = NA,
+                                             text_y = NA) {
+  
+  # GRAPHICAL PARAMETERS -------------------------------------------------------
+  
+  # PLOT LIMITS
+  lims <- par("usr")
+  
+  # X LIMITS
+  xmin <- lims[1]
+  xmax <- lims[2]
+  xrng <- xmax - xmin
+  xpad <- (xrng - xrng/1.04) # 4% BUFFER EITHER SIDE
+  xmin <- xmin + 0.5 * xpad # 2% BUFFER
+  xmax <- xmax - 0.5 * xpad # 2% BUFFER
+  
+  # Y LIMITS
+  ymin <- lims[3]
+  ymax <- lims[4]
+  yrng <- ymax - ymin
+  ypad <- (yrng - yrng/1.04) # 4% BUFFER EITHER SIDE
+  ymin <- ymin + 0.5 * ypad # 2% BUFFER
+  ymax <- ymax - 0.5 * ypad # 2% BUFFER
+  
+  # PREPARE GATE ---------------------------------------------------------------
+  
+  # CORRECT DIMENSIONS
+  x <- cyto_gate_convert(x, channels = channels)
+  
+  # GATE CHANNEL
+  chan <- parameters(x)
+  
+  # PREPARE TEXT LOCATIONS
+  text_x <- rep(text_x, length.out = length(x@ranges[[1]]))
+  text_y <- rep(text_y, length.out = length(x@ranges[[1]]))
+  
+  # GATE CENTERS ---------------------------------------------------------------
+  
+  # COMPUTE CO-ORDINATES IN PLOT REGION
+  text_xy <- lapply(
+    seq_along(x@ranges[[1]]),
+    function(z) {
+      chan_idx <- match(chan, channels)
+      # GATE COORDS
+      coords <- c(
+        x@ranges[["min"]][z],
+        x@ranges[["max"]][z]
+      )
+      # X CHANNEL MATCH
+      if(chan_idx == 1) {
+        # REPLACE INFINITE COORDS
+        if(!is.finite(coords[1])) {
+          coords[1] <- xmin
+        }
+        if(!is.finite(coords[2])) {
+          coords[2] <- xmax
+        }
+        # XCOORD
+        if(.all_na(text_x[z])) {
+          xcoord <- mean(
+            coords
+          )
+        } else {
+          ycoord <- text_x[z]
+        }
+        # YCOORD
+        if(.all_na(text_y[z])) {
+          ycoord <- mean(
+            c(ymin, ymax)
+          )
+        } else {
+          ycoord <- text_y[z]
+        }
+      # Y CHANNEL MATCH
+      } else {
+        # REPLACE INFINITE COORDS
+        if(!is.finite(coords[1])) {
+          coords[1] <- ymin
+        }
+        if(!is.finite(coords[2])) {
+          coords[2] <- ymax
+        }
+        # XCOORD
+        if(.all_na(text_x[z])) {
+          xcoord <- mean(
+            c(xmin, xmax)
+          )
+        } else {
+          xcoord <- text_x[z]
+        }
+        # YCOORD
+        if(.all_na(text_y[z])) {
+          ycoord <- mean(coords)
+        } else {
+          ycoord <- text_y[z]
+        }
+      }
+      return(
+        c(
+          "x" = xcoord,
+          "y" = ycoord
+        )
+      )
+    }
+  )
+
+  # RETURN GATE CENTER MATRIX
+  return(text_xy)
+  
+}
+
+#' @noRd
 .cyto_gate_center.filters <- function(x,
                                       channels,
                                       text_x = NA,
@@ -466,10 +598,11 @@
   x <- unlist(x)
   
   # CALL LIST METHOD -----------------------------------------------------------
-  text_xy <- .cyto_gate_center(x,
-                               channels = channels,
-                               text_x = text_x,
-                               text_y = text_y
+  text_xy <- .cyto_gate_center(
+    x,
+    channels = channels,
+    text_x = text_x,
+    text_y = text_y
   )
   
   # RETURN GATE CENTER MATRIX --------------------------------------------------
@@ -508,12 +641,14 @@
   text_xy <- mapply(function(x,
                              text_x,
                              text_y) {
-    .cyto_gate_center(x,
-                      channels = channels,
-                      text_x = text_x,
-                      text_y = text_y
+    .cyto_gate_center(
+      x,
+      channels = channels,
+      text_x = text_x,
+      text_y = text_y
     )
-  }, x,
+  }, 
+  x,
   text_x,
   text_y,
   SIMPLIFY = FALSE
@@ -555,6 +690,8 @@
     if(grepl("gate", cyto_class(gate[[z]]), ignore.case = TRUE)) {
       if(cyto_class(gate[[z]], "quadGate")) {
         return(4)
+      } else if(cyto_class(gate[[z]], "multiRangeGate")) {
+        return(length(gate@ranges[[1]]))
       } else {
         return(1)
       }
@@ -688,6 +825,9 @@
       # QUADGATE
       }else if(cyto_class(y, "quadGate")){
         coords <- as.numeric(y@boundary[z])
+      # MULTIRANGEGATE
+      } else if(cyto_class(y, "multiRangeGate")) {
+        coords <- sort(unlist(y@ranges))
       # NOT SUPPORTED
       } else {
         coords <- NULL

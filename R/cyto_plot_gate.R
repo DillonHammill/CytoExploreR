@@ -5,7 +5,8 @@
 #' @param gate gate object of class
 #'   \code{\link[flowCore:rectangleGate-class]{rectangleGate}},
 #'   \code{\link[flowCore:polygonGate-class]{polygonGate}},
-#'   \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}, \code{list} or
+#'   \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}},
+#'   \code{multiRangeGate} \code{list} or
 #'   \code{\link[flowCore:filters-class]{filters}}.
 #' @param channels fluorescent channels to used to construct the plot.
 #' @param gate_line_type integer [0,6] which controls the line type, set to
@@ -587,6 +588,156 @@ cyto_plot_gate.quadGate <- function(gate,
     lwd = gate_line_width, 
     col = gate_line_col
   )
+  
+  # RETURN GATE ----------------------------------------------------------------
+  
+  # GATE WITH CORRECT DIMENSIONS
+  invisible(gate)
+  
+}
+
+#' @rdname cyto_plot_gate
+#' @export
+cyto_plot_gate.multiRangeGate <- function(gate,
+                                          channels = NULL,
+                                          gate_line_type = 1,
+                                          gate_line_width = 2.5,
+                                          gate_line_col = "red",
+                                          gate_fill = "white",
+                                          gate_fill_alpha = 0) {
+  
+  # GRAPHICAL PARAMETERS -------------------------------------------------------
+  
+  # PLOT LIMITS
+  lims <- par("usr")
+  
+  # X LIMITS
+  xmin <- lims[1]
+  xmax <- lims[2]
+  xrng <- xmax - xmin
+  xpad <- (xrng - xrng / 1.04)
+  xmin <- xmin + 0.5 * xpad # 2% BUFFER
+  xmax <- xmax - 0.5 * xpad # 2% BUFFER
+  xrng <- xmax - xmin
+  
+  # Y LIMITS
+  ymin <- lims[3]
+  ymax <- lims[4]
+  yrng <- ymax - ymin
+  ypad <- (yrng - yrng / 1.04)
+  ymin <- ymin + 0.5 * ypad # 2% BUFFER
+  ymax <- ymax - 0.5 * ypad # 2% BUFFER
+  yrng <- ymax - ymin
+  
+  # CYTO_PLOT_THEME ------------------------------------------------------------
+  
+  # ARGUMENTS
+  args <- .args_list()
+  
+  # INHERIT THEME
+  args <- .cyto_plot_theme_inherit(args)
+  
+  # UPDATE ARGUMENTS
+  .args_update(args)
+  
+  # CONVERT GATE ---------------------------------------------------------------
+  
+  # GATE DIMENSIONS
+  if(!is.null(channels)){
+    gate <- cyto_gate_convert(
+      gate,
+      channels = channels
+    )
+  }else{
+    channels <- parameters(gate)
+  }
+  
+  # PLOT GATE ------------------------------------------------------------------
+  
+  # 1D PLOT
+  if(length(channels) == 1){
+    lapply(
+      seq_along(x@ranges[[1]]),
+      function(z) {
+        coords <- c(
+          x@ranges[["min"]][z],
+          x@ranges[["max"]][z]
+        )
+        # REPLACE INFINITE X COORDS
+        if(is.infinite(min(coords))){
+          coords[coords == min(coords)] <- xmin
+        }
+        if(is.infinite(max(coords))){
+          coords[coords == max(coords)] <- xmax
+        }
+        # PLOT GATE(S)
+        rect(
+          xleft = coords[1],
+          xright = coords[2],
+          ybottom = ymin,
+          ytop = ymax,
+          lty = gate_line_type,
+          lwd = gate_line_width,
+          border = gate_line_col,
+          col = adjustcolor(gate_fill, gate_fill_alpha)
+        )
+      }
+    )
+  # 2D PLOT  
+  }else if(length(channels) == 2){
+    lapply(
+      seq_along(x@ranges[[1]]),
+      function(z) {
+        chan <- parameters(x)
+        coords <- c(
+          x@ranges[["min"]][z],
+          x@ranges[["max"]][z]
+        )
+        # REPLACE INFINITE X COORDS
+        if(is.infinite(min(coords))){
+          coords[coords == min(coords)] <- if(chan %in% channels[1]) {
+            xmin
+          } else {
+            ymin
+          }
+        }
+        if(is.infinite(max(coords))){
+          coords[coords == max(coords)] <- if(chan %in% channels[1]) {
+            xmax
+          } else {
+            ymax
+          }
+        }
+        # PLOT GATE(S)
+        rect(
+          xleft = if(chan %in% channels[1]) {
+            min(coords)
+          } else {
+            xmin
+          },
+          xright = if(chan %in% channels[1]) {
+            max(coords)
+          } else {
+            xmax
+          },
+          ybottom = if(chan %in% channels[1]) {
+            ymin
+          } else {
+            min(coords)
+          },
+          ytop = if(chan %in% channels[1]) {
+            ymax
+          } else {
+            max(coords)
+          },
+          lty = gate_line_type,
+          lwd = gate_line_width,
+          border = gate_line_col,
+          col = adjustcolor(gate_fill, gate_fill_alpha)
+        )
+      }
+    )
+  }
   
   # RETURN GATE ----------------------------------------------------------------
   

@@ -208,6 +208,9 @@ cyto_gate_draw <- function(x,
                            seed = 42,
                            ...){
   
+  # TODO: REMOVE REQUIREMENT ON GATINGTEMPLATE
+  # TODO: ADD SUPPORT FOR MULTIRANGEGATE GATING METHOD
+  
   # CHECKS ---------------------------------------------------------------------
   
   # FLAG - SKIP DATA PREPARTION IN CYTO_PLOT
@@ -377,10 +380,13 @@ cyto_gate_draw <- function(x,
             }
             # ADD GATE
             args$gate <- gate
-            gates <<- c(gates, structure(
-              list(gate),
-              names = paste(alias, collapse = "|") # quad gates
-            ))
+            gates <<- c(
+              gates, 
+              structure(
+                list(gate),
+                names = paste(alias, collapse = "|") # quad gates
+              )
+            )
             # LABELS - GATE BASE LAYER
             do.call(".cyto_gate_draw_label", args) # ... not used
           },

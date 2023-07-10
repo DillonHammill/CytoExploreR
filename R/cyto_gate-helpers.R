@@ -2558,22 +2558,22 @@ cyto_gate_convert.rectangleGate <- function(x,
     # 1D GATE IN 1D PLOT - CORRECT CHANNEL
     if (length(chans) == 1 & all(chans %in% channels)) {
       return(x)
-      # 1D GATE IN 1D PLOT - INCORRECT CHANNEL
+    # 1D GATE IN 1D PLOT - INCORRECT CHANNEL
     } else if (length(chans) == 1 & all(!chans %in% channels)) {
       stop("Supplied gate must contain co-ordinates in the supplied channel.")
-      # 2D GATE IN 1D PLOT - CORRECT CHANNEL
+    # 2D GATE IN 1D PLOT - CORRECT CHANNEL
     } else if (length(chans) == 2 & any(chans == channels)) {
       return(x[channels])
-      # 2D GATE IN 1D PLOT - INCORRECT CHANNEL
+    # 2D GATE IN 1D PLOT - INCORRECT CHANNEL
     } else if (length(chans) == 2 & !any(chans == channels)) {
       stop("Supplied gate must contain co-ordinates in the supplied channel.")
     }
-    # 2D PLOT
+  # 2D PLOT
   } else if (length(channels) == 2) {
     # 2D GATE IN 2D PLOT - CORRECT CHANNELS
     if (length(chans) == 2 & all(chans %in% channels)) {
       return(x)
-      # 2D GATE in 2D PLOT - ONE CHANNEL MATCH
+    # 2D GATE in 2D PLOT - ONE CHANNEL MATCH
     } else if (length(chans) == 2 & any(chans %in% channels)) {
       # FITERID
       ID <- x@filterId
@@ -2588,10 +2588,10 @@ cyto_gate_convert.rectangleGate <- function(x,
       colnames(coords) <- c(channels[ind], channels[-ind])
       x <- rectangleGate(.gate = coords)
       return(x)
-      # 2D GATE IN 2D PLOT - NO CHANNELS MATCH
+    # 2D GATE IN 2D PLOT - NO CHANNELS MATCH
     } else if (length(chans) == 2 & !any(chans %in% channels)) {
       stop("Supplied gate must contain co-ordinates in the supplied channels.")
-      # 1D GATE IN 2D PLOT - CORRECT CHANNEL
+    # 1D GATE IN 2D PLOT - CORRECT CHANNEL
     } else if (length(chans) == 1 & all(chans %in% channels)) {
       # FITERID
       ID <- x@filterId
@@ -2606,7 +2606,7 @@ cyto_gate_convert.rectangleGate <- function(x,
       colnames(coords) <- c(channels[ind], channels[-ind])
       x <- rectangleGate(.gate = coords)
       return(x)
-      # 1D GATE IN 2D PLOT - INCORRECT CHANNEL
+    # 1D GATE IN 2D PLOT - INCORRECT CHANNEL
     } else if (length(chans) == 1 & !all(chans %in% channels)) {
       stop("Supplied gate must contain co-ordinates in the supplied channels.")
     }
@@ -2734,7 +2734,7 @@ cyto_gate_convert.ellipsoidGate <- function(x,
     # 2D GATE IN 2D PLOT - CORRECT CHANNELS
     if (all(chans %in% channels)) {
       return(x)
-      # 2D GATE IN 2D PLOT - SINGLE CHANNEL MATCH
+    # 2D GATE IN 2D PLOT - SINGLE CHANNEL MATCH
     } else if (any(chans %in% channels)) {
       # FILTERID
       ID <- x@filterId
@@ -2796,6 +2796,48 @@ cyto_gate_convert.quadGate <- function(x,
       stop("Supplied gate must contain co-ordinates in the supplied channels.")
     }
   }
+}
+
+#' @rdname cyto_gate_convert
+#' @export
+cyto_gate_convert.multiRangeGate <- function(x,
+                                             channels = NULL,
+                                             ...) {
+  
+  # CHECKS ---------------------------------------------------------------------
+  
+  # CHANNELS
+  if (is.null(channels)) {
+    stop("Supply the channels in which the gate will be plotted.")
+  }
+  
+  # GATE CHANNELS
+  chans <- parameters(x)
+  
+  # PREPARE GATE ---------------------------------------------------------------
+  
+  # NOTE: NO REFORMATTING PERFORMED
+  
+  # 1D PLOT
+  if (length(channels) == 1) {
+    # 1D GATE IN 1D PLOT - CORRECT CHANNEL
+    if (all(chans %in% channels)) {
+      return(x)
+    # 1D GATE IN 1D PLOT - INCORRECT CHANNEL
+    } else if (all(!chans %in% channels)) {
+      stop("Supplied gate must contain co-ordinates in the supplied channel.")
+    }
+  # 2D PLOT
+  } else if (length(channels) == 2) {
+    # 1D GATE IN 2D PLOT - CORRECT CHANNEL
+    if (all(chans %in% channels)) {
+      return(x)
+    # 1D GATE IN 2D PLOT - INCORRECT CHANNEL
+    } else if (length(chans) == 1 & !all(chans %in% channels)) {
+      stop("Supplied gate must contain co-ordinates in the supplied channels.")
+    }
+  }
+  
 }
 
 #' @rdname cyto_gate_convert
@@ -3183,14 +3225,59 @@ cyto_gate_transform.quadGate <- function(x,
 
 #' @rdname cyto_gate_transform
 #' @export
+cyto_gate_transform.multiRangeGate <- function(x, 
+                                               trans = NULL,
+                                               inverse = FALSE,
+                                               ...) {
+  
+  # TRANSFORMERS
+  if(is.null(trans) | !cyto_class(trans, "transformerList")){
+    stop("Supply a list of transformers to transform the gate co-ordinates.")
+  }
+  
+  # GATE CHANNEL
+  chan <- parameters(x) 
+  
+  # BYPASS TRANSFORMATION
+  if(!all(chan %in% names(trans))) {
+    return(x)
+  }
+  
+  # TRANSFORM RANGES
+  lapply(
+    seq_along(x@ranges),
+    function(z) {
+      # TRANSFORM FINITE VALUES ONLY
+      idx <- which(is.finite(x@ranges[[z]]))
+      # INVERSE TRANSFORM
+      if(inverse){
+        x@ranges[[z]][idx] <<- trans[[chan]]$inverse(x@ranges[[z]][idx])
+      # TRANSFORM
+      }else{
+        x@ranges[[z]][idx] <<- trans[[chan]]$transform(x@ranges[[z]][idx])
+      }
+    }
+  )
+  
+  # RETURN TRANSFORMED GATE
+  return(x)
+  
+}
+
+#' @rdname cyto_gate_transform
+#' @export
 cyto_gate_transform.filters <- function(x,
                                         trans = NULL,
                                         inverse = FALSE,
                                         ...){
   
-  cyto_gate_transform(unlist(x),
-                      trans = trans,
-                      inverse = inverse)
+  return(
+    cyto_gate_transform(
+      unlist(x),
+      trans = trans,
+      inverse = inverse
+    )
+  )
   
 }
 
@@ -3201,19 +3288,21 @@ cyto_gate_transform.list <- function(x,
                                      inverse = FALSE,
                                      ...){
   
-  # TRANSFORM GATES
-  gates <- structure(
-    lapply(x, function(z){
-      cyto_gate_transform(
-        z,
-        trans = trans,
-        inverse = inverse
-      )
-    }), names = names(x)
+  # RETURN TRANSFORMED GATES
+  return(
+    structure(
+      lapply(
+        x, 
+        function(z){
+          cyto_gate_transform(
+            z,
+            trans = trans,
+            inverse = inverse
+          )
+        }
+      ), 
+      names = names(x)
+    )
   )
-
-  
-  # RETURN UPDATED GATES
-  return(gates)
   
 }

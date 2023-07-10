@@ -6,6 +6,7 @@
 \alias{cyto_gate_convert.polygonGate}
 \alias{cyto_gate_convert.ellipsoidGate}
 \alias{cyto_gate_convert.quadGate}
+\alias{cyto_gate_convert.multiRangeGate}
 \alias{cyto_gate_convert.filters}
 \alias{cyto_gate_convert.list}
 \alias{cyto_gate_prepare}
@@ -18,6 +19,8 @@
 \method{cyto_gate_convert}{ellipsoidGate}(x, channels = NULL, ...)
 
 \method{cyto_gate_convert}{quadGate}(x, channels = NULL, ...)
+
+\method{cyto_gate_convert}{multiRangeGate}(x, channels = NULL, ...)
 
 \method{cyto_gate_convert}{filters}(x, channels = NULL, ...)
 

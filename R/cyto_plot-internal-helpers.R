@@ -1987,13 +1987,16 @@
   
   # RETURN X
   if (.all_na(gate) | label == FALSE) {
-    pops <- lapply(seq_len(length(x)), function(z){
-      if(!.all_na(gate)) {
-        rep(x[z], length(gate))
-      } else {
-        x[z]
+    pops <- lapply(
+      seq_len(length(x)),
+      function(z){
+        if(!.all_na(gate)) {
+          rep(x[z], length(gate))
+        } else {
+          x[z]
+        }
       }
-    })
+    )
     return(pops)
   }
   
@@ -2012,9 +2015,13 @@
   layers <- length(x)
   
   # LABELS PER LAYER (SAME LENGTH AS GATE WHICH INCLUDES NEGATE)
-  labels_per_layer <- split(label_stat,
-                            rep(seq_len(layers), 
-                                each = length(label_stat)/layers))
+  labels_per_layer <- split(
+    label_stat,
+    rep(
+      seq_len(layers), 
+      each = length(label_stat)/layers
+    )
+  )
   
   # POPULATIONS ----------------------------------------------------------------
   
@@ -2035,8 +2042,10 @@
       } else {
         # LIST OF GATED POPULATIONS PER GATE -> LIST OF POPS (CYTOSETS)
         unlist(
-          cyto_gate_apply(cs,
-                          gate = gate)
+          cyto_gate_apply(
+            cs,
+            gate = gate
+          )
         )
       }
     }
@@ -2738,14 +2747,17 @@
   
   # REMOVE ANY FILTERS
   args$gate <- structure(
-    lapply(args$gate, function(z){
-      # KEEP GATE OBJECTS
-      if(grepl("gate", cyto_class(z), ignore.case = TRUE)) {
-        return(z)
-      } else {
-        return(NULL)
+    lapply(
+      args$gate,
+      function(z){
+        # KEEP GATE OBJECTS
+        if(grepl("gate", cyto_class(z), ignore.case = TRUE)) {
+          return(z)
+        } else {
+          return(NULL)
+        }
       }
-    }),
+    ),
     names = names(args$gate)
   )
   args$gate[sapply(args$gate, "is.null")] <- NULL
@@ -2754,8 +2766,7 @@
   NG <- length(args$gate)
   
   # POPULATIONS PER GATE
-  P <- .cyto_gate_count(args$gate,
-                        total = FALSE)
+  P <- .cyto_gate_count(args$gate, total = FALSE)
   
   # PREPARE ARGUMENTS ----------------------------------------------------------
   
@@ -2786,9 +2797,12 @@
       args[[z]] <- rep(args[[z]], length.out = TNP)
       args[[z]] <- split(args[[z]], rep(seq_len(L), each = NP))
       # RE-ARRANGE LABEL COORDS PER GATE
-      args[[z]] <- lapply(seq_len(NP), function(y){
-        LAPPLY(args[[z]], `[[`, y)
-      })
+      args[[z]] <- lapply(
+        seq_len(NP),
+        function(y){
+          LAPPLY(args[[z]], `[[`, y)
+        }
+      )
     }
   }
   
@@ -2821,8 +2835,12 @@
         text_xy <- do.call("cyto_plot_labeller", lapply(label_args, `[[`, z))
       } else {
         # NO LABELS
-        text_xy <- matrix(rep(NA, 2 * length(args$label_text[z])),
-                          ncol = 2
+        text_xy <- matrix(
+          rep(
+            NA,
+            2 * length(args$label_text[z])
+          ),
+          ncol = 2
         )
         colnames(text_xy) <- c("x", "y")
       }
@@ -2834,8 +2852,12 @@
         text_xy <- do.call("cyto_plot_labeller", lapply(label_args, `[[`, z))
       } else {
         # NO LABELS
-        text_xy <- matrix(rep(NA, 2 * length(args$label_text[[z]])),
-                          ncol = 2
+        text_xy <- matrix(
+          rep(
+            NA,
+            2 * length(args$label_text[[z]])
+          ),
+          ncol = 2
         )
         colnames(text_xy) <- c("x", "y")
       }
@@ -2852,20 +2874,31 @@
   
   # REVERT LABEL_TEXT_X & LABEL_TEXT_Y TO ORIGINAL FORMAT
   if (L > 1) {
-    args$label_text_x <- LAPPLY(seq_len(L), function(z) {
-      args$label_text_x[names(args$label_text_x) == z]
-    })
-    args$label_text_y <- LAPPLY(seq_len(L), function(z) {
-      args$label_text_y[names(args$label_text_y) == z]
-    })
+    args$label_text_x <- LAPPLY(
+      seq_len(L), 
+      function(z) {
+        args$label_text_x[names(args$label_text_x) == z]
+      }
+    )
+    args$label_text_y <- LAPPLY(
+      seq_len(L), 
+      function(z) {
+        args$label_text_y[names(args$label_text_y) == z]
+      }
+    )
   }
   
   # RETURN LABEL CO-ORDINATES --------------------------------------------------
   
   # LABEL_COORDS MATRIX
-  label_text_xy <- matrix(c(args$label_text_x, args$label_text_y),
-                          ncol = 2,
-                          byrow = FALSE)
+  label_text_xy <- matrix(
+    c(
+      args$label_text_x, 
+      args$label_text_y
+    ),
+    ncol = 2,
+    byrow = FALSE
+  )
   colnames(label_text_xy) <- c("x", "y")
   return(label_text_xy)
   

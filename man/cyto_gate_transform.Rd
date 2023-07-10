@@ -6,6 +6,7 @@
 \alias{cyto_gate_transform.polygonGate}
 \alias{cyto_gate_transform.ellipsoidGate}
 \alias{cyto_gate_transform.quadGate}
+\alias{cyto_gate_transform.multiRangeGate}
 \alias{cyto_gate_transform.filters}
 \alias{cyto_gate_transform.list}
 \title{Transform gates objects}
@@ -17,6 +18,8 @@
 \method{cyto_gate_transform}{ellipsoidGate}(x, trans = NULL, inverse = FALSE, ...)
 
 \method{cyto_gate_transform}{quadGate}(x, trans = NULL, inverse = FALSE, ...)
+
+\method{cyto_gate_transform}{multiRangeGate}(x, trans = NULL, inverse = FALSE, ...)
 
 \method{cyto_gate_transform}{filters}(x, trans = NULL, inverse = FALSE, ...)
 
