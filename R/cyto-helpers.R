@@ -7684,8 +7684,8 @@ cyto_nodes_convert <- function(x,
     )
     # ANCHOR - PREVENT PARTIAL MATCH
     if(!anchor == "root") {
-      if(!grepl("^\\/", anchor)) {
-        anchor <- paste0("/", anchor)
+      if(!grepl("\\\\/", anchor)) {
+        anchor <- paste0("\\/", anchor)
       }
     }
     # PARTIAL FULL MATCH
@@ -7729,7 +7729,7 @@ cyto_nodes_convert <- function(x,
       )
     }
     # FULL ANCHOR
-    anchor <- nodes_full[anchor_match]
+    anchor <- .str_escape(nodes_full[anchor_match])
   }
   
   # CONVERT NODES
@@ -7737,7 +7737,7 @@ cyto_nodes_convert <- function(x,
     nodes, 
     function(node) {
       # PREPARE NODE
-      if(!grepl("^\\/", node) & !grepl("root", node)) {
+      if(!grepl("\\\\/", node) & !grepl("root", node)) {
         node <- paste0(
           "\\/",
           node
@@ -7824,7 +7824,7 @@ cyto_nodes_convert <- function(x,
           node_split <- .cyto_nodes_split(node)
           # SPLIT NODES FULL
           nodes_full_split <- .cyto_nodes_split(
-            nodes_full[nodes_match]
+            .str_escape(nodes_full[nodes_match])
           )
           # SPLIT ANCHOR
           anchor_split <- .cyto_nodes_split(anchor)
@@ -7919,12 +7919,8 @@ cyto_nodes_convert <- function(x,
     function(node) {
       node <- unlist(
         strsplit(
-          gsub(
-            "^\\\\", # REQUIRED
-            "",
-            node
-          ), 
-          "\\/"
+          node, 
+          "\\\\/"
         )
       )
       node <- node[!LAPPLY(node, ".empty")]

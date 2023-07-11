@@ -441,7 +441,7 @@ suppressPrint <- function(x) {
 .str_escape <- function(x) {
   
   gsub(
-    "([-.|()\\^{}+$*?]|\\[|\\])", 
+    "([[:punct:]])",
     "\\\\\\1",
     x
   )
