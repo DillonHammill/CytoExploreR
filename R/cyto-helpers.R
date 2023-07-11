@@ -1142,7 +1142,7 @@ cyto_class <- function(x,
     } else {
       return(is(x))
     }
-    # CLASS CHECK
+  # CLASS CHECK
   } else {
     if(class) {
       return(any(class(x) %in% expect))
@@ -6919,7 +6919,6 @@ cyto_compensate.flowFrame <- function(x,
         # REMOVE EXCESS ROWS/COLUMNS - MATRIX MAY BE NON-SQUARE
         cols_rm <- which(!colnames(z) %in% chans)
         if(length(cols_rm) > 0) {
-          z <- z[, -cols_rm]
           row_rm <- LAPPLY(
             cols_rm, 
             function(w) {
@@ -6930,6 +6929,7 @@ cyto_compensate.flowFrame <- function(x,
           if(length(row_rm) > 0) {
             z <- z[-row_rm, ]
           }
+          z <- z[, -cols_rm]
         }
         # # PERCENTAGES -> DECIMAL - SPILLOVER < 1000%
         # if(any(z >= 10)){
