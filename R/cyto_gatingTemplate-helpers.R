@@ -235,15 +235,9 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
   
   # GENERATE GATINGTEMPLATE - DATA FRAME
   gt <- gh_generate_template(x)
-  
-  
-  
+
   # TODO: USE BOOLEAN NODES IN GATINGSET TO IDENTIFY BOOLEAN POPULATIONS
-  
-  
-  
-  
-  
+
   # TODO: HANDLE CLUSTERED POPULATIONS? - NEED BOOLEAN GATE CHECK
   # BOOLEAN ENTRIES EXIST
   if(any(LAPPLY(gt$dims, ".empty"))){
@@ -334,16 +328,18 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
                 # USE FIRST ROW ONLY
                 gt_entry <- gt_chunk_dt[1, ]
                 # ALIAS - "/|&:" ILLEGAL CHARCTERS
-                gt_entry[, alias := basename(
-                  cyto_nodes_convert(
-                    x,
-                    nodes = unlist(
-                      strsplit(names(gates), ",")
-                    ),
-                    anchor = gt_parent,
-                    path = "auto"
-                  )
-                  
+                gt_entry[, alias := paste0(
+                  basename(
+                    cyto_nodes_convert(
+                      x,
+                      nodes = unlist(
+                        strsplit(names(gates), ",")
+                      ),
+                      anchor = gt_parent,
+                      path = "auto"
+                    )
+                  ),
+                  collapse = ","
                 )]
                 # POP
                 gt_entry[, pop := "*"]
@@ -372,15 +368,16 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
                 # GATINGTEMPLATE ENTRY
                 gt_entry <- gt_chunk_dt[gt_chunk_dt$alias == names(gates)[q], ]
                 # ALIAS - "/|&:" ILLEGAL CHARCTERS
-                gt_entry[, alias := basename(
+                gt_entry[, alias := paste0(
+                  basename(
                   cyto_nodes_convert(
                     x,
                     nodes = names(gates)[q],
                     anchor = gt_parent,
                     path = "auto"
                   )
-                  
-                )]
+                ),
+                collapse = ",")]
                 # PARENT
                 gt_entry[, parent := cyto_nodes_convert(
                   x,
@@ -488,8 +485,6 @@ cyto_gatingTemplate_generate.GatingSet <- function(x,
   return(gt)
   
 }
-
-
 
 ## GATINGTEMPLATE ACTIVE -------------------------------------------------------
 
