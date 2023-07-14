@@ -735,27 +735,40 @@
         any(grepl("quad", names(attributes(z))))
       }))){
         # QUADRANTS
-        quads <- names(attributes(gate[[1]])[["quadrants"]])
+        quads <- LAPPLY(
+          gate,
+          function(z) {
+            names(attributes(z)[["quadrants"]])
+          }
+        )
       }else{
-        quads <- LAPPLY(gate, function(z){
-          z@filterId
-        })
+        quads <- LAPPLY(
+          gate, 
+          function(z){
+            z@filterId
+          }
+        )
       }
       # CHANNELS
       chans <- as.character(parameters(gate[[1]]))
       # CO-ORDINATES
       coords <- .cyto_gate_coords(gate, channels = chans)
-      coords <- LAPPLY(chans, function(z){
-        unique(coords[, z][is.finite(coords[, z])])
-      })
+      coords <- LAPPLY(
+        chans, 
+        function(z){
+          unique(coords[, z][is.finite(coords[, z])])
+        }
+      )
       names(coords) <- chans
       # NORMAL GATES
       if(length(coords) > 2){
         return(gate)
       }
       # QUADGATE
-      qg <- quadGate(filterId = paste(quads, collapse = "|"),
-                     .gate = coords)
+      qg <- quadGate(
+        filterId = paste(quads, collapse = "|"),
+        .gate = coords
+      )
       return(qg)
     }
   }else if(cyto_class(gate, "quadGate")){

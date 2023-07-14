@@ -2096,9 +2096,13 @@
   # PREPARE ARGUMENTS ----------------------------------------------------------
   
   # LABEL_STAT
-  label_stat <- split(label_stat,
-                      rep(seq_len(length(x)),
-                          each  = length(pops[[1]])))
+  label_stat <- split(
+    label_stat,
+    rep(
+      seq_len(length(x)),
+      each  = length(pops[[1]])
+    )
+  )
   
   # COMPUTE STAT AGAINST BASE LAYER (NO GATES)
   if(.all_na(gate)){

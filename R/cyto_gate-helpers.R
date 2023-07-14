@@ -586,7 +586,11 @@ cyto_gate_remove <- function(x,
       message(
         paste0(
           "Removing the following gates from ",
-          ifelse(is.character(gatingTemplate) , gatingTemplate, "gatingTemplate"), 
+          ifelse(
+            is.character(gatingTemplate),
+            gatingTemplate,
+            "gatingTemplate"
+          ), 
           ": \n",
           paste0(
             paste0(
@@ -2580,10 +2584,16 @@ cyto_gate_convert.rectangleGate <- function(x,
       # CHANNEL INDEX
       ind <- match_ind(chans, channels)
       # COORDS - MISSING CHANNEL
-      coords <- matrix(c(x@min[channels[ind]], x@max[channels[ind]], -Inf, Inf),
-                       ncol = 2,
-                       nrow = 2,
-                       byrow = FALSE
+      coords <- matrix(
+        c(
+          x@min[channels[ind]],
+          x@max[channels[ind]],
+          -Inf, 
+          Inf
+        ),
+        ncol = 2,
+        nrow = 2,
+        byrow = FALSE
       )
       colnames(coords) <- c(channels[ind], channels[-ind])
       x <- rectangleGate(.gate = coords)
@@ -2598,10 +2608,16 @@ cyto_gate_convert.rectangleGate <- function(x,
       # CHANNEL INDEX
       ind <- match_ind(chans, channels)
       # COORDS - MISSING CHANNEL
-      coords <- matrix(c(x@min, x@max, -Inf, Inf),
-                       ncol = 2,
-                       nrow = 2,
-                       byrow = FALSE
+      coords <- matrix(
+        c(
+          x@min, 
+          x@max,
+          -Inf,
+          Inf
+        ),
+        ncol = 2,
+        nrow = 2,
+        byrow = FALSE
       )
       colnames(coords) <- c(channels[ind], channels[-ind])
       x <- rectangleGate(.gate = coords)
@@ -2906,6 +2922,7 @@ cyto_gate_prepare <- function(x,
       "polygonGate",
       "ellipsoidGate",
       "quadGate",
+      "multiRangeGate",
       "filters"
     ))) {
       x <- unlist(x)
@@ -2916,6 +2933,7 @@ cyto_gate_prepare <- function(x,
                              "polygonGate",
                              "ellipsoidGate",
                              "quadGate",
+                             "multiRangeGate",
                              "filters"), TRUE)) {
     x <- list(x)
   }
