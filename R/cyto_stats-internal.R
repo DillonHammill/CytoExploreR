@@ -371,11 +371,12 @@ cyto_stat_rcv <- function(x,
   } else {
     # MEDIANS
     md <- cyto_stat_median(x)
-    cnt <- c(0)
+    cnt <- 0
     apply(
       x,
       2,
       function(z){
+        cnt <<- cnt + 1
         round(
           (median(abs(z - md[cnt])) * 1.4826)/md[cnt] * 100
           , round
