@@ -2594,7 +2594,10 @@ cyto_data_extract <- function(x,
           structure(
             list(
               if(cyto_class(cs, "flowFrame")) {
-                flowFrame_to_cytoframe(cs)
+                flowFrame_to_cytoframe(
+                  cs,
+                  emptyValue = FALSE
+                )
               } else {
                 cs
               }
@@ -2608,7 +2611,10 @@ cyto_data_extract <- function(x,
               cyto_names(cs), 
               function(z) {
                 if(cyto_class(cs, "flowSet")) {
-                  flowFrame_to_cytoframe(cs[[z]])
+                  flowFrame_to_cytoframe(
+                    cs[[z]],
+                    emptyValue = FALSE
+                  )
                 } else {
                   cs[[z]]
                 }
@@ -2624,7 +2630,10 @@ cyto_data_extract <- function(x,
             structure(
               list(
                 if(cyto_class(cs, "flowFrame")) {
-                  flowFrame_to_cytoframe(cs)
+                  flowFrame_to_cytoframe(
+                    cs,
+                    emptyValue = FALSE
+                  )
                 } else {
                   cs
                 }
@@ -3334,7 +3343,9 @@ cyto_select <- function(x,
 cyto_vars <- function(x) {
   
   return(
-    colnames(cyto_details(x))
+    colnames(
+      cyto_details(x)
+    )
   )
   
 }
@@ -3579,7 +3590,10 @@ cyto_sort_by <- function(x,
   pd <- do.call("rbind", pd_split)
   
   # Sorting indices
-  ind <- match_ind(rownames(cyto_details(x)), rownames(pd))
+  ind <- match_ind(
+    rownames(cyto_details(x)), 
+    rownames(pd)
+  )
   
   # Return sorted object
   return(x[ind])
@@ -3643,7 +3657,10 @@ cyto_group_by <- function(x,
   x_list <- lapply(
     seq_len(length(pd_split)), 
     function(z) {
-      ind <- match(rownames(pd_split[[z]]), rownames(cyto_details(x)))
+      ind <- match(
+        rownames(pd_split[[z]]),
+        rownames(cyto_details(x))
+      )
       x[ind]
     }
   )
@@ -7696,6 +7713,7 @@ cyto_nodes_convert <- function(x,
       ),
       nodes_full,
       fixed = FALSE,
+      perl = TRUE,
       ignore.case = ignore.case
     )
     # INVALID ANCHOR
@@ -7751,6 +7769,7 @@ cyto_nodes_convert <- function(x,
         ),
         nodes_full,
         fixed = FALSE,
+        perl = TRUE,
         ignore.case = ignore.case
       )
       # INVALID NODE
@@ -7794,6 +7813,7 @@ cyto_nodes_convert <- function(x,
             ),
             nodes_auto,
             fixed = FALSE,
+            perl = TRUE,
             ignore.case = ignore.case
           )
           # EXACT AUTO MATCH LOCATED
