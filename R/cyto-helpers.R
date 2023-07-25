@@ -837,7 +837,10 @@ cyto_clean <- function(x,
   
   # CYTOSET
   if(cyto_class(cyto_data, "flowSet", TRUE)) {
-    cyto_data <- flowSet_to_cytoset(cyto_data)
+    cyto_data <- flowSet_to_cytoset(
+      cyto_data,
+      emptyValue = FALSE
+    )
   }
   
   # RETURN CLEAN DATA
@@ -2649,7 +2652,10 @@ cyto_data_extract <- function(x,
                 seq_along(cs), 
                 function(z) {
                   if(cyto_class(cs[z], "flowSet")) {
-                    flowSet_to_cytoset(cs[z])
+                    flowSet_to_cytoset(
+                      cs[z],
+                      emptyValue = FALSE
+                    )
                   } else {
                     cs[z]
                   }
@@ -2659,7 +2665,10 @@ cyto_data_extract <- function(x,
             )
           } else {
             if(cyto_class(cs, "flowSet")) {
-              flowSet_to_cytoset(cs)
+              flowSet_to_cytoset(
+                cs,
+                emptyValue = FALSE
+              )
             } else {
               cs
             }
@@ -9101,7 +9110,7 @@ cyto_convert <- function(x,
     # x <- load_cytoframe_from_fcs(tmp, ...)
     x <- flowFrame_to_cytoframe(x, emptyValue = FALSE, ...)
   } else if(cyto_class(x, "flowSet", TRUE)) {
-    x <- flowSet_to_cytoset(x, ...)
+    x <- flowSet_to_cytoset(x, emptyValue = FALSE, ...)
   }
   return(x)
   
