@@ -2596,7 +2596,7 @@ cyto_data_extract <- function(x,
         if(cyto_class(cs, c("flowFrame", "cytoframe"))) {
           structure(
             list(
-              if(cyto_class(cs, "flowFrame")) {
+              if(cyto_class(cs, "flowFrame", TRUE)) {
                 flowFrame_to_cytoframe(
                   cs,
                   emptyValue = FALSE
@@ -2613,7 +2613,7 @@ cyto_data_extract <- function(x,
             lapply(
               cyto_names(cs), 
               function(z) {
-                if(cyto_class(cs, "flowSet")) {
+                if(cyto_class(cs, "flowSet", TRUE)) {
                   flowFrame_to_cytoframe(
                     cs[[z]],
                     emptyValue = FALSE
@@ -2632,7 +2632,7 @@ cyto_data_extract <- function(x,
           cytoset(
             structure(
               list(
-                if(cyto_class(cs, "flowFrame")) {
+                if(cyto_class(cs, "flowFrame", TRUE)) {
                   flowFrame_to_cytoframe(
                     cs,
                     emptyValue = FALSE
@@ -2651,7 +2651,7 @@ cyto_data_extract <- function(x,
               lapply(
                 seq_along(cs), 
                 function(z) {
-                  if(cyto_class(cs[z], "flowSet")) {
+                  if(cyto_class(cs[z], "flowSet", TRUE)) {
                     flowSet_to_cytoset(
                       cs[z],
                       emptyValue = FALSE
@@ -2664,7 +2664,7 @@ cyto_data_extract <- function(x,
               names = cyto_names(cs)
             )
           } else {
-            if(cyto_class(cs, "flowSet")) {
+            if(cyto_class(cs, "flowSet", TRUE)) {
               flowSet_to_cytoset(
                 cs,
                 emptyValue = FALSE
