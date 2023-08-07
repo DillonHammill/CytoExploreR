@@ -154,7 +154,7 @@
 #'   \code{point_col}.
 #' @param key_title_text_font font to use for the key title, set to 1 by default
 #'   for plain font.
-#' @param key_title_text_size numeric to control the size of title text in teh
+#' @param key_title_text_size numeric to control the size of title text in the
 #'   key, set to 1 by default.
 #' @param key_title_text_col colour to use for the key title, set to
 #'   \code{"black"} by default.
@@ -683,7 +683,8 @@ cyto_plot_empty <- function(x,
       main = title,
       cex.main = title_text_size,
       col.main = title_text_col,
-      font.main = title_text_font
+      font.main = title_text_font,
+      line = (par("mar")[3] - length(strsplit(title, "\n")[[1]]))/2
     )
   }
   

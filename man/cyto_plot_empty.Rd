@@ -296,7 +296,7 @@ text colour in the plot key, set to 1 by default to remove transparency.}
 \item{key_title_text_font}{font to use for the key title, set to 1 by default
 for plain font.}
 
-\item{key_title_text_size}{numeric to control the size of title text in teh
+\item{key_title_text_size}{numeric to control the size of title text in the
 key, set to 1 by default.}
 
 \item{key_title_text_col}{colour to use for the key title, set to
