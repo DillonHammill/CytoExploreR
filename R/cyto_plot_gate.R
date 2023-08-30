@@ -656,12 +656,17 @@ cyto_plot_gate.multiRangeGate <- function(gate,
   
   # 1D PLOT
   if(length(channels) == 1){
-    lapply(
-      seq_along(x@ranges[[1]]),
-      function(z) {
+    mapply(
+      function(z,
+               gate_line_type,
+               gate_line_width,
+               gate_line_col,
+               gate_fill,
+               gate_fill_alpha) {
+        # GATE COORDINATES
         coords <- c(
-          x@ranges[["min"]][z],
-          x@ranges[["max"]][z]
+          gate@ranges[["min"]][z],
+          gate@ranges[["max"]][z]
         )
         # REPLACE INFINITE X COORDS
         if(is.infinite(min(coords))){
@@ -681,17 +686,29 @@ cyto_plot_gate.multiRangeGate <- function(gate,
           border = gate_line_col,
           col = adjustcolor(gate_fill, gate_fill_alpha)
         )
-      }
+      },
+      seq_along(gate@ranges[[1]]),
+      gate_line_type,
+      gate_line_width,
+      gate_line_col,
+      gate_fill,
+      gate_fill_alpha
     )
   # 2D PLOT  
-  }else if(length(channels) == 2){
-    lapply(
-      seq_along(x@ranges[[1]]),
-      function(z) {
-        chan <- parameters(x)
+  }else if(length(channels) == 2) {
+    mapply(
+      function(z,
+               gate_line_type,
+               gate_line_width,
+               gate_line_col,
+               gate_fill,
+               gate_fill_alpha) {
+        # GATE CHANNELS
+        chan <- parameters(gate)
+        # GATE CO-ORDINATES
         coords <- c(
-          x@ranges[["min"]][z],
-          x@ranges[["max"]][z]
+          gate@ranges[["min"]][z],
+          gate@ranges[["max"]][z]
         )
         # REPLACE INFINITE X COORDS
         if(is.infinite(min(coords))){
@@ -735,7 +752,13 @@ cyto_plot_gate.multiRangeGate <- function(gate,
           border = gate_line_col,
           col = adjustcolor(gate_fill, gate_fill_alpha)
         )
-      }
+      },
+      seq_along(gate@ranges[[1]]),
+      gate_line_type,
+      gate_line_width,
+      gate_line_col,
+      gate_fill,
+      gate_fill_alpha
     )
   }
   

@@ -73,6 +73,12 @@
           if(cyto_class(x$gate[[z]][[y]], "quadGate")) {
             GP[[z]] <<- c(tryCatch(GP[[z]], error = function(e){NULL}), 4)
             GNP[[z]] <<- c(tryCatch(GNP[[z]], error = function(e){NULL}), 4)
+          # MULTIRANGEGATE
+          } else if(cyto_class(x$gate[[z]][[y]], "multiRangeGate")) {
+            GP[[z]] <<- c(tryCatch(GP[[z]], error = function(e){NULL}), 
+                          length(x$gate[[z]][[y]]@ranges[[1]]))
+            GNP[[z]] <<- c(tryCatch(GNP[[z]], error = function(e){NULL}), 
+                           length(x$gate[[z]][[y]]@ranges[[1]]))
           # OTHER GATES - 1 POPULATION
           } else {
             GP[[z]] <<- c(tryCatch(GP[[z]], error = function(e){NULL}), 1)

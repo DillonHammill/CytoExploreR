@@ -217,17 +217,21 @@ cyto_plot_profile <- function(x,
     # CUSTOM HEADERS
     } else {
       # REPEAT HEADERS - MULTIPLE PAGES
-      if(length(header) == tpg) {
-        header <- rep(header, each = pg)
-      } else {
-        stop(
-          paste0(
-            "Supply a header for each ",
-            ifelse(grepl("^c", order, ignore.case = TRUE),
-                   "group!",
-                   "channel!")
+      if(length(header) != tpg) {
+        # HEADER SUPPLIED PER GROUP - REPEAT FOR PAGES
+        if(length(header) == n) {
+          header <- rep(header, each = pg)
+        # LENGTH HEADER MUST BE EITHER N OR TPG
+        } else {
+          stop(
+            paste0(
+              "Supply a header for each ",
+              ifelse(grepl("^c", order, ignore.case = TRUE),
+                     "group!",
+                     "channel!")
+            )
           )
-        )
+        }
       }
     }
   }

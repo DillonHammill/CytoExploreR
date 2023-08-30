@@ -691,7 +691,7 @@
       if(cyto_class(gate[[z]], "quadGate")) {
         return(4)
       } else if(cyto_class(gate[[z]], "multiRangeGate")) {
-        return(length(gate@ranges[[1]]))
+        return(length(gate[[z]]@ranges[[1]]))
       } else {
         return(1)
       }
