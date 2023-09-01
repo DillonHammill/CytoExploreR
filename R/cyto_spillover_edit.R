@@ -1622,17 +1622,19 @@ compPlotServer <- function(id,
         if(!.empty(ID_comp_trans(), null = TRUE)) {
           # COMBINE UNSTAINED
           if(!.empty(ID_comp_trans(), null = TRUE)) {
-            cs <- cytoset(
-              structure(
-                list(
-                  ID_comp_trans()[[1]],
-                  NIL_comp_trans()[[1]]
-                ),
-                names = c(
-                  cyto_names(ID_comp_trans()),
-                  cyto_names(NIL_comp_trans())
-                )
+            cf_list <- structure(
+              list(
+                ID_comp_trans()[[1]],
+                NIL_comp_trans()[[1]]
+              ),
+              names = c(
+                cyto_names(ID_comp_trans()),
+                cyto_names(NIL_comp_trans())
               )
+            )
+            cf_list <- cf_list[!LAPPLY(cf_list, "is.null")]
+            cs <- cytoset(
+              cf_list
             )
           # STAINED ONLY
           } else {
