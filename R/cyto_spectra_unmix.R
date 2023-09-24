@@ -80,7 +80,10 @@ cyto_unmix_compute <- function(x,
   
   # SELECT
   if(!is.null(select)) {
-    x <- cyto_select(x, select)
+    x <- cyto_select(
+      x, 
+      select
+    )
   }
   
   # CHANNELS
@@ -480,7 +483,7 @@ cyto_unmix_compute <- function(x,
               } else {
                 neg_em <- NULL
               }
-              # POSITIVE PEAK EM - LIENAR COPY
+              # POSITIVE PEAK EM - LINEAR COPY
               cs <- cyto_data_extract(
                 cgs[w],
                 parent = pd_grp[, "parent"][w],

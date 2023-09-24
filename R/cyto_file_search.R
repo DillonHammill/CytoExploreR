@@ -138,28 +138,12 @@ cyto_file_search <- function(x,
   if(length(files) == 0) {
     files <- NULL
   # SINGLE FILE FOUND
-  } else if(length(files) == 1) {
-    message(
-      paste0(
-        "Importing ",
-        if(is.null(type)) {
-          "saved data"
-        } else {
-          type
-        },
-        " from ",
-        names(files),
-        "..."
-      )
-    )
-    files <- files[1]
-  # MULTIPLE FILES LOCATED
-  } else {
+  } else if(length(files) > 1) {
     # INTERACTIVE FILE SELECTION
     if(interactive() & cyto_option("CytoExploreR_interactive")) {
       message(
         paste0(
-          "Multiple files located matching the ",
+          "Files located matching the ",
           type,
           " search criteria. ",
           "Which file would you like to import ",
@@ -175,9 +159,9 @@ cyto_file_search <- function(x,
       message(
         paste0(
           paste0(
-            1:length(files),
+            1:(length(files) + 1),
             ": ",
-            names(files)
+            c(names(files), "None")
           ),
           sep = "\n"
         )
@@ -192,7 +176,11 @@ cyto_file_search <- function(x,
           )
         }
       )
-      files <- files[opt]
+      if(opt == length(files) + 1) {
+        files <- NULL
+      } else {
+        files <- files[opt]
+      }
     # DEFAULT TO FIRST FILE
     } else {
       message(
