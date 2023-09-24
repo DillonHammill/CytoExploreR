@@ -16,6 +16,7 @@ cyto_spillover_compute(
   axes_limits = "machine",
   spillover = NULL,
   heatmap = TRUE,
+  events = 500,
   iter = 100,
   trim = 0.001,
   ...
@@ -76,8 +77,11 @@ included for backwards compatibility with older versions of CytoExploreR.}
 \item{heatmap}{logical indicating whether the computed spillover matrix
 should be displayed in a heatmap, set to TRUE by default.}
 
-\item{iter}{indicates the maximum number of allowable iterations for
-refining the spillover coefficients, set to 100 by default.}
+\item{events}{number of events to extract from each control prior to fitting
+RLM models, set to 500 events by default.}
+
+\item{iter}{indicates the maximum number of allowable iterations for refining
+the spillover coefficients, set to 100 by default.}
 
 \item{trim}{proportion of events to exclude from the top and bottom of each
 scale when fitting RLM models in autospill method, set to 0.001 by default.}
