@@ -12,6 +12,7 @@ cyto_channel_match(
   strip = TRUE,
   ignore.case = TRUE,
   insertions = FALSE,
+  label = FALSE,
   ...
 )
 }
@@ -46,6 +47,9 @@ should be found, set to TRUE by default.}
 \item{insertions}{logical indicating whether character insertions are allowed
 when matching the marker/channel combinations to the sample names, set to
 FALSE by default to only allow deletions.}
+
+\item{label}{logicla to indicate whether a \code{label} column is required in
+the case of spectral unmxing, set to FALSE by default.}
 
 \item{...}{additional arguments passed to \code{link{grep}} when performing
 character matching.}

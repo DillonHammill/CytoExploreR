@@ -987,6 +987,8 @@ cyto_channel_select <- function(x){
 #' @param insertions logical indicating whether character insertions are allowed
 #'   when matching the marker/channel combinations to the sample names, set to
 #'   FALSE by default to only allow deletions.
+#' @param label logicla to indicate whether a \code{label} column is required in
+#'   the case of spectral unmxing, set to FALSE by default.
 #' @param ... additional arguments passed to \code{link{grep}} when performing
 #'   character matching.
 #'
@@ -1014,6 +1016,7 @@ cyto_channel_match <- function(x,
                                strip = TRUE,
                                ignore.case = TRUE,
                                insertions = FALSE,
+                               label = FALSE,
                                ...) {
   
   # CYTOFRAMES NOT SUPPORTED
@@ -1094,6 +1097,9 @@ cyto_channel_match <- function(x,
   
   # ADD MISSING PARAMETERS
   vars <- c("group", "parent", "channel")
+  if(label) {
+    vars <- c(vars, "label")
+  }
   vars <- vars[!vars %in% colnames(pd)]
   
   # PREPARE MISSING VARIABLES

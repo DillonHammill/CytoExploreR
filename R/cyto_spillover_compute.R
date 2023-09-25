@@ -203,7 +203,12 @@ cyto_spillover_compute <- function(x,
       )
     ]
   } else {
-    channels <- unique(cyto_channels_extract(x, channels))
+    channels <- unique(
+      cyto_channels_extract(
+        x, 
+        channels
+      )
+    )
   }
   
   # MATCH CHANNELS
