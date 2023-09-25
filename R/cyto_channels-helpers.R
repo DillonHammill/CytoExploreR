@@ -1089,7 +1089,11 @@ cyto_channel_match <- function(x,
             Sys.Date(), 
             "%d%m%y"
           ), 
-          "-Compensation-Details.csv"
+          if(!label) {
+            "-Compensation-Details.csv"
+          } else {
+            "-Unmixing-Details.csv"
+          }
         )
       )
     }

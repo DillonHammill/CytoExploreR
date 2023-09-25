@@ -19,6 +19,7 @@ cyto_spillover_compute(
   events = 500,
   iter = 100,
   trim = 0.001,
+  details = NULL,
   ...
 )
 }
@@ -86,11 +87,16 @@ the spillover coefficients, set to 100 by default.}
 \item{trim}{proportion of events to exclude from the top and bottom of each
 scale when fitting RLM models in autospill method, set to 0.001 by default.}
 
+\item{details}{name of a CSV file to which the details of the compensation
+controls should be saved, set to NULL by default to use
+\code{date-Compensation-Details.csv}. Setting this argument to \code{NA}
+will prevent details from being written to a CSV file.}
+
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 }
 \value{
 spillover matrix and write spillover matrix to csv file named in
-  accordance with \code{spillover}.
+  accordance with \code{save_as}.
 }
 \description{
 \code{cyto_spillover_compute} automatically computes the fluorescent

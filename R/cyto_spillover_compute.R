@@ -78,10 +78,14 @@
 #'   the spillover coefficients, set to 100 by default.
 #' @param trim proportion of events to exclude from the top and bottom of each
 #'   scale when fitting RLM models in autospill method, set to 0.001 by default.
+#' @param details name of a CSV file to which the details of the compensation
+#'   controls should be saved, set to NULL by default to use
+#'   \code{date-Compensation-Details.csv}. Setting this argument to \code{NA}
+#'   will prevent details from being written to a CSV file.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
 #' @return spillover matrix and write spillover matrix to csv file named in
-#'   accordance with \code{spillover}.
+#'   accordance with \code{save_as}.
 #'
 #' @importFrom flowWorkspace cytoset
 #' @importFrom openCyto mindensity gs_add_gating_method
@@ -152,12 +156,15 @@ cyto_spillover_compute <- function(x,
                                    events = 500,
                                    iter = 100,
                                    trim = 0.001,
+                                   details = NULL,
                                    ...) {
 
   # TODO: SAMPLE CHECKS PERFORMED PRIOR TO GROUPING
   # FITC ON BEADS AND CELLS - BOTH KEPT 
   
-  # TODO: SELECT ARGUMENT AND GATE STORAGE ISSUES - XSUB?
+  # TODO: SELECT ARGUMENT AND GATE STORAGE ISSUES - GSUB?
+  
+  # TODO: GATE SVAING NEEDS TO BE HOOKED UP - COMPONENTS HERE ALREADY
   
   # SPILLOVER ------------------------------------------------------------------
   
@@ -172,8 +179,11 @@ cyto_spillover_compute <- function(x,
     save_as <- spillover
   }
   
+  # CYTO_PLOT() ARGUMENTS
+  args <- list(...)
+  
   # CHANNEL_MATCH DEPRECIATED
-  if("channel_match" %in% names(list(...))) {
+  if("channel_match" %in% names(args)) {
     stop(
       paste0(
         "'channel_match' is no longer supported. CytoExploreR will ",
@@ -181,6 +191,13 @@ cyto_spillover_compute <- function(x,
         "'Compensation-Details.csv'."
       )
     )
+  }
+  
+  # INTERNAL UNMIX ARGUMENT
+  unmix <- FALSE
+  if("unmix" %in% names(args)) {
+    unmix <- args[["unmix"]]
+    args <- args[-match("unmix", names(args))]
   }
   
   # PREPARE DATA ---------------------------------------------------------------
@@ -211,65 +228,78 @@ cyto_spillover_compute <- function(x,
     )
   }
   
-  # MATCH CHANNELS
-  pd <- cyto_channel_match(
-    x,
-    channels = channels
-  )
-  pd <- pd[match(rownames(cyto_details(x)), rownames(pd)), , drop = FALSE]
-  
-  # CHECK COMPENSATION DETAILS
-  lapply(
-    seq_len(nrow(pd)),
-    function(z) {
-      # CHANNEL
-      if(!pd$channel[z] %in% c("Unstained",
-                               "unstained",
-                               cyto_channels(x))) {
-        stop(
+  # DEATILS PREPARED FOR UNMIXING
+  if(!unmix) {
+    # MATCH CHANNELS
+    pd <- cyto_channel_match(
+      x,
+      channels = channels,
+      save_as = details
+    )
+    pd <- pd[
+      match(
+        rownames(cyto_details(x)), 
+        rownames(pd)
+      ),
+      , 
+      drop = FALSE
+    ]
+    
+    # CHECK COMPENSATION DETAILS
+    lapply(
+      seq_len(nrow(pd)),
+      function(z) {
+        # CHANNEL
+        if(!pd$channel[z] %in% c("Unstained",
+                                 "unstained",
+                                 cyto_channels(x))) {
+          stop(
+            paste0(
+              pd$channel[z], 
+              " is not a valid channel for this ", 
+              cyto_class(x), 
+              "!"
+            )
+          )
+          # PARENT
+          if(cyto_class(x, "GatingSet")) {
+            cyto_nodes_convert(x, pd$parent[z]) # ERRORS IF MISSING
+          }
+        }
+      }
+    )
+    
+    # MISSING VARIABLES
+    vars <- c("name", "group", "parent", "channel")
+    if(!all(vars %in% colnames(pd))) {
+      stop(
+        paste0(
+          "cyto_details(x) is missing required variables: ",
           paste0(
-            pd$channel[z], 
-            " is not a valid channel for this ", 
-            cyto_class(x), 
-            "!"
+            vars[!vars %in% colnames(pd)],
+            collapse = " & "
           )
         )
-      }
-      # PARENT
-      if(cyto_class(x, "GatingSet")) {
-        cyto_nodes_convert(x, pd$parent[z]) # ERRORS IF MISSING
+      )
+    }
+    
+    # DECOMPENSATE
+    if(cyto_class(x, "GatingSet")) {
+      if(!is.null(cyto_spillover_extract(x))) {
+        x <- cyto_compensate(
+          x,
+          remove = TRUE,
+          quiet = TRUE
+        )
       }
     }
-  )
-  
-  # MISSING VARIABLES
-  vars <- c("name", "group", "parent", "channel")
-  if(!all(vars %in% colnames(pd))) {
-    stop(
-      paste0(
-        "cyto_details(x) is missing required variables: ",
-        paste0(
-          vars[!vars %in% colnames(pd)],
-          collapse = " & "
-        )
-      )
-    )
+  } else {
+    pd <- pData(x)
   }
   
   # TRANSFORMATIONS
   if(.all_na(axes_trans)) {
     axes_trans <- cyto_transformers_extract(x)
-  }
-  
-  # DECOMPENSATE
-  if(cyto_class(x, "GatingSet")) {
-    if(!is.null(cyto_spillover_extract(x))) {
-      x <- cyto_compensate(
-        x,
-        remove = TRUE,
-        quiet = TRUE
-      )
-    }
   }
   
   # BAGWELL METHOD REQUIRES TRANSFORMED DATA
@@ -367,16 +397,24 @@ cyto_spillover_compute <- function(x,
     
     # MESSAGE
     message(
-      "Computing spillover matrix using the Bagwell et al. (1993) method... \n"
+      "Computing ",
+      if(unmix) {
+        "unmixing "
+      } else {
+        "spillover "
+      }, 
+      "matrix using the Bagwell et al. (1993) method... \n"
     )
     # REFERENCE
-    message(
-      paste0(
-        "C. B. Bagwell & E. G. Adams (1993). Fluorescence spectral ",
-        "overlap compensation for any number of flow cytometry parameters. in:",
-        " Annals of the New York Academy of Sciences, 677:167-184.", "\n"
+    if(!unmix) {
+      message(
+        paste0(
+          "C. B. Bagwell & E. G. Adams (1993). Fluorescence spectral ",
+          "overlap compensation for any number of flow cytometry parameters. in:",
+          " Annals of the New York Academy of Sciences, 677:167-184.", "\n"
+        )
       )
-    )
+    }
     
     # SPLIT SAMPLES INTO GROUPS
     cs_list <- cyto_group_by(
@@ -530,15 +568,20 @@ cyto_spillover_compute <- function(x,
                 # PARENT
                 parent <- pd[pd$channel %in% y, "parent"]
                 # ESCAPED CHANNEL NAME - GATINGSET STORAGE
-                chan <- gsub(
+                label <- gsub(
                   "[\\|\\&|\\:|\\,|\\/]",
                   "",
-                  y
+                  if(!unmix){
+                    y
+                  } else {
+                    pd$label[
+                      pd$channel %in% y
+                    ]
+                  }
                 )
-                # POPULATION NAMES
                 pops <- c(
-                  paste0(chan, "-"),
-                  paste0(chan, "+")
+                  paste0(label, "-"),
+                  paste0(label, "+")
                 )
                 # REFERENCE CYTOSETS
                 neg_events <- cs_list[[q]][[y]][["-"]]
@@ -559,7 +602,7 @@ cyto_spillover_compute <- function(x,
                       ),
                       parent = parent,
                       alias = nodes[
-                        grep(paste0(chan, "\\-"), nodes)
+                        grep(paste0(label, "\\-"), nodes)
                       ]
                     )[[1]][[1]]
                   }
@@ -577,7 +620,7 @@ cyto_spillover_compute <- function(x,
                         cs_list[[q]][[y]][["+"]]
                       ),
                       alias = nodes[
-                        grep(paste0(chan, "\\+"), nodes)
+                        grep(paste0(label, "\\+"), nodes)
                       ]
                     )[[1]][[1]]
                   }
@@ -593,35 +636,40 @@ cyto_spillover_compute <- function(x,
                 # REMOVE MISSING GATES
                 gts[LAPPLY(gts, "is.null")] <- NULL
                 # CYTO_PLOT
-                cyto_plot(
-                  if(is.null(neg_events)){
-                    pos_events
-                  } else {
-                    neg_events
-                  },
-                  channels = y,
-                  overlay = if(!is.null(neg_events)){
-                    pos_events
-                  } else {
-                    NA
-                  },
-                  gate = if(!is.null(gts)) {
-                    gts
-                  } else {
-                    NA
-                  },
-                  hist_stack = 0,
-                  hist_fill = if(is.null(neg_events)){
-                    "dodgerblue"
-                  } else {
-                    c("red", "dodgerblue")
-                  },
-                  hist_fill_alpha = 0.6,
-                  title = cyto_names(pos_events),
-                  axes_limits = axes_limits, 
-                  axes_trans = axes_trans,
-                  legend = FALSE,
-                  ...
+                do.call(
+                  "cyto_plot",
+                  c(
+                    list(
+                      if(is.null(neg_events)){
+                        x = pos_events
+                      } else {
+                        x = neg_events
+                      },
+                      channels = y,
+                      overlay = if(!is.null(neg_events)){
+                        pos_events
+                      } else {
+                        NA
+                      },
+                      gate = if(!is.null(gts)) {
+                        gts
+                      } else {
+                        NA
+                      },
+                      hist_stack = 0,
+                      hist_fill = if(is.null(neg_events)){
+                        "dodgerblue"
+                      } else {
+                        c("red", "dodgerblue")
+                      },
+                      hist_fill_alpha = 0.6,
+                      title = cyto_names(pos_events),
+                      axes_limits = axes_limits, 
+                      axes_trans = axes_trans,
+                      legend = FALSE
+                    ),
+                    args
+                  )
                 )
                 # INTERACTIVE - USE CYTO_GATE_DRAW()
                 if(interactive() & cyto_option("CytoExploreR_interactive")) {
@@ -629,7 +677,7 @@ cyto_spillover_compute <- function(x,
                   if(is.null(neg_events) & is.null(neg_gt)) {
                     neg_gt <- cyto_gate_draw(
                       x = pos_events,
-                      alias = paste0(y, "-"),
+                      alias = pops[1],
                       channels = y,
                       type = "interval",
                       plot = FALSE
@@ -642,7 +690,7 @@ cyto_spillover_compute <- function(x,
                   if(is.null(pos_gt)) {
                     pos_gt <- cyto_gate_draw(
                       x = pos_events,
-                      alias = paste0(y, "+"),
+                      alias = pops[2],
                       channels = y,
                       type = "interval",
                       plot = FALSE
@@ -684,7 +732,7 @@ cyto_spillover_compute <- function(x,
                     pos_gt <- mindensity(
                       pos_events[[1]], # CYTOFRAME REQUIRED
                       channel = y,
-                      filterId =pops[2],
+                      filterId = pops[2],
                       positive = TRUE,
                       min = min(rng),
                       max = max(rng)
@@ -886,16 +934,24 @@ cyto_spillover_compute <- function(x,
   } else {
     # MESSAGE
     message(
-      "Computing spillover matrix using the Roca et al. (2021) method... \n"
+      "Computing ",
+      if(unmix) {
+        "unmixing "
+      } else {
+        "spillover "
+      },
+      "matrix using the Roca et al. (2021) method... \n"
     )
     # REFERENCE
-    message(
-      paste0(
-        "Roca et al. (2021). AutoSpill is a principled framework that ",
-        "simplifies the analysis of multichromatic flow cytometry data. Nature",
-        " Communications 12(2890)."
+    if(!unmix) {
+      message(
+        paste0(
+          "Roca et al. (2021). AutoSpill is a principled framework that ",
+          "simplifies the analysis of multichromatic flow cytometry data. Nature",
+          " Communications 12(2890)."
+        )
       )
-    )
+    }
     # DROP UNSTAINED CONTROLS
     if(any(.grepl("Unstained", pd$channel, ignore.case = TRUE))) {
       x <- cyto_select(

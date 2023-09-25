@@ -7,13 +7,19 @@
 cyto_unmix_compute(
   x,
   parent = "root",
-  channels = NULL,
   select = NULL,
-  auto = TRUE,
+  channels = NULL,
+  type = "roca",
+  auto = FALSE,
   save_as = NULL,
+  gatingTemplate = NULL,
   axes_trans = NA,
   axes_limits = "machine",
   heatmap = TRUE,
+  events = 500,
+  iter = 100,
+  trim = 0.001,
+  details = NULL,
   ...
 )
 }
@@ -22,14 +28,28 @@ cyto_unmix_compute(
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing single
 colour controls.}
 
-\item{parent}{name of the population to extract from each control to compute
-the spectral unmixing coefficients, set to \code{"root"} by default.}
+\item{parent}{name of the population to use for the unmixing calculation
+when a GatingSet object is supplied, set to the last node of the GatingSet
+by default (e.g. "Single Cells"). For greater flexibility, users can
+specify a parent population for each control, which will be extracted for
+the unmixing calculation (e.g. Lymphocytes for CD4 APC or Myeloid Cells
+for CD11b FITC). The parent populations for each control can also be
+specified in a \code{parent} column in the channel match CSV file or in
+\code{cyto_details}.}
+
+\item{select}{passed to \code{\link{cyto_select}} to select the samples
+required to compute the spillover matrix.}
 
 \item{channels}{names of the channels/markers for which unmixing coefficients
 should be computed, set to all fluorescent channels by default.}
 
-\item{select}{passed to \code{cyto_select()} to extract a subset of samples
-for computation of unmixing matrix.}
+\item{type}{options include \code{"Bagwell"}, \code{"Roca"} or
+\code{"hybrid"} to indicate which method to use when computing the
+spillover matrix, set to \code{"Roca"} by default. The \code{"hybrid"}
+method computes the spillover coefficients using the \code{Bagwell}
+approach (no RLM) and refines the coefficients using the \code{Autospill}
+approach. Refer to \code{references} section for more details about each
+method.}
 
 \item{auto}{logical indicating whether autofluorescence subtraction should be
 performed, set to TRUE by default. Users will be asked which group to use
@@ -40,6 +60,10 @@ manually here.}
 written, set to \code{Spectral-Unmixing-Matrix.csv} prefixed with the date
 by default. Set this argument to NA if you don't want to write the unmixing
 matrix to file.}
+
+\item{gatingTemplate}{name of \code{gatingTemplate} csv file to which the
+\code{gatingTemplate} entries for the \code{GatingSet} method should be
+saved, set to \code{cyto_gatingTemplate_active()} by default.}
 
 \item{axes_trans}{object of class \code{transformerList} containing the
 transformer definitions for transformations applied to the supplied data,
@@ -54,11 +78,26 @@ arguments.}
 \item{heatmap}{logical indicating whether the computed spectral unmixing
 matrix should be displayed in a heatmap, set to TRUE by default.}
 
+\item{events}{number of events to extract from each control prior to fitting
+RLM models, set to 500 events by default.}
+
+\item{iter}{indicates the maximum number of allowable iterations for refining
+the spillover coefficients, set to 100 by default.}
+
+\item{trim}{proportion of events to exclude from the top and bottom of each
+scale when fitting RLM models in autospill method, set to 0.001 by default.}
+
+\item{details}{name of a CSV file to which the details of the compensation
+controls should be saved, set to NULL by default to use
+\code{date-Compensation-Details.csv}. Setting this argument to \code{NA}
+will prevent details from being written to a CSV file.}
+
 \item{...}{additional arguments passed to \code{cyto_plot()} to allow
 customisation of plots used for gating.}
 }
 \value{
-computed unmixing coefficients in the form of a matrix.
+unmixing matrix and write unmixing matrix to csv file named in
+  accordance with \code{save_as}.
 }
 \description{
 \code{cyto_unmix_compute()} will guide the user through the steps to required
