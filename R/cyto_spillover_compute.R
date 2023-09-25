@@ -394,19 +394,12 @@ cyto_spillover_compute <- function(x,
   if(grepl("^b|^h", type, ignore.case = TRUE)) {
     
     # NOTE: CS - LIST PER CONTROL WITH NEGATIVE & POSITIVE EVENTS
-    
-    # MESSAGE
-    message(
-      "Computing ",
-      if(unmix) {
-        "unmixing "
-      } else {
-        "spillover "
-      }, 
-      "matrix using the Bagwell et al. (1993) method... \n"
-    )
-    # REFERENCE
+
+    # MESSAGE REFERENCE
     if(!unmix) {
+      message(
+        "Computing spillover matrix using the Bagwell et al. (1993) method... \n"
+      )
       message(
         paste0(
           "C. B. Bagwell & E. G. Adams (1993). Fluorescence spectral ",
@@ -917,9 +910,11 @@ cyto_spillover_compute <- function(x,
     
     # HYBRID METHOD - SPILLOVER REFINEMENT
     if(.grepl("^h", type, ignore.case = TRUE)) {
-      message(
-        "Iteratively refining spillover coefficients..."
-      )
+      if(!unmix) {
+        message(
+          "Iteratively refining spillover coefficients..."
+        )
+      }
       spill <- .cyto_asp_spill_refine(
         cs_list,
         spill = list(coef = spill),
@@ -932,18 +927,11 @@ cyto_spillover_compute <- function(x,
     
   # AUTOSPILL - ROCA METHOD  
   } else {
-    # MESSAGE
-    message(
-      "Computing ",
-      if(unmix) {
-        "unmixing "
-      } else {
-        "spillover "
-      },
-      "matrix using the Roca et al. (2021) method... \n"
-    )
-    # REFERENCE
+    # MESSAGE REFERENCE
     if(!unmix) {
+      message(
+        "Computing spillover matrix using the Roca et al. (2021) method... \n"
+      )
       message(
         paste0(
           "Roca et al. (2021). AutoSpill is a principled framework that ",

@@ -259,6 +259,57 @@ cyto_unmix_compute <- function(x,
     auto <- NULL
   }
   
+  # REFERENCES -----------------------------------------------------------------
+  
+  # BAWELL | HYBRID
+  if(grepl("^b|^h", type, ignore.case = TRUE)) {
+    message(
+      "Computing unmixing matrix using the Bagwell et al. (1993) method... \n"
+    )
+    message(
+      paste0(
+        "C. B. Bagwell & E. G. Adams (1993). Fluorescence spectral ",
+        "overlap compensation for any number of flow cytometry parameters. in:",
+        " Annals of the New York Academy of Sciences, 677:167-184.", "\n"
+      )
+    )
+  }
+  
+  # HYBRID
+  if(grepl("^h", type, ignore.case = TRUE)) {
+    message(
+      "Computing unmixing matrix using the hybrid method... \n"
+    )
+    message(
+      paste0(
+        "C. B. Bagwell & E. G. Adams (1993). Fluorescence spectral ",
+        "overlap compensation for any number of flow cytometry parameters. in:",
+        " Annals of the New York Academy of Sciences, 677:167-184.", "\n"
+      )
+    )
+    message(
+      paste0(
+        "Roca et al. (2021). AutoSpill is a principled framework that ",
+        "simplifies the analysis of multichromatic flow cytometry data. Nature",
+        " Communications 12(2890)."
+      )
+    )
+  }
+  
+  # AUTOSPILL
+  if(grepl("^r", type, ignore.case = TRUE)) {
+    message(
+      "Computing unmixing matrix using the Roca et al. (2021) method... \n"
+    )
+    message(
+      paste0(
+        "Roca et al. (2021). AutoSpill is a principled framework that ",
+        "simplifies the analysis of multichromatic flow cytometry data. Nature",
+        " Communications 12(2890)."
+      )
+    )
+  }
+  
   # COMPUTE SPECTRAL UNMIXING MATRIX -------------------------------------------
   
   # STAINED INDICES IN X
