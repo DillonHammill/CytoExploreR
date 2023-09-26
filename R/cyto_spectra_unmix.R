@@ -554,7 +554,7 @@ cyto_unmix.default <- function(x,
   # UPDATE DATA IN GATINGHIERARCHY/GATINGSET
   if(cyto_class(x, "GatingSet")) {
     # warning gates will be dropped
-    if(length(cyto_nodes(gs)) > 1) {
+    if(length(cyto_nodes(x)) > 1) {
       warning(
         "Existing gates will not be transferred to the new unmixed ",
         cyto_class(x),
