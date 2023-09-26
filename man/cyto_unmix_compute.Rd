@@ -32,9 +32,9 @@ colour controls.}
 when a GatingSet object is supplied, set to the last node of the GatingSet
 by default (e.g. "Single Cells"). For greater flexibility, users can
 specify a parent population for each control, which will be extracted for
-the unmixing calculation (e.g. Lymphocytes for CD4 APC or Myeloid Cells
-for CD11b FITC). The parent populations for each control can also be
-specified in a \code{parent} column in the channel match CSV file or in
+the unmixing calculation (e.g. Lymphocytes for CD4 APC or Myeloid Cells for
+CD11b FITC). The parent populations for each control can also be specified
+in a \code{parent} column in the channel match CSV file or in
 \code{cyto_details}.}
 
 \item{select}{passed to \code{\link{cyto_select}} to select the samples

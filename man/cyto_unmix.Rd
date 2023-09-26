@@ -10,8 +10,15 @@
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing unmixed
 spectral data.}
 
+\item{parent}{name of the parental population in the supplied
+\code{GatingHierarchy} or \code{GatingSet} to unmix, set to \code{"root"}
+by default.}
+
 \item{unmix}{an unmixing matrix or the name of a CSV file containing the
 unmixing matrix.}
+
+\item{select}{sample selection criteria to select a subset of samples for
+unmixing, see \code{\link{cyto_select}} for details.}
 
 \item{copy}{logical indicating whether unmixing should be applied to a copy
 of the original data, set to FALSE by default.}
@@ -20,11 +27,18 @@ of the original data, set to FALSE by default.}
 unmixing matrix should be dropped from the unmixed data, set to TRUE by
 default.}
 
+\item{trans}{object of class \code{transformerList} containing the
+definitions of transformers already applied to the input \code{cytoframe}
+or \code{cytoset}, set to NA by default.}
+
+\item{inverse}{logical to indicate whether inverse data transformations
+should be applied to the data prior to unmixing, set to TRUE by default.}
+
 \item{...}{not in use.}
 }
 \value{
 unmixed \code{cytoframe}, \code{cytoset}, \code{GatingHierarchy} or
-  \code{GatingSet}.
+  \code{GatingSet} with fluorescent values on the linear scale.
 }
 \description{
 Apply spectral unmixing matrix to spectral data
@@ -34,8 +48,6 @@ Apply spectral unmixing matrix to spectral data
 # Compute unmixing matrix
 unmix <- cyto_unmix_compute(
   gs,
-  group_by = "type",
-  auto = "cells",
   save_as = "Spectral-Unmixing-Matrix.csv"
 )
 # Apply unmixing matrix

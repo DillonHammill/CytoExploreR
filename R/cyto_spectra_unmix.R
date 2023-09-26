@@ -25,9 +25,9 @@
 #'   when a GatingSet object is supplied, set to the last node of the GatingSet
 #'   by default (e.g. "Single Cells"). For greater flexibility, users can
 #'   specify a parent population for each control, which will be extracted for
-#'   the unmixing calculation (e.g. Lymphocytes for CD4 APC or Myeloid Cells
-#'   for CD11b FITC). The parent populations for each control can also be
-#'   specified in a \code{parent} column in the channel match CSV file or in
+#'   the unmixing calculation (e.g. Lymphocytes for CD4 APC or Myeloid Cells for
+#'   CD11b FITC). The parent populations for each control can also be specified
+#'   in a \code{parent} column in the channel match CSV file or in
 #'   \code{cyto_details}.
 #' @param select passed to \code{\link{cyto_select}} to select the samples
 #'   required to compute the spillover matrix.
@@ -476,17 +476,27 @@ cyto_unmix_compute <- function(x,
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing unmixed
 #'   spectral data.
+#' @param parent name of the parental population in the supplied
+#'   \code{GatingHierarchy} or \code{GatingSet} to unmix, set to \code{"root"}
+#'   by default.
 #' @param unmix an unmixing matrix or the name of a CSV file containing the
 #'   unmixing matrix.
+#' @param select sample selection criteria to select a subset of samples for
+#'   unmixing, see \code{\link{cyto_select}} for details.
 #' @param copy logical indicating whether unmixing should be applied to a copy
 #'   of the original data, set to FALSE by default.
 #' @param drop logical indicating whether the original channels used compute the
 #'   unmixing matrix should be dropped from the unmixed data, set to TRUE by
 #'   default.
+#' @param trans object of class \code{transformerList} containing the
+#'   definitions of transformers already applied to the input \code{cytoframe}
+#'   or \code{cytoset}, set to NA by default.
+#' @param inverse logical to indicate whether inverse data transformations
+#'   should be applied to the data prior to unmixing, set to TRUE by default.
 #' @param ... not in use.
 #'
 #' @return unmixed \code{cytoframe}, \code{cytoset}, \code{GatingHierarchy} or
-#'   \code{GatingSet}.
+#'   \code{GatingSet} with fluorescent values on the linear scale.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -497,8 +507,6 @@ cyto_unmix_compute <- function(x,
 #' # Compute unmixing matrix
 #' unmix <- cyto_unmix_compute(
 #'   gs,
-#'   group_by = "type",
-#'   auto = "cells",
 #'   save_as = "Spectral-Unmixing-Matrix.csv"
 #' )
 #' # Apply unmixing matrix
@@ -520,25 +528,45 @@ cyto_unmix <- function(x,
 
 #' @export
 cyto_unmix.default <- function(x,
+                               parent = "root",
                                unmix = NULL,
+                               select = NULL,
                                copy = FALSE,
                                drop = TRUE,
+                               trans = NA,
+                               inverse = TRUE,
                                ...) {
   
-  # APPLY SPECTRAL UNMIXING
+  # APPLY SPECTRAL UNMIXING TO LINEAR DATA
   cs <- cyto_apply(
     x,
-    parent = "root",
+    parent = parent,
+    select = select,
     FUN = "cyto_unmix",
     input = "cytoframe",
     unmix = unmix,
     copy = copy,
-    drop = drop
+    drop = drop,
+    trans = trans,
+    inverse = inverse
   )
   
   # UPDATE DATA IN GATINGHIERARCHY/GATINGSET
   if(cyto_class(x, "GatingSet")) {
-    gs_cyto_data(x) <- cs
+    # warning gates will be dropped
+    if(length(cyto_nodes(gs)) > 1) {
+      warning(
+        "Existing gates will not be transferred to the new unmixed ",
+        cyto_class(x),
+        "!"
+      )
+    }
+    # create new GatingSet
+    x <- GatingSet(cs)
+    # GATINGHIERARCHY
+    if(cyto_class(x, "GatingHierarchy")) {
+      x <- x[[1]]
+    }
     return(x)
   # UNMIXED CYTOSET
   } else {
@@ -552,6 +580,8 @@ cyto_unmix.flowFrame <- function(x,
                                  unmix = NULL,
                                  copy = FALSE,
                                  drop = TRUE,
+                                 trans = NA,
+                                 inverse = TRUE,
                                  ...){
   
   # MISSING UNMIX
@@ -573,6 +603,19 @@ cyto_unmix.flowFrame <- function(x,
   
   # CHANNELS
   channels <- cyto_channels(x)
+  
+  # INVERSE TRANSFORMATIONS - ALL CHANNELS ON LINEAR SCALE
+  if(!.all_na(trans) & inverse) {
+    trans <- cyto_transformers_combine(
+      trans[names(trans) %in% colnames(unmix)]
+    )
+    x <- cyto_transform(
+      x,
+      trans = trans,
+      inverse = TRUE,
+      copy = TRUE
+    )
+  }
   
   # CHANNELS UNMIX
   exprs <- cyto_exprs(
@@ -612,7 +655,7 @@ cyto_unmix.flowFrame <- function(x,
         x,
         unmix_coef
       )
-      # DROP EXCESS PARAMETER
+      # DROP EXCESS PARAMETERS
       x <- cyto_copy(
         x[, -match(rm[1], cyto_channels(x))]
       )
