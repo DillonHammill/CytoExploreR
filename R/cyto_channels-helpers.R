@@ -1019,6 +1019,8 @@ cyto_channel_match <- function(x,
                                label = FALSE,
                                ...) {
   
+  # NOTE: MARKER COLUMN IS OPTIONAL - INCLUDED FOR UNMIXING
+  
   # CYTOFRAMES NOT SUPPORTED
   if(cyto_class(x, "flowFrame")) {
     stop(
@@ -1100,7 +1102,7 @@ cyto_channel_match <- function(x,
   }
   
   # ADD MISSING PARAMETERS
-  vars <- c("group", "parent", "channel")
+  vars <- c("group", "parent", "channel", "marker")
   if(label) {
     vars <- c(vars, "label")
   }

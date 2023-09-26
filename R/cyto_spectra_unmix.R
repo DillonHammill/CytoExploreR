@@ -181,7 +181,7 @@ cyto_unmix_compute <- function(x,
   )
   
   # MISSING VARIABLES
-  vars <- c("name", "group", "parent", "channel", "label")
+  vars <- c("name", "group", "parent", "channel", "label", "marker")
   if(!all(vars %in% colnames(pd))) {
     stop(
       paste0(
@@ -366,7 +366,19 @@ cyto_unmix_compute <- function(x,
           drop = FALSE
         ]
         # SET LABEL AS ROWNAMES
-        rownames(spill) <- pd$label[id]
+        rownames(spill) <- if(is.na(pd$marker[id])|.empty(pd$marker[id])) {
+          paste0(
+            "<NA> ",
+            pd$label[id]
+          )
+        } else {
+          paste0(
+            "<",
+            pd$marker[id],
+            "> ",
+            pd$label[id]
+          )
+        }
         
         # RETURN COMPUTED COEFFICIENTS
         return(spill)
