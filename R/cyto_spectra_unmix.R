@@ -633,7 +633,14 @@ cyto_unmix.flowFrame <- function(x,
   
   # UNMIX
   unmix_coef <- t(ls$coefficients)
-  colnames(unmix_coef) <- rownames(unmix)
+  
+  # PREPARE NEW PARAMETER NAMES
+  mrks <- gsub("^<(.*)> (.*)", "\\1", rownames(unmix))
+  chans <- gsub("^<(.*)> (.*)", "\\2", rownames(unmix))
+  mrks[mrks == chans] <- NA
+  
+  # SET NEW CHANNEL NAMES
+  colnames(unmix_coef) <- chans
   rownames(unmix_coef) <- NULL
   
   # APPEND UNMIXED PARAMETERS
@@ -669,6 +676,14 @@ cyto_unmix.flowFrame <- function(x,
     }
   }
   
+  # SET MARKER NAMES
+  if(!.all_na(mrks)) {
+    idx <- which(!is.na(mrks))
+    mrks <- mrks[idx]
+    names(mrks) <- chans[idx]
+    cyto_markers(x) <- mrks
+  }
+
   # RETURN UNMIXED CYTOFRAME
   return(x)
 
