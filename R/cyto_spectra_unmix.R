@@ -635,8 +635,10 @@ cyto_unmix.flowFrame <- function(x,
   unmix_coef <- t(ls$coefficients)
   
   # PREPARE NEW PARAMETER NAMES
-  mrks <- gsub("^<(.*)> (.*)", "\\1", rownames(unmix))
-  chans <- gsub("^<(.*)> (.*)", "\\2", rownames(unmix))
+  mrks <- gsub("^<(.*)>(.*)", "\\1", rownames(unmix))
+  chans <- gsub("^<(.*)>(.*)", "\\2", rownames(unmix))
+  chans <- trimws(chans, "both")
+  mrks <- trimws(mrks, "both")
   mrks[mrks == chans] <- NA
   
   # SET NEW CHANNEL NAMES
