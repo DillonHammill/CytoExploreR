@@ -506,22 +506,31 @@ cyto_fluor_channels <- function(x,
                                 ...){
   
   # TODO: SHOULD WE EXCLUDE HEIGHT/WIDTH PARAMTERS HERE?
-  cyto_channels(
-    x, 
-    exclude = c(
-      "FSC",
-      "SSC",
-      "Time",
-      "Original",
-      "Sample",
-      "Event",
-      "UMAP",
-      "t-?SNE",
-      "PCA",
-      "EmbedSOM",
-      "FIt-?SNE"
-    ),
-  ...)
+  args <- list(
+    "x" = x,
+    ...
+  )
+  args$exclude <- c(
+    args$exclude,
+    "FSC",
+    "SSC",
+    "Time",
+    "Original",
+    "Sample",
+    "Event",
+    "UMAP",
+    "t-?SNE",
+    "PCA",
+    "EmbedSOM",
+    "FIt-?SNE"
+  )
+  
+  # CALL CYTO_CHANNELS()
+  cyto_func_call(
+    "cyto_channels",
+    args
+  )
+
 }
 
 ## CYTO_CHANNELS_EXTRACT -------------------------------------------------------
