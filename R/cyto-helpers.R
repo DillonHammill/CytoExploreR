@@ -1963,7 +1963,8 @@ cyto_select <- function(x, ...) {
 #'
 #' @export
 cyto_group_by <- function(x,
-                          group_by = "all") {
+                          group_by = "all",
+                          sep = " ") {
 
   # Check class of x
   if (!any(is(x, "flowSet") | is(x, "GatingSet"))) {
@@ -2050,14 +2051,14 @@ cyto_group_by <- function(x,
       names(pd_split) <- nms
     } else {
       pd_split <- split(pd, pd[, group_by],
-        sep = " ",
+        sep = sep,
         lex.order = TRUE,
         drop = TRUE
       )
     }
   } else {
     pd_split <- split(pd, pd[, group_by],
-      sep = " ",
+      sep = sep,
       lex.order = TRUE,
       drop = TRUE
     )
