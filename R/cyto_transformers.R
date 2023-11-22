@@ -263,7 +263,7 @@ cyto_transformers_define <- function(x,
                 asinh(x/cofactor)
               }
               sinh_trans <- function(x, cofactor = cf) {
-                sinh(x/cofactor)
+                sinh(x) * cofactor
               }
               # TRANSFORMERS
               trans <- flow_trans(
