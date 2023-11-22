@@ -246,7 +246,7 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
     gt_bool_chunk$parent <- cyto_nodes_convert(
       x,
       nodes = gt_bool_chunk$parent,
-      path = "auto"
+      path = "full"
     )
     gt_bool_chunk$gating_args <- LAPPLY(
       seq_len(nrow(gt_bool_chunk)), 
@@ -345,11 +345,11 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
                 gt_entry[, pop := "*"]
                 # PARENT
                 gt_entry[, parent := cyto_nodes_convert(
-                  x,
-                  nodes = gt_parent,
-                  path = "auto"
-                  
-                )]
+                    x,
+                    nodes = gt_parent,
+                    path = "full"
+                  )
+                ]
                 # GATING METHOD
                 gt_entry[, gating_method := "cyto_gate_draw"]
                 # GATING ARGS
@@ -380,11 +380,11 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
                 collapse = ",")]
                 # PARENT
                 gt_entry[, parent := cyto_nodes_convert(
-                  x,
-                  nodes = gt_parent,
-                  path = "auto"
-                  
-                )]
+                    x,
+                    nodes = gt_parent,
+                    path = "full"
+                  )
+                ]
                 # GATING METHOD
                 gt_entry[, gating_method := "cyto_gate_draw"]
                 # GATING ARGS
