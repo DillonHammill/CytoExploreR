@@ -64,8 +64,7 @@
     args <- .args_list(...)
     args <- args[!names(args) %in% c("x", "gate", "label", "channels")]
     # LIST OF POPULATIONS PER GATE
-    pops <- cyto_gate_apply(x,
-                            gate = gate)
+    pops <- cyto_gate_apply(x, gate = gate)
     # REPEAT ARGUMENTS - NOT CHANNELS
     args <- structure(
       lapply(args, function(arg) {
@@ -383,7 +382,7 @@
 
 #' @importFrom flowCore rectangleGate
 #' @importFrom grDevices adjustcolor
-#' @importFrom graphics locator par
+#' @importFrom graphics locator par lines
 #' @noRd
 .cyto_gate_interval_draw <- function(alias,
                                      channels,
@@ -973,6 +972,155 @@
     gate_line_type = gate_line_type,
     gate_line_width = gate_line_width,
     gate_line_col = gate_line_col
+  )
+  
+  # RETURN GATE OBJECT
+  return(gate)
+  
+}
+
+#' @importFrom flowCore multiRangeGate
+#' @importFrom grDevices adjustcolor
+#' @importFrom graphics locator par lines
+#' @noRd
+.cyto_gate_multirange_draw <- function(alias,
+                                       channels,
+                                       gate_point_shape = 16,
+                                       gate_point_size = 1,
+                                       gate_point_col = "red",
+                                       gate_point_col_alpha = 1,
+                                       gate_line_type = 1,
+                                       gate_line_width = 2.5,
+                                       gate_line_col = "red",
+                                       gate_line_col_alpha = 1,
+                                       ...) {
+  
+  # HIDE ERROR MESSAGES
+  options("show.error.messages" = FALSE)
+  on.exit(options("show.error.messages" = TRUE))
+  
+  # INSTRUCTIONS
+  message(
+    paste(
+      "Select the upper bound of the",
+      alias, 
+      "population to construct a multirange gate. \n"
+    )
+  )
+  
+  # PLOT LIMITS
+  par_usr <- par("usr")
+  
+  # X LIMITS + BUFFER
+  par_xlim <- par_usr[1:2]
+  par_xrng <- par_xlim[2] - par_xlim[1]
+  par_xpad <- (par_xrng - par_xrng / 1.04)
+  par_xmin <- par_xlim[1] + 0.5 * par_xpad
+  par_xmax <- par_xlim[2] - 0.5 * par_xpad
+  
+  # Y LIMITS + BUFFER
+  par_ylim <- par_usr[3:4]
+  par_yrng <- par_ylim[2] - par_ylim[1]
+  par_ypad <- (par_yrng - par_yrng / 1.04)
+  par_ymin <- par_ylim[1] + 0.5 * par_ypad
+  par_ymax <- par_ylim[2] - 0.5 * par_ypad
+  
+  # INSTRUCTIONS
+  message(
+    paste(
+      "Select the lower and upper bounds of the",
+      alias, 
+      "population to construct an multirange gate. \n"
+    )
+  )
+  
+  # COLOUR - TRANSPARENCY
+  gate_point_col <- adjustcolor(gate_point_col, gate_point_col_alpha)
+  gate_line_col <- adjustcolor(gate_line_col, gate_line_col_alpha)
+  
+  # COORDS - POINT BY POINT - SET 2 POINT LIMIT
+  coords <- list()
+  for(z in seq_len(100)){
+    # SELECT POINT
+    pt <- locator(
+      n = 1,
+      type = "p",
+      pch = gate_point_shape,
+      cex = gate_point_size,
+      col = gate_point_col
+    )
+    # POINT SELECTED ADD TO COORDS
+    if(!is.null(pt)){
+      pt <- do.call("cbind", pt)
+      coords[[z]] <- pt
+      # ADD LINE CURRENT CO-ORDINATE - X COORDS + PAR_YMIN & PAR_YMAX
+      lines(
+        x = c(coords[[z]][, "x"], coords[[z]][, "x"]),
+        y = c(par_ymin, par_ymax),
+        lty = gate_line_type,
+        lwd = gate_line_width,
+        col = gate_line_col
+      )
+      # CONNECT TO PREVIOUS CO-ORDINATE - HORIZONTAL LINES
+      if(z %% 2 == 0) {
+        # LOWER LINE
+        lines(
+          x = c(coords[[z-1]][, "x"], coords[[z]][, "x"]),
+          y = c(par_ymin, par_ymin),
+          lty = gate_line_type,
+          lwd = gate_line_width,
+          col = gate_line_col
+        )
+        # UPPER LINE
+        lines(
+          x = c(coords[[z-1]][, "x"], coords[[z]][, "x"]),
+          y = c(par_ymax, par_ymax),
+          lty = gate_line_type,
+          lwd = gate_line_width,
+          col = gate_line_col
+        )
+      }
+    } else {
+      break()
+    }
+  }
+  
+  # CHECK COORDS LENGTH
+  if(length(coords) < 2) {
+    stop(
+      "A minimum of 2 points is required to construct a multirange gate."
+    )
+  }
+  if(length(coords) %% 2 != 0) {
+    stop(
+      "An even number of points is required to construct a multirange gate."
+    )
+  }
+  coords <- do.call("rbind", coords)
+  
+  # SPLIT COORDS INTO PAIRS
+  idx <- split(
+    seq_along(coords),
+    rep(1:(length(coords)/2), each = 2)
+  )
+  
+  # CONSTRUCT GATES
+  gate <- multiRangeGate(
+    filterId = alias, 
+    ranges = list(
+      min = sapply(
+        idx,
+        function(z) {
+          min(unlist(coords[idx]))
+        }
+      ),
+      max = sapply(
+        idx,
+        function(z) {
+          max(unlist(coords[idx]))
+        }
+      )
+    )
   )
   
   # RETURN GATE OBJECT

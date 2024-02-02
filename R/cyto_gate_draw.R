@@ -28,9 +28,9 @@
 #'   gate types are supported but should be accompanied with an \code{alias}
 #'   argument of the same length (i.e. one \code{type} per \code{alias}).
 #'   Supported gate types are \code{polygon, rectangle, ellipse, threshold,
-#'   boundary, interval, quadrant and web} which can be abbreviated as upper or
-#'   lower case first letters as well. Default \code{type} is \code{"interval"}
-#'   for 1D gates and \code{"polygon"} for 2D gates.
+#'   boundary, interval, quadrant, multirange and web} which can be abbreviated 
+#'   as upper or lower case first letters as well. Default \code{type} is 
+#'   \code{"interval"} for 1D gates and \code{"polygon"} for 2D gates.
 #' @param gatingTemplate name of \code{gatingTemplate} csv file to which the
 #'   \code{gatingTemplate} entries for the \code{GatingSet} method should be
 #'   saved, set to \code{cyto_gatingTemplate_active()} by default.
@@ -281,6 +281,14 @@ cyto_gate_draw <- function(x,
     merge_by <- group_by
   }
   
+  # MULTIRANGE REQUIRES TIME X AXIS
+  if(type[[1]] %in% "multirange") {
+    channels <- c(
+      channels[grep("Time", channels, ignore.case = TRUE)],
+      channels[-grep("Time", channels, ignore.case = TRUE)]
+    )
+  }
+  
   # PREPARE DATA ---------------------------------------------------------------
   
   # LIST OF CYTOSET LISTS
@@ -421,6 +429,8 @@ cyto_gate_draw <- function(x,
   }
   
   # PREPARE GATES --------------------------------------------------------------
+  
+  # TODO: check whether multirange can be wrapped in filters for gatingTemplate
   
   # TRANSPOSE GATES - LIST OF LENGTH ALIAS - EACH OF LENGTH GROUP
   gate_list <- transpose(gate_list)

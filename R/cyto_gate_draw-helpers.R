@@ -65,10 +65,13 @@
     }else if(grepl("^q", type[z], ignore.case = TRUE)) {
       type[z] <<- "quadrant"
       return(TRUE)
+    }else if(grepl("^m", type[z], ignore.case = TRUE)) {
+      type[z] <<- "multirange"
+      return(TRUE)
     }else if(grepl("^w", type[z], ignore.case = TRUE)) {
       type[z] <<- "web"
       return(TRUE)
-      # flowSet method passes NA to flowFrame method negate
+    # flowSet method passes NA to flowFrame method negate
     }else if(z == length(type) & is.na(type[z])){ 
       return(TRUE)
     }else{
@@ -121,9 +124,20 @@
                        "polygon",
                        "ellipse",
                        "quadrant",
-                       "web"))){
-      stop("Supported 1D gate types include interval, boundary and threshold.")
+                       "web",
+                       "multirange"))){
+      stop(
+        "Supported 1D gate types include interval, boundary, threshold and ",
+        "multirange."
+      )
     }
+  }
+  
+  # MULTIRANGE
+  if(type %in% "multirange" & !any(grepl("Time", channels, ignore.case = TRUE))) {
+    stop(
+      "MultiRangeGates are only currently supported for the Time channel"
+    )
   }
   
   # REMOVE NEGATED GATE TYPE

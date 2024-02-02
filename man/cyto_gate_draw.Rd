@@ -61,9 +61,9 @@ the gating routine.}
 gate types are supported but should be accompanied with an \code{alias}
 argument of the same length (i.e. one \code{type} per \code{alias}).
 Supported gate types are \code{polygon, rectangle, ellipse, threshold,
-boundary, interval, quadrant and web} which can be abbreviated as upper or
-lower case first letters as well. Default \code{type} is \code{"interval"}
-for 1D gates and \code{"polygon"} for 2D gates.}
+boundary, interval, quadrant, multirange and web} which can be abbreviated 
+as upper or lower case first letters as well. Default \code{type} is 
+\code{"interval"} for 1D gates and \code{"polygon"} for 2D gates.}
 
 \item{gatingTemplate}{name of \code{gatingTemplate} csv file to which the
 \code{gatingTemplate} entries for the \code{GatingSet} method should be
