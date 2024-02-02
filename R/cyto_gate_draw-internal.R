@@ -1108,17 +1108,21 @@
   gate <- multiRangeGate(
     filterId = alias, 
     ranges = list(
-      min = sapply(
-        idx,
-        function(z) {
-          min(unlist(coords[idx]))
-        }
+      min = min(
+        sapply(
+          coords[idx], 
+          function(z){
+            z[, "x"]
+          }
+        )
       ),
-      max = sapply(
-        idx,
-        function(z) {
-          max(unlist(coords[idx]))
-        }
+      max = max(
+        sapply(
+          coords[idx], 
+          function(z){
+            z[, "x"]
+          }
+        )
       )
     )
   )
