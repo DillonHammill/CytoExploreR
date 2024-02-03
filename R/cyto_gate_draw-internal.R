@@ -67,22 +67,32 @@
     pops <- cyto_gate_apply(x, gate = gate)
     # REPEAT ARGUMENTS - NOT CHANNELS
     args <- structure(
-      lapply(args, function(arg) {
-        split(
-          rep(arg, length.out = length(unlist(pops))),
-          rep(1:length(pops), each = LAPPLY(pops, length))
-        )
-      }),
+      lapply(
+        args, 
+        function(arg) {
+          split(
+            rep(arg, length.out = length(unlist(pops))),
+            rep(1:length(pops), each = LAPPLY(pops, length))
+          )
+        }
+      ),
       names = names(args)
     )
     # UPDATE ARGUMENTS
     .args_update(args)
     # GATE CENTERS - BYPASS GATE CONVERSION?
     label_text_xy <- tryCatch(
-      .cyto_gate_center(gate,
-                        channels = channels), 
+      .cyto_gate_center(
+        gate,
+        channels = channels
+      ), 
       error = function(e){
-        return(rep(list(NA), length(gate)))
+        return(
+          rep(
+            list(NA),
+            length(gate)
+          )
+        )
       }
     )
     # LABEL EACH POPULATION
@@ -1096,7 +1106,6 @@
       "An even number of points is required to construct a multirange gate."
     )
   }
-  coords <- do.call("rbind", coords)
   
   # SPLIT COORDS INTO PAIRS
   idx <- split(
@@ -1104,27 +1113,40 @@
     rep(1:(length(coords)/2), each = 2)
   )
   
-  # CONSTRUCT GATES
-  gate <- multiRangeGate(
-    filterId = alias, 
-    ranges = list(
-      min = min(
-        sapply(
-          coords[idx], 
-          function(z){
-            z[, "x"]
-          }
-        )
-      ),
-      max = max(
-        sapply(
-          coords[idx], 
-          function(z){
-            z[, "x"]
-          }
-        )
+  # GATE RANGES
+  ranges <- list(
+    min = unname(
+      sapply(
+        idx, 
+        function(z){
+          min(
+            do.call(
+              "rbind",
+              coords[z]
+            )[, "x"]
+          )
+        }
+      )
+    ),
+    max = unname(
+      sapply(
+        idx, 
+        function(z){
+          max(
+            do.call(
+              "rbind",
+              coords[z]
+            )[, "x"]
+          )
+        }
       )
     )
+  )
+  
+  # CONSTRUCT GATE
+  gate <- multiRangeGate(
+    ranges = ranges,
+    filterId = alias
   )
   
   # RETURN GATE OBJECT

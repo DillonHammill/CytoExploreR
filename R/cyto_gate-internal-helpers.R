@@ -515,76 +515,83 @@
   
   # GATE CENTERS ---------------------------------------------------------------
   
-  # COMPUTE CO-ORDINATES IN PLOT REGION
-  text_xy <- lapply(
-    seq_along(x@ranges[[1]]),
-    function(z) {
-      chan_idx <- match(chan, channels)
-      # GATE COORDS
-      coords <- c(
-        x@ranges[["min"]][z],
-        x@ranges[["max"]][z]
-      )
-      # X CHANNEL MATCH
-      if(chan_idx == 1) {
-        # REPLACE INFINITE COORDS
-        if(!is.finite(coords[1])) {
-          coords[1] <- xmin
-        }
-        if(!is.finite(coords[2])) {
-          coords[2] <- xmax
-        }
-        # XCOORD
-        if(.all_na(text_x[z])) {
-          xcoord <- mean(
-            coords
-          )
-        } else {
-          ycoord <- text_x[z]
-        }
-        # YCOORD
-        if(.all_na(text_y[z])) {
-          ycoord <- mean(
-            c(ymin, ymax)
-          )
-        } else {
-          ycoord <- text_y[z]
-        }
-      # Y CHANNEL MATCH
-      } else {
-        # REPLACE INFINITE COORDS
-        if(!is.finite(coords[1])) {
-          coords[1] <- ymin
-        }
-        if(!is.finite(coords[2])) {
-          coords[2] <- ymax
-        }
-        # XCOORD
-        if(.all_na(text_x[z])) {
-          xcoord <- mean(
-            c(xmin, xmax)
-          )
-        } else {
-          xcoord <- text_x[z]
-        }
-        # YCOORD
-        if(.all_na(text_y[z])) {
-          ycoord <- mean(coords)
-        } else {
-          ycoord <- text_y[z]
-        }
-      }
-      return(
-        c(
-          "x" = xcoord,
-          "y" = ycoord
-        )
-      )
-    }
+  # COMPUTE CO-ORDINATES IN CENTER PLOT REGION
+  idx <- ceiling(
+    mean(
+      seq_along(x@ranges[[1]])
+    )
   )
-
+  # CHANNEL ORDER
+  chan_idx <- match(chan, channels)
+  # GATE COORDS
+  coords <- c(
+    x@ranges[["min"]][idx],
+    x@ranges[["max"]][idx]
+  )
+  # X CHANNEL MATCH
+  if(chan_idx == 1) {
+    # REPLACE INFINITE COORDS
+    if(!is.finite(coords[1])) {
+      coords[1] <- xmin
+    }
+    if(!is.finite(coords[2])) {
+      coords[2] <- xmax
+    }
+    # XCOORD
+    if(.all_na(text_x[idx])) {
+      xcoord <- mean(
+        coords
+      )
+    } else {
+      ycoord <- text_x[idx]
+    }
+    # YCOORD
+    if(.all_na(text_y[idx])) {
+      ycoord <- mean(
+        c(ymin, ymax)
+      )
+    } else {
+      ycoord <- text_y[idx]
+    }
+    # Y CHANNEL MATCH
+  } else {
+    # REPLACE INFINITE COORDS
+    if(!is.finite(coords[1])) {
+      coords[1] <- ymin
+    }
+    if(!is.finite(coords[2])) {
+      coords[2] <- ymax
+    }
+    # XCOORD
+    if(.all_na(text_x[idx])) {
+      xcoord <- mean(
+        c(xmin, xmax)
+      )
+    } else {
+      xcoord <- text_x[idx]
+    }
+    # YCOORD
+    if(.all_na(text_y[idx])) {
+      ycoord <- mean(coords)
+    } else {
+      ycoord <- text_y[idx]
+    }
+  }
+  
   # RETURN GATE CENTER MATRIX
-  return(text_xy)
+  return(
+    matrix(
+      c(
+        xcoord,
+        ycoord
+      ),
+      nrow = 1,
+      dimnames = list(
+        NULL,
+        c("x", "y")
+      )
+    )
+  )
   
 }
 
