@@ -1170,17 +1170,20 @@
   if(!.all_na(gate)) {
     # GATE CO-ORDINATES
     coords <- .cyto_gate_coords(gate, channels)
-    # DROP NON-FINITE CO-ORDINATES
-    coords <- coords[is.finite(coords[, 1]), , drop = FALSE]
-    # BYPASS INFINITE CO-ORDINATES
-    if(nrow(coords) > 0) {
-      # MINIMUM
-      if(min(coords) < min(data_range)) {
-        data_range[1, 1] <- min(coords)
-      }
-      # MAXIMUM
-      if(max(coords) > max(data_range)) {
-        data_range[2, 1] <- max(coords)
+    # COORDS MAY BE DYNAMIC FOR EITHER AXIS - USE PLOT LIMITS -> TRANS ERRORS
+    if(!is.null(coords)) {
+      # DROP NON-FINITE CO-ORDINATES
+      coords <- coords[is.finite(coords[, 1]), , drop = FALSE]
+      # BYPASS INFINITE CO-ORDINATES
+      if(nrow(coords) > 0) {
+        # MINIMUM
+        if(min(coords) < min(data_range)) {
+          data_range[1, 1] <- min(coords)
+        }
+        # MAXIMUM
+        if(max(coords) > max(data_range)) {
+          data_range[2, 1] <- max(coords)
+        }
       }
     }
   }
@@ -1443,6 +1446,7 @@
               buffer = axes_limits_buffer
             )[, chan])
         }
+        # TODO: RESTRICT RANGE TO TRANSFORMATION RANGE
         # RESTRICT AXES TICKS & LABELS BY RANGE
         ind <- which(axis_ticks > min(rng) & axis_ticks < max(rng))
         axis_ticks <- axis_ticks[ind]

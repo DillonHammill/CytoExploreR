@@ -697,8 +697,6 @@
     if(grepl("gate", cyto_class(gate[[z]]), ignore.case = TRUE)) {
       if(cyto_class(gate[[z]], "quadGate")) {
         return(4)
-      } else if(cyto_class(gate[[z]], "multiRangeGate")) {
-        return(length(gate[[z]]@ranges[[1]]))
       } else {
         return(1)
       }
@@ -847,7 +845,11 @@
         coords <- as.numeric(y@boundary[z])
       # MULTIRANGEGATE
       } else if(cyto_class(y, "multiRangeGate")) {
-        coords <- sort(unlist(y@ranges))
+        if(grepl("Time", z, ignore.case = TRUE)) {
+          coords <- sort(unlist(y@ranges))
+        } else {
+          coords <- NULL
+        }
       # NOT SUPPORTED
       } else {
         coords <- NULL
@@ -856,6 +858,11 @@
     })
   })
   coords[sapply(coords, "is.null")] <- NULL
+  
+  # NO COORDS FOR CHANNEL
+  if(length(coords) == 0) {
+    return(NULL)
+  }
   
   # COORD MATRIX
   if(length(channels) == 1){
