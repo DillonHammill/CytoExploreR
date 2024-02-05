@@ -509,10 +509,6 @@
   # GATE CHANNEL
   chan <- parameters(x)
   
-  # PREPARE TEXT LOCATIONS
-  text_x <- rep(text_x, length.out = length(x@ranges[[1]]))
-  text_y <- rep(text_y, length.out = length(x@ranges[[1]]))
-  
   # GATE CENTERS ---------------------------------------------------------------
   
   # COMPUTE CO-ORDINATES IN CENTER PLOT REGION
@@ -523,59 +519,34 @@
   )
   # CHANNEL ORDER
   chan_idx <- match(chan, channels)
-  # GATE COORDS
-  coords <- c(
-    x@ranges[["min"]][idx],
-    x@ranges[["max"]][idx]
-  )
-  # X CHANNEL MATCH
-  if(chan_idx == 1) {
-    # REPLACE INFINITE COORDS
-    if(!is.finite(coords[1])) {
-      coords[1] <- xmin
-    }
-    if(!is.finite(coords[2])) {
-      coords[2] <- xmax
-    }
-    # XCOORD
-    if(.all_na(text_x[idx])) {
-      xcoord <- mean(
-        coords
+  
+  # TIME CHANNEL ON X AXIS
+  if(chan_idx[1] == 1) {
+    xcoord <- mean(
+      c(
+        x@ranges$min[idx],
+        x@ranges$max[idx]
       )
-    } else {
-      ycoord <- text_x[idx]
-    }
-    # YCOORD
-    if(.all_na(text_y[idx])) {
-      ycoord <- mean(
-        c(ymin, ymax)
+    )
+    ycoord <- mean(
+      c(
+        ymin,
+        ymax
       )
-    } else {
-      ycoord <- text_y[idx]
-    }
-    # Y CHANNEL MATCH
+    )
   } else {
-    # REPLACE INFINITE COORDS
-    if(!is.finite(coords[1])) {
-      coords[1] <- ymin
-    }
-    if(!is.finite(coords[2])) {
-      coords[2] <- ymax
-    }
-    # XCOORD
-    if(.all_na(text_x[idx])) {
-      xcoord <- mean(
-        c(xmin, xmax)
+    xcoord <- mean(
+      c(
+        xmin,
+        xmax
       )
-    } else {
-      xcoord <- text_x[idx]
-    }
-    # YCOORD
-    if(.all_na(text_y[idx])) {
-      ycoord <- mean(coords)
-    } else {
-      ycoord <- text_y[idx]
-    }
+    )
+    ycoord <- mean(
+      c(
+        x@ranges$min[idx],
+        x@ranges$max[idx]
+      )
+    )
   }
   
   # RETURN GATE CENTER MATRIX
