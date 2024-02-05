@@ -2126,14 +2126,16 @@
         # FREQUENCY
         if(grepl("freq$", label_stat_fun, ignore.case = TRUE) |
            grepl("percent$", label_stat_fun, ignore.case = TRUE)) {
-          res <- cyto_stats_compute(pops[[z]][[y]],
-                                    channels = channels,
-                                    parent = x[z],
-                                    stat = label_stat_fun,
-                                    round = 2,
-                                    input = "matrix",
-                                    markers = FALSE,
-                                    details = FALSE)
+          res <- cyto_stats_compute(
+            pops[[z]][[y]],
+            channels = channels,
+            parent = x[z],
+            stat = label_stat_fun,
+            round = 2,
+            input = "matrix",
+            markers = FALSE,
+            details = FALSE
+          )
         # HISTOGRAM STATISTICS - ADDITIONAL ARGUMENTS
         } else if(any(LAPPLY(c("mode",
                                "auc"), function(w){
@@ -2141,29 +2143,33 @@
                                        label_stat_fun, 
                                        ignore.case = TRUE)
                                }))){
-          res <- cyto_stats_compute(pops[[z]][[y]],
-                                    channels = channels,
-                                    stat = label_stat_fun,
-                                    inverse = TRUE,
-                                    trans = axes_trans,
-                                    round = 2,
-                                    input = "matrix",
-                                    smooth = hist_smooth,
-                                    bins = hist_bins,
-                                    limits = xlim,
-                                    markers = FALSE,
-                                    details = FALSE)
+          res <- cyto_stats_compute(
+            pops[[z]][[y]],
+            channels = channels,
+            stat = label_stat_fun,
+            inverse = TRUE,
+            trans = axes_trans,
+            round = 2,
+            input = "matrix",
+            smooth = hist_smooth,
+            bins = hist_bins,
+            limits = xlim,
+            markers = FALSE,
+            details = FALSE
+          )
         # OTHER STATISTICS - GATED POPS
         } else {
-          res <- cyto_stats_compute(pops[[z]][[y]],
-                                    channels = channels,
-                                    stat = label_stat_fun,
-                                    inverse = TRUE,
-                                    trans = axes_trans,
-                                    round = 2,
-                                    input = "matrix",
-                                    markers = FALSE,
-                                    details = FALSE)
+          res <- cyto_stats_compute(
+            pops[[z]][[y]],
+            channels = channels,
+            stat = label_stat_fun,
+            inverse = TRUE,
+            trans = axes_trans,
+            round = 2,
+            input = "matrix",
+            markers = FALSE,
+            details = FALSE
+          )
         }
         # DROP NAME & ALIAS COLUMNS
         res <- res[, -which(c("name", "alias") %in% colnames(res)), 
@@ -2340,17 +2346,21 @@
   if (!.all_na(gate)) {
     gate_centers <- do.call(
       "rbind",
-      .cyto_gate_center(gate,
-                        channels = channels,
-                        text_x = rep(NA, GC),
-                        text_y = rep(NA, GC))
+      .cyto_gate_center(
+        gate,
+        channels = channels,
+        text_x = rep(NA, GC),
+        text_y = rep(NA, GC)
+      )
     )
   # NO GATES - NO CENTERS
   } else {
-    gate_centers <- matrix(NA,
-                           ncol = 2,
-                           nrow = sum(GNP),
-                           dimnames = list(NULL, c("x", "y")))
+    gate_centers <- matrix(
+      NA,
+      ncol = 2,
+      nrow = sum(GNP),
+      dimnames = list(NULL, c("x", "y"))
+    )
   }
   
   # LABEL_TEXT_XY - MATRIX
@@ -2612,7 +2622,7 @@
 
 #' Compute label dimensions
 #'
-#' Labels should already contain statistic as well. Co-ordiante for each label
+#' Labels should already contain statistic as well. Co-ordinate for each label
 #' must already be computed.
 #'
 #' @importFrom graphics strwidth strheight
