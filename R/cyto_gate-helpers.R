@@ -2344,6 +2344,9 @@ cyto_gate_type <- function(gates) {
       # QUADRANT
     } else if (cyto_class(gates, "quadGate")) {
       types <- "quadrant"
+      # MULTIRANGE
+    } else if(cyto_class(gates, "multiRangeGate")) {
+      types <- "multirange"
     }
     # Multiple gates supplied
   } else if (length(gates) > 1) {
@@ -2440,6 +2443,9 @@ cyto_gate_type <- function(gates) {
         } else {
           types <- rep("polygon", length(gates))
         }
+      # MULTIRANGEGATE
+      } else if(classes[1] == "multiRangeGate") {
+        types <- rep("multirange", length(gates))
       }
       # Not all supplied gates are of the same class - treat separately
     } else {
@@ -2478,6 +2484,9 @@ cyto_gate_type <- function(gates) {
           # QUADRANT
         } else if (class(x) == "quadGate") {
           types <- "quadrant"
+          # MULTIRANGEGATE
+        } else if(class(x) == "multiRangeGate") {
+          types <- "multirange"
         }
       })
     }
