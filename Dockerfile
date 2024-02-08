@@ -43,7 +43,7 @@ RUN R -e "options('timeout' = 999999)" && \
     R -e "devtools::install_github('DillonHammill/CytoExploreRData')" && \
     R -e "devtools::install_github('DillonHammill/DataEditR')" && \
     R -e "devtools::install_github('DillonHammill/HeatmapR')" && \
-    R -e "devtools::install_github('DillonHammill/CytoExploreR', ref = 'stable')" && \
+    R -e "devtools::install_github('DillonHammill/CytoExploreR', ref = 'refine')" && \
     R -e "install.packages(c('dplyr', 'tidyr', 'stringr', 'magrittr', 'forcats'))" && \
     R -e "install.packages(c('overlapping', 'FNN'))"
 
