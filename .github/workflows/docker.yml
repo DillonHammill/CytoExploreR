@@ -26,5 +26,5 @@ jobs:
       run: |
         export VERSION=$(grep Version DESCRIPTION | awk '{print $2}')
         export VERSION="v$VERSION"
-        docker build -t dhammill/cytoexplorer-devel:$VERSION -t dhammill/cytoexplorer-devel:latest .
+        docker buildx build -t dhammill/cytoexplorer-devel:$VERSION -t dhammill/cytoexplorer-devel:latest .
         docker push dhammill/cytoexplorer-devel --all-tags
