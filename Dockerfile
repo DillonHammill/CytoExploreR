@@ -1,26 +1,21 @@
-# UBUNTU OS IMAGE
-FROM ubuntu:16.04
+# BIOCONDUCTOR ROCKER
+FROM bioconductor/bioconductor_docker:latest
 
-# RSTUDIO 
-FROM rocker/rstudio
-
-# INSTALL DEPENDENCIES
-RUN apt-get update && apt-get install --no-install-recommends -y\
-    libprotobuf-dev \
+# DEPENDENCIES
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    libopenblas-dev \
     autoconf \
-    automake \
-    libtool \
-    libxml2-dev \
-    libhdf5-dev \
+    libltdl-dev \
     zlib1g-dev \
-    libpng-dev \
-    tcl \
     wget \
     unzip \
     make \
     g++
 
-# DOWNLOAD FFTW
+# PYTHON
+# RUN apt-get install -y python3 python3-dev python3-pip python3-venv
+
+# FFTW
 RUN wget http://www.fftw.org/fftw-3.3.8.tar.gz && \
     tar -zxvf fftw-3.3.8.tar.gz && \
     rm -rf fftw-3.3.8.tar.gz && \
@@ -29,7 +24,7 @@ RUN wget http://www.fftw.org/fftw-3.3.8.tar.gz && \
     make && \
     make install
 
-# FIT-SNE - (path to fast_tsne -> FIt-SNE-master/fast_tsne.R)
+# FIT-SNE
 RUN cd /. && \
     wget --no-check-certificate -O FIt-SNE.zip https://github.com/KlugerLab/FIt-SNE/archive/master.zip && \
     unzip FIt-SNE.zip && \
@@ -39,22 +34,22 @@ RUN cd /. && \
     cd /. && \
     mv /FIt-SNE-master home/rstudio/.FIt-SNE
 
-# INSTALL DEPENDENCIES
-RUN R -e "install.packages('remotes')" && \
-    R -e "install.packages('latticeExtra')" && \
-    R -e "install.packages('XML')" && \
-    R -e "install.packages('BiocManager')" && \
-    R -e "BiocManager::install('flowCore')" && \
-    R -e "BiocManager::install('CytoML')" && \
-    R -e "BiocManager::install('flowWorkspace')" && \
-    R -e "BiocManager::install('openCyto')" && \
-    R -e "remotes::install_github('RGLab/RProtoBufLib')" && \
-    R -e "remotes::install_github('RGLab/cytolib')" && \
-    R -e "remotes::install_github('RGLab/flowCore')" && \
-    R -e "remotes::install_github('RGLab/flowWorkspace')" && \
-    R -e "remotes::install_github('RGLab/flowStats')" && \
-    R -e "remotes::install_github('RGLab/openCyto')" && \
-    R -e "remotes::install_github('DillonHammill/CytoExploreRData')" && \
-    R -e "remotes::install_github('DillonHammill/flowAI')" && \
-    R -e "remotes::install_github('exaexa/scattermore')" && \
-    R -e "remotes::install_github('DillonHammill/CytoExploreR')"
+# R DEPENDENCIES
+RUN R -e "options('timeout' = 999999)" && \
+    R -e "install.packages('BiocManager')" &&\
+    R -e "BiocManager::install(c('cytolib', 'flowCore', 'flowWorkspace', 'openCyto', 'ggcyto', 'CytoML', 'flowWorkspaceData'))" &&\
+    R -e "devtools::install_github('RGLab/cytoqc')" &&\
+    R -e "devtools::install_github('DillonHammill/openCyto', force = TRUE)" && \
+    R -e "devtools::install_github('DillonHammill/CytoExploreRData')" && \
+    R -e "devtools::install_github('DillonHammill/DataEditR')" && \
+    R -e "devtools::install_github('DillonHammill/HeatmapR')" && \
+    R -e "devtools::install_github('DillonHammill/CytoExploreR', ref = 'stable')" && \
+    R -e "install.packages(c('dplyr', 'tidyr', 'stringr', 'magrittr', 'forcats'))" && \
+    R -e "install.packages(c('overlapping', 'FNN'))"
+
+# RETICULATE
+# RUN R -e "install.packages('reticulate')"
+#    R -e "reticulate::py_discover_config()" && \
+#    R -e "reticulate::virtualenv_create('cytoexplorer')" && \
+#    R -e "reticulate::use_virtualenv('cytoexplorer')" && \
+#    R -e "reticulate::py_install(c('numpy', 'pacmap', 'openTSNE'), 'cytoexplorer', pip = TRUE)"
