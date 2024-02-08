@@ -53,6 +53,8 @@
 #'   be labelled with the marker names when available, set to TRUE by default.
 #'   Otherwise, the list of matrices will be labelled with the names of the
 #'   channels.
+#' @param smooth smoothing parameter passed to \code{cyto_stat_density} to
+#'   adjust the smoothness of the kernel density estimate, set to 1 by default.
 #' @param ... additional arguments passed to \code{HeatmapR::heat_map()}.
 #'
 #' @return a distance matrix for compositional or sample comparisons, or a list
@@ -79,6 +81,7 @@ cyto_dist <- function(x,
                       grid = c(14,14),
                       heatmap = TRUE,
                       markers = TRUE,
+                      smooth = 1,
                       ...) {
   
   # TODO: ADD HELLINGER DISTANCE

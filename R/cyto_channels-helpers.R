@@ -1044,6 +1044,7 @@ cyto_channel_match <- function(x,
   # USED IN CYTO_SPILLOVER_EDIT() | CYTO_PLOT_COMPENSATION()
   args <- list(...)
   if("channel_match" %in% names(args)) {
+    channel_match <- args[["channel_match"]]
     cyto_details(x) <- channel_match[
       match(
         rownames(cyto_details(x)),

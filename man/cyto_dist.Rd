@@ -20,6 +20,7 @@ cyto_dist(
   grid = c(14, 14),
   heatmap = TRUE,
   markers = TRUE,
+  smooth = 1,
   ...
 )
 }
@@ -89,6 +90,9 @@ distance matrix, set to TRUE by default.}
 be labelled with the marker names when available, set to TRUE by default.
 Otherwise, the list of matrices will be labelled with the names of the
 channels.}
+
+\item{smooth}{smoothing parameter passed to \code{cyto_stat_density} to
+adjust the smoothness of the kernel density estimate, set to 1 by default.}
 
 \item{...}{additional arguments passed to \code{HeatmapR::heat_map()}.}
 }

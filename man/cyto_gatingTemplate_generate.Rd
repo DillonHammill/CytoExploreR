@@ -2,19 +2,50 @@
 % Please edit documentation in R/cyto_gatingTemplate-helpers.R
 \name{cyto_gatingTemplate_generate}
 \alias{cyto_gatingTemplate_generate}
-\alias{cyto_gatingTemplate_generate.GatingHierarchy}
-\alias{cyto_gatingTemplate_generate.GatingSet}
 \title{Generate a CytoExploreR gatingTemplate for a GatingHierarchy or GatingSet}
 \usage{
-\method{cyto_gatingTemplate_generate}{GatingHierarchy}(x, gatingTemplate = NULL, ...)
-
-\method{cyto_gatingTemplate_generate}{GatingSet}(x, gatingTemplate = NULL, ...)
+cyto_gatingTemplate_generate(
+  x,
+  select = NULL,
+  merge_by = "name",
+  nodes = NULL,
+  gatingTemplate = TRUE,
+  save_as = NULL,
+  active = FALSE,
+  inverse = FALSE,
+  ...
+)
 }
 \arguments{
-\item{x}{object of class GatingHierarchy or GatingSet.}
+\item{x}{an object of class
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
-\item{gatingTemplate}{name of a CSV file to which the generated
-gatingTemplate should be saved.}
+\item{select}{sample selection criteria passed to \code{cyto_select} to
+identify the samples to included in the generated gatingTemplate, set to
+NULL by default to use all samples in \code{x}.}
+
+\item{merge_by}{vector of experiment variable names to indicate how samples
+should be merged prior to creating the gatingTemplate entries, set to
+\code{"name"} by default to store a unique gate for every sample in
+\code{x}. If \code{merge_by} is specified, a consensus gate will be created
+for each sample group and stored in the gatingTemplate.}
+
+\item{nodes}{vector of population names to include in the gatingTemplate, set
+to NULL by default to include all nodes.}
+
+\item{gatingTemplate}{logical indicating whether the generated gatingTemplate
+should be returned as a \code{gatingTemplate} object instead of a
+\code{data.frame}, set to TRUE by default.}
+
+\item{save_as}{name of a CSV file to which the generated gatingTemplate
+should be written.}
+
+\item{active}{logical to indicate whether the generated gatingTemplate should
+be set to the active gatingTemplate, set to FALSE by default.}
+
+\item{inverse}{placeholder for future support for storing gates in the
+gatingTemplate on the linear scale.}
 
 \item{...}{additional arguments passed to \code{gatingTemplate}.}
 }

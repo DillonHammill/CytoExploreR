@@ -113,7 +113,7 @@ cyto_plot_spectra <- function(x,
           if(cyto_class(x, "GatingSet")) {
             pop <- tryCatch(
               cyto_nodes_convert(
-                gs,
+                x,
                 nodes = pop,
                 path = "auto"
               ),

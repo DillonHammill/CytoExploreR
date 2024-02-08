@@ -604,7 +604,8 @@ cyto_plot_gate.multiRangeGate <- function(gate,
                                           gate_line_width = 2.5,
                                           gate_line_col = "red",
                                           gate_fill = "white",
-                                          gate_fill_alpha = 0) {
+                                          gate_fill_alpha = 0,
+                                          ...) {
   
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
@@ -829,7 +830,7 @@ cyto_plot_gate.list <- function(gate,
   # POPULATION COUNT - GATE_FILL ARGUMENTS
   pop_count <- c()
   lapply(gate, function(z){
-    if(class(z) == "quadGate"){
+    if(cyto_class(z, "quadGate")) {
       pop_count <<- c(pop_count, 4)
     }else{
       pop_count <<- c(pop_count, 1)

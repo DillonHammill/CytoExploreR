@@ -785,19 +785,18 @@ cyto_spillover_compute <- function(x,
                           )
                         )
                       }
-                    }
-                  )
-                  # WRITE UPDATED GATINGTEMPLATE - WRITING ERROR - SYNC GS
-                  tryCatch(
-                    cyto_gatingTemplate_write(
-                      gt,
-                      gatingTemplate
-                    ),
-                    error = function(e) {
-                      
-                      gs_pop_remove(
-                        x,
-                        r
+                      # WRITE UPDATED GATINGTEMPLATE - WRITING ERROR - SYNC GS
+                      tryCatch(
+                        cyto_gatingTemplate_write(
+                          gt,
+                          gatingTemplate
+                        ),
+                        error = function(e) {
+                          gs_pop_remove(
+                            x,
+                            r
+                          )
+                        }
                       )
                     }
                   )

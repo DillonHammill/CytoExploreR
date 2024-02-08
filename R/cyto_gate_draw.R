@@ -554,7 +554,7 @@ cyto_gate_draw <- function(x,
         function(z) {
           # TODO: QUADRANT GATES? NAMES ARGUMENT?
           gs_pop_remove(
-            gs,
+            x,
             z
           )
         }

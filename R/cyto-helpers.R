@@ -136,7 +136,10 @@ cyto_import <- function(path = ".",
           )
         )
       ]
-      wsp <- open_flowjo_xml(wsp_file)
+      wsp <- cyto_func_call(
+        "CytoML::open_flowjo_xml",
+        list(wsp_file)
+      )
       gs <- cyto_func_call(
         "CytoML::flowjo_to_gatingset",
         list(wsp, path = path, ...)
@@ -1831,7 +1834,6 @@ cyto_transform.default <- function(x,
     }
   }
 
-  
   # COMPLETE
   if(!quiet){
     message(
@@ -1888,9 +1890,7 @@ cyto_transform.transformList <- function(x,
   # MESSAGE
   if(!quiet){
     message(
-      "Applying ", 
-      ifelse(inverse, "inverse ", ""),
-      "data transformations..."
+      "Applying data transformations..."
     )
   }
   
@@ -8080,6 +8080,7 @@ cyto_nodes_ancestor <- function(x,
 #'
 #' @importFrom flowWorkspace gh_pop_get_parent gh_pop_get_children
 #'   gh_pop_get_descendants
+#' @importFrom openCyto gt_get_children
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'

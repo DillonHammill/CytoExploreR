@@ -65,7 +65,8 @@
   gate_line_width = 2.5,
   gate_line_col = "red",
   gate_fill = "white",
-  gate_fill_alpha = 0
+  gate_fill_alpha = 0,
+  ...
 )
 
 \method{cyto_plot_gate}{filters}(

@@ -94,7 +94,7 @@
 #'   eventReactive renderImage tabsetPanel tabPanel sidebarLayout fluidRow
 #'   updateSelectInput onStop stopApp runApp updateCheckboxInput paneViewer icon
 #'   span img NS reactive moduleServer observeEvent column
-#'   updateCheckboxGroupInput checkboxGroupInput
+#'   updateCheckboxGroupInput checkboxGroupInput renderPlot
 #' @importFrom rhandsontable rhandsontable rHandsontableOutput hot_to_r
 #'   renderRHandsontable hot_cols hot_rows
 #' @importFrom bslib bs_theme

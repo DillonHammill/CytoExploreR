@@ -172,7 +172,7 @@ cyto_file_search <- function(x,
         as.numeric(opt),
         warning = function(w){
           return(
-            match(opt, names(pd))
+            match(opt, files)
           )
         }
       )

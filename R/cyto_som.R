@@ -285,7 +285,7 @@ cyto_som <- function(x,
       # SCALE SOM PARAMETERS
       if(!scale %in% FALSE) {
         codes[, channels] <- cyto_stat_scale(
-          codes[, chnanels, drop = FALSE],
+          codes[, channels, drop = FALSE],
           type = scale
         )
         som_scaled_rng <- cyto_stat_range(

@@ -2275,7 +2275,7 @@
   # CHECKS ---------------------------------------------------------------------
   
   # X - CYTO_PLOT ARGUMENTS
-  if(class(x) == "cyto_plot") {
+  if(cyto_class(x, "cyto_plot")) {
     .args_update(x)
   }
   
@@ -3355,7 +3355,7 @@
           # BIN WIDTH
           x_bin <- diff(d$x)/2
           # MAP Y -> [0,1]
-          d$y <- CytoExploreR:::cyto_stat_rescale(
+          d$y <- cyto_stat_rescale(
             d$y,
             scale = c(0,1)
           )
@@ -4156,7 +4156,7 @@
                              title = "") {
   
   # x can be a list
-  if (class(x) == "list") {
+  if (cyto_class(x, "list", TRUE)) {
     if (length(x) > 1) {
       overlay <- x[2:length(x)]
       x <- x[[1]]
@@ -4891,7 +4891,7 @@
   }
   
   # Make colorRampPalette
-  if (class(hist_cols) != "function") {
+  if (is.function(hist_cols)) {
     cols <- colorRampPalette(hist_cols)
   } else {
     cols <- hist_cols

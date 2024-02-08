@@ -295,7 +295,7 @@ cyto_plot_empty <- function(x,
       x <- c(x, overlay)
     }
     # CYTO_PLOT ARGUMENTS
-  } else if (class(x) == "cyto_plot") {
+  } else if (cyto_class(x, "cyto_plot")) {
     .args_update(x)
   }
   

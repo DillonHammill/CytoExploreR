@@ -158,6 +158,8 @@ cyto_plot_explore <- function(x,
   
   # PREPARE PLOT PARAMETERS ----------------------------------------------------
   
+  # TODO: HANDLE CUSTOM LAYOUTS
+  
   # PREPARE LAYOUT
   if(missing(layout)) {
     # # SWITCH LAYOUTS FOR SINGLE PLOTS

@@ -182,48 +182,122 @@ cyto_gatingTemplate_extract <- function(x,
 
 #' Generate a CytoExploreR gatingTemplate for a GatingHierarchy or GatingSet
 #'
-#' @param x object of class GatingHierarchy or GatingSet.
-#' @param gatingTemplate name of a CSV file to which the generated
-#'   gatingTemplate should be saved.
+#' @param x an object of class
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param select sample selection criteria passed to \code{cyto_select} to
+#'   identify the samples to included in the generated gatingTemplate, set to
+#'   NULL by default to use all samples in \code{x}.
+#' @param merge_by vector of experiment variable names to indicate how samples
+#'   should be merged prior to creating the gatingTemplate entries, set to
+#'   \code{"name"} by default to store a unique gate for every sample in
+#'   \code{x}. If \code{merge_by} is specified, a consensus gate will be created
+#'   for each sample group and stored in the gatingTemplate.
+#' @param nodes vector of population names to include in the gatingTemplate, set
+#'   to NULL by default to include all nodes.
+#' @param gatingTemplate logical indicating whether the generated gatingTemplate
+#'   should be returned as a \code{gatingTemplate} object instead of a
+#'   \code{data.frame}, set to TRUE by default.
+#' @param save_as name of a CSV file to which the generated gatingTemplate
+#'   should be written.
+#' @param active logical to indicate whether the generated gatingTemplate should
+#'   be set to the active gatingTemplate, set to FALSE by default.
+#' @param inverse placeholder for future support for storing gates in the
+#'   gatingTemplate on the linear scale.
 #' @param ... additional arguments passed to \code{gatingTemplate}.
 #'
 #' @return write generated gatingTemplate to designated CSV file and return the
 #'   gatingTemplate object.
 #'
-#' @importFrom data.table as.data.table
-#' @importFrom openCyto gh_generate_template gatingTemplate
-#' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#' 
-#' @name cyto_gatingTemplate_generate
-NULL
-
-#' @noRd
+#'
+#' @importFrom data.table as.data.table
+#' @importFrom grDevices chull
+#' @importFrom flowCore rectangleGate polygonGate quadGate filters
+#' @importFrom flowWorkspace gh_pop_is_negated gh_pop_get_gate gh_pop_get_data
+#' @importFrom openCyto CytoExploreR_.argDeparser gatingTemplate
+#'
 #' @export
-cyto_gatingTemplate_generate <- function(x, 
-                                         gatingTemplate = NULL,
-                                         ...) {
-  UseMethod("cyto_gatingTemplate_generate")
-}
-
-#' @rdname cyto_gatingTemplate_generate
-#' @export
-cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
-                                                         gatingTemplate = NULL,
-                                                         ...){
+cyto_gatingTemplate_generate <- function(x,
+                                         select = NULL,
+                                         merge_by = "name",
+                                         nodes = NULL,
+                                         gatingTemplate = TRUE,
+                                         save_as = NULL,
+                                         active = FALSE,
+                                         inverse = FALSE,
+                                         ...){
   
-  # GATINGTEMPLATE MISSING
-  if(is.null(gatingTemplate)){
-    stop("Supply the name of a csv file to 'gatingTemplate'.")
+  # TODO: INVERSE IS PLACEHOLDER FOR WHEN GATE TRANSFORM SUPPORTED IN FLOWCORE
+  if(inverse) {
+    warning(
+      "'inverse' is not currently supported."
+    )
   }
   
-  # NODES - AUTO PATH
-  nodes_auto <- cyto_nodes(
+  # GATINGSET | GATINGHIERARCHY ONLY
+  if(!cyto_class(x, "GatingSet")) {
+    stop(
+      "cyto_gatingTemplate_generate() requires either a GatingHierarchy or ",
+      "GatingSet!"
+    )
+  }
+  
+  # EXPERIMENT DETAILS
+  pd <- cyto_details(x)
+  
+  # TRANSFORMERS
+  trans <- cyto_transformers_extract(x)
+  
+  # FULL NODE PATHS
+  nodes_full <- cyto_nodes(
     x,
-    path = "auto"
+    path = "full"
   )
   
-  # DATA.TABLE R CMD CHECK NOTE
+  # ALL NODES
+  if(is.null(nodes)) {
+    nodes <- nodes_full
+  # SUBSET NODES
+  } else {
+    nodes <- cyto_nodes_convert(
+      x, 
+      nodes = nodes,
+      path = "full"
+    )
+  }
+  
+  # GROUPBY - SPLIT SAMPLES INTO GROUPS
+  pd_groups <- cyto_groups(
+    x, 
+    group_by = merge_by,
+    details = TRUE,
+    select = select
+  )
+  
+  # COMPUTE INSTRUMENT LIMITS - REPLACE INFINITE COORDS
+  rng <- apply(
+    do.call(
+      "rbind",
+      lapply(
+        seq_along(x),
+        function(id) {
+          cf <- gh_pop_get_data(
+            x[[id]]
+          )
+          # USE BOTH DATA & INSTRUMENT LIMITS
+          rbind(
+            range(cf, type = "instrument"),
+            range(cf, type = "data")
+          )
+        }
+      )
+    ),
+    2,
+    "range"
+  )
+  
+  # INITIALIZE GATINGTEMPLATE VARIABLES - R CMD CHECK NOTE
   parent <- NULL
   alias <- NULL
   pop <- NULL
@@ -233,256 +307,433 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
   groupBy <- NULL
   preprocessing_method <- NULL
   
-  # GENERATE GATINGTEMPLATE - DATA FRAME
-  gt <- gh_generate_template(x)
-
-  # TODO: USE BOOLEAN NODES IN GATINGSET TO IDENTIFY BOOLEAN POPULATIONS
-
-  # TODO: HANDLE CLUSTERED POPULATIONS? - NEED BOOLEAN GATE CHECK
-  # BOOLEAN ENTRIES EXIST
-  if(any(LAPPLY(gt$dims, ".empty"))){
-    # PREPARE BOOLEAN ENTRIES
-    gt_bool_chunk <- gt[LAPPLY(gt$dims, ".empty"), ]
-    gt_bool_chunk$parent <- cyto_nodes_convert(
-      x,
-      nodes = gt_bool_chunk$parent,
-      path = "full"
-    )
-    gt_bool_chunk$gating_args <- LAPPLY(
-      seq_len(nrow(gt_bool_chunk)), 
-      function(z){
-        gate <- gh_pop_get_gate(
-          x,
-          gt_bool_chunk$alias[z]
+  # GENERATE BARE BONES GATINGTEMPLATE
+  gt <- cyto_gatingTemplate_extract(x)
+  
+  gt$dims[is.na(gt$dims)] <- "NA"
+  
+  # SPLIT GATINGTEMPLATE BY PARENT & DIMS
+  gt_chunks <- split(
+    gt,
+    gt[, c("parent", "dims")],
+    sep = "|",
+    drop = TRUE
+  )
+  
+  # ORDER GT_CHUNKS BY NODES - CORRECT ORDER IN GATINGTEMPLATE
+  idx <- sapply(
+    gt_chunks,
+    function(gt_chunk) {
+      parent <- gt_chunk$parent
+      parent[parent == "root"] <- ""
+      alias <- unlist(strsplit(gt_chunk$alias, ","))
+      min(
+        match(
+          paste0(
+            parent,
+            "/",
+            alias
+          ),
+          nodes
         )
-        return(gate@deparse)
-      }
-    )
-    gt_bool_chunk$gating_method <- rep("boolGate", nrow(gt_bool_chunk))
-    gt_bool_chunk <- as.data.table(gt_bool_chunk)
-    # RESTRICT GATINGTEMPLATE
-    gt <- gt[!LAPPLY(gt$dims, ".empty"), ]
-    # NO BOOLEAN ENTRIES EXIST
-  }else{
-    gt_bool_chunk <- NULL
-  }
-  
-  # GATINGTEMPLATE INFO
-  gt_parents <- unique(gt$parent)
-  
-  # GATINGTEMPLATE ENTRIES PER PARENT
-  gt_entries <- lapply(
-    gt_parents, 
-    function(gt_parent) {
-      # GATINGTEMPLATE CHUNK
-      gt_parent_chunk <- gt[gt$parent == gt_parent, ]
-      gt_parent_chunk_channels <- unique(gt_parent_chunk$dims)
-      # PREPARE ENTRIES (PER PLOT)
-      gt_entries <- lapply(
-        gt_parent_chunk_channels,
-        function(y) {
-          gt_chunk <- gt_parent_chunk[gt_parent_chunk$dims == y, ]
-          gt_alias <- basename(gt_chunk$alias)
-          gt_channels <- unlist(strsplit(y, ","))
-          # GATES
-          gates <- lapply(
-            gt_alias, 
-            function(w) {
-              gh_pop_get_gate(
-                x,
-                cyto_nodes_convert(
-                  x,
-                  nodes = w,
-                  anchor = gt_parent,
-                  path = "auto"
-                )
-              )
-            }
-          )
-          names(gates) <- gt_alias
-          # GATES BELONG TO QUADGATE
-          if(length(gates) == 4 &
-             all(LAPPLY(gates, "class") == "rectangleGate")){
-            # RECTANGLES BELONG TO QUADGATE
-            if(all(LAPPLY(gates, function(v){
-              any(grepl("quad", names(attributes(v))))
-            }))){
-              gates <- list(
-                .cyto_gate_quad_convert(
-                  gates,
-                  channels = gt_channels
-                )
-              )
-              names(gates) <- paste0(gt_alias, collapse = ",")
-            }
-          }
-          # GATINGTEMPLATE CHUNK DATA TABLE 
-          gt_chunk_dt <- as.data.table(gt_chunk)
-          gt_entries <- lapply(
-            seq_along(gates), 
-            function(q) {
-              # GATE
-              gate <- gates[[q]]
-              # QUAD GATE
-              if(cyto_class(gate, "quadGate")){
-                # USE FIRST ROW ONLY
-                gt_entry <- gt_chunk_dt[1, ]
-                # ALIAS - "/|&:" ILLEGAL CHARCTERS
-                gt_entry[, alias := paste0(
-                  basename(
-                    cyto_nodes_convert(
-                      x,
-                      nodes = unlist(
-                        strsplit(names(gates), ",")
-                      ),
-                      anchor = gt_parent,
-                      path = "auto"
-                    )
-                  ),
-                  collapse = ","
-                )]
-                # POP
-                gt_entry[, pop := "*"]
-                # PARENT
-                gt_entry[, parent := cyto_nodes_convert(
-                    x,
-                    nodes = gt_parent,
-                    path = "full"
-                  )
-                ]
-                # GATING METHOD
-                gt_entry[, gating_method := "cyto_gate_draw"]
-                # GATING ARGS
-                gt_entry[, gating_args := CytoExploreR_.argDeparser(
-                  list(gate = gates,
-                       openCyto.minEvents  = -1)
-                )]
-                # COLLAPSE DATA FOR GATING
-                gt_entry[, collapseDataForGating := TRUE]
-                # GROUP BY
-                gt_entry[, groupBy := "NA"]
-                # PREPROCESSING METHOD
-                gt_entry[, preprocessing_method := "pp_cyto_gate_draw"]
-                # OTHER GATE TYPES
-              }else{
-                # GATINGTEMPLATE ENTRY
-                gt_entry <- gt_chunk_dt[gt_chunk_dt$alias == names(gates)[q], ]
-                # ALIAS - "/|&:" ILLEGAL CHARCTERS
-                gt_entry[, alias := paste0(
-                  basename(
-                  cyto_nodes_convert(
-                    x,
-                    nodes = names(gates)[q],
-                    anchor = gt_parent,
-                    path = "auto"
-                  )
-                ),
-                collapse = ",")]
-                # PARENT
-                gt_entry[, parent := cyto_nodes_convert(
-                    x,
-                    nodes = gt_parent,
-                    path = "full"
-                  )
-                ]
-                # GATING METHOD
-                gt_entry[, gating_method := "cyto_gate_draw"]
-                # GATING ARGS
-                gt_entry[, gating_args := CytoExploreR_.argDeparser(
-                  list(gate = list(filters(list(gate))),
-                       openCyto.minEvents  = -1)
-                )]
-                # COLLAPSE DATA FOR GATING
-                gt_entry[, collapseDataForGating := TRUE]
-                # GROUP BY
-                gt_entry[, groupBy := "NA"]
-                # PREPROCESSING METHOD
-                gt_entry[, preprocessing_method := "pp_cyto_gate_draw"]
-              }
-              return(gt_entry)
-            }
-          )
-          gt_entries <- do.call("rbind", gt_entries)
-          return(gt_entries)
-        }
       )
-      gt_entries <- do.call("rbind", gt_entries)
-      return(gt_entries)
     }
   )
-  gt_entries <- do.call("rbind", gt_entries)
   
-  # SORT GATINGTEMPLATE ENTRIES
-  gt_entries <- gt_entries[
-    order(match(gt_entries$parent, cyto_nodes(x, path = "auto"))), ]
+  # DROP UNWANTED NODES
+  gt_chunks <- gt_chunks[!is.na(idx)]
+  idx <- idx[!is.na(idx)]
   
-  # ADD BOOLEAN ENTRIES
-  # TODO: USE AUTO PATHS IN GATING_ARGS LOGIC
-  if(!is.null(gt_bool_chunk)){
-    lapply(
-      seq_len(nrow(gt_bool_chunk)),
-      function(z){
-        gate_pops <- gt_bool_chunk$gating_args[z]
-        gate_pops <- unlist(strsplit(gate_pops, "\\||\\&|\\!"))
-        gate_pops <- gate_pops[!LAPPLY(gate_pops, ".empty")]
-        ind <- LAPPLY(
-          gate_pops, 
-          function(pop) {
-            # FIX BOOLEAN LOGIC
-            match(
-              basename(pop),
-              gt_entries$alias
+  # REORDER GATINGTEMPLATE CHUNKS
+  gt_chunks <- gt_chunks[order(idx)]
+  
+  # CONSTRUCT GATINGTEMPLATE
+  gt_new <- do.call(
+    "rbind",
+    structure(
+      lapply(
+        gt_chunks,
+        function(gt_chunk) {
+          # PARENT
+          parent <- unique(gt_chunk$parent)
+          # CHANNELS
+          channels <- strsplit(unique(gt_chunk$dims), ",")[[1]]
+          # ALIAS
+          alias <- gt_chunk$alias
+          # REQUIRE: LIST OF FILTERS PER POPULATION IN EACH SAMPLE
+          group_gate_list <- structure(
+            lapply(
+              pd_groups,
+              function(pd_group) {
+                # SAMPLE INDICES
+                idx <- match(pd_group$name, pd$name)
+                # EXTRACT GATES PER SAMPLE IN GROUP
+                sample_gates <- lapply(
+                  idx,
+                  function(id) {
+                    # EXTRACT GATE OBJECTS
+                    gate_list <- structure(
+                      lapply(
+                        alias,
+                        function(pop) {
+                          gate <- gh_pop_get_gate(
+                            x[[id]],
+                            paste0(
+                              if(parent == "root") {
+                                ""
+                              } else {
+                                parent
+                              },
+                              "/",
+                              pop
+                            )
+                          )
+                          # INHERIT NEGATED FLAG
+                          attributes(gate)$negated <- gh_pop_is_negated(
+                            x[[id]],
+                            paste0(
+                              if(parent == "root") {
+                                ""
+                              } else {
+                                parent
+                              },
+                              "/",
+                              pop
+                            )
+                          )
+                          return(gate)
+                        }
+                      ),
+                      names = alias
+                    )
+                    # FORMAT QUADRANT GATES
+                    quad_idx <- which(
+                      sapply(
+                        gate_list,
+                        function(gate){
+                          if(inherits(gate, "rectangleGate")) {
+                            any(grepl("quad", names(attributes(gate))))
+                          } else {
+                            FALSE
+                          }
+                        }
+                      )
+                    )
+                    # QUADRANTS LOCATED
+                    if(length(quad_idx) > 0) {
+                      # EXTRACT RECTANGLEGATES
+                      quads <- gate_list[quad_idx]
+                      # REMOVE QUADRANTS FROM GATE_LIST
+                      gate_list <- gate_list[-quad_idx]
+                      # QUADRANT CO-ORDINATES
+                      coords <- do.call(
+                        "rbind",
+                        lapply(
+                          quads,
+                          function(quad) {
+                            structure(
+                              c(quad@min, quad@max),
+                              names = parameters(quad)
+                            )
+                          }
+                        )
+                      )
+                      # QUADRANT CENTER
+                      coords <- unlist(
+                        sapply(
+                          channels,
+                          function(z) {
+                            unique(coords[, z][is.finite(coords[, z])])
+                          }
+                        )
+                      )
+                      names(coords) <- channels
+                      # CONSTRUCT QUADRANTGATE
+                      quads <- list(
+                        quadGate(
+                          filterId = paste0(
+                            names(attributes(quads[[1]])[["quadrants"]]),
+                            collapse = "|"
+                          ),
+                          .gate = coords
+                        )
+                      )
+                      attributes(quads[[1]])$negated <- FALSE
+                      gate_list <- c(quads, gate_list)
+                    }
+                    names(gate_list) <- sapply(
+                      gate_list,
+                      function(gate) {
+                        gate@filterId
+                      }
+                    )
+                    # # APPLY INVERSE TRANSFORMERS
+                    # if(inverse & length(trans) > 0) {
+                    #   # EXTRACT INVERSE TRANSFORMLIST
+                    #   inv_trans <- transformList(
+                    #     names(trans),
+                    #     lapply(
+                    #       trans,
+                    #       `[[`,
+                    #       "inverse"
+                    #     )
+                    #   )
+                    #   # apply inverse transformers to gates
+                    #   gate_list <- structure(
+                    #     lapply(
+                    #       gate_list,
+                    #       function(gate) {
+                    #         if(any(parameters(gate) %in% names(trans))) {
+                    #           # excess transformers may be supplied
+                    #           gate <- transform(
+                    #             gate,
+                    #             inv_trans
+                    #           )
+                    #         }
+                    #         return(gate)
+                    #       }
+                    #     ),
+                    #     names = names(gate_list)
+                    #   )
+                    # }
+                    return(gate_list)
+                  }
+                )
+                # CONSTRUCT GATINGTEMPLATE ENTRIES
+                structure(
+                  lapply(
+                    names(sample_gates[[1]]),
+                    function(gate) {
+                      # EXTRACT UNIQUE GATES ACROSS SAMPLES IN GROUP
+                      gates <- unique(
+                        lapply(
+                          sample_gates,
+                          `[[`,
+                          gate
+                        )
+                      )
+                      # SAMPLES IN GROUP HAVE DIFFERENT GATES
+                      if(length(gates) > 1) {
+                        # MULTIRANGEGATE - USE FIRST GATE
+                        if(cyto_class(gates[[1]],c("booleanFilter", "multiRangeGate"))) {
+                          return(gates[[1]])
+                        # QUADRANTGATE
+                        } else if(cyto_class(gates[[1]], "quadGate")) {
+                          coords <- colMeans(
+                            do.call(
+                              "rbind",
+                              lapply(
+                                gates,
+                                function(pop) {
+                                  pop@boundary
+                                }
+                              )
+                            )
+                          )
+                          return(
+                            quadGate(
+                              .gate = coords,
+                              filterId = gate
+                            )
+                          )
+                        # 1D RECTANGLEGATE
+                        } else if(inherits(gates[[1]], "rectangleGate") &
+                                  length(parameters(gates[[1]])) == 1) {
+                          # COMBINE GATE COORDINATES
+                          coords <- do.call(
+                            "rbind",
+                            lapply(
+                              gates,
+                              function(pop) {
+                                rbind(
+                                  pop@min,
+                                  pop@max
+                                )
+                              }
+                            )
+                          )
+                        # COERCE COORDS & CHULL
+                        } else {
+                          coords <- do.call(
+                            "rbind",
+                            lapply(
+                              gates,
+                              function(pop) {
+                                as(pop, "polygonGate")@boundaries
+                              }
+                            )
+                          )
+                        }
+                        # REPLACE INFINITE COORDS WITH INSTRUMENT LIMITS
+                        lapply(
+                          colnames(coords),
+                          function(chan) {
+                            coords[, chan][
+                              is.infinite(coords[, chan]) & coords[, chan] < 0
+                            ] <<- min(rng[, chan])
+                            coords[, chan][
+                              is.infinite(coords[, chan]) & coords[, chan] > 0
+                            ] <<- max(rng[, chan])
+                          }
+                        )
+                        # 1D RANGE GATE
+                        if(ncol(coords) == 1) {
+                          # RANGE ACROSS GATES
+                          chull <- rectangleGate(
+                            .gate = apply(
+                              coords,
+                              2,
+                              "range"
+                            ),
+                            filterId = gate
+                          )
+                        # 2D POLYGON
+                        } else {
+                          # CHULL POLYGONGATE
+                          chull <- polygonGate(
+                            .gate = coords[chull(coords), ],
+                            filterId = gate
+                          )
+                        }
+                        # INHERIT NEGATED FLAG
+                        attributes(chull)$negated <- 
+                          attributes(gates[[1]])$negated
+                        # COSENSUS GATE
+                        return(chull)
+                      } else {
+                        return(gates[[1]])
+                      }
+                    }
+                  ),
+                  names = names(sample_gates[[1]])
+                )
+              }
             )
-          }
-        )
-        ind <- max(ind)
-        gt_entries <<- rbind(
-          gt_entries[1:ind, ],
-          gt_bool_chunk[z, ],
-          gt_entries[ind+1:nrow(gt_entries), , drop = TRUE]
-        )
+          )
+          # CONASTRUCT GATINGTEMPLATE ENTRIES
+          do.call(
+            "rbind",
+            lapply(
+              names(group_gate_list[[1]]),
+              function(alias) {
+                # GATE FLAGS
+                bool <- FALSE
+                quad <- FALSE
+                negated <- FALSE
+                # GATES PER GROUP
+                gates <- structure(
+                  lapply(
+                    group_gate_list,
+                    function(gate_list) {
+                      gate <- gate_list[[alias]]
+                      # NEGATED FLAG
+                      negated <<- attributes(gate)$negated
+                      # BOOLEAN FLAG
+                      if(inherits(gate, "booleanFilter")) {
+                        bool <<- TRUE
+                      }
+                      # DON'T WRAP QUADGATES IN FILTERS
+                      if(inherits(gate, "quadGate")) {
+                        quad <<- TRUE
+                        gate_list[[alias]]
+                      } else {
+                        filters(gate_list[alias])
+                      }
+                    }
+                  ),
+                  names = names(group_gate_list)
+                )
+                # GATINGTEMPLATE ENTRY
+                gt_entry <- as.data.table(gt_chunk[1, , drop = FALSE])
+                # ALIAS
+                gate <- gsub("\\|", ",", alias)
+                # POP
+                if(negated) {
+                  gt_entry[, pop := "-"]
+                } else {
+                  gt_entry[, pop := "+"]
+                }
+                # ALIAS
+                gt_entry[, alias := gate]
+                # PREPROCESSING_METHOD
+                gt_entry[, preprocessing_method := "pp_cyto_gate_draw"]
+                # GATING_METHOD
+                gt_entry[, gating_method := "cyto_gate_draw"]
+                # COLLAPSEDATAFORGATING REQUIRED - OR NEED GATE FOR ALL SAMPLES
+                gt_entry[, collapseDataForGating := TRUE]
+                # GROUPBY
+                if(all(is.na(merge_by))) {
+                  group_by <- "NA"
+                } else {
+                  group_by <- paste0(
+                    merge_by,
+                    collapse = ":"
+                  )
+                }
+                gt_entry[, groupBy := group_by]
+                # BOOLEANFILTER
+                if(bool) {
+                  gt_entry[, groupBy := NA]
+                  gt_entry[, preprocessing_method := NA]
+                  gt_entry[, gating_method := "boolGate"]
+                  gt_entry[, gating_args := gates[[1]][[1]]@deparse]
+                  gt_entry[, collapseDataForGating := NA]
+                # OTHER GATES PREPARED ABOVE
+                } else {
+                  if(quad) {
+                    gt_entry[, pop := "*"]
+                  }
+                  gt_entry[, gating_args := CytoExploreR_.argDeparser(
+                    list(
+                      gate = gates,
+                      openCyto.minEvents  = -1
+                    )
+                  )]
+                }
+                return(gt_entry)
+              }
+            )
+          )
+        }
+      ),
+      names = names(gt_chunks)
+    )
+  )
+  
+  # BACKWARDS COMPATIBLE GATINGTEMPLATE
+  if(is.character(gatingTemplate)) {
+    save_as <- gatingTemplate
+    gatingTemplate <- TRUE
+  }
+  
+  # WRITE GATINGTEMPLATE TO CSV FILE
+  if(!is.null(save_as)) {
+    write_to_csv(
+      gt_new,
+      save_as
+    )
+    if(active) {
+      cyto_gatingTemplate_active(
+        save_as
+      )
+    }
+  }
+  
+  # CONSTRUCT GATINGTEMPLATE OBJECT
+  if(gatingTemplate) {
+    gt_new <- tryCatch(
+      gatingTemplate(
+        gt_new,
+        ...
+      ),
+      error = function(e) {
+        return(gt_new)
       }
     )
   }
   
-  # REMOVE EMPTY ROWS
-  gt_entries <- gt_entries[
-    LAPPLY( 
-      seq_len(nrow(gt_entries)),
-      function(z) {
-        !.all_na(gt_entries[z, ])
-      }
-    ), ]
-  
-  # SAVE GATINGTEMPLATE
-  write_to_csv(
-    gt_entries,
-    gatingTemplate
-  )
-  
-  # GATINGTEMPLATE OBJECT
-  gt <- gatingTemplate(gatingTemplate, ...)
-  
-  # RETURN GATINGTEMPLATE
-  return(gt)
-  
-}
-
-#' @rdname cyto_gatingTemplate_generate
-#' @export
-cyto_gatingTemplate_generate.GatingSet <- function(x,
-                                                   gatingTemplate = NULL,
-                                                   ...){
-  
-  # CALL GATINGHIERARCHY METHOD
-  gt <- cyto_gatingTemplate_generate(
-    x[[1]],
-    gatingTemplate = gatingTemplate,
-    ...
-  )
-  
-  # RETURN GATINGTEMPLATE OBJECT
-  return(gt)
+  # return constructed gatingTemplate
+  return(gt_new)
   
 }
 

@@ -2451,10 +2451,10 @@ cyto_gate_type <- function(gates) {
     } else {
       types <- LAPPLY(gates, function(x) {
         # ELLIPSE
-        if (class(x) == "ellipsoidGate") {
+        if (cyto_class(x, "ellipsoidGate")) {
           types <- "ellipse"
           # RECTANGLE/BOUNDARY/THRESHOLD/INTERVAL
-        } else if (class(x) == "rectangleGate") {
+        } else if (cyto_class(x, "rectangleGate")) {
           # Includes rectangle, interval, threshold and boundary gate_types
           if (length(parameters(x)) == 1) {
             # Gate in One Dimension
@@ -2479,13 +2479,13 @@ cyto_gate_type <- function(gates) {
             }
           }
           # POLYGON
-        } else if (class(x) == "polygonGate") {
+        } else if (cyto_class(x, "polygonGate")) {
           types <- "polygon"
           # QUADRANT
-        } else if (class(x) == "quadGate") {
+        } else if (cyto_class(x, "quadGate")) {
           types <- "quadrant"
           # MULTIRANGEGATE
-        } else if(class(x) == "multiRangeGate") {
+        } else if(cyto_class(x, "multiRangeGate")) {
           types <- "multirange"
         }
       })

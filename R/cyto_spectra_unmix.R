@@ -393,8 +393,8 @@ cyto_unmix_compute <- function(x,
       pd$group %in% auto &
         grepl("Unstained", pd$channel, ignore.case = TRUE)
     )
-    # USE FIRST UNSTAINED CONTROL PER CGROUP
-    auto_idx <- auto_idx[!is.duplicated(pd$group[auto_idx])]
+    # USE FIRST UNSTAINED CONTROL PER GROUP
+    auto_idx <- auto_idx[!duplicated(pd$group[auto_idx])]
     # COMPUTE AUTOFLUORESCENCE SPECTRA
     auto <- do.call(
       "rbind",
