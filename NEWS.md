@@ -1,3 +1,12 @@
+# CYtoExploreR 2.0.2
+
+* Major improvements to `cyto_gatingTemplate_generate()` to allow for finer control over how gatingTemplates should be generated from GatingHierarchy or GatingSet objects. 
+
+# CytoExploreR 2.0.1
+
+* Added new `multirange` gate type to `cyto_gate_draw()` to allow for Time channel gating.
+* `cyto_plot()` now supports visualisation of `multiRangeGate` objects.
+
 # CytoExploreR 2.0.0
 
 * `CytoExploreR` now uses the `HeatmapR` package to display heatmaps in `cyto_spillover_compute()` and `cyto_spillover_spread_compute()`.
