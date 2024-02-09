@@ -3542,7 +3542,9 @@ cyto_groups <- function(x,
     return(pd_split)
     # RETURN GROUP NAMES
   }else{
-    return(names(pd_split))
+    groups <- names(pd_split)
+    names(groups) <- sapply(pd_split, nrow)
+    return(groups)
   }
   
 }
