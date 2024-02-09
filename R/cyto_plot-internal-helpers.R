@@ -4891,7 +4891,7 @@
   }
   
   # Make colorRampPalette
-  if (is.function(hist_cols)) {
+  if(!is.function(hist_cols)) {
     cols <- colorRampPalette(hist_cols)
   } else {
     cols <- hist_cols
