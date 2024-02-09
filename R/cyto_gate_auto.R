@@ -301,10 +301,12 @@ cyto_gate_auto <- function(x,
   }
   
   # GROUP NAME
-  grp <- cyto_groups(
-    fs,
-    group_by = groupBy,
-    details = FALSE
+  grp <- unname(
+    cyto_groups(
+      fs,
+      group_by = groupBy,
+      details = FALSE
+    )
   )
   
   # RETURN - GROUP & TRANSFORMERS

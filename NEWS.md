@@ -1,6 +1,7 @@
 # CYtoExploreR 2.0.2
 
 * Major improvements to `cyto_gatingTemplate_generate()` to allow for finer control over how gatingTemplates should be generated from GatingHierarchy or GatingSet objects. 
+* `cyto_groups()` now reports the number of samples per group when `details = FALSE`.
 
 # CytoExploreR 2.0.1
 
