@@ -1,8 +1,8 @@
 Package: CytoExploreR
 Type: Package
 Title: Interactive Analysis of Cytometry Data
-Version: 2.0.2
-Date: 2024-02-08
+Version: 2.0.3
+Date: 2024-02-13
 Authors@R: c(
   person("Dillon", "Hammill", role = c("aut", "cre"), email = "Dillon.Hammill@anu.edu.au"),
   person("Greg", "Finak", role = "ctb", email = "gfinak@fredhutch.org"),
@@ -39,7 +39,8 @@ Imports:
     stats,
     tidyr,
     utils,
-    visNetwork
+    visNetwork,
+    XML
 Suggests: 
   covr,
   CytoExploreRData,

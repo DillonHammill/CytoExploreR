@@ -6875,7 +6875,12 @@ cyto_compensate.flowFrame <- function(x,
   
   # READ SPILLOVER MATRIX FROM FILE
   if(cyto_class(spill, "character", TRUE)) {
-    spill <- read_from_csv(spill)
+    # CSV FILE
+    if(file_ext(spill) %in% "mtx") {
+      spill <- read_from_mtx(spill)
+    } else {
+      spill <- read_from_csv(spill)
+    }
   }
 
   # CREATE LIST OF SPILLOVER MATRICES - BYPASS CHECKING LISTS

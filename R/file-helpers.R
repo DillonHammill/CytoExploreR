@@ -282,3 +282,78 @@ write_to_csv <- function(x,
   )
   
 }
+
+## READ SPILLOVER FROM MTX -----------------------------------------------------
+
+#' Read in .mtx spillover matrices
+#' @importFrom XML xmlParse xmlToList
+#' @noRd
+read_from_mtx <- function(x) {
+  
+  # PARSE XML
+  xml <- suppressPrint(
+    xmlParse(x)
+  )
+  
+  # CONVERT TO LIST
+  xml_list <- xmlToList(xml)
+  
+  # XML_LIST
+  # [[1]]
+  #   [[1]] list of parameters with.without Comp prefix (flowjo)
+  #   [[2:(n-1)]] list of coefficients as key value pairs and parameter last
+  #   [[n]] file metadata (flowjo version etc.)
+  
+  # PARAMETER NAMES
+  params <- unname(
+    sapply(
+      xml_list[[1]][[1]],
+      `[[`,
+      1
+    )
+  )
+  
+  # CONSTRUCT EMPTY SPILLOVER MATRIX
+  spill <- matrix(
+    0,
+    nrow = length(params),
+    ncol = length(params),
+    dimnames = list(
+      params,
+      params
+    )
+  )
+  diag(spill) <- 1
+  
+  # CONSTRUCT SPILLOVER MATRIX
+  lapply(
+    2:(length(xml_list[[1]]) - 1),
+    function(z) {
+      # PARAMETER
+      param <- xml_list[[1]][[z]][[length(params) + 1]][1]
+      # EXTRACT COEFFICIENTS
+      coef <- sapply(
+        seq_along(xml_list[[1]][[z]]),
+        function(q) {
+          res <- unname(
+            suppressWarnings(
+              as.numeric(
+                xml_list[[1]][[z]][[q]][2]
+              )
+            )
+          )
+          names(res) <- unname(xml_list[[1]][[z]][[q]][1])
+          return(res)
+        }
+      )
+      # DROP PARAMETER NAME COEFFICIENT
+      coef <- coef[!is.na(coef)]
+      # INSERT COEFFICIENTS
+      spill[match(param, rownames(spill)), params] <<- coef[params]
+    }
+  )
+  
+  # SPILLOVER MATRIX
+  return(spill)
+  
+}

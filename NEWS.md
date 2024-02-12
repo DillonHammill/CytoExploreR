@@ -1,7 +1,12 @@
-# CYtoExploreR 2.0.2
+# CytoExploreR 2.0.3
+
+* CytoExploreR can now read in spillover matrices from `.mtx` files using the new internal `read_from_mtx()` function.
+
+# CytoExploreR 2.0.2
 
 * Major improvements to `cyto_gatingTemplate_generate()` to allow for finer control over how gatingTemplates should be generated from GatingHierarchy or GatingSet objects. 
 * `cyto_groups()` now reports the number of samples per group when `details = FALSE`.
+* Changed default value of `multiple` to TRUE in `cyto_plot_save()`.
 
 # CytoExploreR 2.0.1
 
