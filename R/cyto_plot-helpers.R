@@ -1313,7 +1313,7 @@ cyto_plot_new_page <- function(){
 #'   \code{svg} and \code{pdf} graphics devices.
 #' @param res resolution in ppi, set to 300 by default.
 #' @param multiple logical indicating whether multiple pages should be saved to
-#'   separate numbered files, set to \code{FALSE} by default.
+#'   separate numbered files, set to \code{TRUE} by default.
 #' @param reset logical indicating whether to reset a previous call to
 #'   \code{cyto_plot_save}.
 #' @param ... additional arguments for the appropriate \code{png()},
@@ -1369,7 +1369,7 @@ cyto_plot_save <- function(save_as,
                            height = 7,
                            units = "in",
                            res = 300,
-                           multiple = FALSE,
+                           multiple = TRUE,
                            reset = FALSE,
                            ...) {
   
