@@ -1148,9 +1148,17 @@ spillEditServer <- function(id,
       } else {
         # SPILLOVER CSV FILENAME
         if(is.character(spill())) {
-          sp <- read_from_csv(spill(),
-                              data.table = FALSE)
-          # SPILLOVER MATRIX SUPPLIED
+          if(file_ext(spill()) %in% "mtx") {
+            sp <- read_from_mtx(
+              spill()
+            )
+          } else {
+            sp <- read_from_csv(
+              spill(),
+              data.table = FALSE
+            )
+          }
+        # SPILLOVER MATRIX SUPPLIED
         } else {
           sp <- spill()
         }
