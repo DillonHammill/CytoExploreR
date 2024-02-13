@@ -117,21 +117,31 @@ cyto_gate_auto <- function(x,
   
   # ACTIVE GATINGTEMPLATE
   if (is.null(gatingTemplate)) {
-    gatingTemplate <- cyto_gatingTemplate_active(ask = TRUE)
-  }
-  # CHECK EXISTING ENTRIES IN GATINGTEMPLATE
-  gt <- .cyto_gatingTemplate_check(
-    parent, 
-    alias, 
-    gatingTemplate
-  )
-  # CREATE GATINGTEMPLATE
-  if (is.null(gt)) {
-    message(
-      paste("Creating", gatingTemplate, "to save the constructed gate(s).")
+    gatingTemplate <- cyto_gatingTemplate_active(
+      ask = TRUE,
+      force = FALSE
     )
-    cyto_gatingTemplate_create(gatingTemplate, active = TRUE)
-    gt <- cyto_gatingTemplate_read(gatingTemplate, data.table = TRUE)
+  }
+  # NO GATINGTEMPLATE
+  if(isFALSE(gatingTemplate)) {
+    gatingTemplate <- NULL
+    gt <- NULL
+  # GATINGTEMPLATE
+  } else {
+    # CHECK EXISTING ENTRIES IN GATINGTEMPLATE
+    gt <- .cyto_gatingTemplate_check(
+      parent, 
+      alias, 
+      gatingTemplate
+    )
+    # CREATE GATINGTEMPLATE
+    if (is.null(gt)) {
+      message(
+        paste("Creating", gatingTemplate, "to save the constructed gate(s).")
+      )
+      cyto_gatingTemplate_create(gatingTemplate, active = TRUE)
+      gt <- cyto_gatingTemplate_read(gatingTemplate, data.table = TRUE)
+    }
   }
 
   # APPLY AUTOMATED GATING ALGORITHM -------------------------------------------
@@ -260,20 +270,23 @@ cyto_gate_auto <- function(x,
     gm
   )
   
-  # ADD GATES TO GATINGTEMPLATE
-  gt <- rbind(gt, pop)
+  # GATINGTEMPLATE -------------------------------------------------------------
   
-  # WRITING NEW GATINGTEMPLATE ENTRIES
-  message(
-    paste(
-      "Re-writing",
-      gatingTemplate,
-      "with new gating entries..."
+  # GATINGTEMPLATE ENTRIES REQUIRED
+  if(!is.null(gatingTemplate)) {
+    # ADD GATES TO GATINGTEMPLATE
+    gt <- rbind(gt, pop)
+    # WRITING NEW GATINGTEMPLATE ENTRIES
+    message(
+      paste(
+        "Re-writing",
+        gatingTemplate,
+        "with new gating entries..."
+      )
     )
-  )
-  
-  # SAVE UPDATED GATINGTEMPLATE
-  cyto_gatingTemplate_write(gt, gatingTemplate)
+    # SAVE UPDATED GATINGTEMPLATE
+    cyto_gatingTemplate_write(gt, gatingTemplate)
+  }
   
   # RETURN GATINGSET
   return(x)

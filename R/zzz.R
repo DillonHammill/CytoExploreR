@@ -21,7 +21,7 @@
   # PROGRESS BARS
   options("CytoExploreR_progress" = NULL)
   
-  # ACTIVE GATINGTEMPLATE
+  # ACTIVE GATINGTEMPLATE - FALSE TURNS OFF GATINGTEMPLATE
   options("CytoExploreR_gatingTemplate" = NULL)
   
   # CUSTOM THEME FOR CYTO_PLOT()

@@ -208,9 +208,6 @@ cyto_gate_draw <- function(x,
                            seed = 42,
                            ...){
   
-  # TODO: REMOVE REQUIREMENT ON GATINGTEMPLATE
-  # TODO: ADD SUPPORT FOR MULTIRANGEGATE GATING METHOD
-  
   # CHECKS ---------------------------------------------------------------------
   
   # FLAG - SKIP DATA PREPARTION IN CYTO_PLOT
@@ -226,21 +223,31 @@ cyto_gate_draw <- function(x,
   if(cyto_class(x, "GatingSet")) {
     # ACTIVE GATINGTEMPLATE
     if (is.null(gatingTemplate)) {
-      gatingTemplate <- cyto_gatingTemplate_active(ask = TRUE)
-    }
-    # CHECK EXISTING ENTRIES IN GATINGTEMPLATE
-    gt <- .cyto_gatingTemplate_check(
-      parent, 
-      alias, 
-      gatingTemplate
-    )
-    # CREATE GATINGTEMPLATE
-    if (is.null(gt)) {
-      message(
-        paste("Creating", gatingTemplate, "to save the constructed gate(s).")
+      gatingTemplate <- cyto_gatingTemplate_active(
+        ask = TRUE,
+        force = FALSE
       )
-      cyto_gatingTemplate_create(gatingTemplate, active = TRUE)
-      gt <- cyto_gatingTemplate_read(gatingTemplate, data.table = TRUE)
+    }
+    # NO GATINGTEMPLATE
+    if(isFALSE(gatingTemplate)) {
+      gatingTemplate <- NULL
+      gt <- NULL
+    # GATINGTEMPLATE SUPPLIED
+    } else {
+      # CHECK EXISTING ENTRIES IN GATINGTEMPLATE
+      gt <- .cyto_gatingTemplate_check(
+        parent, 
+        alias, 
+        gatingTemplate
+      )
+      # CREATE GATINGTEMPLATE
+      if (is.null(gt)) {
+        message(
+          paste("Creating", gatingTemplate, "to save the constructed gate(s).")
+        )
+        cyto_gatingTemplate_create(gatingTemplate, active = TRUE)
+        gt <- cyto_gatingTemplate_read(gatingTemplate, data.table = TRUE)
+      }
     }
   }
   
@@ -281,6 +288,7 @@ cyto_gate_draw <- function(x,
     merge_by <- group_by
   }
   
+  # NOTE: WE COULD HANDLE THIS DOWNSTREAM?
   # MULTIRANGE REQUIRES TIME X AXIS
   if(type[[1]] %in% "multirange") {
     channels <- c(
@@ -430,8 +438,6 @@ cyto_gate_draw <- function(x,
   
   # PREPARE GATES --------------------------------------------------------------
   
-  # TODO: check whether multirange can be wrapped in filters for gatingTemplate
-  
   # TRANSPOSE GATES - LIST OF LENGTH ALIAS - EACH OF LENGTH GROUP
   gate_list <- transpose(gate_list)
 
@@ -475,9 +481,6 @@ cyto_gate_draw <- function(x,
   } else {
     group_by <- NA
   }
-  
-  # gs_add_gating_method - GATINGTEMPLATE ENTRY & APPLY TO GATINGSET
-  message(paste("Adding newly constructed gate(s) to", gatingTemplate, "."))
   
   # ADD GATED POPULATIONS TO GATINGTEMPLATE
   pops <- lapply(
@@ -536,31 +539,34 @@ cyto_gate_draw <- function(x,
     )
   }
   
-  # RBIND GATINGTEMPLATE ENTRIES
-  pops <- do.call("rbind", pops)
-  
-  # COMBINE NEW ENTRIES WITH EXISTING ONES
-  gt <- rbind(gt, pops)
-  
-  # SAVE UPDATED GATINGTEMPLATE - IN CASE OF WRITING ERROR - SYNC GATINGSET
-  tryCatch(
-    cyto_gatingTemplate_write(
-      gt,
-      gatingTemplate
-    ),
-    error = function(e) {
-      lapply(
-        unlist(alias),
-        function(z) {
-          # TODO: QUADRANT GATES? NAMES ARGUMENT?
-          gs_pop_remove(
-            x,
-            z
-          )
-        }
-      )
-    }
-  )
+  # GATINGTEMPLATE ENTRIES REQUIRED
+  if(!is.null(gatingTemplate)) {
+    # gs_add_gating_method - GATINGTEMPLATE ENTRY & APPLY TO GATINGSET
+    message(paste("Adding newly constructed gate(s) to", gatingTemplate, "."))
+    # RBIND GATINGTEMPLATE ENTRIES
+    pops <- do.call("rbind", pops)
+    # COMBINE NEW ENTRIES WITH EXISTING ONES
+    gt <- rbind(gt, pops)
+    # SAVE UPDATED GATINGTEMPLATE - IN CASE OF WRITING ERROR - SYNC GATINGSET
+    tryCatch(
+      cyto_gatingTemplate_write(
+        gt,
+        gatingTemplate
+      ),
+      error = function(e) {
+        lapply(
+          unlist(alias),
+          function(z) {
+            # TODO: QUADRANT GATES? NAMES ARGUMENT?
+            gs_pop_remove(
+              x,
+              z
+            )
+          }
+        )
+      }
+    )
+  }
   
   # RETURN GATINGSET
   return(x)

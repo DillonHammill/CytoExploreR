@@ -425,7 +425,15 @@ cyto_gate_remove <- function(x,
   
   # GATINGTEMPLATE MISSING
   if (is.null(gatingTemplate)) {
-    gatingTemplate <- cyto_gatingTemplate_active(ask = FALSE)
+    gatingTemplate <- cyto_gatingTemplate_active(
+      ask = FALSE,
+      force = FALSE
+    )
+  }
+  
+  # NO GATINGTEMPLATE
+  if(isFALSE(gatingTemplate)) {
+    gatingTemplate <- NULL
   }
   
   # GATINGHIERARCHY | GATINGSET ------------------------------------------------
@@ -642,11 +650,17 @@ cyto_gate_rename <- function(x,
                              gatingTemplate = NULL,
                              ...) {
   
-  # TODO: ALLOW GATINGSET ONLY?
-  
   # MISSING GATINGTEMPLATE
   if (is.null(gatingTemplate)) {
-    gatingTemplate <- cyto_gatingTemplate_active(ask = TRUE)
+    gatingTemplate <- cyto_gatingTemplate_active(
+      ask = TRUE,
+      force = FALSE
+    )
+  }
+  
+  # NO GATINGTEMPLATE
+  if(isFALSE(gatingTemplate)) {
+    gatingTemplate <- NULL
   }
   
   # ALIAS INVALID
@@ -669,69 +683,68 @@ cyto_gate_rename <- function(x,
     names
   )
   
-  # READ IN GATINGTEMPLATE
-  gt <- cyto_gatingTemplate_read(gatingTemplate)
-  
-  # UPDATE PARENTAL NAMES
-  lapply(
-    seq_along(alias), 
-    function(z) {
-      # CHANGES DESCENDANT NODES AS WELL (eg CD4 T Cells & CD69+ CD4 T Cells)
-      if (any(grepl(alias[z], gt$parent, fixed = TRUE))) {
-        gt[grepl(alias[z], gt$parent, fixed = TRUE), "parent"] <<- names[z]
+  # GATINGTEMPLATE ENTRIES REQUIRED
+  if(!is.null(gatingTemplate)) {
+    # READ IN GATINGTEMPLATE
+    gt <- cyto_gatingTemplate_read(gatingTemplate)
+    # UPDATE PARENTAL NAMES
+    lapply(
+      seq_along(alias), 
+      function(z) {
+        # CHANGES DESCENDANT NODES AS WELL (eg CD4 T Cells & CD69+ CD4 T Cells)
+        if (any(grepl(alias[z], gt$parent, fixed = TRUE))) {
+          gt[grepl(alias[z], gt$parent, fixed = TRUE), "parent"] <<- names[z]
+        }
       }
-    }
-  )
-  
-  # UPDATE ALIAS NAMES
-  gt_alias <- lapply(
-    gt$alias, 
-    function(z) {
-      unlist(strsplit(as.character(z), ","))
-    }
-  )
-  gt_alias <- LAPPLY(
-    gt_alias, 
-    function(z) {
-      lapply(
-        seq_len(length(alias)), 
-        function(y) {
-          # CHANGES DESCENDANT NODES
-          if (any(grepl(alias[y], z, fixed = TRUE))) {
-            z[grepl(alias[y], z, fixed = TRUE)] <<- names[y]
+    )
+    # UPDATE ALIAS NAMES
+    gt_alias <- lapply(
+      gt$alias, 
+      function(z) {
+        unlist(strsplit(as.character(z), ","))
+      }
+    )
+    gt_alias <- LAPPLY(
+      gt_alias, 
+      function(z) {
+        lapply(
+          seq_len(length(alias)), 
+          function(y) {
+            # CHANGES DESCENDANT NODES
+            if (any(grepl(alias[y], z, fixed = TRUE))) {
+              z[grepl(alias[y], z, fixed = TRUE)] <<- names[y]
+            }
           }
-        }
-      )
-      # RE-COLLAPSE ALIAS
-      z <- paste(z, collapse = ",")
-      return(z)
-    }
-  )
-  gt[, "alias"] <- gt_alias
-  
-  # UPDATE GATING ARGUMENTS - CAPTURES BOOLEAN | CLUSTERS
-  lapply(
-    seq_len(nrow(gt)), 
-    function(z) {
-      gating_args <- gt[z, "gating_args"]
-      lapply(
-        seq_along(alias), 
-        function(y) {
-          # DESCENDANT NODES CHANGE
-          if (any(grepl(alias[y], gating_args, fixed = TRUE))) {
-            gating_args <<- gsub(alias[y], names[y], gating_args)
+        )
+        # RE-COLLAPSE ALIAS
+        z <- paste(z, collapse = ",")
+        return(z)
+      }
+    )
+    gt[, "alias"] <- gt_alias
+    # UPDATE GATING ARGUMENTS - CAPTURES BOOLEAN | CLUSTERS
+    lapply(
+      seq_len(nrow(gt)), 
+      function(z) {
+        gating_args <- gt[z, "gating_args"]
+        lapply(
+          seq_along(alias), 
+          function(y) {
+            # DESCENDANT NODES CHANGE
+            if (any(grepl(alias[y], gating_args, fixed = TRUE))) {
+              gating_args <<- gsub(alias[y], names[y], gating_args)
+            }
           }
-        }
-      )
-      gt[z, "gating_args"] <<- gating_args
-    }
-  )
-  
-  # SAVE UPDATED GATINGTEMPLATE
-  cyto_gatingTemplate_write(
-    gt,
-    save_as = gatingTemplate
-  )
+        )
+        gt[z, "gating_args"] <<- gating_args
+      }
+    )
+    # SAVE UPDATED GATINGTEMPLATE
+    cyto_gatingTemplate_write(
+      gt,
+      save_as = gatingTemplate
+    )
+  }
   
   # RETURN GATINGSET
   return(x)
@@ -778,7 +791,6 @@ cyto_gate_copy <- function(x,
                            hidden = FALSE,
                            ...){
   
-  # TODO: ALLOW GATINGSET ONLY?
   # TODO: CHECK IF GATE ALREADY EXISTS - MESSAGE TO USE CYTO_GATE_EDIT()
   
   # CHECKS ---------------------------------------------------------------------
@@ -840,15 +852,20 @@ cyto_gate_copy <- function(x,
   
   # MISSING GATINGTEMPLATE
   if (is.null(gatingTemplate)) {
-    gatingTemplate <- cyto_gatingTemplate_active(ask = TRUE)
+    gatingTemplate <- cyto_gatingTemplate_active(
+      ask = TRUE,
+      force = FALSE
+    )
   }
   
-  # READ GATINGTEMPLATE
-  gt <- cyto_gatingTemplate_read(
-    gatingTemplate,
-    parse = TRUE
-  )
+  # NO GATINGTEMPLATE
+  if(isFALSE(gatingTemplate)) {
+    gatingTemplate <- NULL
+  }
   
+  # EXTRACT GATINTEMPLATE
+  gt <- cyto_gatingTemplate_extract(x)
+
   # GATINGTEMPLATE POPULATIONS
   gt_pops <- lapply(
     1:nrow(gt),
@@ -979,14 +996,21 @@ cyto_gate_copy <- function(x,
     )
   )
   
-  # COMBINE GATINGTEMPLATE ENTRIES
-  gt <- do.call(
-    "rbind", 
-    list(gt, gt_entries)
-  )
-  
-  # WRITE UPDATED GATINGTEMPLATE
-  cyto_gatingTemplate_write(gt, save_as = gatingTemplate)
+  # GATINGTEMPLATE ENTRIES REUIRED
+  if(!is.null(gatingTemplate)) {
+    # READ GATINGTEMPLATE
+    gt <- cyto_gatingTemplate_read(
+      gatingTemplate,
+      parse = TRUE
+    )
+    # COMBINE GATINGTEMPLATE ENTRIES
+    gt <- do.call(
+      "rbind", 
+      list(gt, gt_entries)
+    )
+    # WRITE UPDATED GATINGTEMPLATE
+    cyto_gatingTemplate_write(gt, save_as = gatingTemplate)
+  }
   
   # RETURN UPDATED GATINGSET 
   return(x)
@@ -1041,9 +1065,7 @@ cyto_gate_bool <- function(x,
                            alias = NULL,
                            logic = NULL,
                            gatingTemplate = NULL,
-                           ...){
-  
-  # TODO: ALLOW GATINGSET ONLY?
+                           ...) {
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -1187,11 +1209,19 @@ cyto_gate_bool <- function(x,
   
   # MISSING GATINGTEMPLATE
   if (is.null(gatingTemplate)) {
-    gatingTemplate <- cyto_gatingTemplate_active(ask = TRUE)
+    gatingTemplate <- cyto_gatingTemplate_active(
+      ask = TRUE,
+      force = FALSE
+    )
+  }
+  
+  # NO GATINGTEMPLATE
+  if(isFALSE(gatingTemplate)) {
+    gatingTemplate <- NULL
   }
   
   # READ GATINGTEMPLATE
-  gt <- cyto_gatingTemplate_read(gatingTemplate)
+  gt <- cyto_gatingTemplate_extract(x)
   gt_alias <- unlist(strsplit(gt$alias, ","))
   
   # GATINGTEMPLATE ENTRIES -----------------------------------------------------
@@ -1202,52 +1232,63 @@ cyto_gate_bool <- function(x,
   
   # ADD BOOLEAN ENTRIES
   gt_entries <- structure(
-    lapply(seq_along(alias), function(z){
-      # BOOLEAN GATE ALREADY EXISTS - UPDATE LOGIC?
-      if(alias[z] %in% gt_alias) {
-        # DON'T UPDATE EXISTING BOOLEAN LOGIC
-        if(!cyto_enquire(
-          paste0(
-            alias[z], " already exists in the gatingTemplate. Do you want ",
-            "to update the boolean logic for this population? (Y/N)"
-          ),
-          options = c("Y", "T")
-        )) {
-          return(NULL)
-        # UPDATE EXISTING BOOLEAN LOGIC
-        } else {
-          # REMOVE EXISTING ENTRY FROM GATINGTEMPLATE
-          gt <<- gt[gt$alias != alias[z], ]
+    lapply(
+      seq_along(alias),
+      function(z){
+        # BOOLEAN GATE ALREADY EXISTS - UPDATE LOGIC?
+        if(alias[z] %in% gt_alias) {
+          # DON'T UPDATE EXISTING BOOLEAN LOGIC
+          if(!cyto_enquire(
+            paste0(
+              alias[z], " already exists in the gatingTemplate. Do you want ",
+              "to update the boolean logic for this population? (Y/N)"
+            ),
+            options = c("Y", "T")
+          )) {
+            return(NULL)
+            # UPDATE EXISTING BOOLEAN LOGIC
+          } else {
+            # REMOVE EXISTING ENTRY FROM GATINGTEMPLATE
+            gt <<- gt[gt$alias != alias[z], ]
+          }
         }
-      }
-      # NEW GATINGTEMPLATE ENTRIES
-      gt_pop <- gt_entry
-      gt_pop[, "alias"] <- alias[z]
-      gt_pop[, "pop"] <- "+"
-      gt_pop[, "parent"] <- parent[z]
-      gt_pop[, "gating_method"] <- "boolGate"
-      gt_pop[, "gating_args"] <- logic[z]
-      # CREATE BOOLEANFILTER
-      gate <- eval(
-        substitute(
-          booleanFilter(v, filterId = alias[z]),
-          list(v = as.symbol(logic[z]))
+        # NEW GATINGTEMPLATE ENTRIES
+        gt_pop <- gt_entry
+        gt_pop[, "alias"] <- alias[z]
+        gt_pop[, "pop"] <- "+"
+        gt_pop[, "parent"] <- parent[z]
+        gt_pop[, "gating_method"] <- "boolGate"
+        gt_pop[, "gating_args"] <- logic[z]
+        # CREATE BOOLEANFILTER
+        gate <- eval(
+          substitute(
+            booleanFilter(v, filterId = alias[z]),
+            list(v = as.symbol(logic[z]))
+          )
         )
-      )
-      # ADD BOOLEANFILTER TO GATINGSET
-      gs_pop_add(x,
-                 gate = gate,
-                 parent = parent[z])
-      # RETURN NEW GATINGTEMPLATE ENTRY
-      return(gt_pop)
-    }), 
-    names = alias)
+        # ADD BOOLEANFILTER TO GATINGSET
+        gs_pop_add(
+          x,
+          gate = gate,
+          parent = parent[z]
+        )
+        # RETURN NEW GATINGTEMPLATE ENTRY
+        return(gt_pop)
+      }
+    ), 
+    names = alias
+  )
   gt_entries <- do.call("rbind", gt_entries)
   
-  # UPDATE GATINGTEMPLATE
-  gt <- rbind(gt, gt_entries)
-  cyto_gatingTemplate_write(gt,
-                            save_as = gatingTemplate)
+  # GATINGTEMPLATE ENTRIES REQUIRED
+  if(!is.null(gatingTemplate)) {
+    # READ GATINGTEMPLATE
+    gt <- cyto_gatingTemplate_read(gatingTemplate)
+    # UPDATE GATINGTEMPLATE
+    gt <- rbind(gt, gt_entries)
+    # WRITE GATINGTEMPLATE
+    cyto_gatingTemplate_write(gt, save_as = gatingTemplate)
+  }
   
   # RETURN GATINGSET
   return(x)
@@ -1720,7 +1761,15 @@ cyto_gate_edit <- function(x,
   
   # MISSING GATINGTEMPLATE
   if (is.null(gatingTemplate)) {
-    gatingTemplate <- cyto_gatingTemplate_active(ask = TRUE)
+    gatingTemplate <- cyto_gatingTemplate_active(
+      ask = TRUE,
+      force = FALSE
+    )
+  }
+  
+  # NO GATINGTEMPLATE
+  if(isFALSE(gatingTemplate)) {
+    gatingTemplate <- NULL
   }
   
   # AXES_TRANS
@@ -1739,9 +1788,9 @@ cyto_gate_edit <- function(x,
   # PREPARE GATINGTEMPLATE -----------------------------------------------------
   
   # READ GATINGTEMPLATE
-  gt <- cyto_gatingTemplate_read(
-    gatingTemplate,
-    data.table = FALSE
+  gt <- cyto_gatingTemplate_extract(
+    x,
+    bool = TRUE
   )
   
   # REPLACE PARENT WITH FULL PATHS (IN CASE)
@@ -1754,9 +1803,12 @@ cyto_gate_edit <- function(x,
   # RESTRICT GATINGTEMPLATE
   gt_chunk <- 
     gt[gt$parent == parent & 
-         LAPPLY(gt$alias, function(z){
-           any(alias %in% unlist(strsplit(z, ",")))
-         }), ]
+         LAPPLY(
+           gt$alias, 
+           function(z) {
+             any(alias %in% unlist(strsplit(z, ",")))
+           }
+          ), ]
   
   # INVALID ALIAS/PARENT COMBINATION
   if(nrow(gt_chunk) == 0) {
@@ -1784,7 +1836,7 @@ cyto_gate_edit <- function(x,
   gt_gating_method <- unique(gt_chunk[, "gating_method"])
   
   # BOOLEAN GATE(S)
-  gt_bool_chunk <- gt_chunk[gt_chunk$gating_method == "boolGate", ]
+  gt_bool_chunk <- gt_chunk[gt_chunk$gating_method %in% "boolGate", ]
   if(nrow(gt_bool_chunk) > 0) {
     # REMOVE FROM ALIAS
     bool_alias <- gt_bool_chunk$alias
@@ -1802,8 +1854,10 @@ cyto_gate_edit <- function(x,
     }
   }
   
+  # TODO: CYTO_GATINGTEMPLATE_EXTRACT DETECTS REFGATES?
+  
   # REFERENCE GATES - MESSAGE
-  if(any(gt_chunk$gating_method == "refGate")) {
+  if(any(gt_chunk$gating_method %in% "refGate")) {
     message(
       "Reference gate(s) will be replaced with their own gate(s)."
     )
@@ -2051,66 +2105,66 @@ cyto_gate_edit <- function(x,
     names = names(gates_gs_transposed)
   )
   
-  # DATA.TABLE FRIENDLY NAMES
-  prnt <- parent
-  als <- alias
-  gtmd <- "cyto_gate_draw"
-  ppmd <- "pp_cyto_gate_draw"
-  
-  # FIND & EDIT GATINGTEMPLATE ENTRIES
-  gt <- cyto_gatingTemplate_read(gatingTemplate, data.table = TRUE)
-  
-  # DATA.TABLE R CMD CHECK NOTE
-  gating_method <- NULL
-  gating_args <- NULL
-  collapseDataForGating <- NULL
-  groupBy <- NULL
-  preprocessing_method <- NULL
-  preprocessing_args <- NULL
-  .SD <- NULL
-  
-  # GROUP_BY
-  if (merge_by[1] == "Combined Events") {
-    group_by <- "NA"
-  } else {
-    group_by <- paste(merge_by, collapse = ":")
-  }
-  
-  # HANDLE MULTIPLE POPULATIONS
-  als <- lapply(als, "paste", collapse = ",")
-
-  # INDEX PARENT IN GATINTEMPLATE (FULL PATH)
-  parent_ind <- which(
-    cyto_nodes_convert(
-      x, 
-      nodes = gt$parent,
-      path = "full"
-    ) %in% prnt
-  )
-  
-  # MODIFY GATINGTEMPLATE - GATED POPULATIONS ONLY
-  for (i in seq_len(length(als))) {
-    alias_ind <- match(
-      als[i],
-      gt$alias
+  # GATINGTEMPLATE ENTRIES REQUIRED
+  if(!is.null(gatingTemplate)) {
+    # DATA.TABLE FRIENDLY NAMES
+    prnt <- parent
+    als <- alias
+    gtmd <- "cyto_gate_draw"
+    ppmd <- "pp_cyto_gate_draw"
+    # FIND & EDIT GATINGTEMPLATE ENTRIES
+    gt <- cyto_gatingTemplate_read(
+      gatingTemplate,
+      data.table = TRUE
     )
-    ind <- intersect(parent_ind, alias_ind)
-    gt[ind, gating_method := gtmd]
-    gt[
-      ind,
-      gating_args := CytoExploreR_.argDeparser(
-        list(
-          gate = gates_gs_transposed[[i]],
-          openCyto.minEvents = -1
-        )
+    # DATA.TABLE R CMD CHECK NOTE
+    gating_method <- NULL
+    gating_args <- NULL
+    collapseDataForGating <- NULL
+    groupBy <- NULL
+    preprocessing_method <- NULL
+    preprocessing_args <- NULL
+    .SD <- NULL
+    # GROUP_BY
+    if (merge_by[1] == "Combined Events") {
+      group_by <- "NA"
+    } else {
+      group_by <- paste(merge_by, collapse = ":")
+    }
+    # HANDLE MULTIPLE POPULATIONS
+    als <- lapply(als, "paste", collapse = ",")
+    # INDEX PARENT IN GATINTEMPLATE (FULL PATH)
+    parent_ind <- which(
+      cyto_nodes_convert(
+        x, 
+        nodes = gt$parent,
+        path = "full"
+      ) %in% prnt
+    )
+    # MODIFY GATINGTEMPLATE - GATED POPULATIONS ONLY
+    for (i in seq_len(length(als))) {
+      alias_ind <- match(
+        als[i],
+        gt$alias
       )
-    ]
-    gt[ind, collapseDataForGating := TRUE]
-    gt[ind, preprocessing_method := ppmd]
-    gt[ind, preprocessing_args := as.logical(NA)]
-    # groupBy must be character class
-    gt[, groupBy := lapply(.SD, as.character), .SDcols = "groupBy"]
-    gt[ind, groupBy := group_by]
+      ind <- intersect(parent_ind, alias_ind)
+      gt[ind, gating_method := gtmd]
+      gt[
+        ind,
+        gating_args := CytoExploreR_.argDeparser(
+          list(
+            gate = gates_gs_transposed[[i]],
+            openCyto.minEvents = -1
+          )
+        )
+      ]
+      gt[ind, collapseDataForGating := TRUE]
+      gt[ind, preprocessing_method := ppmd]
+      gt[ind, preprocessing_args := as.logical(NA)]
+      # groupBy must be character class
+      gt[, groupBy := lapply(.SD, as.character), .SDcols = "groupBy"]
+      gt[ind, groupBy := group_by]
+    }
   }
   
   # CONVERT ALIAS BACK TO VECTOR
@@ -2189,8 +2243,10 @@ cyto_gate_edit <- function(x,
           preprocessing_method = NA
         )
       )
-      # GATINGTEMPLATE
-      gt <- rbind(gt, pop)
+      # GATINGTEMPLATE ENTRY
+      if(!is.null(gatingTemplate)) {
+        gt <- rbind(gt, pop)
+      }
     # UPDATE EXISTING BOOLEAN GATE  
     } else{
       suppressMessages(
@@ -2224,7 +2280,9 @@ cyto_gate_edit <- function(x,
             path = "auto"
           )
           # REMOVE BOOLEAN GATE & DESCENDANTS
-          gt <- gt[!alias %in% c(gt_bool_chunk[i, "alias"], bool_desc), ]
+          if(!is.null(gatingTemplate)) {
+            gt <- gt[!alias %in% c(gt_bool_chunk[i, "alias"], bool_desc), ]
+          }
           # REMOVE GATE(S) FROM GATINGSET
           suppressMessages(gs_pop_remove(x, gt_bool_chunk[i, "alias"]))
         }
@@ -2258,11 +2316,14 @@ cyto_gate_edit <- function(x,
   #   }
   # }
   
-  # SAVE UPDATED GATINGTEMPLATE
-  cyto_gatingTemplate_write(
-    gt,
-    save_as = gatingTemplate
-  )
+  # GATINGTEMPLATE ENTRIES REQUIRED
+  if(!is.null(gatingTemplate)) {
+    # SAVE UPDATED GATINGTEMPLATE
+    cyto_gatingTemplate_write(
+      gt,
+      save_as = gatingTemplate
+    )
+  }
   
   # UPDATE GATINGSET GLOBALLY
   return(x)

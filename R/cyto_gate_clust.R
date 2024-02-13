@@ -141,21 +141,31 @@ cyto_gate_clust <- function(x,
   if(cyto_class(x, "GatingSet")) {
     # ACTIVE GATINGTEMPLATE
     if (is.null(gatingTemplate)) {
-      gatingTemplate <- cyto_gatingTemplate_active(ask = TRUE)
-    }
-    # CHECK EXISTING ENTRIES IN GATINGTEMPLATE
-    gt <- .cyto_gatingTemplate_check(
-      parent, 
-      alias, 
-      gatingTemplate
-    )
-    # CREATE GATINGTEMPLATE
-    if (is.null(gt)) {
-      message(
-        paste("Creating", gatingTemplate, "to save the constructed gate(s).")
+      gatingTemplate <- cyto_gatingTemplate_active(
+        ask = TRUE,
+        force = FALSE
       )
-      cyto_gatingTemplate_create(gatingTemplate, active = TRUE)
-      gt <- cyto_gatingTemplate_read(gatingTemplate, data.table = TRUE)
+    }
+    # NO GATINTEMPLATE
+    if(isFALSE(gatingTemplate)) {
+      gatingTemplate <- NULL
+      gt <- NULL
+    # GATINGTEMPLATE SUPPLIED
+    } else {
+      # CHECK EXISTING ENTRIES IN GATINGTEMPLATE
+      gt <- .cyto_gatingTemplate_check(
+        parent, 
+        alias, 
+        gatingTemplate
+      )
+      # CREATE GATINGTEMPLATE
+      if (is.null(gt)) {
+        message(
+          paste("Creating", gatingTemplate, "to save the constructed gate(s).")
+        )
+        cyto_gatingTemplate_create(gatingTemplate, active = TRUE)
+        gt <- cyto_gatingTemplate_read(gatingTemplate, data.table = TRUE)
+      }
     }
   }
   
@@ -224,30 +234,35 @@ cyto_gate_clust <- function(x,
     )
   )
   
-  # NEW NODES
-  new_nodes <- cyto_nodes(x, path = "auto")
-  new_nodes <- new_nodes[!new_nodes %in% nodes]
+  # GATINGTEMPLATE -------------------------------------------------------------
   
-  # EXTRACT GATING ARGUMENTS
-  gating_args <- eval(
-    parse(
-      text = paste0("list(", pop$gating_args, ")")
+  # GATINGTEMPLATE ENTRIES REQUIRED
+  if(!is.null(gatingTemplate)) {
+    # NEW NODES
+    new_nodes <- cyto_nodes(x, path = "auto")
+    new_nodes <- new_nodes[!new_nodes %in% nodes]
+    
+    # EXTRACT GATING ARGUMENTS
+    gating_args <- eval(
+      parse(
+        text = paste0("list(", pop$gating_args, ")")
+      )
     )
-  )
-  
-  # UPDATE ALIAS IN GATING_ARGS
-  gating_args$alias <- paste0(new_nodes, collapse = ",")
-  pop$gating_args <- CytoExploreR_.argDeparser(gating_args)
-  
-  # ADD POPULATIONS TO GATINGTEMPLATE
-  pop$alias <- gating_args$alias
-  gt <- rbind(gt, pop)
-  
-  # WRITING NEW GATINGTEMPLATE ENTRIES
-  message(paste("Re-writing", gatingTemplate, "with new gating entries..."))
-  
-  # SAVE UPDATED GATINGTEMPLATE
-  cyto_gatingTemplate_write(gt, gatingTemplate)
+    
+    # UPDATE ALIAS IN GATING_ARGS
+    gating_args$alias <- paste0(new_nodes, collapse = ",")
+    pop$gating_args <- CytoExploreR_.argDeparser(gating_args)
+    
+    # ADD POPULATIONS TO GATINGTEMPLATE
+    pop$alias <- gating_args$alias
+    gt <- rbind(gt, pop)
+    
+    # WRITING NEW GATINGTEMPLATE ENTRIES
+    message(paste("Re-writing", gatingTemplate, "with new gating entries..."))
+    
+    # SAVE UPDATED GATINGTEMPLATE
+    cyto_gatingTemplate_write(gt, gatingTemplate)
+  }
   
   # RETURN GATINGSET
   return(x)

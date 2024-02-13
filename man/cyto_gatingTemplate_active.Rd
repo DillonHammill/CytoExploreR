@@ -4,7 +4,7 @@
 \alias{cyto_gatingTemplate_active}
 \title{Retrieve or set active gatingTemplate}
 \usage{
-cyto_gatingTemplate_active(x = NULL, reset = FALSE, ask = FALSE)
+cyto_gatingTemplate_active(x = NULL, reset = FALSE, ask = FALSE, force = FALSE)
 }
 \arguments{
 \item{x}{name of the gatingTemplate to set as the active gatingTemplate. If
@@ -16,8 +16,11 @@ should be reset so that no active gatingTemplate is set, set to FALSE by
 default.}
 
 \item{ask}{logical indicating whether the user should be asked to supply a
-name for the active gatingTemplate if one has not been set, set to FALSE
-by default.}
+name for the active gatingTemplate if one has not been set, set to FALSE by
+default.}
+
+\item{force}{logical indicating whether a valid gatingTemplate should be
+forced through \code{ask} set to FALSE by default.}
 }
 \value{
 retrieve or set current active gatingTemplate.

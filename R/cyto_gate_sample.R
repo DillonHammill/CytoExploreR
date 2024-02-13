@@ -102,21 +102,31 @@ cyto_gate_sample <- function(x,
   
   # ACTIVE GATINGTEMPLATE
   if (is.null(gatingTemplate)) {
-    gatingTemplate <- cyto_gatingTemplate_active(ask = TRUE)
-  }
-  # CHECK EXISTING ENTRIES IN GATINGTEMPLATE
-  gt <- .cyto_gatingTemplate_check(parent, 
-                                   alias, 
-                                   gatingTemplate)
-  # CREATE GATINGTEMPLATE
-  if (is.null(gt)) {
-    message(
-      paste("Creating", gatingTemplate, "to save the constructed gate(s).")
+    gatingTemplate <- cyto_gatingTemplate_active(
+      ask = TRUE,
+      force = FALSE
     )
-    cyto_gatingTemplate_create(gatingTemplate, active = TRUE)
-    gt <- cyto_gatingTemplate_read(gatingTemplate, data.table = TRUE)
   }
-  
+  # NO GATINGTEMPLATE
+  if(isFALSE(gtaingTemplate)) {
+    gatingTemplate <- NULL
+    gt <- NULL
+  # GATINGTEMPLATE SUPPLIED
+  } else {
+    # CHECK EXISTING ENTRIES IN GATINGTEMPLATE
+    gt <- .cyto_gatingTemplate_check(parent, 
+                                     alias, 
+                                     gatingTemplate)
+    # CREATE GATINGTEMPLATE
+    if (is.null(gt)) {
+      message(
+        paste("Creating", gatingTemplate, "to save the constructed gate(s).")
+      )
+      cyto_gatingTemplate_create(gatingTemplate, active = TRUE)
+      gt <- cyto_gatingTemplate_read(gatingTemplate, data.table = TRUE)
+    }
+  }
+
   # GATINGTEMPLATE ENTRIES -----------------------------------------------------
   
   # GROUP_BY -> MERGE_BY
@@ -172,16 +182,17 @@ cyto_gate_sample <- function(x,
       )
     )
   )
+  
+  # GATINGTEMPLATE ENTRIES REQUIRED
+  if(!is.null(gatingTemplate)) {
+    # ADD POPULATIONS TO GATINGTEMPLATE
+    gt <- rbind(gt, pop)
+    # WRITING NEW GATINGTEMPLATE ENTRIES
+    message(paste("Re-writing", gatingTemplate, "with new gating entries..."))
+    # SAVE UPDATED GATINGTEMPLATE
+    cyto_gatingTemplate_write(gt, gatingTemplate)
+  }
     
-  # ADD POPULATIONS TO GATINGTEMPLATE
-  gt <- rbind(gt, pop)
-  
-  # WRITING NEW GATINGTEMPLATE ENTRIES
-  message(paste("Re-writing", gatingTemplate, "with new gating entries..."))
-  
-  # SAVE UPDATED GATINGTEMPLATE
-  cyto_gatingTemplate_write(gt, gatingTemplate)
-  
   # RETURN GATINGSET
   return(x)
   
