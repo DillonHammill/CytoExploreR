@@ -1,6 +1,7 @@
 # CytoExploreR 2.0.3
 
 * CytoExploreR can now read in spillover matrices from `.mtx` files using the new internal `read_from_mtx()` function.
+* CytoExplreR can now be run without using a gatingTemplate by setting `cyto_gatingTemplate_active(FALSE)` at the beginning of the session.
 
 # CytoExploreR 2.0.2
 
