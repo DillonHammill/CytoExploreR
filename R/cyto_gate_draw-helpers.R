@@ -134,7 +134,7 @@
   }
   
   # MULTIRANGE
-  if(type %in% "multirange" & !any(grepl("Time", channels, ignore.case = TRUE))) {
+  if(any(type %in% "multirange") & !any(grepl("Time", channels, ignore.case = TRUE))) {
     stop(
       "MultiRangeGates are only currently supported for the Time channel"
     )
