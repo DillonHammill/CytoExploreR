@@ -30,6 +30,21 @@
 #'   \code{channels_y}. On the other hand, setting \code{order = "groups"} will
 #'   plot each channel on a separate page with a plot for each group in
 #'   \code{merge_by}.
+#' @param alias name of the gated population(s) to gated in the plot when a
+#'   GatingHierarchy or GatingSet object is supplied. Setting alias to "" will
+#'   automatically plot any gates constructed in the supplied channels. alias is
+#'   equivalent to the gate argument for cytoset objects.
+#' @param gate gate objects to be plotted, can be either objects of class
+#'   rectangleGate, polygonGate, ellipsoidGate, quadGate or filters. Lists of
+#'   these supported gate objects are also supported.
+#' @param negate logical indicating whether a label should be included for the
+#'   negated population when gate objects are supplied, set to FALSE by default.
+#'   Setting negate = TRUE will result in the creation of a boolean filter that
+#'   contains all the events outside the gates supplied to alias or gate. If
+#'   such a boolean gate exists in the GatingSet/GatingHierarchy it will
+#'   automatically be extracted when alias = "". In order to prevent plotting of
+#'   these boolean gates, users will need to explicitly pass the names of the
+#'   gates they want to display to alias.
 #' @param point_col names of the channels or markers to use for the colour scale
 #'   of each plot, set to all fluorescent channels by default.
 #' @param point_col_scale vector of colours to use for the colour scale within
@@ -126,6 +141,9 @@ cyto_plot_map <- function(x,
                           merge_by = "name",
                           overlay = NA,
                           order = "channels",
+                          alias = NA,
+                          gate = NA,
+                          negate = FALSE,
                           point_col = NA,
                           point_col_scale = NA,
                           layout,
@@ -133,6 +151,8 @@ cyto_plot_map <- function(x,
                           title,
                           axes_trans = NA,
                           ...) {
+  
+  # TODO: ADD SUPPORT FOR ALIAS
   
   # CYTO_PLOT_COMPLETE ----------------------------------------------------------
   
@@ -183,9 +203,25 @@ cyto_plot_map <- function(x,
     point_col <- cyto_channels_extract(x, point_col)
   }
   
+  # GATES
+  gate <- .cyto_plot_gates(
+    x,
+    parent = parent,
+    channels = channels,
+    alias = alias, 
+    gate = gate,
+    merge_by = merge_by,
+    select = select,
+    negate = negate
+  )
+  
   # CALL .CYTO_PLOT_DATA() - PASS TWO CHANNELS FOR FORMATTING
   args <- .args_list(...)
+  
+  # PROGRESS BAR
   args$progress <- "cyto_plot_map()"
+  
+  # PREPARE DATA
   x <- cyto_func_execute(
     ".cyto_plot_data",
     args
@@ -360,6 +396,7 @@ cyto_plot_map <- function(x,
                  cyto_plot(
                    x[[z]], # USE LIST METHOD - CYTO_PLOT DATA CALLED
                    channels = channels,
+                   gate = gate[[z]],
                    axes_trans = axes_trans,
                    layout = layout,
                    header = header[cnt + ceiling(w/np)],
@@ -403,6 +440,7 @@ cyto_plot_map <- function(x,
                 cyto_plot(
                   x[[w]],
                   channels = channels,
+                  gate = gate[[w]],
                   axes_trans = axes_trans,
                   layout = layout,
                   header = header[cnt + ceiling(w/np)],

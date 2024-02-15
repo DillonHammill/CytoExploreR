@@ -12,6 +12,9 @@ cyto_plot_map(
   merge_by = "name",
   overlay = NA,
   order = "channels",
+  alias = NA,
+  gate = NA,
+  negate = FALSE,
   point_col = NA,
   point_col_scale = NA,
   layout,
@@ -56,6 +59,24 @@ will plot each group on a single page with a plot for each channel in
 \code{channels_y}. On the other hand, setting \code{order = "groups"} will
 plot each channel on a separate page with a plot for each group in
 \code{merge_by}.}
+
+\item{alias}{name of the gated population(s) to gated in the plot when a
+GatingHierarchy or GatingSet object is supplied. Setting alias to "" will
+automatically plot any gates constructed in the supplied channels. alias is
+equivalent to the gate argument for cytoset objects.}
+
+\item{gate}{gate objects to be plotted, can be either objects of class
+rectangleGate, polygonGate, ellipsoidGate, quadGate or filters. Lists of
+these supported gate objects are also supported.}
+
+\item{negate}{logical indicating whether a label should be included for the
+negated population when gate objects are supplied, set to FALSE by default.
+Setting negate = TRUE will result in the creation of a boolean filter that
+contains all the events outside the gates supplied to alias or gate. If
+such a boolean gate exists in the GatingSet/GatingHierarchy it will
+automatically be extracted when alias = "". In order to prevent plotting of
+these boolean gates, users will need to explicitly pass the names of the
+gates they want to display to alias.}
 
 \item{point_col}{names of the channels or markers to use for the colour scale
 of each plot, set to all fluorescent channels by default.}
