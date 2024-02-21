@@ -8,6 +8,7 @@ cyto_channels_extract(
   x,
   channels,
   skip = NULL,
+  append = FALSE,
   plot = FALSE,
   escape = TRUE,
   ignore.case = TRUE,
@@ -26,6 +27,10 @@ cyto_channels_extract(
 \item{skip}{vector of markers/channels in \code{channels} to bypass when
 converting to valid channels, for example \code{"Unstained"} is bypassed
 when checking channels in the channel match file.}
+
+\item{append}{logical indicating whether the name of the channel should be
+appended to the marker names in the form \code{<marker> channel}, set to
+FALSE by default.}
 
 \item{plot}{logical indicating whether the channels will be used to construct
 a plot, set to FALSE by default. If set to TRUE an additional check will be

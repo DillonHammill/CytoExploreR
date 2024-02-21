@@ -141,14 +141,11 @@ cyto_channels <- function(x,
   
   # CHANNELS EXCLUDE
   if(length(ind_rm) > 0) {
-    channels <- intersect(
-      channels[ind],
-      channels[-ind_rm]
-    )
-  # ALL CHANNELS
-  } else {
-    channels <- channels[ind]
+    ind <- ind[!ind %in% ind_rm]
   }
+  
+  # SUBSET CHANNELS
+  channels <- channels[ind]
   
   # MARKERS
   markers <- cyto_markers(x)
@@ -382,14 +379,12 @@ cyto_markers <- function(x,
     
     # MARKERS EXCLUDE
     if(length(ind_rm) > 0) {
-      markers <- intersect(
-        markers[ind],
-        markers[-ind_rm]
-      )
-    # ALL MARKERS
-    } else {
-      markers <- markers[ind]
+      ind <- ind[!ind %in% ind_rm]
     }
+    
+    # SUBSET MARKERS
+    markers <- markers[ind]
+    
     # APPEND
     if(append) {
       markers <- paste0(
@@ -555,6 +550,9 @@ cyto_fluor_channels <- function(x,
 #' @param skip vector of markers/channels in \code{channels} to bypass when
 #'   converting to valid channels, for example \code{"Unstained"} is bypassed
 #'   when checking channels in the channel match file.
+#' @param append logical indicating whether the name of the channel should be
+#'   appended to the marker names in the form \code{<marker> channel}, set to
+#'   FALSE by default.
 #' @param plot logical indicating whether the channels will be used to construct
 #'   a plot, set to FALSE by default. If set to TRUE an additional check will be
 #'   performed to ensure that only 1 or 2 \code{channels} are supplied.
@@ -585,6 +583,7 @@ cyto_fluor_channels <- function(x,
 cyto_channels_extract <- function(x,
                                   channels, 
                                   skip = NULL,
+                                  append = FALSE,
                                   plot = FALSE,
                                   escape = TRUE,
                                   ignore.case = TRUE,
@@ -682,6 +681,16 @@ cyto_channels_extract <- function(x,
     if (!length(res) %in% c(1, 2)) {
       stop("Invalid number of supplied channels.")
     }
+  }
+  
+  # APPEND
+  if(append) {
+    res <- paste0(
+      "<",
+      names(res),
+      "> ",
+      res
+    )
   }
   
   # CHANNELS
