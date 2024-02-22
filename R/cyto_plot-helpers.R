@@ -1109,13 +1109,13 @@ cyto_plot_new <- function(popup = NULL,
       update_pars,
       new_pars[!names(new_pars) %in% names(set_pars)] # NEW
     )
-    # EXCLUDE PARAMETERS THAT REQUIRE NEW DEVICE
-    set_pars <- set_pars[!names(set_pars) %in% c("layout",
-                                                 "mfrow",
-                                                 "mfcol",
-                                                 "oma",
-                                                 "omi",
-                                                 "omd")]
+    # # EXCLUDE PARAMETERS THAT REQUIRE NEW DEVICE
+    # set_pars <- set_pars[!names(set_pars) %in% c("layout",
+    #                                              "mfrow",
+    #                                              "mfcol",
+    #                                              "oma",
+    #                                              "omi",
+    #                                              "omd")]
   }
   
   # SET GRAPHICAL PARAMETERS
@@ -1879,7 +1879,18 @@ cyto_plot_par <- function(...,
       layout(new_pars$layout)
       new_pars <- new_pars[!names(new_pars) %in% "layout"]
     }
-    # SET REMAINING PARAMETERS
+    # SET REMAINING PARAMETERS IF VALUES DONT MATCH
+    curr_pars <- .par(names(new_pars))
+    new_pars <- new_pars[
+      LAPPLY(
+        names(new_pars),
+        function(z) {
+          !all(
+            curr_pars[[z]] == new_pars[[z]]
+          )
+        }
+      )
+    ]
     par(new_pars)
   }
 
