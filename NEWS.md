@@ -1,3 +1,7 @@
+# CytoExploreR 2.0.4
+
+* Gates can now be skipped upon review in `cyto_gate_edit()` by hitting `Finish` before selecting any points.
+
 # CytoExploreR 2.0.3
 
 * CytoExploreR can now read in spillover matrices from `.mtx` files using the new internal `read_from_mtx()` function.
