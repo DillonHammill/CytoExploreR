@@ -208,6 +208,8 @@ cyto_gate_draw <- function(x,
                            seed = 42,
                            ...){
   
+  # TODO: add support for skipping samples whilst drawing.
+  
   # CHECKS ---------------------------------------------------------------------
   
   # FLAG - SKIP DATA PREPARTION IN CYTO_PLOT
@@ -321,7 +323,9 @@ cyto_gate_draw <- function(x,
   
   # LOOP THROUGH GROUPS
   gate_list <- structure(
-    lapply(seq_along(cs_lists), function(z){
+    lapply(
+      seq_along(cs_lists), 
+      function(z) {
       # CYTOSET LIST
       cs_list <- cs_lists[[z]]
       # CYTO_PLOT
@@ -388,8 +392,14 @@ cyto_gate_draw <- function(x,
               gate <- .cyto_gate_draw_dispatch(args) # ... not used
               # NEGATE
             } else {
+              # GATES MISSING
+              if(any(LAPPLY(gates, "is.null"))) {
+                gate <- NULL
+              }
+              # NEGATE SINGLE GATE
               if(length(gates) == 1) {
                 gate <- !gates[[1]]
+              # NEGATE MULTIPLE GATES
               } else {
                 gate <- !do.call("|", unname(unlist(gates)))
               }
@@ -427,11 +437,12 @@ cyto_gate_draw <- function(x,
         names = alias
       )
       return(gates)
-    }),
+      }
+    ),
     names = names(cs_lists)
   )
   
-  # CYTOSET METHOD RETURNS GATES
+  # CYTOSET METHOD RETURNS GATES -> MAY BE EMPTY FOR CYTO_GATE_EDIT()
   if(!cyto_class(x, "GatingSet")) {
     return(gate_list)
   }

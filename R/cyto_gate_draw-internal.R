@@ -23,8 +23,13 @@
   if(!.all_na(args$type)) {
     return(
       do.call(
-        paste0(".cyto_gate_", args$type, "_draw"), 
-        args)
+          paste0(
+            ".cyto_gate_", 
+            args$type,
+            "_draw"
+          ), 
+          args
+        )
       )
   } else {
     return(NULL)
@@ -54,12 +59,18 @@
   
   # X - MUST BE A CYTOSET
   
+  # PREPARE GATES
+  if(!cyto_class(gate, "list", TRUE)) {
+    gate <- list(gate)
+  }
+  
+  # BYPASS EMPTY GATES
+  if(any(LAPPLY(gate, function(z){.all_na(z) | is.null(z)}))) {
+    label <- FALSE
+  }
+  
   # LABEL GATED POPULATIONS
   if(label == TRUE) {
-    # PREPARE GATES
-    if(!cyto_class(gate, "list", TRUE)) {
-      gate <- list(gate)
-    }
     # PULLDOWN ARGUMEMTS
     args <- .args_list(...)
     args <- args[!names(args) %in% c("x", "gate", "label", "channels")]
@@ -72,7 +83,7 @@
         function(arg) {
           split(
             rep(arg, length.out = length(unlist(pops))),
-            rep(1:length(pops), each = LAPPLY(pops, length))
+            rep(1:length(pops), LAPPLY(pops, length))
           )
         }
       ),
@@ -232,6 +243,8 @@
                                     gate_line_col_alpha = 1, 
                                     ...) {
   
+  # NOTE: NULL RETURN VALUE WHEN FINISH HIT & NO POINTS SELECTED
+  
   # HIDE ERROR MESSAGE ON CLOSE
   options("show.error.messages" = FALSE)
   on.exit(options("show.error.messages" = TRUE))
@@ -279,9 +292,15 @@
         col = gate_line_col
       )
     # CLOSE GATE
-    }else if(is.null(pt)){
+    } else if(is.null(pt)) {
+      # NO GATE DRAWN
+      if(length(coords) == 0) {
+        break()
+      }
+      # INVALID GATE DRAWN
       if(length(coords) < 3){
         stop("A minimum of 3 points is required to construct a polygon gate.")
+      # VALID GATE DRAWN
       }else{
         # JOIN FIRST & LAST POINTS
         lines(
@@ -296,6 +315,13 @@
       }
     }
   }
+  
+  # NO GATE DRAWN
+  if(length(coords) == 0) {
+    return(NULL)
+  }
+  
+  # COMBINE GATE CO-ORDINATES
   coords <- do.call("rbind", coords)
   
   # CHANNELS
@@ -303,7 +329,10 @@
   
   # RETURN GATE OBJECT
   return(
-    polygonGate(.gate = coords, filterId = alias)
+    polygonGate(
+      .gate = coords,
+      filterId = alias
+    )
   )
 
 }
@@ -324,6 +353,8 @@
                                       gate_line_col_alpha = 1, 
                                       ...) {
 
+  # NOTE: NULL RETURN VALUE WHEN FINISH HIT & NO POINTS SELECTED
+  
   # HIDE ERROR MESSAGE ON CLOSE
   options("show.error.messages" = FALSE)
   on.exit(options("show.error.messages" = TRUE))
@@ -359,20 +390,36 @@
     coords[[z]] <- pt
     # TERMINATE LOOP
     if(is.null(pt)){
+      # NO GATE DRAWN
+      if(length(coords) == 0) {
+        break()
+      }
+      # INVALID GATE DRAWN
       if(length(coords) < 2){
         stop("A minimum of 2 points is required to construct a rectangle gate.")
+      # VALID GATE DRAWN
       }else{
         break()
       }
     }
   }
+  
+  # NO GATE DRAWN
+  if(length(coords) == 0) {
+    return(NULL)
+  }
+  
+  # COMBINE CO-ORDINATES
   coords <- do.call("rbind", coords)
   
   # CHANNELS
   colnames(coords) <- channels
   
   # CONSTRUCT GATE
-  gate <- rectangleGate(.gate = coords, filterId = alias)
+  gate <- rectangleGate(
+    .gate = coords,
+    filterId = alias
+  )
   
   # PLOT GATE
   cyto_plot_gate(
@@ -406,6 +453,8 @@
                                      gate_line_col = "red",
                                      gate_line_col_alpha = 1, 
                                      ...) {
+  
+  # NOTE: NULL RETURN VALUE WHEN FINISH HIT & NO POINTS SELECTED
   
   # HIDE ERROR MESSAGE ON CLOSE
   options("show.error.messages" = FALSE)
@@ -457,6 +506,10 @@
     }
     # ADD POINT TO COORDS
     coords[[z]] <- pt
+    # NO GATE DRAWN
+    if(length(coords) == 0) {
+      break()
+    }
     # ADD LINES - X COORS + PAR_YMIN & PAR_YMAX
     if(length(channels) == 1 | axis == "x"){
       lines(
@@ -514,6 +567,13 @@
       }
     }
   }
+  
+  # NO GATE DRAWN
+  if(length(coords) == 0) {
+    return(NULL)
+  }
+  
+  # COMBINE GATE CO-ORDINATES
   coords <- do.call("rbind", coords)
   
   # PREPARE COORDS
@@ -539,7 +599,10 @@
     colnames(coords) <- channels
     rownames(coords) <- c("min", "max")
     
-    gate <- rectangleGate(.gate = coords, filterId = alias)
+    gate <- rectangleGate(
+      .gate = coords,
+      filterId = alias
+    )
   }
   
   # RETURN GATE OBJECT
@@ -562,6 +625,8 @@
                                       gate_line_col = "red",
                                       gate_line_col_alpha = 1, 
                                       ...) {
+  
+  # NOTE: NULL RETURN VALUE WHEN FINISH HIT & NO POINTS SELECTED
   
   # HIDE ERROR MESSAGES
   options("show.error.messages" = FALSE)
@@ -588,6 +653,11 @@
     col = gate_point_col
   )
   
+  # NO GATE DRAWN
+  if(length(coords) == 0) {
+    return(NULL)
+  }
+  
   # TIDY GATE COORDS
   if (length(channels) == 1) {
     pts <- data.frame(x = c(coords$x, Inf))
@@ -603,7 +673,10 @@
   }
   
   # CONSTRUCT GATE
-  gate <- rectangleGate(.gate = pts, filterId = alias)
+  gate <- rectangleGate(
+    .gate = pts,
+    filterId = alias
+  )
   
   # PLOT GATE
   cyto_plot_gate(
@@ -635,6 +708,8 @@
                                      gate_line_col_alpha = 1, 
                                      ...) {
   
+  # NOTE: NULL RETURN VALUE WHEN FINISH HIT & NO POINTS SELECTED
+  
   # HIDE ERROR MESSAGES
   options("show.error.messages" = FALSE)
   on.exit(options("show.error.messages" = TRUE))
@@ -659,6 +734,11 @@
     cex = gate_point_size,
     col = gate_point_col
   )
+  
+  # NO GATE DRAWN
+  if(length(coords) == 0) {
+    return(NULL)
+  }
   
   # TIDY GATE COORDS
   if (length(channels) == 1) {
@@ -706,6 +786,8 @@
                                     gate_line_col_alpha = 1, 
                                     ...) {
 
+  # NOTE: NULL RETURN VALUE WHEN FINISH HIT & NO POINTS SELECTED
+  
   # HIDE ERROR MESSAGES
   options("show.error.messages" = FALSE)
   on.exit(options("show.error.messages" = TRUE))
@@ -739,7 +821,18 @@
     }
     # ADD POINT TO COORDS
     coords[[z]] <- pt
+    # NO GATE DRAWN
+    if(length(coords) == 0) {
+      break()
+    }
   }
+  
+  # NO GATE DRAWN
+  if(length(coords) == 0) {
+    return(NULL)
+  }
+  
+  # COMBINE GATE CO-ORDINATES
   coords <- do.call("rbind", coords)
   coords <- data.frame(coords)
   colnames(coords) <- channels
@@ -928,6 +1021,8 @@
                                      gate_line_col_alpha = 1, 
                                      ...) {
   
+  # NOTE: NULL RETURN VALUE WHEN FINISH HIT & NO POINTS SELECTED
+  
   # HIDE ERROR MESSAGES
   options("show.error.messages" = FALSE)
   on.exit(options("show.error.messages" = TRUE)) 
@@ -965,6 +1060,11 @@
     col = gate_point_col
   )
   
+  # NO GATE DRAWN
+  if(length(pts) == 0) {
+    return(NULL)
+  }
+  
   # CO-ORDINATES MATRIX
   pts <- matrix(unlist(pts), ncol = 2)
   
@@ -972,8 +1072,13 @@
   colnames(pts) <- channels
   
   # QUADGATE CONSTRUCTION
-  gate <- quadGate(.gate = pts, 
-                   filterId = paste(alias, collapse = "|"))
+  gate <- quadGate(
+    .gate = pts, 
+    filterId = paste(
+      alias, 
+      collapse = "|"
+    )
+  )
   
   # PLOT GATE
   cyto_plot_gate(
@@ -1004,6 +1109,8 @@
                                        gate_line_col = "red",
                                        gate_line_col_alpha = 1,
                                        ...) {
+  
+  # NOTE: NULL RETURN VALUE WHEN FINISH HIT & NO POINTS SELECTED
   
   # HIDE ERROR MESSAGES
   options("show.error.messages" = FALSE)
@@ -1095,6 +1202,11 @@
     }
   }
   
+  # NO GATE DRAWN
+  if(length(coords) == 0) {
+    return(NULL)
+  }
+  
   # CHECK COORDS LENGTH
   if(length(coords) < 2) {
     stop(
@@ -1169,6 +1281,8 @@
                                 gate_line_col = "red",
                                 gate_line_col_alpha = 1,
                                 ...) {     
+  
+  # NOTE: NULL RETURN VALUE WHEN FINISH HIT & NO POINTS SELECTED
 
   # WARNING
   message("Web gates are an experimental feature - use at your own risk!")
@@ -1200,6 +1314,11 @@
     col = gate_point_col
   )
   
+  # NO GATE DRAWN
+  if(length(center) == 0) {
+    return(NULL)
+  }
+  
   # User Prompt
   message("Select surrounding co-ordinates on plot edges to draw a web gate.")
   
@@ -1210,28 +1329,43 @@
   ymax <- round(par("usr")[4], 2)
   
   # Get all gate co-ordinates - c(center, others)
-  coords <- lapply(seq_len(length(alias)), function(x) {
-    
-    # GATE COORDS
-    pt <- locator(
-      n = 1,
-      type = "p",
-      pch = gate_point_shape,
-      cex = gate_point_size,
-      col = gate_point_col
-    )
-    
-    # LINE TO CENTER
-    lines(
-      x = c(center$x, pt$x),
-      y = c(center$y, pt$y),
-      lty = gate_line_type,
-      lwd = gate_line_width,
-      col = gate_line_col
-    )
-    
-    return(c(pt$x, pt$y))
-  })
+  coords <- lapply(
+    seq_len(
+      length(alias)
+    ), 
+    function(x) {
+      
+      # GATE COORDS
+      pt <- locator(
+        n = 1,
+        type = "p",
+        pch = gate_point_shape,
+        cex = gate_point_size,
+        col = gate_point_col
+      )
+      
+      # LINE TO CENTER
+      if(!is.null(pt)) {
+        lines(
+          x = c(center$x, pt$x),
+          y = c(center$y, pt$y),
+          lty = gate_line_type,
+          lwd = gate_line_width,
+          col = gate_line_col
+        )
+        return(c(pt$x, pt$y))
+      } else {
+        return(NULL)
+      }
+    }
+  )
+  
+  # NO GATE DRAWN
+  if(length(coords[!LAPPLY(coords, "is.null")]) == 0) {
+    return(NULL)
+  }
+  
+  # COMBINE GATE CO-ORDINATES
   coords <- as.data.frame(do.call(rbind, coords))
   colnames(coords) <- c("x", "y")
   coords <- rbind(center, coords)

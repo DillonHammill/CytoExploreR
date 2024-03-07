@@ -2075,8 +2075,32 @@ cyto_gate_edit <- function(x,
         }
       }
       
-      # UPDATE GATES
-      gates_gs[[y]] <<- gate_new
+      # POPULATIONS WITH NEW GATES
+      pops_new <- names(gate_new)[!LAPPLY(gate_new, "is.null")]
+      
+      # UPDATE GATES IN PLACE
+      if(length(pops_new) > 0) {
+        gates_gs[[y]][pops_new] <<- gate_new[pops_new]
+      }
+      
+      # POPULATIONS WITH OLD GATES REQUIRE LABELS
+      pops_old <- names(gate_new)[LAPPLY(gate_new, "is.null")]
+      if(length(pops_old) > 0) {
+        .cyto_gate_draw_label(
+          cs_list[[1]],
+          alias = pops_old,
+          channels = channels,
+          gate = gates_gs[[y]][pops_old],
+          label = TRUE,
+          label_text_size = label_text_size,
+          label_text_font = label_text_font,
+          label_text_col = label_text_col,
+          label_text_col_alpha = label_text_col_alpha,
+          label_fill = label_fill,
+          label_fill_alpha = label_fill_alpha
+        )
+      }
+      
     }
   )
   # PREPARE GATES FOR GATINGTEMPLATE
