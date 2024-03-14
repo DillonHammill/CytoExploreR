@@ -213,8 +213,6 @@ cyto_gate_draw <- function(x,
   
   # TODO: add support for skipping samples whilst drawing.
   
-  print(gate)
-  
   # CHECKS ---------------------------------------------------------------------
   
   # FLAG - SKIP DATA PREPARTION IN CYTO_PLOT
