@@ -28,8 +28,8 @@
 #'   gate types are supported but should be accompanied with an \code{alias}
 #'   argument of the same length (i.e. one \code{type} per \code{alias}).
 #'   Supported gate types are \code{polygon, rectangle, ellipse, threshold,
-#'   boundary, interval, quadrant, multirange and web} which can be abbreviated 
-#'   as upper or lower case first letters as well. Default \code{type} is 
+#'   boundary, interval, quadrant, multirange and web} which can be abbreviated
+#'   as upper or lower case first letters as well. Default \code{type} is
 #'   \code{"interval"} for 1D gates and \code{"polygon"} for 2D gates.
 #' @param gatingTemplate name of \code{gatingTemplate} csv file to which the
 #'   \code{gatingTemplate} entries for the \code{GatingSet} method should be
@@ -79,6 +79,8 @@
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
+#' @param gate optional existing gate for internal use only to allow gate
+#'   validation in \code{cyto_gate_edit}.
 #' @param gate_point_shape shape to use for selected gate points, set to
 #'   \code{16} by default to use filled circles. See
 #'   \code{\link[graphics:par]{pch}} for alternatives.
@@ -191,6 +193,7 @@ cyto_gate_draw <- function(x,
                            title = "",
                            axes_trans = NA,
                            axes_limits = "machine",
+                           gate = NA,
                            gate_point_shape = 16,
                            gate_point_size = 1,
                            gate_point_col = "red",
@@ -209,6 +212,8 @@ cyto_gate_draw <- function(x,
                            ...){
   
   # TODO: add support for skipping samples whilst drawing.
+  
+  print(gate)
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -389,30 +394,49 @@ cyto_gate_draw <- function(x,
             args$channels <- channels
             # GATE
             if(!.all_na(type)) {
-              gate <- .cyto_gate_draw_dispatch(args) # ... not used
+              gate_new <- .cyto_gate_draw_dispatch(args) # ... not used
               # NEGATE
             } else {
               # GATES MISSING
               if(any(LAPPLY(gates, "is.null"))) {
-                gate <- NULL
+                gate_new <- NULL
               }
               # NEGATE SINGLE GATE
               if(length(gates) == 1) {
-                gate <- !gates[[1]]
+                gate_new <- !gates[[1]]
               # NEGATE MULTIPLE GATES
               } else {
-                gate <- !do.call("|", unname(unlist(gates)))
+                gate_new <- !do.call("|", unname(unlist(gates)))
               }
             }
             # ADD GATE
-            args$gate <- gate
             gates <<- c(
               gates, 
               structure(
-                list(gate),
+                list(gate_new),
                 names = paste(alias, collapse = "|") # quad gates
               )
             )
+            # UPDATE ARGUMENTS - USE EXISTING GATE IF NONE DRAWN
+            args$gate <- gate_new
+            # WE ASSUME GATES ARE PROPERLY NAMED HERE - INTERNAL USE ONLY
+            # ONLY GATE OBJECTS OR NAMED GATE OBJECT LISTS ARE SUPPORTED
+            if(is.null(gate_new) & !.all_na(gate)) {
+              if(cyto_class(gate, "filters")) {
+                args$gate <- gate[[
+                  LAPPLY(
+                    gate,
+                    function(z) {
+                      z@filterId %in% alias
+                    }
+                  )
+                ]]
+              } else if(length(gate) > 1) {
+                args$gate <- gate[[alias]]
+              } else {
+                args$gate <- gate
+              }
+            }
             # LABELS - GATE BASE LAYER
             do.call(".cyto_gate_draw_label", args) # ... not used
           },

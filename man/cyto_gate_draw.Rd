@@ -23,6 +23,7 @@ cyto_gate_draw(
   title = "",
   axes_trans = NA,
   axes_limits = "machine",
+  gate = NA,
   gate_point_shape = 16,
   gate_point_size = 1,
   gate_point_col = "red",
@@ -61,8 +62,8 @@ the gating routine.}
 gate types are supported but should be accompanied with an \code{alias}
 argument of the same length (i.e. one \code{type} per \code{alias}).
 Supported gate types are \code{polygon, rectangle, ellipse, threshold,
-boundary, interval, quadrant, multirange and web} which can be abbreviated 
-as upper or lower case first letters as well. Default \code{type} is 
+boundary, interval, quadrant, multirange and web} which can be abbreviated
+as upper or lower case first letters as well. Default \code{type} is
 \code{"interval"} for 1D gates and \code{"polygon"} for 2D gates.}
 
 \item{gatingTemplate}{name of \code{gatingTemplate} csv file to which the
@@ -125,6 +126,9 @@ appropriately labelled.}
 to \code{"machine"} by default to use entire axes ranges. Fine control over
 axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 arguments.}
+
+\item{gate}{optional existing gate for internal use only to allow gate
+validation in \code{cyto_gate_edit}.}
 
 \item{gate_point_shape}{shape to use for selected gate points, set to
 \code{16} by default to use filled circles. See

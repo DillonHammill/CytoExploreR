@@ -2052,6 +2052,13 @@ cyto_gate_edit <- function(x,
         negate = negate,
         axis = axis,
         plot = FALSE,
+        gate = gate[
+          cyto_nodes_convert(
+            x,
+            nodes = alias,
+            path = "auto"
+          )
+        ], # existing gate
         gate_point_shape = gate_point_shape,
         gate_point_size = gate_point_size,
         gate_point_col = gate_point_col,
@@ -2083,23 +2090,23 @@ cyto_gate_edit <- function(x,
         gates_gs[[y]][pops_new] <<- gate_new[pops_new]
       }
       
-      # POPULATIONS WITH OLD GATES REQUIRE LABELS
-      pops_old <- names(gate_new)[LAPPLY(gate_new, "is.null")]
-      if(length(pops_old) > 0) {
-        .cyto_gate_draw_label(
-          cs_list[[1]],
-          alias = pops_old,
-          channels = channels,
-          gate = gates_gs[[y]][pops_old],
-          label = TRUE,
-          label_text_size = label_text_size,
-          label_text_font = label_text_font,
-          label_text_col = label_text_col,
-          label_text_col_alpha = label_text_col_alpha,
-          label_fill = label_fill,
-          label_fill_alpha = label_fill_alpha
-        )
-      }
+      # # POPULATIONS WITH OLD GATES REQUIRE LABELS
+      # pops_old <- names(gate_new)[LAPPLY(gate_new, "is.null")]
+      # if(length(pops_old) > 0) {
+      #   .cyto_gate_draw_label(
+      #     cs_list[[1]],
+      #     alias = pops_old,
+      #     channels = channels,
+      #     gate = gates_gs[[y]][pops_old],
+      #     label = TRUE,
+      #     label_text_size = label_text_size,
+      #     label_text_font = label_text_font,
+      #     label_text_col = label_text_col,
+      #     label_text_col_alpha = label_text_col_alpha,
+      #     label_fill = label_fill,
+      #     label_fill_alpha = label_fill_alpha
+      #   )
+      # }
       
     }
   )
