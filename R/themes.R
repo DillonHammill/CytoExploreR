@@ -67,6 +67,13 @@ ozette_light_theme <- function(point_shape = "hex",
                                ),
                                axes_text_col = "grey40",
                                key_text_col = "grey40",
+                               gate_line_col = "black",
+                               gate_line_width = 1,
+                               gate_fill_alpha = 0.1,
+                               gate_fill = "grey40",
+                               label_fill_alpha = 0,
+                               label_text_col = "black",
+                               label_text_font = 1,
                                ...) {
   
   cyto_plot_theme_reset()

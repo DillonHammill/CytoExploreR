@@ -9,6 +9,13 @@ ozette_light_theme(
   point_col_scale = c("#131D2A", "#1853C9", "#EFF412", "#FF8000", "#FF1200"),
   axes_text_col = "grey40",
   key_text_col = "grey40",
+  gate_line_col = "black",
+  gate_line_width = 1,
+  gate_fill_alpha = 0.1,
+  gate_fill = "grey40",
+  label_fill_alpha = 0,
+  label_text_col = "black",
+  label_text_font = 1,
   ...
 )
 }
