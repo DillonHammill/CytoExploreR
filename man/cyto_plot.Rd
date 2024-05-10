@@ -45,6 +45,7 @@ cyto_plot(
   point_col = NA,
   point_col_alpha = 1,
   point_fast = FALSE,
+  point_bins = 256,
   contour_lines = 0,
   contour_line_type = 1,
   contour_line_width = 1,
@@ -58,6 +59,9 @@ cyto_plot(
   axes_label_text_font = 1,
   axes_label_text_size = 1.1,
   axes_label_text_col = "black",
+  axes_ticks_line_width = 1,
+  axes_ticks_line_col = "black",
+  axes_ticks_line_col_alpha = 1,
   title_text_font = 2,
   title_text_size = 1.1,
   title_text_col = "black",
@@ -86,6 +90,12 @@ cyto_plot(
   key_hist_line_type = 1,
   key_hist_line_width = 1.5,
   key_hist_line_col = "black",
+  key_border_line_width = 1,
+  key_border_line_col = "black",
+  key_border_line_col_alpha = 1,
+  key_ticks_line_width = 1,
+  key_ticks_line_col = "black",
+  key_ticks_line_col_alpha = 1,
   gate_line_type = 1,
   gate_line_width = 2.5,
   gate_line_col = "red",
@@ -118,6 +128,8 @@ cyto_plot(
   header_text_size = 1,
   header_text_col = "black",
   page = FALSE,
+  page_fill = "white",
+  page_fill_alpha = 1,
   memory = TRUE,
   seed = 42,
   ...
@@ -152,8 +164,8 @@ internally to ensure that the axes on the constructed plots are
 appropriately labelled.}
 
 \item{merge_by}{a vector of experiment variables to sort and merge samples
-into groups prior to plotting, set to "name" by default to prevent merging.
-To merge all samples set this argument to \code{TRUE} or \code{"all"}.}
+into groups prior to plotting, set to NA by default to prevent merging. To
+merge all samples set this argument to \code{TRUE} or \code{"all"}.}
 
 \item{overlay}{name(s) of the populations to overlay or a \code{cytoset},
 \code{list of cytosets} or \code{list of cytoset lists} containing
@@ -262,7 +274,8 @@ by default.}
 
 \item{point_shape}{shape(s) to use for points in 2-D scatterplots, set to
 \code{"."} by default to maximise plotting speed.  See
-\code{\link[graphics:par]{pch}} for alternatives.}
+\code{\link[graphics:par]{pch}} for alternatives. Hex binning is supported
+using \code{point_shape = "hex"}.}
 
 \item{point_size}{numeric to control the size of points in 2-D scatter plots
 set to 2 by default.}
@@ -289,6 +302,9 @@ by default to use a blue-red density colour scale.}
 the \code{scattermore} package, set to FALSE by default. This is an
 optional feature so if you intend to use it, make sure that you have the
 scattermore package installed \code{install.packages("scattermore")}.}
+
+\item{point_bins}{number of bins to use for points when \code{point_shape =
+"hex"}, set to 256 bins by default.}
 
 \item{contour_lines}{numeric indicating the number of levels to use for
 contour lines in 2-D scatter plots, set to 0 by default to turn off contour
@@ -335,6 +351,16 @@ set to 1.1 by default.}
 
 \item{axes_label_text_col}{colour to use for axes labels text, set to
 \code{"black"} by default.}
+
+\item{axes_ticks_line_width}{numeric to control the line width of axes ticks,
+set to 1 by default. Refer to \code{lwd} in \code{\link[graphics:par]{par}}
+for alternatives.}
+
+\item{axes_ticks_line_col}{colour to use for axes ticks, set to
+\code{"black"} by default.}
+
+\item{axes_ticks_line_col_alpha}{numeric [0,1] to control the transparency of
+caxes ticks, set to 1 by default to remove transparency.}
 
 \item{title_text_font}{numeric to control the font of title text, set to 2
 for bold font by default. See \code{\link[graphics:par]{font}} for
@@ -432,6 +458,26 @@ borders lines, set to 1 by default.}
 
 \item{key_hist_line_col}{colour to use for the histogram border in the key,
 set to \code{"black"} by default.}
+
+\item{key_border_line_width}{numeric to control the line width in key border,
+set to 1 by default. Refer to \code{lwd} in \code{\link[graphics:par]{par}}
+for alternatives.}
+
+\item{key_border_line_col}{colour to use for key border, set to
+\code{"black"} by default.}
+
+\item{key_border_line_col_alpha}{numeric [0, 1] to control the transparency
+of the key border, set to 1 by default to remove transparency.}
+
+\item{key_ticks_line_width}{numeric to control the line width in key ticks,
+set to 1 by default. Refer to \code{lwd} in \code{\link[graphics:par]{par}}
+for alternatives.}
+
+\item{key_ticks_line_col}{colour to use for key ticks, set to \code{"black"}
+by default.}
+
+\item{key_ticks_line_col_alpha}{numeric [0, 1] to control the transparency of
+the key ticks, set to 1 by default to remove transparency.}
 
 \item{gate_line_type}{integer [0,6] to control the line type of gates, set to
 \code{1} to draw solid lines by default. See
@@ -554,6 +600,12 @@ a new page is required after constructing the plot(s), set to FALSE by
 default. This argument is only required for custom layouts which result in
 pages with empty panels that require a header, because cyto_plot() only
 adds headers to complete pages.}
+
+\item{page_fill}{colour to use to fill the page prior to adding plot panels,
+set to \code{"white"} by default.}
+
+\item{page_fill_alpha}{numeric [0,1] to control the transparency of the page
+colour, set to 1 by default to remove transparency.}
 
 \item{memory}{logical indicating whether \code{cyto_plot()} should remember
 label co-ordinates when \code{label_position = "manual"} and use those

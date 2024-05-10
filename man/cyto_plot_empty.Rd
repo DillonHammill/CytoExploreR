@@ -35,6 +35,7 @@ cyto_plot_empty(
   point_cols = NA,
   point_col = NA,
   point_col_alpha = 1,
+  point_bins = 256,
   axes_text = c(TRUE, TRUE),
   axes_text_font = 1,
   axes_text_size = 1,
@@ -42,6 +43,9 @@ cyto_plot_empty(
   axes_label_text_font = 1,
   axes_label_text_size = 1.1,
   axes_label_text_col = "black",
+  axes_ticks_line_width = 1,
+  axes_ticks_line_col = "black",
+  axes_ticks_line_col_alpha = 1,
   title_text_font = 2,
   title_text_size = 1.1,
   title_text_col = "black",
@@ -75,11 +79,19 @@ cyto_plot_empty(
   key_hist_line_type = 1,
   key_hist_line_width = 1.5,
   key_hist_line_col = "black",
+  key_border_line_width = 1,
+  key_border_line_col = "black",
+  key_border_line_col_alpha = 1,
+  key_ticks_line_width = 1,
+  key_ticks_line_col = "black",
+  key_ticks_line_col_alpha = 1,
   grid = TRUE,
   grid_line_type = 1,
   grid_line_width = 1,
   grid_line_col = "grey95",
   grid_line_alpha = 1,
+  page_fill = "white",
+  page_fill_alpha = 1,
   ...
 )
 }
@@ -169,7 +181,8 @@ by default.}
 
 \item{point_shape}{shape(s) to use for points in 2-D scatterplots, set to
 \code{"."} by default to maximise plotting speed.  See
-\code{\link[graphics:par]{pch}} for alternatives.}
+\code{\link[graphics:par]{pch}} for alternatives. Hex binning is supported
+using \code{point_shape = "hex"}.}
 
 \item{point_size}{numeric to control the size of points in 2-D scatter plots
 set to 2 by default.}
@@ -184,6 +197,9 @@ by default to use a blue-red density colour scale.}
 
 \item{point_col_alpha}{numeric [0,1] to control point colour transparency in
 2-D scatter plots, set to 1 by default to use solid colours.}
+
+\item{point_bins}{number of bins to use for points when \code{point_shape =
+"hex"}, set to 256 bins by default.}
 
 \item{axes_text}{logical vector of length 2 indicating whether axis text
 should be included for the x and y axes respectively, set to
@@ -206,6 +222,16 @@ for details.}
 \item{axes_label_text_size}{character expansion for axis labels.}
 
 \item{axes_label_text_col}{colour of axis labels.}
+
+\item{axes_ticks_line_width}{numeric to control the line width of axes ticks,
+set to 1 by default. Refer to \code{lwd} in \code{\link[graphics:par]{par}}
+for alternatives.}
+
+\item{axes_ticks_line_col}{colour to use for axes ticks, set to
+\code{"black"} by default.}
+
+\item{axes_ticks_line_col_alpha}{numeric [0,1] to control the transparency of
+caxes ticks, set to 1 by default to remove transparency.}
 
 \item{title_text_font}{numeric indicating the font to use for title, set to 2
 for bold font by default. See \code{\link[graphics:par]{?par}} font for
@@ -315,6 +341,26 @@ borders lines, set to 1 by default.}
 \item{key_hist_line_col}{colour to use for the histogram border in the key,
 set to \code{"black"} by default.}
 
+\item{key_border_line_width}{numeric to control the line width in key border,
+set to 1 by default. Refer to \code{lwd} in \code{\link[graphics:par]{par}}
+for alternatives.}
+
+\item{key_border_line_col}{colour to use for key border, set to
+\code{"black"} by default.}
+
+\item{key_border_line_col_alpha}{numeric [0, 1] to control the transparency
+of the key border, set to 1 by default to remove transparency.}
+
+\item{key_ticks_line_width}{numeric to control the line width in key ticks,
+set to 1 by default. Refer to \code{lwd} in \code{\link[graphics:par]{par}}
+for alternatives.}
+
+\item{key_ticks_line_col}{colour to use for key ticks, set to \code{"black"}
+by default.}
+
+\item{key_ticks_line_col_alpha}{numeric [0, 1] to control the transparency of
+the key ticks, set to 1 by default to remove transparency.}
+
 \item{grid}{logical indicating whether to include grid lines in the plot
 background, set to TRUE by default. Alternatively, users can supply a
 integer to indicate the number of equally spaced quantiles to used for the
@@ -332,6 +378,12 @@ default.}
 
 \item{grid_line_alpha}{numeric [0,1] to control the transparency of grid
 lines, set to 1 by default to remove transparency.}
+
+\item{page_fill}{colour to use to fill the page prior to adding plot panels,
+set to \code{"white"} by default.}
+
+\item{page_fill_alpha}{numeric [0,1] to control the transparency of the page
+colour, set to 1 by default to remove transparency.}
 
 \item{...}{not in use.}
 }

@@ -13,7 +13,7 @@
 #'   \code{x}. If not supplied the gating scheme will be obtained directly from
 #'   the GatingHierarchy or GatingSet.
 #' @param merge_by a vector of experiment variables to sort and merge samples
-#'   into groups prior to plotting, set to "name" by default to prevent merging.
+#'   into groups prior to plotting, set to NA by default to prevent merging.
 #'   To merge all samples set this argument to \code{TRUE} or \code{"all"}.
 #' @param overlay name(s) of the populations in the \code{GatingHierarchy} or
 #'   \code{GatingSet} to overlay on every plot in the gating scheme. For

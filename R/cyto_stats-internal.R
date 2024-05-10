@@ -24,7 +24,8 @@
                     "quantile",
                     "auc",
                     "range",
-                    "bin"), function(z){
+                    "bin",
+                    "hex"), function(z){
                       grepl(paste0("^", z, "$"), FUN, ignore.case = TRUE)
                     }))) {
       FUN <- paste0("cyto_stat_", tolower(FUN))
@@ -1007,54 +1008,65 @@ cyto_stat_bkde2d <- function(x,
   
   # LIMITS - MATRIX
   if(!is.null(dim(limits))) {
-    limits <- lapply(1:ncol(limits), function(z){limits[, z, drop = TRUE]})
+    limits <- lapply(
+      1:ncol(limits), 
+      function(z){
+        limits[, z, drop = TRUE]
+      }
+    )
   }
   
   # DEFAULT LIMITS - MATCH KERNSMOOTH
-  limits <- lapply(seq_along(limits), function(z){
-    if(any(is.na((limits[[z]])))) {
-      return(
-        c(
-          min(x[, z]) - 1.5 * h[z],
-          max(x[, z]) + 1.5 * h[z]
-        )
-      )
-    }
-    return(limits[[z]])
-  })
-  
-  # COMPUTE BANDWIDTH USING PLUGIN METHOD
-  bandwidth <- LAPPLY(seq_along(bandwidth), function(z){
-    if(.all_na(bandwidth[z])) {
-      if(length(x[, z]) < 2) {
-        return(NA)
-      } else {
+  limits <- lapply(
+    seq_along(limits),
+    function(z){
+      if(any(is.na((limits[[z]])))) {
         return(
-          tryCatch(
-            suppressWarnings(
-              dpik(
-                x[, z],
-                gridsize = M[z],
-                range.x = limits[[z]],
-                truncate = TRUE
-              )
-            ),
-            error = function(e) {
-              return(diff(limits[[z]])/M[z])
-            }
+          c(
+            min(x[, z]) - 1.5 * h[z],
+            max(x[, z]) + 1.5 * h[z]
           )
         )
       }
-    } else {
-      # BANDWIDTH > 0
-      if(bandwidth[z] <= 0) {
-        stop("'bandwidth' must be strictly positive!")
-      }
-      return(
-        bandwidth[z]
-      )
+      return(limits[[z]])
     }
-  })
+  )
+  
+  # COMPUTE BANDWIDTH USING PLUGIN METHOD
+  bandwidth <- LAPPLY(
+    seq_along(bandwidth), 
+    function(z){
+      if(.all_na(bandwidth[z])) {
+        if(length(x[, z]) < 2) {
+          return(NA)
+        } else {
+          return(
+            tryCatch(
+              suppressWarnings(
+                dpik(
+                  x[, z],
+                  gridsize = M[z],
+                  range.x = limits[[z]],
+                  truncate = TRUE
+                )
+              ),
+              error = function(e) {
+                return(diff(limits[[z]])/M[z])
+              }
+            )
+          )
+        }
+      } else {
+        # BANDWIDTH > 0
+        if(bandwidth[z] <= 0) {
+          stop("'bandwidth' must be strictly positive!")
+        }
+        return(
+          bandwidth[z]
+        )
+      }
+    }
+  )
   h <- bandwidth
   
   # COMPUTE GRID POINTS
@@ -1086,14 +1098,17 @@ cyto_stat_bkde2d <- function(x,
     # COMPUTE KERNEL WEIGHTS
     L <- c(0, 0)
     kapid <- list(0, 0)
-    lapply(seq_len(2), function(z){
-      L[z] <<- min(floor(tau*h[z]*(M[z]-1)/(b[z]-a[z])), M[z] - 1L)
-      lvecid <- seq(0, L[z])
-      facid <- (b[z] - a[z])/(h[z]*(M[z]-1L))
-      w <- matrix(dnorm(lvecid*facid)/h[z])
-      tot <- sum(c(w, rev(w[-1L]))) * facid * h[z]
-      kapid[[z]] <<- w/tot
-    })
+    lapply(
+      seq_len(2), 
+      function(z){
+        L[z] <<- min(floor(tau*h[z]*(M[z]-1)/(b[z]-a[z])), M[z] - 1L)
+        lvecid <- seq(0, L[z])
+        facid <- (b[z] - a[z])/(h[z]*(M[z]-1L))
+        w <- matrix(dnorm(lvecid*facid)/h[z])
+        tot <- sum(c(w, rev(w[-1L]))) * facid * h[z]
+        kapid[[z]] <<- w/tot
+      }
+    )
     kapp <- kapid[[1L]] %*% (t(kapid[[2L]]))/n
     
     # # GRIDSIZE TOO SMALL
@@ -1132,8 +1147,10 @@ cyto_stat_bkde2d <- function(x,
       list(
         counts = cnts,
         bkde = rp,
-        bins = list("x" = xpts,
-                    "y" = ypts)
+        bins = list(
+          "x" = xpts,
+          "y" = ypts
+        )
       )
     )
   # COUNTS ONLY
@@ -1142,8 +1159,10 @@ cyto_stat_bkde2d <- function(x,
       list(
         counts = cnts,
         bkde = NA,
-        bins = list("x" = xpts,
-                    "y" = ypts)
+        bins = list(
+          "x" = xpts,
+          "y" = ypts
+        )
       )
     )
   }
@@ -1245,5 +1264,155 @@ cyto_stat_rescale <- function(x,
     # RETURN RESCALED DATA
     return(x)
   }
+  
+}
+
+#' Compute hex bins for cyto_plot
+#'
+#' @param x xy matrix to compute hexbins.
+#' @param limits truncate data prior to binning.
+#' @param bins number of bins to use for hex binning, set to 256 by default.
+#' @param smooth logical indicating whether the hexbins counts should be
+#'   smoothed, set to TRUE by default.
+#'
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#'
+#' @noRd
+cyto_stat_hex <- function(x,
+                          limits = list(NA, NA),
+                          bins = 256,
+                          smooth = TRUE) {
+  
+  # TODO: support hexbin count smoothing
+  
+  # handle zero event data
+  if(nrow(x) == 0) {
+    return(
+      list(
+        x = NA,
+        y = NA,
+        cell = NA,
+        count = NA,
+        width = NA,
+        height = NA,
+        density = NA,
+        coords = NA
+      )
+    )
+  }
+  
+  # LIMITS - MATRIX
+  if(!is.null(dim(limits))) {
+    limits <- lapply(
+      1:ncol(limits), 
+      function(z){
+        limits[, z, drop = TRUE]
+      }
+    )
+  }
+  
+  # XLIM
+  if(.all_na(limits[[1]])) {
+    limits[[1]] <- range(x[, 1])
+  }
+  
+  # YLIM
+  if(.all_na(limits[[2]])) {
+    limits[[2]] <- range(x[, 2])
+  }
+  
+  # TRIM DATA TO LIMITS
+  x <- x[
+    (x[, 1] >= min(limits[[1]]) &
+      x[, 1] <= max(limits[[1]])) &
+    (x[, 2] >= min(limits[[2]]) &
+       x[, 2] <= max(limits[[2]])),
+  ]
+  
+  # require hexbin package
+  cyto_require(
+    "hexbin"
+  )
+  
+  # rounding
+  round_any <- function(y, accuracy, f = round) {
+    f(y/accuracy) * accuracy
+  }
+  
+  # compute binwidth
+  bw <- c(
+    diff(limits[[1]])/bins,
+    diff(limits[[2]])/bins
+  )
+  
+  # x hexbin bounds
+  xb <- c(
+    round_any(min(limits[[1]]), bw[1], floor) - 1e-6,
+    round_any(max(limits[[1]]), bw[1], ceiling) + 1e-6
+  )
+  xbins <- diff(xb)/bw[1]
+  
+  # y hexbin bounds
+  yb <- c(
+    round_any(min(limits[[2]]), bw[2], floor) - 1e-6,
+    round_any(max(limits[[2]]), bw[2], ceiling) + 1e-6
+  )
+  ybins <- diff(yb)/bw[2]
+  
+  # call hexbin
+  hex <- cyto_func_call(
+    "hexbin::hexbin",
+    list(
+      x[, 1],
+      xbnds = xb,
+      xbins = bins,
+      x[, 2],
+      ybnds = yb,
+      shape = 1,
+      IDs = TRUE
+    )
+  )
+  
+  # NOTE: HEXBVIN SMOOTHING ISN'T GREAT
+  # # smooth hexbin counts
+  # if(smooth) {
+  #   hex <- cyto_func_call(
+  #     "hexbin::smooth.hexbin",
+  #     list(
+  #       hex,
+  #       wts = c(48, 4, 1)
+  #     )
+  #   )
+  # }
+  
+  # compute hexagon widths
+  sx <- hex@xbins / diff(hex@xbnds)
+  sy <- (hex@xbins * hex@shape)/ diff(hex@ybnds)
+  dx <- 1/(2 * sx)
+  dy <- 1/(2* sqrt(3) * sy)
+  
+  # get hexbin stats
+  hb <- cyto_func_call(
+    "hexbin::hcell2xy",
+    list(hex)
+  )
+  hb$cell <- hex@cell
+  hb$id <- hex@cID
+  hb$counts <- hex@count
+  hb$width <- bw[1]
+  hb$height <- bw[2]
+  hb$density <- hb$count/sum(hb$count)
+  hb$coords = cyto_func_call(
+    "hexbin::hexcoords",
+    list(
+      dx,
+      dy,
+      1,
+      sep = NA
+    )
+  )
+  
+  # return computed hexbin
+  return(hb)
   
 }

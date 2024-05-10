@@ -67,7 +67,8 @@
 #'   by default.
 #' @param point_shape shape(s) to use for points in 2-D scatterplots, set to
 #'   \code{"."} by default to maximise plotting speed.  See
-#'   \code{\link[graphics:par]{pch}} for alternatives.
+#'   \code{\link[graphics:par]{pch}} for alternatives. Hex binning is supported
+#'   using \code{point_shape = "hex"}.
 #' @param point_size numeric to control the size of points in 2-D scatter plots
 #'   set to 2 by default.
 #' @param point_col_scale vector of colours to use for density gradient.
@@ -77,6 +78,8 @@
 #'   by default to use a blue-red density colour scale.
 #' @param point_col_alpha numeric [0,1] to control point colour transparency in
 #'   2-D scatter plots, set to 1 by default to use solid colours.
+#' @param point_bins number of bins to use for points when \code{point_shape =
+#'   "hex"}, set to 256 bins by default.
 #' @param axes_text logical vector of length 2 indicating whether axis text
 #'   should be included for the x and y axes respectively, set to
 #'   \code{c(TRUE,TRUE)} by default to display axes text on both axes.
@@ -92,6 +95,13 @@
 #'   for details.
 #' @param axes_label_text_size character expansion for axis labels.
 #' @param axes_label_text_col colour of axis labels.
+#' @param axes_ticks_line_width numeric to control the line width of axes ticks,
+#'   set to 1 by default. Refer to \code{lwd} in \code{\link[graphics:par]{par}}
+#'   for alternatives.
+#' @param axes_ticks_line_col colour to use for axes ticks, set to
+#'   \code{"black"} by default.
+#' @param axes_ticks_line_col_alpha numeric [0,1] to control the transparency of
+#'   caxes ticks, set to 1 by default to remove transparency.
 #' @param title_text_font numeric indicating the font to use for title, set to 2
 #'   for bold font by default. See \code{\link[graphics:par]{?par}} font for
 #'   details.
@@ -167,6 +177,20 @@
 #'   borders lines, set to 1 by default.
 #' @param key_hist_line_col colour to use for the histogram border in the key,
 #'   set to \code{"black"} by default.
+#' @param key_border_line_width numeric to control the line width in key border,
+#'   set to 1 by default. Refer to \code{lwd} in \code{\link[graphics:par]{par}}
+#'   for alternatives.
+#' @param key_border_line_col colour to use for key border, set to
+#'   \code{"black"} by default.
+#' @param key_border_line_col_alpha numeric [0, 1] to control the transparency
+#'   of the key border, set to 1 by default to remove transparency.
+#' @param key_ticks_line_width numeric to control the line width in key ticks,
+#'   set to 1 by default. Refer to \code{lwd} in \code{\link[graphics:par]{par}}
+#'   for alternatives.
+#' @param key_ticks_line_col colour to use for key ticks, set to \code{"black"}
+#'   by default.
+#' @param key_ticks_line_col_alpha numeric [0, 1] to control the transparency of
+#'   the key ticks, set to 1 by default to remove transparency.
 #' @param grid logical indicating whether to include grid lines in the plot
 #'   background, set to TRUE by default. Alternatively, users can supply a
 #'   integer to indicate the number of equally spaced quantiles to used for the
@@ -180,10 +204,15 @@
 #'   default.
 #' @param grid_line_alpha numeric [0,1] to control the transparency of grid
 #'   lines, set to 1 by default to remove transparency.
+#' @param page_fill colour to use to fill the page prior to adding plot panels,
+#'   set to \code{"white"} by default.
+#' @param page_fill_alpha numeric [0,1] to control the transparency of the page
+#'   colour, set to 1 by default to remove transparency.
 #' @param ... not in use.
 #'
 #' @importFrom grDevices adjustcolor rgb colorRamp axisTicks
-#' @importFrom graphics plot box axis title par rect axTicks abline
+#' @importFrom graphics plot box axis title par rect axTicks abline grconvertX
+#'   grconvertY
 #' @importFrom methods formalArgs is
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -233,6 +262,7 @@ cyto_plot_empty <- function(x,
                             point_cols = NA,
                             point_col = NA,
                             point_col_alpha = 1,
+                            point_bins = 256,
                             axes_text = c(TRUE, TRUE),
                             axes_text_font = 1,
                             axes_text_size = 1,
@@ -240,6 +270,9 @@ cyto_plot_empty <- function(x,
                             axes_label_text_font = 1,
                             axes_label_text_size = 1.1,
                             axes_label_text_col = "black",
+                            axes_ticks_line_width = 1,
+                            axes_ticks_line_col = "black",
+                            axes_ticks_line_col_alpha = 1,
                             title_text_font = 2,
                             title_text_size = 1.1,
                             title_text_col = "black",
@@ -273,11 +306,19 @@ cyto_plot_empty <- function(x,
                             key_hist_line_type = 1,
                             key_hist_line_width = 1.5,
                             key_hist_line_col = "black",
+                            key_border_line_width = 1,
+                            key_border_line_col = "black",
+                            key_border_line_col_alpha = 1,
+                            key_ticks_line_width = 1,
+                            key_ticks_line_col = "black",
+                            key_ticks_line_col_alpha = 1,
                             grid = TRUE,
                             grid_line_type = 1,
                             grid_line_width = 1,
                             grid_line_col = "grey95",
                             grid_line_alpha = 1,
+                            page_fill = "white",
+                            page_fill_alpha = 1,
                             ...) {
   
   # PREPARE X ------------------------------------------------------------------
@@ -455,14 +496,16 @@ cyto_plot_empty <- function(x,
       key_size = key_size,
       key_scale = key_scale,
       key_title = key_title,
-      axes_trans = axes_trans
+      axes_trans = axes_trans,
+      point_bins = point_bins,
+      point_shape = point_shape
     )[[1]]
   }
   
   # MARGINS --------------------------------------------------------------------
   
   # PLOT MARGINS - set par("mar")
-  .cyto_plot_margins(
+  mar <- .cyto_plot_margins(
     x,
     channels = channels,
     legend = legend,
@@ -492,8 +535,25 @@ cyto_plot_empty <- function(x,
     bty = "n",
     xaxt = "n",
     yaxt = "n",
-    ann = FALSE
+    ann = FALSE,
+    bg = adjustcolor(
+      page_fill,
+      page_fill_alpha
+    )
   )
+  
+  # # PANEL BOX - LBRT
+  # rect(
+  #   par("usr")[1] - grconvertX(abs(mar[2]), from = "lines", to = "user"), 
+  #   par("usr")[3] - grconvertY(abs(mar[1]), from = "lines", to = "user"), 
+  #   par("usr")[2] + grconvertX(abs(mar[4]), from = "lines", to = "user"), 
+  #   par("usr")[4] + grconvertY(abs(mar[3]), from = "lines", to = "user"),
+  #   col = "red",
+  #   border = "black",
+  #   lty = 1,
+  #   lwd = 1,
+  #   xpd = TRUE
+  # )
   
   # X AXIS TEXT
   if(length(axes_text[[1]]$at) == 0) {
@@ -518,7 +578,12 @@ cyto_plot_empty <- function(x,
         1,
         at = axes_text[[1]]$at[x_mnr_ind],
         labels = axes_text[[1]]$label[x_mnr_ind],
-        tck = -0.015
+        tck = -0.015,
+        lwd = axes_ticks_line_width,
+        col = adjustcolor(
+          axes_ticks_line_col,
+          axes_ticks_line_col_alpha
+        )
       )
     }
     # MAJOR TICKS
@@ -533,7 +598,12 @@ cyto_plot_empty <- function(x,
         col.axis = axes_text_col,
         cex.axis = axes_text_size,
         tck = -0.03,
-        las = axes_text[[1]]$las
+        las = axes_text[[1]]$las,
+        lwd = axes_ticks_line_width,
+        col = adjustcolor(
+          axes_ticks_line_col,
+          axes_ticks_line_col_alpha
+        )
       )
     # MAJOR AXIS TICKS ONLY
     } else {
@@ -545,7 +615,12 @@ cyto_plot_empty <- function(x,
         col.axis = axes_text_col,
         cex.axis = axes_text_size,
         tck = -0.03,
-        las = axes_text[[1]]$las
+        las = axes_text[[1]]$las,
+        lwd = axes_ticks_line_width,
+        col = adjustcolor(
+          axes_ticks_line_col,
+          axes_ticks_line_col_alpha
+        )
       )
     }
   }
@@ -573,7 +648,12 @@ cyto_plot_empty <- function(x,
         2,
         at = axes_text[[2]]$at[x_mnr_ind],
         labels = axes_text[[2]]$label[x_mnr_ind],
-        tck = -0.015
+        tck = -0.015,
+        lwd = axes_ticks_line_width,
+        col = adjustcolor(
+          axes_ticks_line_col,
+          axes_ticks_line_col_alpha
+        )
       )
     }
     # MAJOR TICKS
@@ -588,7 +668,12 @@ cyto_plot_empty <- function(x,
         col.axis = axes_text_col,
         cex.axis = axes_text_size,
         tck = -0.03,
-        las = axes_text[[2]]$las
+        las = axes_text[[2]]$las,
+        lwd = axes_ticks_line_width,
+        col = adjustcolor(
+          axes_ticks_line_col,
+          axes_ticks_line_col_alpha
+        )
       )
       # MAJOR AXIS TICKS ONLY
     } else {
@@ -600,19 +685,24 @@ cyto_plot_empty <- function(x,
         col.axis = axes_text_col,
         cex.axis = axes_text_size,
         tck = -0.03,
-        las = axes_text[[2]]$las
+        las = axes_text[[2]]$las,
+        lwd = axes_ticks_line_width,
+        col = adjustcolor(
+          axes_ticks_line_col,
+          axes_ticks_line_col_alpha
+        )
       )
     }
   }
   
   # BORDER_FILL
-  if (border_fill != "white") {
-    rect(
-      par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
-      col = adjustcolor(border_fill, border_fill_alpha),
-      border = NA
-    )
-  }
+  rect(
+    par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+    col = adjustcolor(border_fill, border_fill_alpha),
+    border = border_line_col,
+    lty = border_line_type,
+    lwd = border_line_width
+  )
   
   # GRID LINES
   if (grid != FALSE) {
@@ -2301,6 +2391,9 @@ cyto_plot_theme_args <- function() {
     "axes_label_text_font",
     "axes_label_text_size",
     "axes_label_text_col",
+    "axes_ticks_line_width",
+    "axes_ticks_line_col",
+    "axes_ticks_line_col_alpha",
     "title_text_font",
     "title_text_size",
     "title_text_col",
@@ -2328,6 +2421,7 @@ cyto_plot_theme_args <- function() {
     "border_line_type",
     "border_line_width",
     "border_line_col",
+    "point_bins",
     "point_shape",
     "point_size",
     "point_col_scale",
@@ -2361,11 +2455,19 @@ cyto_plot_theme_args <- function() {
     "key_hist_line_type",
     "key_hist_line_width",
     "key_hist_line_col",
+    "key_border_line_width",
+    "key_border_line_col",
+    "key_border_line_col_alpha",
+    "key_ticks_line_width",
+    "key_ticks_line_col",
+    "key_ticks_line_col_alpha",
     "spectra_cols",
     "spectra_col_scale",
     "spectra_col_alpha",
     "spectra_border_line_type",
     "spectra_border_line_width",
-    "spectra_border_line_col"
+    "spectra_border_line_col",
+    "page_fill",
+    "page_fill_alpha"
   )
 }

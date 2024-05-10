@@ -19,6 +19,8 @@
 #' @param channels channels used to construct the existing cyto_plot.
 #' @param events controls the number or percentage of events to display, set to
 #'   1 by default to display all events.
+#' @param contour_bins number of bins to use for contour lines, set to 256 bins
+#'   by default.
 #' @param contour_lines numeric indicating the number of levels to use for
 #'   contour lines, set to 15 by default.
 #' @param contour_line_type type of line to use for contour lines, set to 1 by
@@ -68,6 +70,7 @@ cyto_plot_contour <- function(x,
                               overlay = NA,
                               select = NULL,
                               events = 1,
+                              contour_bins = 256,
                               contour_lines = 15,
                               contour_line_type = 1,          
                               contour_line_width = 1,
@@ -143,7 +146,7 @@ cyto_plot_contour <- function(x,
               "cyto_stat_bkde2d",
               input = "matrix",
               channels = args$channels,
-              bins = c(250, 250),
+              bins = contour_bins,
               limits = list(.par("usr")[[1]][1:2],
                             .par("usr")[[1]][3:4]),
               copy = FALSE,

@@ -1,3 +1,14 @@
+# CytoExploreR 2.0.6 (pre-release)
+
+* The behavior of `cyto_merge_by()` when `merge_by = NA` has changed from collapsing all samples to instead split samples individually. This is because splitting by `name` may not always work in cases where multiple samples share the same file names. This change requires updates to openCyto which should be re-installed when updating to the new version of CytoExploreR.
+
+# CytoExploreR 2.0.5
+
+* `cyto_import()` has gained a logical `nodes` argument that allows for bypassing of the unique nodes test and renaming (it can be temperamental for complex node names).
+* `cyto_plot()` gain additional customization arguments including `axes_ticks_line_width`, `axes_ticks_line_col`, `axes_ticks_line_col_alpha`, `key_border_line_width`, `key_border_line_col`, `key_border_line_col_alpha`, `key_ticks_line_width`, `key_ticks_line_col`, `key_ticks_line_col_alpha`, `page_fill` and `page_fill_alpha`.
+* `cyto_plot()` now has native support for hex binning through `point_col = "hex"` and binning can be controlled through `point_bins`. `point_bins` also influences the 2D kernel density estimates for points to allow for finer control over the resolution of the binned kernel density estimate. Hex bins are computed using the new `cyto_stat_hex()`.
+* New custom themes have been added to match the theme of Ozette's platform including `ozette_dark_theme()` and `ozette_light_theme()`.
+
 # CytoExploreR 2.0.4
 
 * Gates can now be skipped upon review in `cyto_gate_edit()` by hitting `Finish` before selecting any points.

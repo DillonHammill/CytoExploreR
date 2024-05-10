@@ -20,8 +20,9 @@
 #' @param events controls the number or percentage of events to display, set to
 #'   1 by default to display all events.
 #' @param point_shape shape(s) to use for points in 2-D scatterplots, set to
-#'   \code{"."} by default to maximise plotting speed.  See
-#'   \code{\link[graphics:par]{pch}} for alternatives.
+#'   \code{"."} by default to maximise plotting speed. See
+#'   \code{\link[graphics:par]{pch}} for alternatives. Hex binning is also
+#'   supported through \code{point_shape = "hex"}.
 #' @param point_size numeric to control the size of points in 2-D scatter plots
 #'   set to 2 by default. Optionally a list containing the point sizes for every
 #'   point or list named with a channel/marker and scaling factor \code{e.g.
@@ -44,6 +45,8 @@
 #'   the \code{scattermore} package, set to FALSE by default. This is an
 #'   optional feature so if you intend to use it, make sure that you have the
 #'   scattermore package installed \code{install.packages("scattermore")}.
+#' @param point_bins number of bins to use for points when \code{point_shape =
+#'   "hex"}, set to 256 bins by default.
 #' @param contour_lines numeric indicating the number of levels to use for
 #'   contour lines, set to 0 by default to exclude contour lines.
 #' @param contour_line_type type of line to use for contour lines, set to 1 by
@@ -81,6 +84,7 @@ cyto_plot_point <- function(x,
                             point_col = NA,
                             point_col_alpha = 1,
                             point_fast = FALSE,
+                            point_bins = 256,
                             contour_lines = 0,
                             contour_line_type = 1,
                             contour_line_width = 1,
@@ -126,6 +130,7 @@ cyto_plot_point <- function(x,
     "point_size",
     "point_col",
     "point_col_alpha",
+    "point_bins",
     names(args)[grepl("contour_", names(args))]
   )
   lapply(
@@ -137,108 +142,164 @@ cyto_plot_point <- function(x,
   
   # PREPARE DATA ---------------------------------------------------------------
   
-  # BASE LAYER - BKDE2D
-  if(.all_na(args$point_col[1])) {
-    # BKDE
-    if(!"bkde2d" %in% names(args)) {
-      args$bkde2d <- list(
+  # TODO: hexbin can be on any layer
+  # TODO: use bkde2d for all point shapes except hexbin
+  # TODO: colour hexbins by other parameters - average?
+  # TODO: can we use hexbins for contour lines?
+  
+  # INITIALIZE HEXBIN
+  args$hex <- rep(
+    list(
+      list(
+        x = NA,
+        y = NA,
+        cell = NA,
+        id = NA,
         counts = NA,
-        bins = NA,
-        bkde = NA
+        width = NA,
+        height = NA,
+        density = NA,
+        coords = NA
       )
-    }
-    # RECOMPUTE BKDE
-    if(.all_na(args$bkde2d$bkde)) {
-      # RECOMPUTE BKDE2D - DEFAULT BINS
-      args$bkde2d <- cyto_apply(
-        args$x[[1]],
-        "cyto_stat_bkde2d",
-        input = "matrix",
-        channels = args$channels,
-        limits = list(.par("usr")[[1]][1:2],
-                      .par("usr")[[1]][3:4]),
-        smooth = args$point_col_smooth,
-        copy = FALSE,
-        simplify = FALSE
-      )[[1]]
-    }
-  } else {
-    args$bkde2d <- list(
-      counts = NA,
-      bins = NA,
-      bkde = NA
+    ),
+    length(args$x)
+  )
+  
+  # INITIALIZE BKDE2D - BKDE2D MAY BE PRE-COMPUTED
+  if(!"bkde2d" %in% names(args)) {
+    args$bkde2d <- rep(
+      list(
+        list(
+          counts = NA,
+          bins = NA,
+          bkde = NA
+        )
+      ),
+      length(args$x)
     )
   }
   
-  # SORT EVENTS BY COLOUR
-  sort_by <- c()
-  if(args$point_col[1] %in% c(cyto_channels(args$x[[1]]),
-                              cyto_markers(args$x[[1]]))) {
-    sort_by <- c(sort_by, "col")
-  }
-  
-  # SORT EVENTS BY SIZE
-  if(cyto_class(args$point_size, "list", TRUE)) {
-    sort_by <- c(sort_by, "size")
-    # CHANNEL + SCALING FACTOR
-    if(!is.null(names(args$point_size[1])) & 
-       length(args$point_size[[1]]) == 1) {
-      fct <- args$point_size[[1]]
-      args$point_size[[1]] <- cyto_exprs(
-        args$x[[1]][[1]],
-        channels = names(args$point_size[1]),
-        drop = TRUE
+  # HEXBIN | BKDE2D | SORT | SIZE
+  lapply(
+    seq_along(args$x),
+    function(z) {
+      # HEXBIN
+      hex <- list(
+        x = NA,
+        y = NA,
+        cell = NA,
+        id = NA,
+        counts = NA,
+        width = NA,
+        height = NA,
+        density = NA,
+        coords = NA
       )
-      args$point_size[[1]] <- (args$point_size[[1]]/sum(args$point_size[[1]])) *
-        fct
-    }
-  }
-  
-  # TODO: SORTING ONLY PERFORMED ON BASE LAYER
-  
-  # SORTING REQUIRED
-  if(length(sort_by) > 0) {
-    # TWO WAY SORT - SIZE & COLOUR
-    if(length(sort_by) == 2) {
-      ind <- order(
-        -args$point_size[[1]],
-        cyto_exprs(
-          args$x[[1]],
-          channels = args$point_col[1],
-          drop = TRUE
+      if(args$point_shape[z] %in% "hex") {
+        hex <- cyto_apply(
+          args$x[[z]],
+          "cyto_stat_hex",
+          input = "matrix",
+          channels = args$channels,
+          copy = FALSE,
+          simplify = FALSE,
+          bins = args$point_bins[z],
+          smooth = args$point_col_smooth,
+          limits = list(
+            .par("usr")[[1]][1:2],
+            .par("usr")[[1]][3:4]
+          ),
+          inverse = FALSE
         )[[1]]
-      )
-    # SINGLE WAY SORT
-    } else {
-      # SIZE
-      if(sort_by %in% "size") {
-        ind <- order(
-          -args$point_size[[1]]
-        )
-      # COLOUR
-      } else {
-        ind <- order(
-          cyto_exprs(
-            args$x[[1]],
-            channels = args$point_col[1],
+      }
+      args$hex[[z]] <<- hex
+      # BKDE2D
+      if(.all_na(unlist(args$point_col[z])) & .all_na(args$bkde2d[[z]]$bkde)) {
+        args$bkde2d[[z]] <<- cyto_apply(
+          args$x[[z]],
+          "cyto_stat_bkde2d",
+          input = "matrix",
+          channels = args$channels,
+          limits = list(
+            .par("usr")[[1]][1:2],
+            .par("usr")[[1]][3:4]
+          ),
+          smooth = args$point_col_smooth,
+          bins = args$point_bins[z],
+          copy = FALSE,
+          simplify = FALSE,
+          inverse = FALSE
+        )[[1]]
+      }
+      # SORT BY MARKER EXPRESSION
+      sort_by <- NULL
+      if(!args$point_shape[z] %in% "hex" & args$point_col[z] %in% 
+        c(cyto_channels(args$x[[1]]), cyto_markers(args$x[[1]]))) {
+         sort_by <- "col"
+      }
+      # SORT BY SIZE
+      if(cyto_class(args$point_size[z], "list", TRUE)) {
+        sort_by <- c(sort_by, "size")
+        # CHANNEL + SCALING FACTOR
+        if(!is.null(names(args$point_size[z])) & 
+           length(args$point_size[[z]]) == 1) {
+          fct <- args$point_size[[z]]
+          args$point_size[[z]] <<- cyto_exprs(
+            args$x[[z]][[1]],
+            channels = names(args$point_size[z]),
             drop = TRUE
-          )[[1]]
+          )
+          args$point_size[[z]] <<- (args$point_size[[z]]/sum(args$point_size[[z]])) *
+            fct
+        }
+      }
+      # SORTING REQUIRED
+      if(length(sort_by) > 0) {
+        # TWO WAY SORT - SIZE & COLOUR
+        if(length(sort_by) == 2) {
+          ind <- order(
+            -args$point_size[[z]],
+            cyto_exprs(
+              args$x[[z]],
+              channels = args$point_col[z],
+              drop = TRUE
+            )[[1]]
+          )
+          # SINGLE WAY SORT
+        } else {
+          # SIZE
+          if(sort_by %in% "size") {
+            ind <- order(
+              -args$point_size[[z]]
+            )
+            # COLOUR
+          } else {
+            ind <- order(
+              cyto_exprs(
+                args$x[[z]],
+                channels = args$point_col[z],
+                drop = TRUE
+              )[[1]]
+            )
+          }
+        }
+        # SORT EVENTS - COPY REQUIRED
+        args$x[[z]] <<- cyto_copy(args$x[[z]])
+        cyto_exprs(args$x[[z]]) <<- list(
+          cyto_exprs(args$x[[z]], drop = FALSE)[[1]][
+            ind, , drop = FALSE
+          ]
         )
+        # SORT POINT_SIZE - POINT_COL HANDLED LATER
+        if(cyto_class(args$point_size[z], "list", TRUE)) {
+          args$point_size[[z]] <<- args$point_size[[z]][ind]
+        }
+        rm(ind)
       }
     }
-    # SORT EVENTS - COPY REQUIRED
-    args$x[[1]] <- cyto_copy(args$x[[1]])
-    cyto_exprs(args$x[[1]]) <- list(
-      cyto_exprs(args$x[[1]], drop = FALSE)[[1]][
-        ind, , drop = FALSE
-      ]
-    )
-    # SORT POINT_SIZE - POINT_COL HANDLED LATER
-    if(cyto_class(args$point_size, "list", TRUE)) {
-      args$point_size[[1]] <- args$point_size[[1]][ind]
-    }
-    rm(ind)
-  }
+  )
+  
+  # TODO: SORT OUT POINT_COL FOR HEXBINS & BKDE2D PRE-COMPUTED FORMAT
   
   # POINT_COL ------------------------------------------------------------------
   
@@ -266,7 +327,6 @@ cyto_plot_point <- function(x,
     dev_size <- as.integer(dev.size("px") / dev.size("in") * .par("pin")[[1]])
   }
 
-  
   # POINT & CONTOUR LINES LAYERS -----------------------------------------------
   
   # ADD POINTS & CONTOURS
@@ -401,60 +461,91 @@ cyto_plot_point <- function(x,
               }
             )
           }
-          # PLOT DEFAULT POINTS
-          if (!args$point_fast) {
-            # CONVENTIONAL PLOTTING
-            points(
-              x = exprs[, args$channels[1]],
-              y = exprs[, args$channels[2]],
-              pch = args$point_shape[z],
-              cex = if(cyto_class(args$point_size, "list", TRUE)) {
-                args$point_size[[z]]
-              } else {
-                args$point_size[z]
-              },
-              col = if(args$point_shape[z] %in% c(21:25)) {
-                "black"
-              } else {
-                args$point_col[[z]]
-              },
-              bg = if(args$point_shape[z] %in% c(21:25)) {
-                args$point_col[[z]]
-              } else {
-                "black"
-              }
+          # HEXBIN
+          if(!.all_na(args$hex[[z]]$x)) {
+            n <- length(args$hex[[z]]$x)
+            n7 <- rep.int(7, n)
+            polygon(
+              x = rep.int(args$hex[[z]]$coords$x, n) + 
+                rep.int(args$hex[[z]]$x, n7),
+              y = rep.int(args$hex[[z]]$coords$y, n) + 
+                rep.int(args$hex[[z]]$y, n7),
+              # x = rep(
+              #   args$hex[[z]]$coords$x,
+              #   times = n
+              # ) + 
+              # rep(
+              #   args$hex[[z]]$x,
+              #   each = 7
+              # ),
+              # y = rep(
+              #   args$hex[[z]]$coords$y, 
+              #   times = n
+              # ) + 
+              # rep(
+              #   args$hex[[z]]$y,
+              #   each = 7
+              # ),
+              col = args$point_col[[z]],
+              border = NA
             )
-          # SCATTERMORE POINTS - LACK PCH CONTROL
+          # POINTS
           } else {
-            # RASTER
-            rasterImage(
-              cyto_func_call(
-                "scattermore::scattermore",
-                list(
-                  xy = cbind(
-                    exprs[, args$channels[1]], 
-                    exprs[, args$channels[2]]
-                  ),
-                  size = dev_size,
-                  xlim = usr[1:2],
-                  ylim = usr[3:4],
-                  cex = if(cyto_class(args$point_size, "list", TRUE)){
-                    0.5 * args$point_size[[z]][1]
-                  }else {
-                    0.5 * args$point_size[z]
-                  },
-                  rgba = col2rgb(
-                    args$point_col[[z]], 
-                    alpha = TRUE
-                  ),
-                  output.raster = TRUE
-                )
-              ),
-              xleft = usr[1],
-              xright = usr[2],
-              ybottom = usr[3],
-              ytop = usr[4]
-            )
+            # PLOT DEFAULT POINTS
+            if (!args$point_fast) {
+              # CONVENTIONAL PLOTTING
+              points(
+                x = exprs[, args$channels[1]],
+                y = exprs[, args$channels[2]],
+                pch = args$point_shape[z],
+                cex = if(cyto_class(args$point_size, "list", TRUE)) {
+                  args$point_size[[z]]
+                } else {
+                  args$point_size[z]
+                },
+                col = if(args$point_shape[z] %in% c(21:25)) {
+                  "black"
+                } else {
+                  args$point_col[[z]]
+                },
+                bg = if(args$point_shape[z] %in% c(21:25)) {
+                  args$point_col[[z]]
+                } else {
+                  "black"
+                }
+              )
+              # SCATTERMORE POINTS - LACK PCH CONTROL
+            } else {
+              # RASTER
+              rasterImage(
+                cyto_func_call(
+                  "scattermore::scattermore",
+                  list(
+                    xy = cbind(
+                      exprs[, args$channels[1]], 
+                      exprs[, args$channels[2]]
+                    ),
+                    size = dev_size,
+                    xlim = usr[1:2],
+                    ylim = usr[3:4],
+                    cex = if(cyto_class(args$point_size, "list", TRUE)){
+                      0.5 * args$point_size[[z]][1]
+                    }else {
+                      0.5 * args$point_size[z]
+                    },
+                    rgba = col2rgb(
+                      args$point_col[[z]], 
+                      alpha = TRUE
+                    ),
+                    output.raster = TRUE
+                  )
+                ),
+                xleft = usr[1],
+                xright = usr[2],
+                ybottom = usr[3],
+                ytop = usr[4]
+              )
+            }
           }
           # CONTOUR_LINES
           if (args$contour_lines[z] != 0) {
@@ -462,12 +553,13 @@ cyto_plot_point <- function(x,
               args$x[[z]],
               channels = args$channels,
               events = 1,
+              contour_bins = args$point_bins[z],
               contour_lines = args$contour_lines[z],
               contour_line_type = args$contour_line_type[z],
               contour_line_width = args$contour_line_width[z],
               contour_line_col = args$contour_line_col[z],
               contour_line_alpha = args$contour_line_alpha[z],
-              bkde2d = args$bkde2d
+              bkde2d = args$bkde2d[[z]]
             )
           }
         }

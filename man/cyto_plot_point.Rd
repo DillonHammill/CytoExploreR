@@ -19,6 +19,7 @@ cyto_plot_point(
   point_col = NA,
   point_col_alpha = 1,
   point_fast = FALSE,
+  point_bins = 256,
   contour_lines = 0,
   contour_line_type = 1,
   contour_line_width = 1,
@@ -53,8 +54,9 @@ details. Sample selection occurs prior to grouping with \code{merge_by}.}
 1 by default to display all events.}
 
 \item{point_shape}{shape(s) to use for points in 2-D scatterplots, set to
-\code{"."} by default to maximise plotting speed.  See
-\code{\link[graphics:par]{pch}} for alternatives.}
+\code{"."} by default to maximise plotting speed. See
+\code{\link[graphics:par]{pch}} for alternatives. Hex binning is also
+supported through \code{point_shape = "hex"}.}
 
 \item{point_size}{numeric to control the size of points in 2-D scatter plots
 set to 2 by default. Optionally a list containing the point sizes for every
@@ -84,6 +86,9 @@ by default to use a blue-red density colour scale.}
 the \code{scattermore} package, set to FALSE by default. This is an
 optional feature so if you intend to use it, make sure that you have the
 scattermore package installed \code{install.packages("scattermore")}.}
+
+\item{point_bins}{number of bins to use for points when \code{point_shape =
+"hex"}, set to 256 bins by default.}
 
 \item{contour_lines}{numeric indicating the number of levels to use for
 contour lines, set to 0 by default to exclude contour lines.}

@@ -11,6 +11,7 @@ cyto_plot_contour(
   overlay = NA,
   select = NULL,
   events = 1,
+  contour_bins = 256,
   contour_lines = 15,
   contour_line_type = 1,
   contour_line_width = 1,
@@ -43,6 +44,9 @@ details. Sample selection occurs prior to grouping with \code{merge_by}.}
 
 \item{events}{controls the number or percentage of events to display, set to
 1 by default to display all events.}
+
+\item{contour_bins}{number of bins to use for contour lines, set to 256 bins
+by default.}
 
 \item{contour_lines}{numeric indicating the number of levels to use for
 contour lines, set to 15 by default.}

@@ -48,7 +48,7 @@
 #'   "children" or "descendants" when a \code{GatingSet} or
 #'   \code{GatingHierarchy} to overlay all respective nodes.
 #' @param merge_by a vector of pData variables to sort and merge samples into
-#'   groups prior to plotting, set to "name" by default to prevent merging. To
+#'   groups prior to plotting, set to NA by default to prevent merging. To
 #'   merge all samples set this argument to \code{TRUE} or \code{"all"}.
 #' @param label_text vector of population names to use in the labels. To exclude
 #'   the population names set this argument to NA.

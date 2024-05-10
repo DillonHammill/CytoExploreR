@@ -45,7 +45,7 @@ select samples using \code{\link{cyto_select}} when a \code{flowSet} or
 details. Sample selection occurs prior to grouping with \code{merge_by}.}
 
 \item{merge_by}{a vector of pData variables to sort and merge samples into
-groups prior to plotting, set to "name" by default to prevent merging. To
+groups prior to plotting, set to NA by default to prevent merging. To
 merge all samples set this argument to \code{TRUE} or \code{"all"}.}
 
 \item{overlay}{name(s) of the populations to overlay or a \code{cytoset},

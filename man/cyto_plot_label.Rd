@@ -81,7 +81,7 @@ populations to be overlaid onto the plot(s). This argument can be set to
 \code{GatingHierarchy} to overlay all respective nodes.}
 
 \item{merge_by}{a vector of pData variables to sort and merge samples into
-groups prior to plotting, set to "name" by default to prevent merging. To
+groups prior to plotting, set to NA by default to prevent merging. To
 merge all samples set this argument to \code{TRUE} or \code{"all"}.}
 
 \item{label_text}{vector of population names to use in the labels. To exclude

@@ -10,7 +10,7 @@ cyto_plot_save(
   height = 7,
   units = "in",
   res = 300,
-  multiple = TRUE,
+  multiple = NULL,
   reset = FALSE,
   ...
 )
@@ -34,7 +34,8 @@ set to 7 by default for image with width of 7 inches.}
 \item{res}{resolution in ppi, set to 300 by default.}
 
 \item{multiple}{logical indicating whether multiple pages should be saved to
-separate numbered files, set to \code{TRUE} by default.}
+separate numbered files, set to \code{TRUE} for PDF and \code{FALSE} for
+other file types by default.}
 
 \item{reset}{logical indicating whether to reset a previous call to
 \code{cyto_plot_save}.}

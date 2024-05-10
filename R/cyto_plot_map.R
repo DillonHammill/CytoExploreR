@@ -17,7 +17,7 @@
 #'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
 #'   details. Sample selection occurs prior to grouping with \code{merge_by}.
 #' @param merge_by a vector of pData variables to sort and merge samples into
-#'   groups prior to plotting, set to "name" by default to prevent merging. To
+#'   groups prior to plotting, set to NA by default to prevent merging. To
 #'   merge all samples set this argument to \code{TRUE} or \code{"all"}.
 #' @param overlay name(s) of the populations to overlay or a \code{cytoset},
 #'   \code{list of cytosets} or \code{list of cytoset lists} containing
@@ -164,6 +164,10 @@ cyto_plot_map <- function(x,
     on.exit({
       cyto_plot_complete()
     })
+  } else {
+    on.exit(
+      cyto_option("cyto_plot_data", FALSE)
+    )
   }
 
   # CYTO_PLOT_CALIBRATE --------------------------------------------------------
