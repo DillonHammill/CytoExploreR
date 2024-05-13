@@ -2035,12 +2035,14 @@ cyto_plot_layout <- function(...){
 #'   extract samples that should be used to calibrate the channels, set to NULL
 #'   by default to calibrate channels using data from all samples.
 #' @param type indicates the type of calibration to perform, options include
-#'   \code{"range"} or \code{"quantile"}, set to \code{"quantile"} by default.
-#'   Range calibration simply uses the full range of values across samples for
-#'   the calibration. Quantile calibration computes an lower and upper quantile
-#'   for each channel, values falling outside the calibration range are assigned
-#'   the bottom or top colour. Alternatively, users can also supply their own
-#'   custom calibration function to \code{type} that accepts a matrix.
+#'   \code{"instrument"}, \code{"range"} or \code{"quantile"}, set to
+#'   \code{"quantile"} by default. Instrument calibartion uses the full
+#'   instrument range in each channel for calibration. Range calibration simply
+#'   uses the full range of values across samples for the calibration. Quantile
+#'   calibration computes an lower and upper quantile for each channel, values
+#'   falling outside the calibration range are assigned the bottom or top
+#'   colour. Alternatively, users can also supply their own custom calibration
+#'   function to \code{type} that accepts a matrix.
 #' @param probs vector of lower and upper probabilities passed to
 #'   \code{stats:quantile} to compute quantiles, set to \code{c(0.01, 0.99)} by
 #'   default.
@@ -2183,8 +2185,26 @@ cyto_plot_calibrate <- function(x,
       }
       # ONLY COMPUTE LIMITS IF NOT SUPPLIED
       if(any(is.na(z))) {
-        # RANGE
-        if(grepl("^r", type, ignore.case = TRUE)) {
+        # INSTRUMENT|MACHINE
+        if(grepl("^i|^m", type, ignore.case = TRUE)) {
+          res <- cyto_apply(
+            x,
+            function(w) {
+              range(
+                w,
+                "instrument"
+              )
+            },
+            select = 1,
+            parent = parent,
+            channels = channels[cnt],
+            input = "cytoframe",
+            inverse = FALSE,
+            copy = FALSE,
+            ...
+          )
+        # RANGE|DATA
+        } else if(grepl("^r|^d", type, ignore.case = TRUE)) {
           res <- cyto_apply(
             x,
             "cyto_stat_range",

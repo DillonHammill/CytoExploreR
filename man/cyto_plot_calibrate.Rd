@@ -41,12 +41,14 @@ extract samples that should be used to calibrate the channels, set to NULL
 by default to calibrate channels using data from all samples.}
 
 \item{type}{indicates the type of calibration to perform, options include
-\code{"range"} or \code{"quantile"}, set to \code{"quantile"} by default.
-Range calibration simply uses the full range of values across samples for
-the calibration. Quantile calibration computes an lower and upper quantile
-for each channel, values falling outside the calibration range are assigned
-the bottom or top colour. Alternatively, users can also supply their own
-custom calibration function to \code{type} that accepts a matrix.}
+\code{"instrument"}, \code{"range"} or \code{"quantile"}, set to
+\code{"quantile"} by default. Instrument calibartion uses the full
+instrument range in each channel for calibration. Range calibration simply
+uses the full range of values across samples for the calibration. Quantile
+calibration computes an lower and upper quantile for each channel, values
+falling outside the calibration range are assigned the bottom or top
+colour. Alternatively, users can also supply their own custom calibration
+function to \code{type} that accepts a matrix.}
 
 \item{probs}{vector of lower and upper probabilities passed to
 \code{stats:quantile} to compute quantiles, set to \code{c(0.01, 0.99)} by
