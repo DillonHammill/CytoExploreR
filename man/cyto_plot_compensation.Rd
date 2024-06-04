@@ -34,6 +34,8 @@ cyto_plot_compensation(
   header_text_font = 2,
   header_text_size = 1,
   header_text_col = "black",
+  page_fill = "white",
+  page_fill_alpha = 1,
   ...
 )
 }
@@ -140,6 +142,12 @@ to 1 by default.}
 
 \item{header_text_col}{colour to use for the header text, set to "black" by
 default.}
+
+\item{page_fill}{colour to use to fill the page prior to adding plot panels,
+set to \code{"white"} by default.}
+
+\item{page_fill_alpha}{numeric [0,1] to control the transparency of the page
+colour, set to 1 by default to remove transparency.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 }

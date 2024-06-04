@@ -49,6 +49,10 @@
 #'   possible.
 #' @param title text to display above each plot, set to the name of the group or
 #'   channels displayed in the plot by default.
+#' @param page_fill colour to use to fill the page prior to adding plot panels,
+#'   set to \code{"white"} by default.
+#' @param page_fill_alpha numeric [0,1] to control the transparency of the page
+#'   colour, set to 1 by default to remove transparency.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
 #' @return list of recorded plots.
@@ -104,6 +108,8 @@ cyto_plot_explore <- function(x,
                               axes_trans = NA,
                               header,
                               title,
+                              page_fill = "white",
+                              page_fill_alpha = 1,
                               ...) {
   
   # TODO: REMOVE EXCESS ARGUMENTS - PASS THROUGH ... TO .CYTO_PLOT_DATA()
@@ -212,6 +218,10 @@ cyto_plot_explore <- function(x,
     # TOTAL PLOTS
     tp <- n * length(x)
   }
+  
+  # PREPARE PAGE_FILL ARGUMENTS
+  page_fill <- rep(page_fill, length.out = tpg)
+  page_fill_alpha <- rep(page_fill_alpha, length.out = tpg)
   
   # PREPARE HEADERS
   if(missing(header)) {
@@ -358,6 +368,8 @@ cyto_plot_explore <- function(x,
                       } else {
                         FALSE
                       },
+                      page_fill = page_fill[cnt + ceiling(w/np)],
+                      page_fill_alpha = page_fill_alpha[cnt + ceiling(w/np)],
                       ...
                     )
                   }
@@ -419,6 +431,8 @@ cyto_plot_explore <- function(x,
                         } else {
                           FALSE
                         },
+                        page_fill = page_fill[cnt + ceiling(v/np)],
+                        page_fill_alpha = page_fill_alpha[cnt + ceiling(v/np)],
                         ...
                       )
                     }

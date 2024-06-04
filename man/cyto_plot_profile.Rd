@@ -17,6 +17,8 @@ cyto_plot_profile(
   hist_stack = 0,
   axes_trans = NA,
   header,
+  page_fill = "white",
+  page_fill_alpha = 1,
   ...
 )
 }
@@ -77,6 +79,12 @@ appropriately labelled.}
 users can supply a vector of headers for each page, this can be tricky to
 get right so it is recommended for users to use the default headers where
 possible.}
+
+\item{page_fill}{colour to use to fill the page prior to adding plot panels,
+set to \code{"white"} by default.}
+
+\item{page_fill_alpha}{numeric [0,1] to control the transparency of the page
+colour, set to 1 by default to remove transparency.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 }

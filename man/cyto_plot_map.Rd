@@ -21,6 +21,8 @@ cyto_plot_map(
   header,
   title,
   axes_trans = NA,
+  page_fill = "white",
+  page_fill_alpha = 1,
   ...
 )
 }
@@ -103,6 +105,12 @@ support in-line transformations and as such the transformations should be
 applied to the data prior to plotting. The transformerList is used
 internally to ensure that the axes on the constructed plots are
 appropriately labelled.}
+
+\item{page_fill}{colour to use to fill the page prior to adding plot panels,
+set to \code{"white"} by default.}
+
+\item{page_fill_alpha}{numeric [0,1] to control the transparency of the page
+colour, set to 1 by default to remove transparency.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 }
