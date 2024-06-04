@@ -5,6 +5,7 @@
 # CytoExploreR 2.0.7
 
 * Bug fixes to handling of `page_fill` and `page_fill_alpha` within the `cyto_plot()` family of functions.
+* Add `close` button to `cyto_spillove_edit()` which saves the spillover matrix and then kills the application.
 
 # CytoExploreR 2.0.6
 

@@ -128,6 +128,9 @@ cyto_spillover_edit <- function(x,
                                 viewer = FALSE,
                                 ...) {
   
+  # NOTE: We can't run the app in a loop as it listens to previous port and 
+  # uses spillover matrix from previous run as pData input for next run.
+  
   # PREPARE DATA ---------------------------------------------------------------
   
   # CYTOSET/GATINGSET
@@ -158,7 +161,7 @@ cyto_spillover_edit <- function(x,
   } else {
     channels <- cyto_channels_extract(x, channels)
   }
-
+  
   # SAMPLE NAMES
   nms <- cyto_names(x)
   
@@ -177,7 +180,7 @@ cyto_spillover_edit <- function(x,
       }
     )
     pd <- pd[match(rownames(cyto_details(x)), rownames(pd)), , drop = FALSE]
-  # BYPASS CHANNEL_MATCH
+    # BYPASS CHANNEL_MATCH
   } else {
     # BYPASS CYTO_CHANNEL_MATCH TO ALLOW FULL STAINED SAMPLES
     lapply(
@@ -193,7 +196,7 @@ cyto_spillover_edit <- function(x,
       }
     )
   }
-
+  
   # UPDATE EXPERIMENT DETAILS
   cyto_details(x) <- pd
   
@@ -245,7 +248,7 @@ cyto_spillover_edit <- function(x,
     # NO SPILLOVER MATRIX FOUND
     if(!is.null(spillover)) {
       spillover <- spillover[!LAPPLY(spillover, "is.null")][[1]]
-    # TEMPLATE SPILLOVER MATRIX
+      # TEMPLATE SPILLOVER MATRIX
     } else {
       spillover <- matrix(
         0,
@@ -258,7 +261,7 @@ cyto_spillover_edit <- function(x,
       )
       diag(spillover) <- 1
     }
-  # PREPARE SUPPLIED SPILLOVER MATRIX
+    # PREPARE SUPPLIED SPILLOVER MATRIX
   } else {
     spillover <- .cyto_spillover_prepare(
       x,
@@ -317,7 +320,7 @@ cyto_spillover_edit <- function(x,
     # AVOID UNSTAINED CONTROL
     if (any(grepl("Unstained", pd$channel))) {
       ID_select <- pd$name[!grepl("Unstained",pd$channel,ignore.case = TRUE)][1]
-    # USE FIRST SAMPLE
+      # USE FIRST SAMPLE
     } else {
       ID_select <- pd$name[1]
     }
@@ -406,7 +409,11 @@ cyto_spillover_edit <- function(x,
                           "line",
                           "tracker"
                         )),
-              spillSaveUI("editor_save")
+              spillSaveUI("editor_save"),
+              actionButton(
+                "close",
+                "Close"
+              )
             ),
             mainPanel(
               width = 9,
@@ -443,18 +450,18 @@ cyto_spillover_edit <- function(x,
               ),
               optionsUI(
                 "plots_options",
-                 label = NULL,
-                 selected = plots_opts_select,
-                 choiceNames = list(
-                   "Overlay unstained control",
-                   "Overlay compensated data",
-                   "Fit robust linear models"
-                 ),
-                 choiceValues = list(
-                   "unstained",
-                   "compensated",
-                   "models"
-                 )
+                label = NULL,
+                selected = plots_opts_select,
+                choiceNames = list(
+                  "Overlay unstained control",
+                  "Overlay compensated data",
+                  "Fit robust linear models"
+                ),
+                choiceValues = list(
+                  "unstained",
+                  "compensated",
+                  "models"
+                )
               )
             ),
             mainPanel(
@@ -563,7 +570,7 @@ cyto_spillover_edit <- function(x,
               quiet = TRUE
             )
           }
-        # NO UNSTAINED CONTROL SELECTED
+          # NO UNSTAINED CONTROL SELECTED
         } else {
           values$NIL_comp_trans <- NULL
         }
@@ -626,7 +633,7 @@ cyto_spillover_edit <- function(x,
               quiet = TRUE
             )
           }
-        # NO SAMPLE SELECTED
+          # NO SAMPLE SELECTED
         } else {
           values$ID_comp_trans <- NULL
         }
@@ -810,6 +817,18 @@ cyto_spillover_edit <- function(x,
         "editor_save",
         spill = reactive(values$spill),
         save_as = save_as
+      )
+      
+      # CLOSE
+      observeEvent(
+        input$close,
+        {
+          write_to_csv(
+            reactive(values$spill)(),
+            save_as
+          )
+          stopApp(read_from_csv(save_as))
+        }
       )
       
       # RETURN
@@ -1068,33 +1087,33 @@ nodeSelectServer <- function(id,
   moduleServer(
     id, 
     function(input, output, session) {
-    
-    # NAMESPACE
-    ns <- session$ns
-    
-    # VALUES
-    values <- reactiveValues(
-      select = NULL
-    )
-    
-    # UPDATE UI OPTIONS
-    observe({
-      if(cyto_class(data(), "GatingSet")) {
-        updateSelectInput(
-          session,
-          "select",
-          choices = cyto_nodes(data(), path = "auto"),
-          selected = selected()
-        )
-      }
+      
+      # NAMESPACE
+      ns <- session$ns
+      
+      # VALUES
+      values <- reactiveValues(
+        select = NULL
+      )
+      
+      # UPDATE UI OPTIONS
+      observe({
+        if(cyto_class(data(), "GatingSet")) {
+          updateSelectInput(
+            session,
+            "select",
+            choices = cyto_nodes(data(), path = "auto"),
+            selected = selected()
+          )
+        }
+      })
+      
+      observeEvent(input$select, {
+        values$select <- input$select
+      })
+      
+      return(reactive({values$select}))
     })
-    
-    observeEvent(input$select, {
-      values$select <- input$select
-    })
-    
-    return(reactive({values$select}))
-  })
   
 }
 
@@ -1158,7 +1177,7 @@ spillEditServer <- function(id,
               data.table = FALSE
             )
           }
-        # SPILLOVER MATRIX SUPPLIED
+          # SPILLOVER MATRIX SUPPLIED
         } else {
           sp <- spill()
         }
@@ -1378,7 +1397,7 @@ editPlotServer <- function(id,
   moduleServer(id, function(input,
                             output,
                             session){
-
+    
     # PLOTS
     output$plot <- renderPlot({
       # BYPASS PLOTS FOR MISSING DATA
@@ -1470,7 +1489,7 @@ editPlotServer <- function(id,
               channel = chan,
               inverse = TRUE
             )
-          # NO TRANSFORMERS - LINEAR SCALE
+            # NO TRANSFORMERS - LINEAR SCALE
           } else {
             label_text_x <- min(lims) + 
               0.90 * diff(lims)
@@ -1644,7 +1663,7 @@ compPlotServer <- function(id,
             cs <- cytoset(
               cf_list
             )
-          # STAINED ONLY
+            # STAINED ONLY
           } else {
             cs <- ID_comp_trans()
           }
@@ -1750,10 +1769,10 @@ compPlotServer <- function(id,
       function(z) {
         if (z < n - 1) {
           raw_data[raw_data[, channels[1]] >= chunks[z] &
-                   raw_data[, channels[1]] < chunks[z + 1], ]
+                     raw_data[, channels[1]] < chunks[z + 1], ]
         } else {
           raw_data[raw_data[, channels[1]] >= chunks[z] &
-                   raw_data[, channels[1]] <= chunks[z + 1], ]
+                     raw_data[, channels[1]] <= chunks[z + 1], ]
         }
       }
     )
