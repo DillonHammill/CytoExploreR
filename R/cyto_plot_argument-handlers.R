@@ -139,6 +139,8 @@
       "header_text_size",
       "header_text_col",
       "key_scale", # prepared manually
+      "page_fill",
+      "page_fill_alpha",
       "..."
     )]
   
@@ -193,14 +195,12 @@
   
   layer_args <- c(
     arg_names[grepl("contour", arg_names)], # contour arguments
-    arg_names[grepl("hist_fill", arg_names)], # hist_fill arguments
+    arg_names[grepl("hist_fill",                               arg_names)], # hist_fill arguments
     arg_names[grepl("hist_line", arg_names)], # hist_line arguments
     arg_names[grepl("legend_", arg_names)], # legend aes arguments
     arg_names[grepl("point_", arg_names)], # point args
     "spectra_col",
-    "spectra_col_alpha",
-    "page_fill",
-    "page_fill_alpha"
+    "spectra_col_alpha"
   )
   
   # UPDATE ARG_NAMES

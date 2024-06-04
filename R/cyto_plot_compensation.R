@@ -76,6 +76,10 @@
 #'   to 1 by default.
 #' @param header_text_col colour to use for the header text, set to "black" by
 #'   default.
+#' @param page_fill colour to use to fill the page prior to adding plot panels,
+#'   set to \code{"white"} by default.
+#' @param page_fill_alpha numeric [0,1] to control the transparency of the page
+#'   colour, set to 1 by default to remove transparency.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
 #' @importFrom flowWorkspace cytoset
@@ -121,6 +125,8 @@ cyto_plot_compensation <- function(x,
                                    header_text_font = 2,
                                    header_text_size = 1,
                                    header_text_col = "black",
+                                   page_fill = "white",
+                                   page_fill_alpha = 1,
                                    ...) {
   
   # CYTO_PLOT_COMPLETE ---------------------------------------------------------
@@ -364,6 +370,10 @@ cyto_plot_compensation <- function(x,
   # TOTAL PLOTS
   tp <- n * length(channels)
   
+  # PAGE FILL
+  page_fill <- rep(page_fill, length.out = tpg)
+  page_fill_alpha <- rep(page_fill_alpha, length.out = tpg)
+  
   # HEADER
   if(missing(header)) {
     header <- rep(
@@ -534,6 +544,13 @@ cyto_plot_compensation <- function(x,
                 cyto_plot_new_page()
                 # RECORD
                 rec <- cyto_plot_record()
+                # SET PAGE FILL
+                cyto_plot_par(
+                  bg = adjustcolor(
+                    page_fill[ind],
+                    page_fill_alpha[ind]
+                  )
+                )
               }
               return(rec)
             }

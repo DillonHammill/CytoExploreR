@@ -28,6 +28,8 @@ cyto_plot_gating_scheme(
   header_text_col = "black",
   legend_text_font = 1,
   legend_text_size = 1.2,
+  page_fill = "white",
+  page_fill_alpha = 1,
   ...
 )
 }
@@ -125,6 +127,12 @@ alternatives.}
 
 \item{legend_text_size}{numeric to control the size of text in the legend,
 set to 1.2 by default.}
+
+\item{page_fill}{colour to use to fill the page prior to adding plot panels,
+set to \code{"white"} by default.}
+
+\item{page_fill_alpha}{numeric [0,1] to control the transparency of the page
+colour, set to 1 by default to remove transparency.}
 
 \item{...}{additional arguments passed to \code{cyto_plot()}.}
 }

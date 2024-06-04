@@ -73,6 +73,10 @@
 #' @param gate_line_col colour(s) to use for gates, set to \code{"red"} by
 #'   default. Setting \code{gate_line_col = NA} will automatically match the
 #'   gate colour with node colour.
+#' @param page_fill colour to use to fill the page prior to adding plot panels,
+#'   set to \code{"white"} by default.
+#' @param page_fill_alpha numeric [0,1] to control the transparency of the page
+#'   colour, set to 1 by default to remove transparency.
 #' @param ... additional arguments passed to \code{cyto_plot()}.
 #'
 #' @importFrom flowWorkspace gh_pop_is_hidden
@@ -109,6 +113,8 @@ cyto_plot_gating_scheme <- function(x,
                                     header_text_col = "black",
                                     legend_text_font = 1,
                                     legend_text_size = 1.2,
+                                    page_fill = "white",
+                                    page_fill_alpha = 1,
                                     ...) {
   
   # CYTO_PLOT_COMPLETE ---------------------------------------------------------
@@ -481,6 +487,10 @@ cyto_plot_gating_scheme <- function(x,
     tp <- n * length(x_list)
   }
   
+  # PREPARE PAGE_FILL ARGUMENTS
+  page_fill <- rep(page_fill, length.out = tpg)
+  page_fill_alpha <- rep(page_fill_alpha, length.out = tpg)
+  
   # DEFAULT HEADERS 
   if(missing(header)) {
     # SEPARATE GATING SCHEMES
@@ -773,6 +783,13 @@ cyto_plot_gating_scheme <- function(x,
                   cyto_plot_new_page()
                   # RECORD
                   rec <- cyto_plot_record()
+                  # PAGE FILL
+                  cyto_plot_par(
+                    bg = adjustcolor(
+                      page_fill[ind],
+                      page_fill_alpha[ind]
+                    )
+                  )
                 }
                 return(rec)
               }
@@ -967,6 +984,13 @@ cyto_plot_gating_scheme <- function(x,
                   cyto_plot_new_page()
                   # RECORD
                   rec <- cyto_plot_record()
+                  # PAGE FILL
+                  cyto_plot_par(
+                    bg = adjustcolor(
+                      page_fill[ind],
+                      page_fill_alpha[ind]
+                    )
+                  )
                 }
                 return(rec)
               }

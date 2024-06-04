@@ -864,11 +864,11 @@ cyto_plot <- function(x,
     }
   }
   
-  # HEADER ARGUMENTS - REPEAT PER PAGE
-  header_args <- args[grepl("^header", names(args))]
-  for(i in names(header_args)) {
-    header_args[[i]] <- rep(
-      header_args[[i]], 
+  # PAGE ARGUMENTS - HEADER
+  page_args <- args[grepl("^header|^page_fill", names(args))]
+  for(i in names(page_args)) {
+    page_args[[i]] <- rep(
+      page_args[[i]], 
       length.out = if(!is.null(dim(args$layout))) {
         max(unique(unlist(args$layout)))
       }else {
@@ -879,10 +879,10 @@ cyto_plot <- function(x,
   }
   
   # UPDATE HEADER ARGUMENTS
-  .args_update(header_args)
+  .args_update(page_args)
   
   # REMOVE HEADER ARGUMENTS - CANNOT SPLIT LATER
-  args <- args[!names(args) %in% names(header_args)]
+  args <- args[!names(args) %in% names(page_args)]
   
   # KEY_SCALE 
   args$key_scale <- .cyto_plot_key_scale(
@@ -924,10 +924,14 @@ cyto_plot <- function(x,
     layout = args$layout,
     oma = oma,
     bg = adjustcolor(
-      args$page_fill,
-      args$page_fill_alpha
+      page_fill[1],
+      page_fill_alpha[1]
     )
   )
+  
+  # DROP FIRST PAGE FILL ARGUMENTS
+  page_fill <- page_fill[-1]
+  page_fill_alpha <- page_fill_alpha[-1]
   
   # RESET LABEL MEMORY
   if(cyto_option("cyto_plot_method") == "cytoset" & 
@@ -1096,7 +1100,15 @@ cyto_plot <- function(x,
         p <- cyto_plot_record()
         # NEW DEVICE
         if(z < length(args)) {
-          cyto_plot_new() # USE GLOBAL SETTINGS
+          # TODO: which page is it on?
+          cyto_plot_new(
+            bg = adjustcolor(
+              page_fill[1],
+              page_fill_alpha[1]
+            )
+          ) # USE GLOBAL SETTINGS
+          page_fill <<- page_fill[-1]
+          page_fill_alpha <<- page_fill_alpha[-1]
         }
       } else {
         p <- NULL

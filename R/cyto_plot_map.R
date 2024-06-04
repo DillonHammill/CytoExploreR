@@ -65,6 +65,10 @@
 #'   applied to the data prior to plotting. The transformerList is used
 #'   internally to ensure that the axes on the constructed plots are
 #'   appropriately labelled.
+#' @param page_fill colour to use to fill the page prior to adding plot panels,
+#'   set to \code{"white"} by default.
+#' @param page_fill_alpha numeric [0,1] to control the transparency of the page
+#'   colour, set to 1 by default to remove transparency.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -150,6 +154,8 @@ cyto_plot_map <- function(x,
                           header,
                           title,
                           axes_trans = NA,
+                          page_fill = "white",
+                          page_fill_alpha = 1,
                           ...) {
   
   # TODO: ADD SUPPORT FOR ALIAS
@@ -306,6 +312,10 @@ cyto_plot_map <- function(x,
     tp <- n * length(x)
   }
   
+  # PREPARE PAGE_FILL ARGUMENTS
+  page_fill <- rep(page_fill, length.out = tpg)
+  page_fill_alpha <- rep(page_fill_alpha, length.out = tpg)
+  
   # DEFAULT HEADERS
   if(missing(header)) {
     # CHANNEL ORDER - GROUPS AS HEADERS
@@ -412,6 +422,8 @@ cyto_plot_map <- function(x,
                    },
                    point_col = point_col[w],
                    point_col_scale = point_col_scale[[w]],
+                   page_fill = page_fill[cnt + ceiling(w/np)],
+                   page_fill_alpha = page_fill_alpha[cnt + ceiling(w/np)],
                    ...
                  )
                }
@@ -456,6 +468,8 @@ cyto_plot_map <- function(x,
                   },
                   point_col = point_col[z],
                   point_col_scale = point_col_scale[[z]],
+                  page_fill = page_fill[cnt + ceiling(w/np)],
+                  page_fill_alpha = page_fill_alpha[cnt + ceiling(w/np)],
                   ...
                 )
               }
