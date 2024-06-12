@@ -1,7 +1,7 @@
 Package: CytoExploreR
 Type: Package
 Title: Interactive Analysis of Cytometry Data
-Version: 2.0.7
+Version: 2.0.8
 Date: 2024-06-04
 Authors@R: c(
   person("Dillon", "Hammill", role = c("aut", "cre"), email = "Dillon.Hammill@anu.edu.au"),
