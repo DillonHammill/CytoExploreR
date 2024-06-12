@@ -124,11 +124,9 @@
                        "polygon",
                        "ellipse",
                        "quadrant",
-                       "web",
-                       "multirange"))){
+                       "web"))){
       stop(
-        "Supported 1D gate types include interval, boundary, threshold and ",
-        "multirange."
+        "Supported 1D gate types include interval, boundary, and threshold."
       )
     }
   }
