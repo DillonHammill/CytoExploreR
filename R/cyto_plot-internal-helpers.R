@@ -379,14 +379,26 @@
   }
   
   # EVENT-ID
-  if(length(x) > 1) { 
-    if(!all(sapply(x, function(z) {"Event-ID" %in% cyto_channels(z)}))) {
-      stop(
-        "Data must be barcoded using cyto_barcode(x, 'events') to display overlays."
-      )
-    }
+  if(length(x[[1]]) > 1) {
+    lapply(
+      x, 
+      function(z) {
+        if(length(z) > 1) {
+          if(!all(LAPPLY(
+            z, 
+            function(w) {
+              "Event-ID" %in% cyto_channels(w)
+            }
+          ))) {
+            stop(
+              "Data must be barcoded using cyto_barcode(x, 'events') to display overlays."
+            )
+          }
+        }
+      }
+    )
   }
-  
+
   # SOM
   if(som) {
     # MERGE SOM AT EACH LAYER
