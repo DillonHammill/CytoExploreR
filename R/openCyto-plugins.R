@@ -151,7 +151,7 @@
   # EXPERIMENT GROUPS
   if(!.all_na(groupBy)) {
     # VARIABLE NAMES
-    if(all(grepl("^[A-Za-z]+$", groupBy, ignore.case = TRUE))) {
+    if(all(!grepl("^[0-9]*$", groupBy, ignore.case = TRUE))) {
       # MATCH NAMES FS TO GROUPS IN GS
       grps <- cyto_groups(
         gs,

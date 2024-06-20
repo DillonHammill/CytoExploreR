@@ -1,6 +1,10 @@
-# CytoExploreR 2.0.10 (pre-release)
+# CytoExploreR 2.0.11 (pre-release)
 
 * The behavior of `cyto_merge_by()` when `merge_by = NA` has changed from collapsing all samples to instead split samples individually. This is because splitting by `name` may not always work in cases where multiple samples share the same file names. This change requires updates to openCyto which should be re-installed when updating to the new version of CytoExploreR.
+
+# CytoExploreR 2.0.10
+
+* Added support for non-alphabet characters in `pData` grouping variables for `cyto_gate_draw()` openCyto plugin.
 
 # CytoExploreR 2.0.9
 
