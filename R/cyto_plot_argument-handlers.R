@@ -341,7 +341,8 @@
                           "size",
                           "font",
                           "label_fill",
-                          "gate_fill"), function(r){
+                          "gate_fill",
+                          "point_bins"), function(r){
                             grepl(r, arg, ignore.case = TRUE)
                           }))){
             arg_ind <- which(arg_split[[z]] == "*-*")
