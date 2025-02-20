@@ -613,6 +613,14 @@ cyto_unmix.flowFrame <- function(x,
     }
   }
   
+  # ROW SUM-TO-ONE
+  unmix <- sweep(
+    unmix,
+    1,
+    rowSums(unmix),
+    "/"
+  )
+  
   # CHANNELS
   channels <- cyto_channels(x)
   
