@@ -329,6 +329,11 @@ cyto_gate_draw <- function(x,
     lapply(
       seq_along(cs_lists), 
       function(z) {
+      # PRINT GROUP PROGRESS
+      message(
+        "[", z, "/", length(cs_lists), "]: ",
+        names(cs_lists)[z]
+      )
       # CYTOSET LIST
       cs_list <- cs_lists[[z]]
       # CYTO_PLOT
