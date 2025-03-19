@@ -661,8 +661,9 @@ cyto_plot <- function(x,
   if(all(LAPPLY(args$title, ".empty"))) {
     # REPEAT
     args$title <- rep("", length(args$x))
-    # HISTOGRAMS
-    if(length(args$channels) == 1) {
+    # HISTOGRAMS - USE SAME TITLE AS 2D PLOT FOR CYTO_PLOT_EXPLORE()
+    if(length(args$channels) == 1 & 
+       !cyto_option("cyto_plot_method") %in% "explore") {
       args$title <- LAPPLY(
         seq_along(args$title), 
         function(z){
@@ -802,27 +803,25 @@ cyto_plot <- function(x,
       "las" = 2
     )
   } else {
-    axes_text_x <- 
-      .cyto_plot_axes_text(
-        args$x[[1]],
-        channels = args$channels[1],
-        axes_text = args$axes_text[1],
-        axes_trans = args$axes_trans,
-        axes_range = list(args$xlim),
-        axes_limits = args$axes_limits
-      )[[1]]
+    axes_text_x <- .cyto_plot_axes_text(
+      args$x[[1]],
+      channels = args$channels[1],
+      axes_text = args$axes_text[1],
+      axes_trans = args$axes_trans,
+      axes_range = list(args$xlim),
+      axes_limits = args$axes_limits
+    )[[1]]
   }
   
   # Y AXIS BREAKS & LABELS
-  axes_text_y <- 
-    .cyto_plot_axes_text(
-      args$x[[1]],
-      channels = args$channels[2],
-      axes_text = args$axes_text[2],
-      axes_trans = args$axes_trans,
-      axes_range = list(args$ylim),
-      axes_limits = args$axes_limits
-    )[[1]]
+  axes_text_y <- .cyto_plot_axes_text(
+    args$x[[1]],
+    channels = args$channels[2],
+    axes_text = args$axes_text[2],
+    axes_trans = args$axes_trans,
+    axes_range = list(args$ylim),
+    axes_limits = args$axes_limits
+  )[[1]]
 
   # AXES_TEXT
   args$axes_text <- list(axes_text_x, axes_text_y)
