@@ -5142,8 +5142,9 @@
 #' Get density fill colours for cyto_plot
 #'
 #' @param x list of flowFrame or density objects.
-#' @param density_fill vector of colours to use for each layer.
-#' @param density_cols vector of colls to use to select density_fill colours.
+#' @param hist_fill vector of colours to use for each layer.
+#' @param hist_cols vector of colls to use to select density_fill colours.
+#' @param hist_fill_alpha transparency of histogram fill colours.
 #'
 #' @importFrom grDevices adjustcolor colorRampPalette
 #'
@@ -5153,7 +5154,11 @@
 .cyto_plot_hist_fill <- function(x,
                                  hist_fill = NA,
                                  hist_cols = NA,
-                                 hist_fill_alpha = 1) {
+                                 hist_fill_alpha = 1,
+                                 point_col = NA,
+                                 point_cols = NA,
+                                 point_col_scale = NA,
+                                 point_col_alpha = 1) {
   
   # INHERIT CYTO_PLOT_THEME ----------------------------------------------------
   
@@ -5173,9 +5178,16 @@
   
   # DENSITY_FILL ---------------------------------------------------------------
   
+  # NOTE: HIST_COLS AND POINT_COLS ARE REDUNDANT HERE
+  
   # No hist_cols supplied
   if (.all_na(hist_cols)) {
     hist_cols <- .cyto_plot_colour_palette(type = "hist_cols")
+  }
+  
+  # GET DEFAULT POINT_COL_SCALE
+  if(.all_na(point_col_scale)) {
+    point_col_scale <- .cyto_plot_point_col_scale()
   }
   
   # Make colorRampPalette
@@ -5185,36 +5197,48 @@
     cols <- hist_cols
   }
   
-  # No colours supplied to hist_fill either
-  if (.all_na(hist_fill)) {
-    
-    # Pull out a single colour per layer
-    hist_fill <- cols(SMP)
-    
-    # Colours supplied manually to hist_fill
-  } else {
-    
-    # Too few colours supplied - pull others from cols
-    if (length(hist_fill) < SMP) {
-      hist_fill <- c(
-        hist_fill,
-        cols(SMP - length(hist_fill))
-      )
-      
-      # Too many colours supplied
-    } else if (length(hist_fill) > SMP) {
-      hist_fill <- hist_fill[seq_len(SMP)]
-    }
+  # HIST_FILL TEMPLATE - FILL WITH NA
+  hist_fill <- rep(c(hist_fill, rep(NA, SMP)), length.out = SMP)
+  
+  # POINT_COL TEMPLATE - FILL WITH NA
+  point_col <- rep(c(point_col, rep(NA, SMP)), length.out = SMP)
+  
+  # POINT_COL MAY BE SPECIFIED BY ACCIDENT
+  hist_fill <- ifelse(is.na(hist_fill), point_col, hist_fill)
+  
+  # BOTTOM POINT_COL_SCALE COLOUR AS DEFAULT
+  if(is.na(hist_fill[1])) {
+    hist_fill[1] <- point_col_scale[1]
   }
   
+  # REPLACE MISSING COLOURS WITH DEFAULTS
+  idx <- which(is.na(hist_fill))
+  hist_fill[idx] <- cols(length(idx))
+  
   # Adjust colors by hist_fill_alpha
-  hist_fill <- mapply(function(hist_fill, hist_fill_alpha) {
-    if (hist_fill_alpha != 1) {
-      adjustcolor(hist_fill, hist_fill_alpha)
-    } else {
-      hist_fill
-    }
-  }, hist_fill, hist_fill_alpha, USE.NAMES = FALSE)
+  hist_fill <- mapply(
+    function(
+    hist_fill, 
+    hist_fill_alpha,
+    point_col_alpha) {
+      alpha <- min(
+        hist_fill_alpha,
+        point_col_alpha
+      )
+      if (alpha != 1) {
+        adjustcolor(
+          hist_fill, 
+          alpha
+        )
+      } else {
+        hist_fill
+      }
+    },
+    hist_fill, 
+    hist_fill_alpha,
+    point_col_alpha,
+    USE.NAMES = FALSE
+  )
   
   return(hist_fill)
 }

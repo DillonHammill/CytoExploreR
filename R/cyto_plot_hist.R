@@ -106,6 +106,7 @@ cyto_plot_hist <- function(x,
     # HISTOGRAMS
     args <- .args_list(...)
     args$channels <- cyto_channels_extract(x[[1]], channel)
+    rm(args)
     d <- do.call(".cyto_plot_hist", args)
   }
   
@@ -117,32 +118,37 @@ cyto_plot_hist <- function(x,
   # ARGUMENTS ------------------------------------------------------------------
   
   # ARGUMENTS
-  args <- .args_list(...)[-match("args", names(args))]
+  args <- .args_list(...)
   
   # CYTO_PLOT_THEME
   args <- .cyto_plot_theme_inherit(args)
   
-  # UPDATE ARGUMENTS
-  .args_update(args)
-  
   # HIST_FILL ------------------------------------------------------------------
   
+  # NOTE: WE NEED TO PASS POINT_COL ARGUMENTS HERE TO ENSURE CONSISTENT COLOURS
   # HIST_FILL COLOURS
-  hist_fill <- .cyto_plot_hist_fill(
-    x,
-    hist_fill = hist_fill,
-    hist_cols = hist_cols,
-    hist_fill_alpha = hist_fill_alpha
+  # hist_fill <- .cyto_plot_hist_fill(
+  #   x,
+  #   hist_fill = hist_fill,
+  #   hist_cols = hist_cols,
+  #   hist_fill_alpha = hist_fill_alpha,
+  #   ... # point_col arguments
+  # )
+  hist_fill <- cyto_func_execute(
+    ".cyto_plot_hist_fill",
+    args
   )
   
   # REPEAT ARGUMENTS -----------------------------------------------------------
   
   # ARGUMENTS TO REPEAT
-  args <- .args_list()[c(
-    "hist_line_type",
-    "hist_line_width",
-    "hist_line_col"
-  )]
+  args <- .args_list()[
+    c(
+      "hist_line_type",
+      "hist_line_width",
+      "hist_line_col"
+    )
+  ]
   
   # REPEAT ARGUMENTS
   args <- lapply(args, function(arg) {

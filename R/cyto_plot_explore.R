@@ -157,6 +157,8 @@ cyto_plot_explore <- function(x,
     channels_x[1], 
     channels_y[channels_y %in% channels_x[1]][1]
   )
+  
+  # PREPARE DATA
   x <- cyto_func_execute(
     ".cyto_plot_data",
     args
