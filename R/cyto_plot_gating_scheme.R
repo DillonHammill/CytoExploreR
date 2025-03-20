@@ -77,6 +77,7 @@
 #'   set to \code{"white"} by default.
 #' @param page_fill_alpha numeric [0,1] to control the transparency of the page
 #'   colour, set to 1 by default to remove transparency.
+#' @param ylim lower and upper limits of y axes (e.g. c(0,250000)).
 #' @param ... additional arguments passed to \code{cyto_plot()}.
 #'
 #' @importFrom flowWorkspace gh_pop_is_hidden
@@ -115,6 +116,7 @@ cyto_plot_gating_scheme <- function(x,
                                     legend_text_size = 1.2,
                                     page_fill = "white",
                                     page_fill_alpha = 1,
+                                    ylim = NA, 
                                     ...) {
   
   # CYTO_PLOT_COMPLETE ---------------------------------------------------------
@@ -631,6 +633,10 @@ cyto_plot_gating_scheme <- function(x,
                 alias <- unique(gt_split[[w]]$alias_auto)
                 # CHANNELS
                 channels <- unlist(strsplit(unique(gt_split[[w]]$dims), ","))
+                # DEFAULT YLIM FOR HISTOGRAMS
+                if(length(channels) == 1) {
+                  ylim <- NA
+                }
                 # OVERLAY
                 pops <- NULL
                 if(!.all_na(overlay)) {
@@ -681,6 +687,7 @@ cyto_plot_gating_scheme <- function(x,
                   title_text_col = node_props[
                     node_props$node %in% parent, "title_text_col"
                   ],
+                  ylim = ylim, 
                   ...
                 )
                 # LEGEND
@@ -831,6 +838,10 @@ cyto_plot_gating_scheme <- function(x,
                 alias <- unique(gt_chunk[, "alias_auto"])
                 # CHANNELS
                 channels <- unlist(strsplit(unique(gt_chunk[, "dims"]), ","))
+                # DEFAULT YLIM FOR HISTOGRAMS
+                if(length(channels) == 1) {
+                  ylim <- NA
+                }
                 # POPULATIONS TO OVERLAY 
                 pops <- NULL
                 # OVERLAY
@@ -882,6 +893,7 @@ cyto_plot_gating_scheme <- function(x,
                   title_text_col = node_props[
                     node_props$node %in% parent, "title_text_col"
                   ],
+                  ylim = ylim,
                   ...
                 )
                 # LEGEND - FULL LEGEND ON EACH PAGE

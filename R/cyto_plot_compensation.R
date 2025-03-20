@@ -80,6 +80,7 @@
 #'   set to \code{"white"} by default.
 #' @param page_fill_alpha numeric [0,1] to control the transparency of the page
 #'   colour, set to 1 by default to remove transparency.
+#' @param ylim lower and upper limits of y axes (e.g. c(0,250000)).
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
 #' @importFrom flowWorkspace cytoset
@@ -127,6 +128,7 @@ cyto_plot_compensation <- function(x,
                                    header_text_col = "black",
                                    page_fill = "white",
                                    page_fill_alpha = 1,
+                                   ylim = NA,
                                    ...) {
   
   # CYTO_PLOT_COMPLETE ---------------------------------------------------------
@@ -473,6 +475,11 @@ cyto_plot_compensation <- function(x,
                 title = NA,
                 layout = layout,
                 page = FALSE, # MANUAL PAGING REQUIRED
+                ylim = if(xchan == ychan) {  # DEFAULT YLIM FOR HISTOGRAMS
+                  NA
+                } else {
+                  ylim
+                },
                 ...
               )
               # SPILLOVER COEFFICIENTS | MODELS
