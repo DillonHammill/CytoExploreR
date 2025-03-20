@@ -85,11 +85,11 @@ in the console to install the latest versions of
 install.packages("BiocManager")
 # Install flowCore, flowWorkspace and openCyto
 library(BiocManager)
-install(c("flowCore", "flowWorkspace", "openCyto"))
+install(c("cytolib", "flowCore", "flowWorkspace", "flowWorkspaceData", "openCyto"))
 ```
 
 Currently, **CytoExploreR** requires the development versions of these
-RGLab packages hosted on GitHub:
+packages hosted on GitHub:
 
 ``` r
 # Install & load devtools
@@ -97,13 +97,10 @@ tryCatch(library(devtools), error = function(e){
   install.packages("devtools")
   library(devtools)
 })
-# Install flowCore, flowWorkspace & openCyto from GitHub
-install_github("RGLab/RProtoBufLib")
-install_github("RGLab/cytolib")
-install_github("RGLab/flowCore")
-install_github("RGLab/flowWorkspace")
-install_github("RGLab/flowStats")
-install_github("RGLab/openCyto")
+# Install development versions from GitHub
+install_github("DillonHammill/openCyto", force = TRUE)
+install_github("DillonHammill/DataEditR")
+install_github("DillonHammill/HeatmapR")
 ```
 
 ## CytoExploreR
