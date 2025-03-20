@@ -1,6 +1,15 @@
-# CytoExploreR 2.0.12 (pre-release)
+# CytoExploreR 2.0.13 (pre-release)
 
 * The behavior of `cyto_merge_by()` when `merge_by = NA` has changed from collapsing all samples to instead split samples individually. This is because splitting by `name` may not always work in cases where multiple samples share the same file names. This change requires updates to openCyto which should be re-installed when updating to the new version of CytoExploreR.
+
+# CytoExploreR 2.0.12
+
+* Group progress messages for `cyto_gate_draw()`
+* Improved handling of `ylim` for mixed 1D/2D `cyto_plot()` wrappers.
+* Consistent titles for all panels in `cyto_plot_explore()`
+* Default histogram colour has changed to match that of points - the bottom colour of the density colour scale.
+* Histogram and point colours are now in sync.
+* `hist_fill` and `hist_fill_alpha` inherit from `point_col` and `point_col_alpha` to ensure consistency in multi-plot layouts. 
 
 # CytoExploreR 2.0.11
 
