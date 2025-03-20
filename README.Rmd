@@ -34,7 +34,7 @@ After successfully installing R and RStudio, the following additional platform-s
 
 ## Mac OS
 - Install Xcode developer tools from the [App Store](https://apps.apple.com/au/app/xcode/id497799835?mt=12). Restart your computer.
-- Install command line tools by opening the terminal and running xcode-select --install
+- Install command line tools by opening the terminal and running `xcode-select --install`
 - Install macOS R toolchain by installing clang7 and gfortran [here](https://cran.r-project.org/bin/macosx/tools/)
 - Check if XQuartz is listed in your installed Applications, it may be hiding in the utilities folder. If XQuartz is missing on your computer, it can be installed from the [XQuartz](https://www.xquartz.org/) website.
 - Restart your computer so all these changes will take effect.
