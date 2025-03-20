@@ -19,6 +19,7 @@ cyto_plot_explore(
   title,
   page_fill = "white",
   page_fill_alpha = 1,
+  ylim = NA,
   ...
 )
 }
@@ -87,6 +88,8 @@ set to \code{"white"} by default.}
 
 \item{page_fill_alpha}{numeric [0,1] to control the transparency of the page
 colour, set to 1 by default to remove transparency.}
+
+\item{ylim}{lower and upper limits of y axes (e.g. c(0,250000)).}
 
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 }

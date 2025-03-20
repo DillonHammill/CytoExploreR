@@ -53,6 +53,7 @@
 #'   set to \code{"white"} by default.
 #' @param page_fill_alpha numeric [0,1] to control the transparency of the page
 #'   colour, set to 1 by default to remove transparency.
+#' @param ylim lower and upper limits of y axes (e.g. c(0,250000)).
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
 #' @return list of recorded plots.
@@ -110,6 +111,7 @@ cyto_plot_explore <- function(x,
                               title,
                               page_fill = "white",
                               page_fill_alpha = 1,
+                              ylim = NA, 
                               ...) {
   
   # TODO: REMOVE EXCESS ARGUMENTS - PASS THROUGH ... TO .CYTO_PLOT_DATA()
@@ -351,6 +353,7 @@ cyto_plot_explore <- function(x,
                     y_chan <- y_chans[v]
                     if(y_chan == x_chan) {
                       y_chan <- NULL
+                      ylim <- NA # FORCE DEFAULT LIMITS FOR HISTOGRAM Y AXIS
                     }
                     # CONSTRUCT PLOT
                     cyto_plot(
@@ -372,6 +375,7 @@ cyto_plot_explore <- function(x,
                       },
                       page_fill = page_fill[cnt + ceiling(w/np)],
                       page_fill_alpha = page_fill_alpha[cnt + ceiling(w/np)],
+                      ylim = ylim,
                       ...
                     )
                   }
@@ -410,6 +414,7 @@ cyto_plot_explore <- function(x,
                 y_chan <- channels_y[w]
                 if(y_chan == x_chan) {
                   y_chan <- NULL
+                  ylim <- NA # FORCE DEFAULT Y AXIS LIMITS FOR HISTOGRAMS
                 }
                 # LOOP THROUGH GROUPS
                 p <- structure(
@@ -435,6 +440,7 @@ cyto_plot_explore <- function(x,
                         },
                         page_fill = page_fill[cnt + ceiling(v/np)],
                         page_fill_alpha = page_fill_alpha[cnt + ceiling(v/np)],
+                        ylim = ylim,
                         ...
                       )
                     }
