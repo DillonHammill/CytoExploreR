@@ -60,6 +60,8 @@ cyto_plot_spectra <- function(x,
                               spectra_col_alpha = 1,
                               ...) {
  
+  # TODO: ADD SUPPORT FOR PLOTTING SPECTRA FROM SPILLOVER/UNMIX MATRICES
+  
   # PULL DOWN ARGUMENTS
   args <- .args_list(...)
   
@@ -134,6 +136,8 @@ cyto_plot_spectra <- function(x,
       names = cyto_names(x)
     )
   )
+  
+  # TODO: EXTEND BOTTOM MARGIN TO ENCOMPASS CHANNEL NAMES
   
   # CALL CYTO_PLOT()
   cyto_func_call(
