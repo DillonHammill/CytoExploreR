@@ -111,7 +111,7 @@ cyto_plot_explore <- function(x,
                               title,
                               page_fill = "white",
                               page_fill_alpha = 1,
-                              ylim = NA, 
+                              ylim = c(NA, NA), 
                               ...) {
   
   # TODO: REMOVE EXCESS ARGUMENTS - PASS THROUGH ... TO .CYTO_PLOT_DATA()
@@ -353,7 +353,7 @@ cyto_plot_explore <- function(x,
                     y_chan <- y_chans[v]
                     if(y_chan == x_chan) {
                       y_chan <- NULL
-                      ylim <- NA # FORCE DEFAULT LIMITS FOR HISTOGRAM Y AXIS
+                      ylim <- c(NA, NA) # FORCE DEFAULT LIMITS FOR HISTOGRAM Y AXIS
                     }
                     # CONSTRUCT PLOT
                     cyto_plot(
@@ -414,7 +414,7 @@ cyto_plot_explore <- function(x,
                 y_chan <- channels_y[w]
                 if(y_chan == x_chan) {
                   y_chan <- NULL
-                  ylim <- NA # FORCE DEFAULT Y AXIS LIMITS FOR HISTOGRAMS
+                  ylim <- c(NA, NA) # FORCE DEFAULT Y AXIS LIMITS FOR HISTOGRAMS
                 }
                 # LOOP THROUGH GROUPS
                 p <- structure(

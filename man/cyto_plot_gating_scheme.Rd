@@ -30,7 +30,7 @@ cyto_plot_gating_scheme(
   legend_text_size = 1.2,
   page_fill = "white",
   page_fill_alpha = 1,
-  ylim = NA,
+  ylim = c(NA, NA),
   ...
 )
 }

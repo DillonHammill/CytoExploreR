@@ -116,7 +116,7 @@ cyto_plot_gating_scheme <- function(x,
                                     legend_text_size = 1.2,
                                     page_fill = "white",
                                     page_fill_alpha = 1,
-                                    ylim = NA, 
+                                    ylim = c(NA, NA), 
                                     ...) {
   
   # CYTO_PLOT_COMPLETE ---------------------------------------------------------
@@ -635,7 +635,7 @@ cyto_plot_gating_scheme <- function(x,
                 channels <- unlist(strsplit(unique(gt_split[[w]]$dims), ","))
                 # DEFAULT YLIM FOR HISTOGRAMS
                 if(length(channels) == 1) {
-                  ylim <- NA
+                  ylim <- c(NA, NA)
                 }
                 # OVERLAY
                 pops <- NULL
@@ -840,7 +840,7 @@ cyto_plot_gating_scheme <- function(x,
                 channels <- unlist(strsplit(unique(gt_chunk[, "dims"]), ","))
                 # DEFAULT YLIM FOR HISTOGRAMS
                 if(length(channels) == 1) {
-                  ylim <- NA
+                  ylim <- c(NA, NA)
                 }
                 # POPULATIONS TO OVERLAY 
                 pops <- NULL

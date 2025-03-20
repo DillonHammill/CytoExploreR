@@ -36,7 +36,7 @@ cyto_plot_compensation(
   header_text_col = "black",
   page_fill = "white",
   page_fill_alpha = 1,
-  ylim = NA,
+  ylim = c(NA, NA),
   ...
 )
 }
