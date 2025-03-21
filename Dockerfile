@@ -48,7 +48,7 @@ RUN R -e "options('timeout' = 999999)" && \
     R -e "install.packages(c('overlapping', 'FNN'))"
 
 # RETICULATE
-RUN R -e "install.packages('reticulate')"
+RUN R -e "install.packages('reticulate')" && \
     R -e "reticulate::py_discover_config()" && \
     R -e "reticulate::virtualenv_create('cytoexplorer')" && \
     R -e "reticulate::use_virtualenv('cytoexplorer')" && \
