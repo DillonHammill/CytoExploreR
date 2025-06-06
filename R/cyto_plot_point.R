@@ -437,23 +437,15 @@ cyto_plot_point <- function(x,
       if(!is.null(nrow(exprs))) {
         # POINTS - BYPASS EMPTY CYTOFRAME
         if(nrow(exprs) != 0) {
-          # SAMPLE-ID
-          ind <- which(
-            LAPPLY(
-              args$channels,
-              function(v) {
-                grepl("^Sample-ID$", v) # NOT FLOWJO SAMPLE IDS
-              }
-            )
-          )
           # JITTER BARCODES FOR SAMPLE-ID
-          if(length(ind) > 0) {
+          if(any(grepl("^Sample-ID$", args$channels))) {
+            ind <- grep("^Sample-ID$", colnames(exprs))
             exprs[, ind] <- LAPPLY(
               unique(exprs[, ind]),
-              function(w){
+              function(w) {
                 rnorm(
                   n = length(
-                    exprs[, ind][exprs[, ind] == w]
+                    exprs[exprs[, ind] == w, ind]
                   ),
                   mean = w,
                   sd = 0.1
