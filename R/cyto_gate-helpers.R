@@ -3014,6 +3014,8 @@ cyto_gate_convert.list <- function(x,
 cyto_gate_prepare <- function(x,
                               channels = NULL) {
   
+  # NOTE: DUPLICATED GATES WILL BE DROPPED!
+  
   # LIST OF GATES --------------------------------------------------------------
   
   # PREPARE GATE LIST
@@ -3024,6 +3026,7 @@ cyto_gate_prepare <- function(x,
       "ellipsoidGate",
       "quadGate",
       "multiRangeGate",
+      "spectralGate",
       "filters"
     ))) {
       x <- unlist(x)
@@ -3035,6 +3038,7 @@ cyto_gate_prepare <- function(x,
                              "ellipsoidGate",
                              "quadGate",
                              "multiRangeGate",
+                             "spectralGate",
                              "filters"), TRUE)) {
     x <- list(x)
   }
