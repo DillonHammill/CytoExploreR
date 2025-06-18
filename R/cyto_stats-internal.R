@@ -323,7 +323,7 @@ cyto_stat_rsd <- function(x,
 
 ## COEFFICIENT OF VARIATION ----------------------------------------------------
 
-#' Coefficient of Varaition
+#' Coefficient of Variation
 #' @param x a vector or matrix
 #' @param round numeric
 #' @noRd
