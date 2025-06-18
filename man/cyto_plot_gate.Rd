@@ -5,12 +5,13 @@
 \alias{cyto_plot_gate.default}
 \alias{cyto_plot_gate.rectangleGate}
 \alias{cyto_plot_gate.polygonGate}
+\alias{cyto_plot_gate.spectralGate}
 \alias{cyto_plot_gate.ellipsoidGate}
 \alias{cyto_plot_gate.quadGate}
 \alias{cyto_plot_gate.multiRangeGate}
 \alias{cyto_plot_gate.filters}
 \alias{cyto_plot_gate.list}
-\title{Plot Gate Objects onto an Existing cyto_plot}
+\title{Plot Gate Objects onto an existing cyto_plot}
 \usage{
 \method{cyto_plot_gate}{default}(gate, ...)
 
@@ -20,8 +21,13 @@
   gate_line_type = 1,
   gate_line_width = 2.5,
   gate_line_col = "red",
+  gate_line_col_alpha = 1,
   gate_fill = "white",
   gate_fill_alpha = 0,
+  gate_point_shape = NA,
+  gate_point_size = 1,
+  gate_point_col = "red",
+  gate_point_col_alpha = 1,
   ...
 )
 
@@ -31,8 +37,29 @@
   gate_line_type = 1,
   gate_line_width = 2.5,
   gate_line_col = "red",
+  gate_line_col_alpha = 1,
   gate_fill = "white",
   gate_fill_alpha = 0,
+  gate_point_shape = NA,
+  gate_point_size = 1,
+  gate_point_col = "red",
+  gate_point_col_alpha = 1,
+  ...
+)
+
+\method{cyto_plot_gate}{spectralGate}(
+  gate,
+  channels = NULL,
+  gate_line_type = 1,
+  gate_line_width = 2.5,
+  gate_line_col = "red",
+  gate_line_col_alpha = 1,
+  gate_fill = "white",
+  gate_fill_alpha = 0,
+  gate_point_shape = NA,
+  gate_point_size = 1,
+  gate_point_col = "red",
+  gate_point_col_alpha = 1,
   ...
 )
 
@@ -42,8 +69,13 @@
   gate_line_type = 1,
   gate_line_width = 2.5,
   gate_line_col = "red",
+  gate_line_col_alpha = 1,
   gate_fill = "white",
   gate_fill_alpha = 0,
+  gate_point_shape = NA,
+  gate_point_size = 1,
+  gate_point_col = "red",
+  gate_point_col_alpha = 1,
   ...
 )
 
@@ -53,8 +85,13 @@
   gate_line_type = 1,
   gate_line_width = 2.5,
   gate_line_col = "red",
+  gate_line_col_alpha = 1,
   gate_fill = "white",
   gate_fill_alpha = 0,
+  gate_point_shape = NA,
+  gate_point_size = 1,
+  gate_point_col = "red",
+  gate_point_col_alpha = 1,
   ...
 )
 
@@ -64,8 +101,13 @@
   gate_line_type = 1,
   gate_line_width = 2.5,
   gate_line_col = "red",
+  gate_line_col_alpha = 1,
   gate_fill = "white",
   gate_fill_alpha = 0,
+  gate_point_shape = NA,
+  gate_point_size = 1,
+  gate_point_col = "red",
+  gate_point_col_alpha = 1,
   ...
 )
 
@@ -75,8 +117,13 @@
   gate_line_type = 1,
   gate_line_width = 2.5,
   gate_line_col = "red",
+  gate_line_col_alpha = 1,
   gate_fill = "white",
   gate_fill_alpha = 0,
+  gate_point_shape = NA,
+  gate_point_size = 1,
+  gate_point_col = "red",
+  gate_point_col_alpha = 1,
   ...
 )
 
@@ -86,8 +133,13 @@
   gate_line_type = 1,
   gate_line_width = 2.5,
   gate_line_col = "red",
+  gate_line_col_alpha = 1,
   gate_fill = "white",
   gate_fill_alpha = 0,
+  gate_point_shape = NA,
+  gate_point_size = 1,
+  gate_point_col = "red",
+  gate_point_col_alpha = 1,
   ...
 )
 }
@@ -112,18 +164,33 @@
 \item{gate_line_col}{indicates the colour of the gate to be constructed, set
 to \code{"red"} by default.}
 
+\item{gate_line_col_alpha}{numeric to control the transparency of gate lines,
+set to 1 by default.}
+
 \item{gate_fill}{fill colour(s) to use for gates, set to "white" by default.}
 
 \item{gate_fill_alpha}{numeric [0,1] to control gate fill colour
 transparency, set to 0 by default to make gate fill colour completely
 transparent.}
+
+\item{gate_point_shape}{point shape to use for gate vertices, set to NA by
+default to plot lines only.}
+
+\item{gate_point_size}{numeric to control the size of gate vertices, set to 1
+by default.}
+
+\item{gate_point_col}{colour(s) to use for gate vertices, set to \code{"red"}
+by default.}
+
+\item{gate_point_col_alpha}{numeric [0, 1] to control the transparency of
+gate vertices, set to 1 by default for solid colours.}
 }
 \value{
 invisibly return modified gate objects with dimensions appropriate
   for the constructed plot.
 }
 \description{
-Plot Gate Objects onto an Existing cyto_plot
+Plot Gate Objects onto an existing cyto_plot
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
