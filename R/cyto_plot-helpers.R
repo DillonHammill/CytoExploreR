@@ -853,31 +853,6 @@ cyto_plot_empty <- function(x,
       ".cyto_plot_key",
       args
     )
-    # .cyto_plot_key(
-    #   x,
-    #   channels = channels,
-    #   xlim = xlim,
-    #   ylim = ylim,
-    #   point_col = point_col,
-    #   point_col_scale = point_col_scale,
-    #   point_col_alpha = point_col_alpha,
-    #   key = key,
-    #   key_size = key_size,
-    #   key_scale = key_scale,
-    #   key_text_font = key_text_font,
-    #   key_text_size = key_text_size,
-    #   key_text_col = key_text_col,
-    #   key_text_col_alpha = key_text_col_alpha,
-    #   axes_trans = axes_trans,
-    #   key_title = key_title,
-    #   key_title_text_size = key_title_text_size,
-    #   key_title_text_font = key_title_text_font,
-    #   key_title_text_col = key_title_text_col,
-    #   key_title_text_col_alpha = key_title_text_col_alpha,
-    #   key_hist_line_type = key_hist_line_type,
-    #   key_hist_line_width = key_hist_line_width,
-    #   key_hist_line_col = key_hist_line_col
-    # )
   }
   
   # LEGEND - FALSE/"fill"/"line"
@@ -886,36 +861,6 @@ cyto_plot_empty <- function(x,
       ".cyto_plot_legend",
       args
     )
-    # .cyto_plot_legend(
-    #   x,
-    #   channels = channels,
-    #   legend = legend,
-    #   legend_text = legend_text,
-    #   legend_text_font = legend_text_font,
-    #   legend_text_size = legend_text_size,
-    #   legend_text_col = legend_text_col,
-    #   legend_line_type = legend_line_type,
-    #   legend_line_width = legend_line_width,
-    #   legend_line_col = legend_line_col,
-    #   legend_box_fill = legend_box_fill,
-    #   legend_point_col = legend_point_col,
-    #   hist_cols = hist_cols,
-    #   hist_fill = hist_fill,
-    #   hist_fill_alpha = hist_fill_alpha,
-    #   hist_line_type = hist_line_type,
-    #   hist_line_width = hist_line_width,
-    #   hist_line_col = hist_line_col,
-    #   point_shape = point_shape,
-    #   point_size = point_size,
-    #   point_col_scale = point_col_scale,
-    #   point_cols = point_cols,
-    #   point_col = point_col,
-    #   point_col_alpha = point_col_alpha,
-    #   key = key,
-    #   spectra_col_scale = NA,
-    #   spectra_col = NA,
-    #   spectra_col_alpha = 1
-    # )
   }
 }
 

@@ -128,7 +128,11 @@ cyto_transformers_define <- function(x,
                                      progress = TRUE,
                                      ...) {
   
+  # TODO: ADD SUPPORT FOR CSV FILE WITH WIDTHBASIS OR COFACTOR
+  
   # NOTE: AXES_LIMITS CAUSE ARGUMENT CONFLICT WITH A FOR LOGICLE
+  
+  # NOTE: COFACTORS CAN BE SUPPLIED AS NAMED VECTOR OR CSV
   
   # RESET PROGRESS BAR ON EXIT
   on.exit({
@@ -190,6 +194,28 @@ cyto_transformers_define <- function(x,
     )
   }
   
+  # COFACTORS
+  if("cofactor" %in% names(args)) {
+    cofactors <- args[["cofactor"]]
+    # COFACTOR CSV FILE
+    if(is.character(cofactors) & length(cofactors) == 1) {
+      # IMPORT COFACTORS
+      cofactors <- read_from_csv(
+        cofactors
+      )
+      # FORMAT COFACTORS
+      cofactors <- structure(
+        cofactors[, grep("cofactor", colnames(cofactors), ignore.case = TRUE)],
+        names = cyto_channels_extract(
+          x,
+          cofactors[, grep("fluor|channel|marker", colnames(cofactors))]
+        )
+      )
+    }
+  } else {
+    cofactors <- NULL
+  }
+  
   # TRANSFORMATION DEFINITIONS
   transformer_list <- structure(
     lapply(
@@ -221,50 +247,64 @@ cyto_transformers_define <- function(x,
             } else {
               # FLOWVS - CANNOT TURN OFF PLOTS & MESSAGES USE CAT
               # COFACTOR SUPPLIED MANUALLY
-              if("cofactor" %in% names(args)) {
-                cf <- args[["cofactor"]]
-              # ESTIMATE COFACTOR USING FLOWVS
-              } else {
-                # FLOWVS
-                cyto_require("flowVS",
-                             source = "BioC",
-                             repo = NULL,
-                             version = NULL,
-                             ref = paste0(
-                               "Azad A, Rajwa B, Pothen A (2016). flowVS:",
-                               " channel-specific variance stabilisation in",
-                               " flow cytometry, BMC Bioinformatics 17(291)."))
-                # ESTIMATE COFACTOR TO STABILISE VARAIANCE
-                message(
-                  paste0(
-                    "Using flowVS to estimate cofactor for ", z, "..."
+              if(length(cofactors) > 0) {
+                # COFACTOR MANUALLY SUPPLIED
+                if(channel %in% names(cofactors)) {
+                  cf <- as.numeric(cofactors[channel])
+                # ESTIMATE COFACTOR USING FLOWVS
+                } else {
+                  # FLOWVS
+                  cyto_require("flowVS",
+                               source = "BioC",
+                               repo = NULL,
+                               version = NULL,
+                               ref = paste0(
+                                 "Azad A, Rajwa B, Pothen A (2016). flowVS:",
+                                 " channel-specific variance stabilisation in",
+                                 " flow cytometry, BMC Bioinformatics 17(291)."))
+                  # ESTIMATE COFACTOR TO STABILISE VARAIANCE
+                  message(
+                    paste0(
+                      "Using flowVS to estimate cofactor for ", z, "..."
+                    )
                   )
-                )
-                invisible(
-                  capture.output(
-                    cf <- cyto_func_call(
-                      "flowVS::estParamFlowVS",
-                      list(
-                        cyto_data_extract(
-                          x,
-                          parent = parent,
-                          select = select,
-                          format = "cytoset",
-                          channels = z
-                        )[[1]],
-                        z
+                  invisible(
+                    capture.output(
+                      cf <- cyto_func_call(
+                        "flowVS::estParamFlowVS",
+                        list(
+                          cyto_data_extract(
+                            x,
+                            parent = parent,
+                            select = select,
+                            format = "cytoset",
+                            channels = z
+                          )[[1]],
+                          z
+                        )
                       )
                     )
                   )
-                )
+                }
               }
               # TRANSFORMER DEFINITIONS
-              asinh_trans <- function(x, cofactor = cf) {
-                asinh(x/cofactor)
-              }
-              sinh_trans <- function(x, cofactor = cf) {
-                sinh(x) * cofactor
-              }
+              trans_fun <- asinh_Gml2(
+                T = sinh(1) * cf,
+                M = 0.43429448190325176
+              )
+              inv_fun <- asinh_Gml2(
+                T = sinh(1) * cf,
+                M = 0.43429448190325176, 
+                inverse = TRUE
+              )
+              
+              # asinh_trans <- function(x, cofactor = cf) {
+              #   asinh(x/cofactor)
+              # }
+              # sinh_trans <- function(x, cofactor = cf) {
+              #   sinh(x) * cofactor
+              # }
+              
               # TRANSFORMERS
               trans <- flow_trans(
                 "arcsinh",

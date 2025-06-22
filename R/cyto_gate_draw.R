@@ -390,10 +390,11 @@ cyto_gate_draw <- function(x,
                    label_text_col_alpha,
                    label_fill,
                    label_fill_alpha){
-            # DATA TO GATE
-            x <- cs_list[[1]]
             # ARGUMENTS
             args <- .args_list()
+            # DATA TO GATE
+            args$x <- cs_list[[1]]
+            # CHANNELS
             args$channels <- channels
             # GATE
             if(!.all_na(type)) {

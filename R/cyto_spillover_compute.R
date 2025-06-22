@@ -164,7 +164,7 @@ cyto_spillover_compute <- function(x,
   
   # TODO: SELECT ARGUMENT AND GATE STORAGE ISSUES - GSUB?
   
-  # TODO: GATE SVAING NEEDS TO BE HOOKED UP - COMPONENTS HERE ALREADY
+  # TODO: GATE SAVING NEEDS TO BE HOOKED UP - COMPONENTS HERE ALREADY
   
   # SPILLOVER ------------------------------------------------------------------
   
@@ -633,33 +633,33 @@ cyto_spillover_compute <- function(x,
                   "cyto_plot",
                   c(
                     list(
-                      if(is.null(neg_events)){
-                        x = pos_events
+                      "x" = if(is.null(neg_events)){
+                        pos_events
                       } else {
-                        x = neg_events
+                        neg_events
                       },
-                      channels = y,
-                      overlay = if(!is.null(neg_events)){
+                      "channels" = y,
+                      "overlay" = if(!is.null(neg_events)){
                         pos_events
                       } else {
                         NA
                       },
-                      gate = if(!is.null(gts)) {
+                      "gate" = if(!is.null(gts)) {
                         gts
                       } else {
                         NA
                       },
-                      hist_stack = 0,
-                      hist_fill = if(is.null(neg_events)){
+                      "hist_stack" = 0,
+                      "hist_fill" = if(is.null(neg_events)){
                         "dodgerblue"
                       } else {
                         c("red", "dodgerblue")
                       },
-                      hist_fill_alpha = 0.6,
-                      title = cyto_names(pos_events),
-                      axes_limits = axes_limits, 
-                      axes_trans = axes_trans,
-                      legend = FALSE
+                      "hist_fill_alpha" = 0.6,
+                      "title" = cyto_names(pos_events),
+                      "axes_limits" = axes_limits, 
+                      "axes_trans" = axes_trans,
+                      "legend" = FALSE
                     ),
                     args
                   )
@@ -1109,7 +1109,8 @@ cyto_spillover_compute <- function(x,
       sp,
       cell_col_empty = "black",
       cell_col_scale = .cyto_plot_point_col_scale(),
-      title = "Spillover Matrix"
+      title = "Spillover Matrix",
+      cell_text = TRUE
     )
   }
   
