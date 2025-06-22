@@ -12,6 +12,7 @@ cyto_plot_contour(
   select = NULL,
   events = 1,
   contour_bins = 256,
+  contour_smooth = 0,
   contour_lines = 15,
   contour_line_type = 1,
   contour_line_width = 1,

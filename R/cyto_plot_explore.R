@@ -114,7 +114,11 @@ cyto_plot_explore <- function(x,
                               ylim = c(NA, NA), 
                               ...) {
   
+  # TODO: ADD POINT_STACK ARGUMENT TO OVERLAY MERGED DATA ONTO SINGLE PANEL IF NO OVERLAY
+  
   # TODO: REMOVE EXCESS ARGUMENTS - PASS THROUGH ... TO .CYTO_PLOT_DATA()
+  
+  # TODO: SUPPORT LEGEND PANEL FOR OVERLAYS
   
   # CYTO_PLOT_COMPLETE ---------------------------------------------------------
   
@@ -280,16 +284,21 @@ cyto_plot_explore <- function(x,
     if(.all_na(header)) {
       header <- rep(NA, length.out = tpg)
     } else {
-      # REPEAT HEADERS - MULTIPLE PAGES
+      # HEADER PROVIDED PER PAGE
       if(length(header) == tpg) {
+        # HEADER PREPARED ALREADY
+      # HEADER PROVIDED PER GROUP
+      } else if(length(header) == n) {
         header <- rep(header, each = pg)
+      # HEADERS SHOULD BE PROVIDED PER GROUP or ALL PAGES
       } else {
         stop(
           paste0(
             "Supply a header for each ",
             ifelse(grepl("^c", order, ignore.case = TRUE),
-                   "group!",
-                   "channel!")
+                   "group",
+                   "channel"),
+            " or page!"
           )
         )
       }

@@ -76,6 +76,7 @@
                             events = 50000,
                             hist_layers = NA,
                             hist_stack = 0,
+                            point_stack = FALSE,
                             barcode = FALSE,
                             seed = 42,
                             ...) {
@@ -687,7 +688,27 @@
           x[z]
         }
       ),
-      names = NULL
+      names = paste(
+        merge_by, 
+        collapse = " : "
+      )
+    )
+  }
+  
+  # FORMAT DATA FOR STACKED POINTS - NO OVERLAY
+  if(length(channels) == 2 & point_stack & .all_na(overlay)) {
+    # COLLAPSE LIST
+    x <- structure(
+      list(
+        structure(
+          lapply(x, "[[", 1),
+          names = names(x)
+        )
+      ),
+      names = paste(
+        merge_by, 
+        collapse = " : "
+      )
     )
   }
   
@@ -701,7 +722,7 @@
 #' Prepare gates for cyto_plot
 #' @param x cytoset, GatingHierarchy or GatingSet.
 #' @param parent name of the parent population
-#' @param channels 
+#' @param channels parameters to use for the plot
 #' @param alias names of gated populations
 #' @param gate gate objects
 #' @param channels channels used to construct plot (required for gate
@@ -718,6 +739,8 @@
                              merge_by = "name",
                              select = NULL,
                              negate = FALSE) {
+  
+  # TODO: USE CHULL TO MERGE GROUP GATES
   
   # TODO: BELOW STEP IN CYTO_PLOT()? GROUPS OUT OF SYNC IN CYTO_PLOT_DATA()?
   # PREPARE X - NON-STANDARD DATA STRUCTURES -> CYTOSET
@@ -860,7 +883,7 @@
             gate, 
             function(w){
               # EXTRACT FILTERS
-              gate_list <- unlist(gate[[w]])
+              gate_list <- unlist(w)
               ids <- LAPPLY(
                 gate_list, 
                 function(z){
@@ -971,6 +994,8 @@
       )
     }
   }
+  
+  # POINT_STACK
   
   # PREPARED GATE OBJECTS
   return(gate)
@@ -1549,7 +1574,9 @@
     return(
       list(
         "xlab" = "",
-        "ylab" = "Intensity"
+        "ylab" = if(.all_na(ylab)) {
+          "Em (%)"
+        }
       )
     )
   }
@@ -2867,7 +2894,8 @@
           list("channels" = gate_args$channels),
           lapply(
             gate_args[!grepl("channels", names(gate_args))],
-            `[[`, z
+            `[[`, 
+            z
           )
         )
       )
@@ -3346,6 +3374,11 @@
                                spectra_cols = NA,
                                spectra_col_alpha = 1) {
   
+  # # SPECTRAL PROFILES AS GATES
+  # if(all(nrow(x) == 0)) {
+  #   
+  # }
+
   # SPECTRA COLOUR SCALES
   spectra_col <- .cyto_plot_spectra_col(
     x,
@@ -3366,6 +3399,10 @@
       lapply(
         seq_along(channels),
         function(z) {
+          # BYPASS PLOTTING FOR SPECTRAL LINES
+          if(all(nrow(cs) == 0)) {
+            return(NULL)
+          }
           # COMPUTE HISTOGRAM
           d <- cyto_apply(
             cs,

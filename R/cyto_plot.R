@@ -127,6 +127,9 @@
 #'   scattermore package installed \code{install.packages("scattermore")}.
 #' @param point_bins number of bins to use for points when \code{point_shape =
 #'   "hex"}, set to 256 bins by default.
+#' @param point_stack logical indicating whether merged data without
+#'   \code{overlay} specified should be plotted as multiple layers on the same
+#'   plot, set to FALSE by default.
 #' @param contour_lines numeric indicating the number of levels to use for
 #'   contour lines in 2-D scatter plots, set to 0 by default to turn off contour
 #'   lines.
@@ -263,9 +266,20 @@
 #'   \code{2.5} by default.
 #' @param gate_line_col colour(s) to use for gates, set to \code{"red"} by
 #'   default.
+#' @param gate_line_col_alpha numeric [0,1] to control the transparency of gate
+#'   borders, set to 1 by default for solid colours.
 #' @param gate_fill fill colour(s) to use for gates, set to "white by default.
 #' @param gate_fill_alpha numeric to control the fill transparency of gates, set
 #'   to 0 by default to remove fill colour(s).
+#' @param gate_point_shape shape(s) to use for gate vertices, set to \code{NA}
+#'   by default to remove gate vertices. See \code{\link[graphics:par]{pch}} for
+#'   alternatives.
+#' @param gate_point_size numeric to control the size of the gate vertices, set
+#'   to 1 by default.
+#' @param gate_point_col colour(s) to use for the gate vertices, set to
+#'   \code{"red"} by default.
+#' @param gate_point_col_alpha numeric [0,1] to control the transparency of gate
+#'   vertices, set to 1 by default for solid colours.
 #' @param label logical indicating whether gated populations should be labelled.
 #'   To include the names of the populations in these labels, supply the
 #'   population names to the \code{label_text} argument. The default statistic
@@ -438,6 +452,7 @@ cyto_plot <- function(x,
                       point_col_alpha = 1,
                       point_fast = FALSE,
                       point_bins = 256,
+                      point_stack = FALSE,
                       contour_lines = 0,
                       contour_line_type = 1,
                       contour_line_width = 1,
@@ -491,8 +506,13 @@ cyto_plot <- function(x,
                       gate_line_type = 1,
                       gate_line_width = 2.5,
                       gate_line_col = "red",
+                      gate_line_col_alpha = 1,
                       gate_fill = "white",
                       gate_fill_alpha = 0,
+                      gate_point_shape = NA,
+                      gate_point_size = 1,
+                      gate_point_col = "red",
+                      gate_point_col_alpha = 1,
                       label,
                       label_text,
                       label_stat,
@@ -622,12 +642,18 @@ cyto_plot <- function(x,
                                    "merge_by",
                                    "events", 
                                    "seed",
-                                   "negate")]
+                                   "negate",
+                                   "point_stack")]
   
   # ARGUMENTS ------------------------------------------------------------------
   
   # HIST_LAYERS - DATA PREPARED IN .CYTO_PLOT_DATA()
   args$hist_layers <- LAPPLY(args$x, "length")
+  
+  # TODO: HANDLE GATES FOR STACKED POINTS
+  if(length(args$channels) == 2 & .all_na(overlay) & point_stack) {
+    args$gate <- args$gate[1]
+  }
   
   # FORMAT GATES FOR HISTOGRAMS IN SAME PLOT
   if(length(args$channels) == 1 & !all(args$hist_layers == 1)) {
@@ -661,60 +687,38 @@ cyto_plot <- function(x,
   if(all(LAPPLY(args$title, ".empty"))) {
     # REPEAT
     args$title <- rep("", length(args$x))
-    # HISTOGRAMS - USE SAME TITLE AS 2D PLOT FOR CYTO_PLOT_EXPLORE()
-    if(length(args$channels) == 1 & 
-       !cyto_option("cyto_plot_method") %in% "explore") {
-      args$title <- LAPPLY(
-        seq_along(args$title), 
-        function(z){
-          paste0(args$title[z], names(args$x)[z])
-        }
-      )
-      # GROUPS
-      if(!is.null(names(args$x))) {
-        args$title <- names(args$x)
+    # INHERIT GROUP NAMES
+    args$title <- LAPPLY(
+      seq_along(args$title), 
+      function(z){
+        paste0(args$title[z], names(args$x)[z])
       }
-      # POPULATIONS - SHARED
-      args$title <- LAPPLY(
-        seq_along(args$x), 
-        function(z){
-          if(length(unique(names(args$x[[z]]))) == 1) {
-            if(unique(names(args$x[[z]])) %in% args$title[z]) {
-              return(args$title[z])
-            } else {
-              return(
-                paste(
-                  args$title[z],
-                  unique(names(args$x[[z]])),
-                  sep = "\n"
-                )
+    )
+    # GROUPS
+    if(!is.null(names(args$x))) {
+      args$title <- names(args$x)
+    }
+    # POPULATIONS - SHARED
+    args$title <- LAPPLY(
+      seq_along(args$x), 
+      function(z){
+        if(length(unique(names(args$x[[z]]))) == 1) {
+          if(unique(names(args$x[[z]])) %in% args$title[z]) {
+            return(args$title[z])
+          } else {
+            return(
+              paste(
+                args$title[z],
+                unique(names(args$x[[z]])),
+                sep = "\n"
               )
-            }
+            )
+          }
         } else {
           return(args$title[z])
         }
-      })
-    # POINTS  
-    } else {
-      # GROUPS
-      if(!is.null(names(args$x))) {
-        args$title <- names(args$x)
       }
-      # POPULATIONS/SAMPLES
-      if(!is.null(LAPPLY(args$x, "names"))) {
-        args$title <- LAPPLY(
-          seq_along(args$x),
-          function(z) {
-            # BASE LAYER POPULATION
-            if(names(args$x[[z]])[1] %in% args$title[z]) {
-              return(args$title[z])
-            } else {
-              return(paste(args$title[z], names(args$x[[z]])[1], sep = "\n"))
-            }
-          }
-        )
-      }
-    }
+    )
   }
   
   # LEGEND_TEXT
@@ -884,18 +888,9 @@ cyto_plot <- function(x,
   args <- args[!names(args) %in% names(page_args)]
   
   # KEY_SCALE 
-  args$key_scale <- .cyto_plot_key_scale(
-    args$x,
-    channels = args$channels,
-    xlim = args$xlim,
-    ylim = args$ylim,
-    point_col = args$point_col,
-    point_bins = args$point_bins,
-    key = args$key,
-    key_size = args$key_size,
-    key_scale = args$key_scale,
-    key_title = key_title,
-    axes_trans = args$axes_trans
+  args$key_scale <- cyto_func_execute(
+    ".cyto_plot_key_scale",
+    args
   )
   
   # PREPARE GRAPHICS DEVICE ----------------------------------------------------
@@ -948,12 +943,15 @@ cyto_plot <- function(x,
   args <- .cyto_plot_args_split(args)
   
   # TRANSPOSE ARGUMENTS
-  args <- lapply(seq_along(args$x), function(z) {
-    # lapply(seq_along(args), function(w){
-    #   args[[w]][z]
-    # })
-    return(lapply(args, `[[`, z))
-  })
+  args <- lapply(
+    seq_along(args$x), 
+    function(z) {
+      # lapply(seq_along(args), function(w){
+      #   args[[w]][z]
+      # })
+      return(lapply(args, `[[`, z))
+    }
+  )
   
   # if(cyto_option("cyto_plot_method") == "cytoset" & 
   #    !cyto_option("cyto_plot_save")) {

@@ -46,6 +46,7 @@ cyto_plot(
   point_col_alpha = 1,
   point_fast = FALSE,
   point_bins = 256,
+  point_stack = FALSE,
   contour_lines = 0,
   contour_line_type = 1,
   contour_line_width = 1,
@@ -99,8 +100,13 @@ cyto_plot(
   gate_line_type = 1,
   gate_line_width = 2.5,
   gate_line_col = "red",
+  gate_line_col_alpha = 1,
   gate_fill = "white",
   gate_fill_alpha = 0,
+  gate_point_shape = NA,
+  gate_point_size = 1,
+  gate_point_col = "red",
+  gate_point_col_alpha = 1,
   label,
   label_text,
   label_stat,
@@ -306,6 +312,10 @@ scattermore package installed \code{install.packages("scattermore")}.}
 \item{point_bins}{number of bins to use for points when \code{point_shape =
 "hex"}, set to 256 bins by default.}
 
+\item{point_stack}{logical indicating whether merged data without
+\code{overlay} specified should be plotted as multiple layers on the same
+plot, set to FALSE by default.}
+
 \item{contour_lines}{numeric indicating the number of levels to use for
 contour lines in 2-D scatter plots, set to 0 by default to turn off contour
 lines.}
@@ -489,10 +499,26 @@ the key ticks, set to 1 by default to remove transparency.}
 \item{gate_line_col}{colour(s) to use for gates, set to \code{"red"} by
 default.}
 
+\item{gate_line_col_alpha}{numeric [0,1] to control the transparency of gate
+borders, set to 1 by default for solid colours.}
+
 \item{gate_fill}{fill colour(s) to use for gates, set to "white by default.}
 
 \item{gate_fill_alpha}{numeric to control the fill transparency of gates, set
 to 0 by default to remove fill colour(s).}
+
+\item{gate_point_shape}{shape(s) to use for gate vertices, set to \code{NA}
+by default to remove gate vertices. See \code{\link[graphics:par]{pch}} for
+alternatives.}
+
+\item{gate_point_size}{numeric to control the size of the gate vertices, set
+to 1 by default.}
+
+\item{gate_point_col}{colour(s) to use for the gate vertices, set to
+\code{"red"} by default.}
+
+\item{gate_point_col_alpha}{numeric [0,1] to control the transparency of gate
+vertices, set to 1 by default for solid colours.}
 
 \item{label}{logical indicating whether gated populations should be labelled.
 To include the names of the populations in these labels, supply the

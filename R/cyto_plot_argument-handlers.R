@@ -61,6 +61,8 @@
     }
   })
   
+  # TODO: WHAT ABOUT NEGATED GATES?
+  
   # GATED POPULATIONS PER LAYER - GP -------------------------------------------
   if (!all(GC == 0)) {
     GP <- list()
@@ -102,11 +104,20 @@
   # INHERIT THEME
   args <- .cyto_plot_theme_inherit(args)
   # SPECTRA ARGUMENTS NOT DEFINED WITHIN CYTO_PLOT()
-  spectra_args <- formals("cyto_plot_spectra")
-  spectra_args <- spectra_args[grepl("spectra", names(spectra_args))]
+  # spectra_args <- formals("cyto_plot_spectra")
+  # spectra_args <- spectra_args[grepl("spectra", names(spectra_args))]
   args <- c(
     args,
-    c(list("spectra" = FALSE), spectra_args)
+    c(
+      list(
+        spectra = FALSE,
+        spectra_col_scale = NA,
+        spectra_col = NA,
+        spectra_cols = NA,
+        spectra_col_alpha = 1
+      ) 
+      # spectra_args
+    )
   )
   args <- args[!names(args) %in% c("merge_by",
                                    "overlay",
@@ -141,6 +152,7 @@
       "key_scale", # prepared manually
       "page_fill",
       "page_fill_alpha",
+      "point_stack",
       "..."
     )]
   
@@ -195,10 +207,10 @@
   
   layer_args <- c(
     arg_names[grepl("contour", arg_names)], # contour arguments
-    arg_names[grepl("hist_fill",                               arg_names)], # hist_fill arguments
+    arg_names[grepl("hist_fill", arg_names)], # hist_fill arguments
     arg_names[grepl("hist_line", arg_names)], # hist_line arguments
     arg_names[grepl("legend_", arg_names)], # legend aes arguments
-    arg_names[grepl("point_", arg_names)], # point args
+    arg_names[grepl("^point_", arg_names)], # point args
     "spectra_col",
     "spectra_col_alpha"
   )
@@ -351,7 +363,7 @@
                                             length.out = arg_length)
             arg_complete <<- c(arg_complete, z)
           # FILL ARGUMENT WITH DEFAULT
-          }else{
+          } else {
             arg_ind <- which(arg_split[[z]] == "*-*")
             arg_length <- length(arg_ind)
             arg_replace <- rep(arg_default,

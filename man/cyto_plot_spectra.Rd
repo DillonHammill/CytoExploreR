@@ -2,9 +2,12 @@
 % Please edit documentation in R/cyto_plot_spectra.R
 \name{cyto_plot_spectra}
 \alias{cyto_plot_spectra}
-\title{Plot fluorescent spectrum for each fluorochrome across detectors}
+\alias{cyto_plot_spectra.default}
+\title{Plot fluorescent spectra for each sample or fluorochrome across detectors}
 \usage{
-cyto_plot_spectra(
+cyto_plot_spectra(x, ...)
+
+\method{cyto_plot_spectra}{default}(
   x,
   parent,
   channels,
@@ -21,6 +24,8 @@ cyto_plot_spectra(
 \item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+
+\item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 
 \item{parent}{name of the population to plot when a \code{GatingHierarchy} or
 \code{GatingSet} object is supplied, set to the \code{"root"} node by
@@ -51,14 +56,12 @@ spectra if none are supplied to \code{spectra_col}.}
 
 \item{spectra_col_alpha}{numeric [0,1] to control point colour transparency
 of spectra, set to 1 by default to use solid colours.}
-
-\item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 }
 \value{
 a list containing the recorded plots.
 }
 \description{
-Plot fluorescent spectrum for each fluorochrome across detectors
+Plot fluorescent spectra for each sample or fluorochrome across detectors
 }
 \examples{
 \dontrun{

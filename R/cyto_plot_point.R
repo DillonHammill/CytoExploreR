@@ -452,6 +452,25 @@ cyto_plot_point <- function(x,
                 )
               }
             )
+            # # RECALCULATE BKDE & DENSITY COLOURS
+            # if(length(args$point_col[[1]]) > 1) {
+            #   args$point_col[[1]] <- NA
+            #   args$bkde2d <- list(
+            #     cyto_stat_bkde2d(
+            #       exprs[, args$channels],
+            #       limits = list(.par("usr")[[1]][1:2],
+            #                     .par("usr")[[1]][3:4]),
+            #       smooth = args$point_col_smooth,
+            #       bins = args$point_bins
+            #     )
+            #   )
+            #   args$point_col[[1]] <- .cyto_plot_point_col(
+            #     list(
+            #       as(exprs, "cytoframe")
+            #     ),
+            #     lapply(args[-match("x", names(args))], `[`, 1)
+            #   )[[1]]
+            # }
           }
           # HEXBIN
           if(!.all_na(args$hex[[z]]$x)) {
