@@ -2,6 +2,7 @@
 
 * The behavior of `cyto_merge_by()` when `merge_by = NA` has changed from collapsing all samples to instead split samples individually. This is because splitting by `name` may not always work in cases where multiple samples share the same file names. This change requires updates to openCyto which should be re-installed when updating to the new version of CytoExploreR.
 
+<<<<<<< HEAD
 # CytoExploreR 2.0.13
 
 * `cyto_plot()` gains a new logical `point_stack` argument to allow stacking of merged samples for 2D plots in a similar way to `hist_stack`.
@@ -11,6 +12,11 @@
 * Add support for CSV `asinh` cofactors through cofactor argument in `cyto_transformers_define()`.
 * Add `cyto_spectra_compare()` to compute cosine similarity scores between different spectra.
 * Add `cyto_plot_line()` to add lines to `cyto_plot()` plots.
+=======
+# CytoExploreR Note
+
+* Hybrid method for `cyto_spillover_compute()` and `cyto_unmix_compute()` has been updated to use the same number of negative and positive events for each control.
+>>>>>>> e5f2efe42488c133da6f1a29b15def334355015d
 
 # CytoExploreR 2.0.12
 
