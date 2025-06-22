@@ -2,6 +2,10 @@
 
 * The behavior of `cyto_merge_by()` when `merge_by = NA` has changed from collapsing all samples to instead split samples individually. This is because splitting by `name` may not always work in cases where multiple samples share the same file names. This change requires updates to openCyto which should be re-installed when updating to the new version of CytoExploreR.
 
+# CytoExploreR Note
+
+* Hybrid method for `cyto_spillover_compute()` and `cyto_unmix_compute()` has been updated to use the same number of negative and positive events for each control.
+
 # CytoExploreR 2.0.12
 
 * Group progress messages for `cyto_gate_draw()`

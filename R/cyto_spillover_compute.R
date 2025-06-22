@@ -48,10 +48,10 @@
 #' @param type options include \code{"Bagwell"}, \code{"Roca"} or
 #'   \code{"hybrid"} to indicate which method to use when computing the
 #'   spillover matrix, set to \code{"Roca"} by default. The \code{"hybrid"}
-#'   method computes the spillover coefficients using the \code{Bagwell}
-#'   approach (no RLM) and refines the coefficients using the \code{Autospill}
-#'   approach. Refer to \code{references} section for more details about each
-#'   method.
+#'   method supports gating like the \code{Bagwell} approach and samples
+#'   positive and negative events in each control before refining the
+#'   coefficients using the \code{Autospill} approach. Refer to
+#'   \code{references} section for more details about each method.
 #' @param save_as name of a csv file to which the computed spillover matrix
 #'   should be written, set to \code{Spillover-Matrix.csv} prefixed with the
 #'   date by default.
@@ -909,11 +909,62 @@ cyto_spillover_compute <- function(x,
     
     # HYBRID METHOD - SPILLOVER REFINEMENT
     if(.grepl("^h", type, ignore.case = TRUE)) {
+      
+      # SUBSAMPLING THEN AUTOSPILL
       if(!unmix) {
         message(
-          "Iteratively refining spillover coefficients..."
+          "Computing the spillover matrix using the hybrid method... \n"
+        )
+        message(
+          paste0(
+            "C. B. Bagwell & E. G. Adams (1993). Fluorescence spectral ",
+            "overlap compensation for any number of flow cytometry parameters. in:",
+            " Annals of the New York Academy of Sciences, 677:167-184.", "\n"
+          )
+        )
+        message(
+          paste0(
+            "Roca et al. (2021). AutoSpill is a principled framework that ",
+            "simplifies the analysis of multichromatic flow cytometry data. Nature",
+            " Communications 12(2890)."
+          )
         )
       }
+      # RESTRICT EACH CONTROL TO HAVE SAME COUNTS FOR NEGATIVE & POSITIVE
+      cs_list <- structure(
+        lapply(
+          cs_list,
+          function(cs) {
+            # NOTE CS IS A LIST OF NEGATIVE & POSITIVE CYTOSETS
+            # COMPUTE MINIMUM COUNTS
+            min_count <- min(
+              c(
+                nrow(cs[["-"]][[1]]),
+                nrow(cs[["+"]][[1]])
+              )
+            )
+            # COUNTS ARE ALREADY THE SAME
+            if(events == min_count) {
+              return(cs)
+            }
+            # DOWNSAMPLING REQUIRED
+            return(
+              list(
+                "-" = cyto_sample(
+                  cs[["-"]][[1]],
+                  events = min_count
+                ),
+                "+" = cyto_sample(
+                  cs[["+"]][[1]],
+                  events = min_count
+                )
+              )
+            )
+          }
+        ),
+        names = names(cs_list)
+      )
+      # REFINE SPILLOVER MATRIX
       spill <- .cyto_asp_spill_refine(
         cs_list,
         spill = list(coef = spill),
