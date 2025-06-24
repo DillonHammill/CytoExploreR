@@ -676,9 +676,7 @@ cyto_spillover_compute <- function(x,
                       "title" = cyto_names(pos_events),
                       "axes_limits" = axes_limits, 
                       "axes_trans" = axes_trans,
-                      "legend" = FALSE,
-                      label = FALSE,
-                      gate_line_col_alpha = 0.2 # TRANSPARENT PREVIOUS GATE(S)
+                      "legend" = FALSE
                     ),
                     args
                   )
