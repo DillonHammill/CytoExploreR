@@ -162,8 +162,11 @@ cyto_spillover_compute <- function(x,
   # TODO: SAMPLE CHECKS PERFORMED PRIOR TO GROUPING
   # FITC ON BEADS AND CELLS - BOTH KEPT 
   
-  # UNIVERSAL UNSTAINED - ALLOW GATING PER CONTROL
+  # NOTE: GATES ARE SAVED BUT RE-RUN CAUSES ISSUES
   # WATERSHED GATING
+  # GATING CAN BE SIMPLIFIED TO A SINGLE CYTO_GATE_DRAW CALL PER CHANNEL
+  # SELECT SAMPLE AND OVERLAY UNSTAINED IF PROVIDED
+  # ATTACH GATES TO ALL SAMPLES
   
   # SPILLOVER ------------------------------------------------------------------
   
@@ -587,16 +590,31 @@ cyto_spillover_compute <- function(x,
                     neg_gt <- NULL
                   # NEGATIVE GATE LOCATED
                   } else {
-                    neg_gt <- cyto_gate_extract(
-                      x,
-                      select = cyto_names(
-                        cs_list[[q]][[y]][["+"]]
-                      ),
-                      parent = parent,
-                      alias = nodes[
-                        grep(paste0(label, "\\-"), nodes)
-                      ]
-                    )[[1]][[1]]
+                    # INTERNAL
+                    if(is.null(neg_events)) {
+                      neg_gt <- cyto_gate_extract(
+                        x,
+                        select = cyto_names(
+                          cs_list[[q]][[y]][["+"]]
+                        ),
+                        parent = parent,
+                        alias = nodes[
+                          grep(paste0(label, "\\-"), nodes)
+                        ]
+                      )[[1]][[1]]
+                    # UNIVERSAL
+                    } else {
+                      neg_gt <- cyto_gate_extract(
+                        x,
+                        select = cyto_names(
+                          cs_list[[q]][[y]][["-"]]
+                        ),
+                        parent = parent,
+                        alias = nodes[
+                          grep(paste0(label, "\\-"), nodes)
+                        ]
+                      )[[1]][[1]]
+                    }
                   }
                   # LOCATE POSITIVE GATE
                   pos_ind <- grep(pops[2], nodes)
@@ -658,7 +676,9 @@ cyto_spillover_compute <- function(x,
                       "title" = cyto_names(pos_events),
                       "axes_limits" = axes_limits, 
                       "axes_trans" = axes_trans,
-                      "legend" = FALSE
+                      "legend" = FALSE,
+                      label = FALSE,
+                      gate_line_col_alpha = 0.2 # TRANSPARENT PREVIOUS GATE(S)
                     ),
                     args
                   )
@@ -666,7 +686,7 @@ cyto_spillover_compute <- function(x,
                 # INTERACTIVE - USE CYTO_GATE_DRAW()
                 if(interactive() & cyto_option("CytoExploreR_interactive")) {
                   # GATE NEGATIVE POPULATION
-                  if(is.null(neg_events) & is.null(neg_gt)) {
+                  if(is.null(neg_events)) {
                     neg_gt <- cyto_gate_draw(
                       x = pos_events,
                       alias = pops[1],
@@ -685,7 +705,6 @@ cyto_spillover_compute <- function(x,
                   }
                   neg_gt@filterId <- pops[1]
                   # GATE POSITIVE POPULATION
-                  if(is.null(pos_gt)) {
                     pos_gt <- cyto_gate_draw(
                       x = pos_events,
                       alias = pops[2],
@@ -694,7 +713,6 @@ cyto_spillover_compute <- function(x,
                       plot = FALSE
                     )[[1]][[1]]
                     pos_gt@filterId <- pops[2]
-                  }
                 # NON-INTERACTIVE - USE MINDENSITY()
                 } else {
                   # COMPUTE RANGE TO ELIMINATE OUTLIERS
@@ -708,7 +726,7 @@ cyto_spillover_compute <- function(x,
                     inverse = FALSE
                   )
                   # GATE NEGATIVE POPULATION
-                  if(is.null(neg_events) & is.null(neg_gt)) {
+                  if(is.null(neg_events)) {
                     # MINDENSITY - GATE NEGATIVE EVENTS
                     neg_gt <- mindensity(
                       pos_events[[1]], # CYTOFRAME REQUIRED
@@ -738,7 +756,6 @@ cyto_spillover_compute <- function(x,
                     )
                   }
                   # MINDENSITY - GATE POSITIVE EVENTS
-                  if(is.null(pos_gt)) {
                     pos_gt <- mindensity(
                       pos_events[[1]], # CYTOFRAME REQUIRED
                       channel = y,
@@ -751,7 +768,6 @@ cyto_spillover_compute <- function(x,
                     cyto_plot_gate(
                       pos_gt
                     )
-                  }
                 }
                 # APPLY GATES TO GATINGSET & STORE IN GATINGTEMPLATE
                 if(cyto_class(x, "GatingSet")) {
@@ -759,49 +775,54 @@ cyto_spillover_compute <- function(x,
                   lapply(
                     pops[!pops %in% names(gts)],
                     function(r) {
-                      # NEGATIVE GATE OPTIONAL
-                      pop_gt <- if(grepl("\\-$", r)) {
-                        neg_gt
-                      } else {
-                        pos_gt
-                      }
-                      # ADD NEW GATES - BYPASS NULL NEGATIVE GATE
-                      if(!is.null(pop_gt)) {
-                        # GATINGTEMPLATE
-                        gt <<- rbind(
-                          gt,
-                          .suppress_all_messages(
-                            gs_add_gating_method(
-                              gs = x,
-                              alias = r,
-                              parent = parent,
-                              pop = "+",
-                              dims = y,
-                              gating_method = "cyto_gate_draw",
-                              gating_args = list(
-                                gate = list(
-                                  "Combined Events" = filters(
-                                    if(grepl("\\-$", r)) {
-                                      list(
-                                        neg_gt
-                                      )
-                                    } else {
-                                      list(
-                                        pos_gt
-                                      )
-                                    }
-                                  )
-                                  
-                                ),
-                                openCyto.minEvents = -1
-                              ),
-                              groupBy = NA,
-                              collapseDataForGating = TRUE,
-                              preprocessing_method = "pp_cyto_gate_draw"
-                            )
-                          )
+                      # NEW OLD GATES IF EXIST
+                      if(any(grepl(r, nodes, fixed = TRUE))) { # WATCH FOR -|+
+                        cyto_gate_remove(
+                          x, 
+                          parent = parent,
+                          alias = r,
+                          channels = y,
+                          gatingTemplate = gatingTemplate
+                        )
+                        gt <- cyto_gatingTemplate_read(
+                          gatingTemplate,
+                          data.table = TRUE
                         )
                       }
+                      # GATINGTEMPLATE
+                      gt <<- rbind(
+                        gt,
+                        .suppress_all_messages(
+                          gs_add_gating_method(
+                            gs = x,
+                            alias = r,
+                            parent = parent,
+                            pop = "+",
+                            dims = y,
+                            gating_method = "cyto_gate_draw",
+                            gating_args = list(
+                              gate = list(
+                                "Combined Events" = filters(
+                                  if(grepl("\\-$", r)) {
+                                    list(
+                                      neg_gt
+                                    )
+                                  } else {
+                                    list(
+                                      pos_gt
+                                    )
+                                  }
+                                )
+                                
+                              ),
+                              openCyto.minEvents = -1
+                            ),
+                            groupBy = NA,
+                            collapseDataForGating = TRUE,
+                            preprocessing_method = "pp_cyto_gate_draw"
+                          )
+                        )
+                      )
                       # WRITE UPDATED GATINGTEMPLATE - WRITING ERROR - SYNC GS
                       tryCatch(
                         cyto_gatingTemplate_write(
