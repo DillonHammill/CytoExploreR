@@ -162,6 +162,9 @@ cyto_spillover_compute <- function(x,
   # TODO: SAMPLE CHECKS PERFORMED PRIOR TO GROUPING
   # FITC ON BEADS AND CELLS - BOTH KEPT 
   
+  # UNIVERSAL UNSTAINED - ALLOW GATING PER CONTROL
+  # WATERSHED GATING
+  
   # SPILLOVER ------------------------------------------------------------------
   
   # BACKWARDS COMPATIBILITY
@@ -671,10 +674,16 @@ cyto_spillover_compute <- function(x,
                       type = "interval",
                       plot = FALSE
                     )[[1]][[1]]
-                    neg_gt@filterId <- pops[1]
                   } else {
-                    neg_gt <- NULL
+                    neg_gt <- cyto_gate_draw(
+                      x = neg_events,
+                      alias = pops[1],
+                      channels = y,
+                      type = "interval",
+                      plot = FALSE
+                    )[[1]][[1]]
                   }
+                  neg_gt@filterId <- pops[1]
                   # GATE POSITIVE POPULATION
                   if(is.null(pos_gt)) {
                     pos_gt <- cyto_gate_draw(
@@ -714,7 +723,19 @@ cyto_spillover_compute <- function(x,
                       neg_gt
                     )
                   } else {
-                    neg_gt <- NULL
+                    # MINDENSITY - GATE NEGATIVE EVENTS
+                    neg_gt <- mindensity(
+                      neg_events[[1]], # CYTOFRAME REQUIRED
+                      channel = y,
+                      filterId = pops[1],
+                      positive = FALSE,
+                      min = min(rng),
+                      max = max(rng)
+                    )
+                    # PLOT GATE
+                    cyto_plot_gate(
+                      neg_gt
+                    )
                   }
                   # MINDENSITY - GATE POSITIVE EVENTS
                   if(is.null(pos_gt)) {
@@ -806,7 +827,10 @@ cyto_spillover_compute <- function(x,
                         neg_gt
                       )[[1]][[1]] # LIST OF POPULATIONS PER GATE
                     } else {
-                      neg_events
+                      cyto_gate_apply(
+                        neg_events,
+                        neg_gt
+                      )[[1]][[1]] # LIST OF POPULATIONS PER GATE
                     },
                     "+" = cyto_gate_apply(
                       pos_events,
