@@ -686,25 +686,28 @@ cyto_spillover_compute <- function(x,
                 # INTERACTIVE - USE CYTO_GATE_DRAW()
                 if(interactive() & cyto_option("CytoExploreR_interactive")) {
                   # GATE NEGATIVE POPULATION
-                  if(is.null(neg_events)) {
-                    neg_gt <- cyto_gate_draw(
-                      x = pos_events,
-                      alias = pops[1],
-                      channels = y,
-                      type = "interval",
-                      plot = FALSE
-                    )[[1]][[1]]
-                  } else {
-                    neg_gt <- cyto_gate_draw(
-                      x = neg_events,
-                      alias = pops[1],
-                      channels = y,
-                      type = "interval",
-                      plot = FALSE
-                    )[[1]][[1]]
+                  if(is.null(neg_gt)) {
+                    if(is.null(neg_events)) {
+                      neg_gt <- cyto_gate_draw(
+                        x = pos_events,
+                        alias = pops[1],
+                        channels = y,
+                        type = "interval",
+                        plot = FALSE
+                      )[[1]][[1]]
+                    } else {
+                      neg_gt <- cyto_gate_draw(
+                        x = neg_events,
+                        alias = pops[1],
+                        channels = y,
+                        type = "interval",
+                        plot = FALSE
+                      )[[1]][[1]]
+                    }
+                    neg_gt@filterId <- pops[1]
                   }
-                  neg_gt@filterId <- pops[1]
                   # GATE POSITIVE POPULATION
+                  if(is.null(pos_gt)) {
                     pos_gt <- cyto_gate_draw(
                       x = pos_events,
                       alias = pops[2],
@@ -713,6 +716,7 @@ cyto_spillover_compute <- function(x,
                       plot = FALSE
                     )[[1]][[1]]
                     pos_gt@filterId <- pops[2]
+                  }
                 # NON-INTERACTIVE - USE MINDENSITY()
                 } else {
                   # COMPUTE RANGE TO ELIMINATE OUTLIERS
@@ -726,36 +730,39 @@ cyto_spillover_compute <- function(x,
                     inverse = FALSE
                   )
                   # GATE NEGATIVE POPULATION
-                  if(is.null(neg_events)) {
-                    # MINDENSITY - GATE NEGATIVE EVENTS
-                    neg_gt <- mindensity(
-                      pos_events[[1]], # CYTOFRAME REQUIRED
-                      channel = y,
-                      filterId = pops[1],
-                      positive = FALSE,
-                      min = min(rng),
-                      max = max(rng)
-                    )
-                    # PLOT GATE
-                    cyto_plot_gate(
-                      neg_gt
-                    )
-                  } else {
-                    # MINDENSITY - GATE NEGATIVE EVENTS
-                    neg_gt <- mindensity(
-                      neg_events[[1]], # CYTOFRAME REQUIRED
-                      channel = y,
-                      filterId = pops[1],
-                      positive = FALSE,
-                      min = min(rng),
-                      max = max(rng)
-                    )
-                    # PLOT GATE
-                    cyto_plot_gate(
-                      neg_gt
-                    )
+                  if(is.null(neg_gt)) {
+                    if(is.null(neg_events)) {
+                      # MINDENSITY - GATE NEGATIVE EVENTS
+                      neg_gt <- mindensity(
+                        pos_events[[1]], # CYTOFRAME REQUIRED
+                        channel = y,
+                        filterId = pops[1],
+                        positive = FALSE,
+                        min = min(rng),
+                        max = max(rng)
+                      )
+                      # PLOT GATE
+                      cyto_plot_gate(
+                        neg_gt
+                      )
+                    } else {
+                      # MINDENSITY - GATE NEGATIVE EVENTS
+                      neg_gt <- mindensity(
+                        neg_events[[1]], # CYTOFRAME REQUIRED
+                        channel = y,
+                        filterId = pops[1],
+                        positive = FALSE,
+                        min = min(rng),
+                        max = max(rng)
+                      )
+                      # PLOT GATE
+                      cyto_plot_gate(
+                        neg_gt
+                      )
+                    }
                   }
                   # MINDENSITY - GATE POSITIVE EVENTS
+                  if(is.null(pos_gt)) {
                     pos_gt <- mindensity(
                       pos_events[[1]], # CYTOFRAME REQUIRED
                       channel = y,
@@ -768,6 +775,7 @@ cyto_spillover_compute <- function(x,
                     cyto_plot_gate(
                       pos_gt
                     )
+                  }
                 }
                 # APPLY GATES TO GATINGSET & STORE IN GATINGTEMPLATE
                 if(cyto_class(x, "GatingSet")) {
@@ -775,20 +783,6 @@ cyto_spillover_compute <- function(x,
                   lapply(
                     pops[!pops %in% names(gts)],
                     function(r) {
-                      # NEW OLD GATES IF EXIST
-                      if(any(grepl(r, nodes, fixed = TRUE))) { # WATCH FOR -|+
-                        cyto_gate_remove(
-                          x, 
-                          parent = parent,
-                          alias = r,
-                          channels = y,
-                          gatingTemplate = gatingTemplate
-                        )
-                        gt <- cyto_gatingTemplate_read(
-                          gatingTemplate,
-                          data.table = TRUE
-                        )
-                      }
                       # GATINGTEMPLATE
                       gt <<- rbind(
                         gt,
@@ -975,32 +969,40 @@ cyto_spillover_compute <- function(x,
       cs_list <- structure(
         lapply(
           cs_list,
-          function(cs) {
-            # NOTE CS IS A LIST OF NEGATIVE & POSITIVE CYTOSETS
-            # COMPUTE MINIMUM COUNTS
-            min_count <- min(
-              c(
-                nrow(cs[["-"]][[1]]),
-                nrow(cs[["+"]][[1]])
-              )
+          function(grp) {
+            structure(
+              lapply(
+                grp,
+                function(dye) {
+                  # COMPUTE MINIMUM COUNTS
+                  min_count <- min(
+                    c(
+                      nrow(dye[["-"]][[1]]),
+                      nrow(dye[["+"]][[1]])
+                    )
+                  )
+                  # COUNTS ARE ALREADY THE SAME
+                  if(events == min_count) {
+                    return(dye)
+                  }
+                  # DOWNSAMPLING REQUIRED
+                  return(
+                    list(
+                      "-" = cyto_sample(
+                        dye[["-"]],
+                        events = min_count
+                      ),
+                      "+" = cyto_sample(
+                        dye[["+"]],
+                        events = min_count
+                      )
+                    )
+                  )
+                }
+              ),
+              names = names(grp)
             )
-            # COUNTS ARE ALREADY THE SAME
-            if(events == min_count) {
-              return(cs)
-            }
-            # DOWNSAMPLING REQUIRED
-            return(
-              list(
-                "-" = cyto_sample(
-                  cs[["-"]][[1]],
-                  events = min_count
-                ),
-                "+" = cyto_sample(
-                  cs[["+"]][[1]],
-                  events = min_count
-                )
-              )
-            )
+
           }
         ),
         names = names(cs_list)
