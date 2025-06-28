@@ -9573,6 +9573,11 @@ cyto_keyword <- function(x,
                          value,
                          ...) {
   
+  # DATA.FRAMES & MATRICES DONT HAVE KEYWORDS
+  if(!cyto_class(x, "list")) {
+    return(NULL)
+  }
+  
   # RETURN ALL KEYWORD VALUE PAIRS
   if(missing(keyword)) {
     # FLOWCORE KEYWORD

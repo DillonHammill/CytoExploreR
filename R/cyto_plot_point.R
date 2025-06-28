@@ -253,6 +253,7 @@ cyto_plot_point <- function(x,
             fct
         }
       }
+      # NOTE: SORTING WON'T WORK FOR SAMPLE-ID AS JITTERING DONE LATER
       # SORTING REQUIRED
       if(length(sort_by) > 0) {
         # TWO WAY SORT - SIZE & COLOUR
