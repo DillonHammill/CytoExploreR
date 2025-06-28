@@ -1006,6 +1006,27 @@ cyto_stat_bkde2d <- function(x,
   h <- bandwidth
   tau <- 3.4             # bivariate normal kernel
   
+  # JITTER SAMPLE-ID BARCODES
+  ind <- grep("^Sample\\-ID$", colnames(x))
+  if(length(ind) == 1) {
+    # SET SEED FOR REPRODUCIBLE SAMPLING - REQUIRED
+    set.seed(42)
+    x[, ind] <- LAPPLY(
+      unique(x[, ind]),
+      function(w) {
+        rnorm(
+          n = length(
+            x[x[, ind] == w, ind]
+          ),
+          mean = w,
+          sd = 0.1
+        )
+      }
+    )
+    # RESET SEED
+    rm(list=".Random.seed", envir=globalenv())
+  }
+  
   # LIMITS - MATRIX
   if(!is.null(dim(limits))) {
     limits <- lapply(
@@ -1150,7 +1171,8 @@ cyto_stat_bkde2d <- function(x,
         bins = list(
           "x" = xpts,
           "y" = ypts
-        )
+        ),
+        data = x
       )
     )
   # COUNTS ONLY
@@ -1162,7 +1184,8 @@ cyto_stat_bkde2d <- function(x,
         bins = list(
           "x" = xpts,
           "y" = ypts
-        )
+        ),
+        data = x
       )
     )
   }

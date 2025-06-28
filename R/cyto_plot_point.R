@@ -437,9 +437,11 @@ cyto_plot_point <- function(x,
       if(!is.null(nrow(exprs))) {
         # POINTS - BYPASS EMPTY CYTOFRAME
         if(nrow(exprs) != 0) {
-          # JITTER BARCODES FOR SAMPLE-ID
-          if(any(grepl("^Sample-ID$", args$channels))) {
-            ind <- grep("^Sample-ID$", colnames(exprs))
+          # JITTER SAMPLE-ID BARCODES
+          ind <- grep("^Sample\\-ID$", colnames(exprs))
+          if(length(ind) == 1) {
+            # SET SEED FOR REPRODUCIBLE SAMPLING - REQUIRED
+            set.seed(42)
             exprs[, ind] <- LAPPLY(
               unique(exprs[, ind]),
               function(w) {
@@ -452,25 +454,8 @@ cyto_plot_point <- function(x,
                 )
               }
             )
-            # # RECALCULATE BKDE & DENSITY COLOURS
-            # if(length(args$point_col[[1]]) > 1) {
-            #   args$point_col[[1]] <- NA
-            #   args$bkde2d <- list(
-            #     cyto_stat_bkde2d(
-            #       exprs[, args$channels],
-            #       limits = list(.par("usr")[[1]][1:2],
-            #                     .par("usr")[[1]][3:4]),
-            #       smooth = args$point_col_smooth,
-            #       bins = args$point_bins
-            #     )
-            #   )
-            #   args$point_col[[1]] <- .cyto_plot_point_col(
-            #     list(
-            #       as(exprs, "cytoframe")
-            #     ),
-            #     lapply(args[-match("x", names(args))], `[`, 1)
-            #   )[[1]]
-            # }
+            # RESET SEED
+            rm(list=".Random.seed", envir=globalenv())
           }
           # HEXBIN
           if(!.all_na(args$hex[[z]]$x)) {
@@ -481,22 +466,6 @@ cyto_plot_point <- function(x,
                 rep.int(args$hex[[z]]$x, n7),
               y = rep.int(args$hex[[z]]$coords$y, n) + 
                 rep.int(args$hex[[z]]$y, n7),
-              # x = rep(
-              #   args$hex[[z]]$coords$x,
-              #   times = n
-              # ) + 
-              # rep(
-              #   args$hex[[z]]$x,
-              #   each = 7
-              # ),
-              # y = rep(
-              #   args$hex[[z]]$coords$y, 
-              #   times = n
-              # ) + 
-              # rep(
-              #   args$hex[[z]]$y,
-              #   each = 7
-              # ),
               col = args$point_col[[z]],
               border = NA
             )

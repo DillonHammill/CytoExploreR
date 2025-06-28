@@ -1141,7 +1141,10 @@
             rownames(rng) <- c("min", "max")
           } else {
             rng <- suppressWarnings(
-              range(y, type = type)
+              range(
+                y, 
+                type = type
+              )
             )
           }
           return(rng)
@@ -1165,6 +1168,13 @@
   data_range <- do.call("cbind", data_range)
   colnames(data_range) <- channels
   rownames(data_range) <- c("min", "max")
+  
+  # BUFFER SAMPLE-ID - BARCODES ARE JITTERED FOR PLOTTING - SD=0.1
+  id <- grep("^Sample-ID$", colnames(data_range))
+  if(length(id) == 1) {
+    data_range["min", id] <- data_range["min", id] - 0.45
+    data_range["max", id] <- data_range["max", id] + 0.45
+  }
   
   # MACHINE RANGE
   if(axes_limits == "machine"){
@@ -4847,6 +4857,26 @@
                       # COMPUTE BREAKS FOR CUT - SEE DENSCOLS()
                       mkBreaks <-  function(u){
                         u - diff(range(u))/(length(u)-1)/2
+                      }
+                      # JITTER SAMPLE-ID
+                      id <- grep("^Sample-ID$", colnames(z))
+                      if(length(id) == 1) {
+                        # SET SEED FOR REPRODUCIBLE SAMPLING - REQUIRED MATCH COMPUTED BKDE
+                        set.seed(42)
+                        z[, id] <- LAPPLY(
+                          unique(z[, id]),
+                          function(w) {
+                            rnorm(
+                              n = length(
+                                z[z[, id] == w, id]
+                              ),
+                              mean = w,
+                              sd = 0.1
+                            )
+                          }
+                        )
+                        # RESET SEED
+                        rm(list=".Random.seed", envir=globalenv())
                       }
                       # COMPUTE BINS
                       b <- do.call(
