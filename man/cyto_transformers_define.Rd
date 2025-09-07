@@ -11,6 +11,7 @@ cyto_transformers_define(
   type = "logicle",
   select = NULL,
   events = 50000,
+  probs = 0.05,
   plot = TRUE,
   progress = TRUE,
   ...
@@ -44,6 +45,9 @@ select a subset of samples for \code{cyto_plot}.}
 
 \item{events}{number or frequency of events to display in plots, set to 50000
 events by default. See \code{\link{cyto_plot}} for details.}
+
+\item{probs}{quantile to use when estimating cofactor or w using negative
+events, set to 0.05 by default.}
 
 \item{plot}{logical indicating whether the results of transformations should
 be plotted using \code{cyto_plot}.}

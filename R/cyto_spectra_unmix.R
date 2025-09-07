@@ -33,17 +33,18 @@
 #'   required to compute the spillover matrix.
 #' @param channels names of the channels/markers for which unmixing coefficients
 #'   should be computed, set to all fluorescent channels by default.
-#' @param type options include \code{"Bagwell"}, \code{"Roca"} or
-#'   \code{"hybrid"} to indicate which method to use when computing the
-#'   spillover matrix, set to \code{"Roca"} by default. The \code{"hybrid"}
-#'   method computes the spillover coefficients using the \code{Bagwell}
-#'   approach (no RLM) and refines the coefficients using the \code{Autospill}
-#'   approach. Refer to \code{references} section for more details about each
-#'   method.
-#' @param auto logical indicating whether autofluorescence subtraction should be
-#'   performed, set to TRUE by default. Users will be asked which group to use
-#'   for autofluorescence subtraction or the name of the group can be supplied
-#'   manually here.
+#' @param gate indicates whether to \code{draw} or use \code{auto} gating
+#'   methods to gate the negative and positive populations for each control.
+#'   Gating is optional for \code{"Autospill"} and \code{"CytoDecode"} methods
+#'   but is recommended to achieve better results and ensure compatibility with
+#'   \code{cyto_panel_design()}. Set to \code{"draw"} by default to allow for
+#'   more flexibility over gating. For \code{gate = "draw"} users can also
+#'   specify whether to gate the 1D histograms or 2D scatter plots 1D or 2D
+#'   suffix to \code{gate}. For example, to gate in 2D set \code{gate =
+#'   "draw-2D"} which is the new default manual gating method.
+#' @param type options include \code{"Bagwell" or "autocomp"}, \code{"Roca" or
+#'   "autospill"} or \code{"CytoDecode"} to indicate which method to use when
+#'   computing the spillover matrix, set to \code{"CytoDecode"} by default. 
 #' @param save_as name of a CSV to which the computed unmixing matrix should be
 #'   written, set to \code{Spectral-Unmixing-Matrix.csv} prefixed with the date
 #'   by default. Set this argument to NA if you don't want to write the unmixing
@@ -63,13 +64,25 @@
 #'   matrix should be displayed in a heatmap, set to TRUE by default.
 #' @param events number of events to extract from each control prior to fitting
 #'   RLM models, set to 500 events by default.
-#' @param iter indicates the maximum number of allowable iterations for refining
-#'   the spillover coefficients, set to 100 by default.
+#' @param model indicates the type of model to use when running autospill,
+#'   options include \code{"rlm"} for robust linear models or \code{"vwqr"} for
+#'   variance weighted quantile regression, set to \code{"rlm"} by default.
+#' @param max_iter indicates the maximum number of allowable iterations for
+#'   refining the spillover coefficients, set to 20 by default.
 #' @param trim proportion of events to exclude from the top and bottom of each
-#'   scale when fitting RLM models in autospill method, set to 0.001 by default.
+#'   scale when fitting models in \code{AutoSpill} and \code{CytoDecode}
+#'   methods, set to 0.001 by default.
+#' @param tol tolerance level for convergence of vwqr model in \code{CytoDecode}
+#'   method, set to \code{1e-6} by default.
+#' @param grid_size size of the grid to use for wvqr model in \code{CytoDecode}
+#'   method, set to 100 by default. Smaller grid sizes will provide a speed
+#'   boost at the cost of accuracy.
+#' @param resid indicates whether to use \code{"lower"}, \code{"upper"} or
+#'   \code{"both"} residuals when fitting variance models in vwqr used in
+#'   \code{CytoDecode}, set to \code{"both"} by default.
 #' @param details name of a CSV file to which the details of the compensation
 #'   controls should be saved, set to NULL by default to use
-#'   \code{date-Compensation-Details.csv}. Setting this argument to \code{NA}
+#'   \code{date-Control-Details.csv}. Setting this argument to \code{NA}
 #'   will prevent details from being written to a CSV file.
 #' @param ... additional arguments passed to \code{cyto_plot()} to allow
 #'   customisation of plots used for gating.
@@ -94,385 +107,32 @@ cyto_unmix_compute <- function(x,
                                parent = "root",
                                select = NULL,
                                channels = NULL,
-                               type = "roca",
-                               auto = FALSE,
+                               gate = "draw-2d",
+                               type = "CytoDecode",
                                save_as = NULL,
                                gatingTemplate = NULL,
                                axes_trans = NA,
                                axes_limits = "machine",
                                heatmap = TRUE,
                                events = 500,
-                               iter = 100,
+                               model = "rlm",
+                               max_iter = 20,
                                trim = 0.001,
+                               tol = 1e-6,
+                               grid_size = 100,
+                               resid = "both",
                                details = NULL,
                                ...) {
  
-  # TODO: LOOSEN MATCHING ON UNSTAINED INCLUDE NA | NIL | AUTO
+  # PULL DOWN ARGUMENTS
+  args <- CytoExploreR:::.args_list(...)
+  args[["unmix"]] <- TRUE
   
-  # PREPARE DATA ---------------------------------------------------------------
-  
-  # SELECT
-  if(!is.null(select)) {
-    x <- cyto_select(
-      x, 
-      select
-    )
-  }
-  
-  # CHANNELS
-  if(is.null(channels)) {
-    channels <- cyto_channels(
-      x,
-      exclude = c(
-        "FSC",
-        "SSC",
-        "Time",
-        "Event-ID",
-        "Sample-ID",
-        "\\-H$",
-        "\\-W$"
-      )
-    )
-  } else {
-    channels <- cyto_channels_extract(
-      x,
-      channels = channels
-    )
-  }
-  
-  # MATCH CHANNELS - LABEL VARIABLE REQUIRED
-  pd <- cyto_channel_match(
-    x,
-    channels = channels,
-    label = TRUE,
-    save_as = details
+  # COMPUTE UNMIXING MATRIX
+  unmix <- cyto_func_call(
+    "cyto_spillover_compute",
+    args
   )
-  pd <- pd[
-    match(
-      rownames(cyto_details(x)),
-      rownames(pd)
-    ), 
-    ,
-    drop = FALSE
-  ]
-  
-  # CHECK COMPENSATION DETAILS
-  lapply(
-    seq_len(nrow(pd)),
-    function(z) {
-      # CHANNEL
-      if(!pd$channel[z] %in% c("Unstained",
-                               "unstained",
-                               cyto_channels(x))) {
-        stop(
-          paste0(
-            pd$channel[z], 
-            " is not a valid channel for this ", 
-            cyto_class(x), 
-            "!"
-          )
-        )
-        # PARENT
-        if(cyto_class(x, "GatingSet")) {
-          cyto_nodes_convert(x, pd$parent[z]) # ERRORS IF MISSING
-        }
-      }
-    }
-  )
-  
-  # MISSING VARIABLES
-  vars <- c("name", "group", "parent", "channel", "label", "marker")
-  if(!all(vars %in% colnames(pd))) {
-    stop(
-      paste0(
-        "cyto_details(x) is missing required variables: ",
-        paste0(
-          vars[!vars %in% colnames(pd)],
-          collapse = " & "
-        )
-      )
-    )
-  }
-  
-  # TRANSFORMERS
-  if(.all_na(axes_trans)) {
-    axes_trans <- cyto_transformers_extract(x)
-  }
-  
-  # TRANSFORMED DATA REQUIRED FOR GATING
-  if(any(!channels %in% names(axes_trans))) {
-    # DEFINE NEW TRANSFORMERS
-    trans_new <- cyto_transformers_define(
-      x, 
-      channels = channels[!channels %in% names(axes_trans)],
-      type = "biex",
-      widthBasis = -10,
-      plot = FALSE,
-      progress = FALSE
-    )
-    # APPLY NEW TRANSFORMERS
-    x <- suppressWarnings(
-      cyto_transform(
-        x,
-        trans = trans_new,
-        copy = TRUE,
-        plot = FALSE,
-        quiet = TRUE
-      )
-    )
-    # COMBINE TRANSFROMERS
-    if(.all_na(axes_trans)) {
-      axes_trans <- trans_new
-    } else {
-      axes_trans <- cyto_transformers_combine(axes_trans, trans_new)
-    }
-  }
-  
-  # RESTRICT TRANSFORMERS TO CHANNELS
-  if(!.all_na(axes_trans)) {
-    if(any(channels %in% names(axes_trans))) {
-      axes_trans <- cyto_transformers_combine(
-        axes_trans[names(axes_trans) %in% channels]
-      )
-    } else {
-      axes_trans <- NA
-    }
-  }
-
-  # SPLIT DATA INTO GROUPS
-  groups <- unique(pd$group)
-  
-  # CHECK AUTOFLUORESCENCE
-  if(!all(auto %in% c(TRUE, FALSE))) {
-    auto <- auto[
-      auto %in% groups
-    ]
-    if(length(auto) == 0) {
-      warning(
-        "'auto' must be the name(s) of a sample group as in ",
-        "cyto_details(x)$group!"
-      )
-    }
-  } else if(all(auto %in% TRUE)) {
-    auto <- groups
-  } else {
-    auto <- NULL
-  }
-  
-  # REFERENCES -----------------------------------------------------------------
-  
-  # BAWELL | HYBRID
-  if(grepl("^b|^h", type, ignore.case = TRUE)) {
-    message(
-      "Computing unmixing matrix using the Bagwell et al. (1993) method... \n"
-    )
-    message(
-      paste0(
-        "C. B. Bagwell & E. G. Adams (1993). Fluorescence spectral ",
-        "overlap compensation for any number of flow cytometry parameters. in:",
-        " Annals of the New York Academy of Sciences, 677:167-184.", "\n"
-      )
-    )
-  }
-  
-  # HYBRID
-  if(grepl("^h", type, ignore.case = TRUE)) {
-    message(
-      "Computing unmixing matrix using the hybrid method... \n"
-    )
-    message(
-      paste0(
-        "C. B. Bagwell & E. G. Adams (1993). Fluorescence spectral ",
-        "overlap compensation for any number of flow cytometry parameters. in:",
-        " Annals of the New York Academy of Sciences, 677:167-184.", "\n"
-      )
-    )
-    message(
-      paste0(
-        "Roca et al. (2021). AutoSpill is a principled framework that ",
-        "simplifies the analysis of multichromatic flow cytometry data. Nature",
-        " Communications 12(2890)."
-      )
-    )
-  }
-  
-  # AUTOSPILL
-  if(grepl("^r", type, ignore.case = TRUE)) {
-    message(
-      "Computing unmixing matrix using the Roca et al. (2021) method... \n"
-    )
-    message(
-      paste0(
-        "Roca et al. (2021). AutoSpill is a principled framework that ",
-        "simplifies the analysis of multichromatic flow cytometry data. Nature",
-        " Communications 12(2890)."
-      )
-    )
-  }
-  
-  # COMPUTE SPECTRAL UNMIXING MATRIX -------------------------------------------
-  
-  # STAINED INDICES IN X
-  idx <- which(
-    !grepl(
-      "Unstained",
-      pd$channel,
-      ignore.case = TRUE
-    )
-  )
-  
-  # LOOP THROUGH STAINED CONTROLS
-  unmix <- do.call(
-    "rbind",
-    lapply(
-      idx, 
-      function(id) {
-        # LOCATE UNSTAINED CONTROL(S)
-        unst_idx <- which(
-          grepl(
-            "Unstained",
-            pd$channel,
-            ignore.case = TRUE
-          ) &
-            pd$group %in% pd$group[id]
-        )
-        # COMPUTE SPILLOVER COEFFICIENTS
-        spill <- cyto_spillover_compute(
-          x[c(unst_idx, id)],
-          channels = channels,
-          type = type,
-          save_as = NA,
-          gatingTemplate = gatingTemplate,
-          axes_trans = axes_trans,
-          axes_limits = axes_limits,
-          heatmap = FALSE,
-          events = events,
-          iter = iter,
-          trim = trim,
-          details = NA, # DON'T EXPORT DETAILS - DONE ALREADY
-          unmix = TRUE,
-          ...
-        )
-        # EXTRACT NON-EMPTY ROW
-        spill <- spill[
-          apply(
-            spill, 
-            1,
-            function(z) {
-              !all(z %in% c(0, 1))
-            }
-          ),
-          , 
-          drop = FALSE
-        ]
-        # SET LABEL AS ROWNAMES
-        rownames(spill) <- if(is.na(pd$marker[id])|.empty(pd$marker[id])) {
-          paste0(
-            "<NA> ",
-            pd$label[id]
-          )
-        } else {
-          paste0(
-            "<",
-            pd$marker[id],
-            "> ",
-            pd$label[id]
-          )
-        }
-        
-        # RETURN COMPUTED COEFFICIENTS
-        return(spill)
-      }
-    )
-  )
-  
-  # AUTOFLUORESCENCE
-  if(length(auto) > 0) {
-    # INDICES OF AUTOFLUORESCENCE CONTROLS
-    auto_idx <- which(
-      pd$group %in% auto &
-        grepl("Unstained", pd$channel, ignore.case = TRUE)
-    )
-    # USE FIRST UNSTAINED CONTROL PER GROUP
-    auto_idx <- auto_idx[!duplicated(pd$group[auto_idx])]
-    # COMPUTE AUTOFLUORESCENCE SPECTRA
-    auto <- do.call(
-      "rbind",
-      lapply(
-        auto_idx,
-        function(id) {
-          # EXTRACT CYTOSET
-          auto_cs <- cyto_data_extract(
-            x[id],
-            parent =  pd$parent[id],
-            channels = channels,
-            format = "cytoset",
-            inverse = TRUE,
-            copy = TRUE,
-            trans = axes_trans
-          )[[1]]
-          # COMPUTE MEDIAN IN ALL LINEAR CHANNELS 
-          auto_spec <- cyto_apply(
-            auto_cs,
-            FUN = "cyto_stat_median",
-            channels = channels,
-            input = "matrix",
-            simplify = TRUE
-          )
-          # SWEEP OUT MAX
-          auto_spec <- auto_spec/max(auto_spec)
-          # SET ROWNAMES
-          rownames(auto_spec) <- paste0(
-            "<",
-            basename(pd$parent[id]),
-            "> ",
-            "Autofluorescence"
-          )
-          # RETURN AUTOFLUORESCENCE SPECTRA
-          return(auto_spec)
-        }
-      )
-    )
-    # APPEND AUTOFLUORESCENCE TO UNMXING MATRIX
-    unmix <- rbind(unmix, auto)
-  }
-  
-  # REMOVE NEGATIVE VALUES
-  unmix[unmix < 0] <- 0
-  
-  # DEFAULT FILENAME
-  if(is.null(save_as)) {
-    save_as <- cyto_file_name(
-      paste0(
-        format(
-          Sys.Date(), 
-          "%d%m%y"
-        ), 
-        "-Spectral-Unmixing-Matrix.csv"
-      )
-    )
-  }
-  
-  # SAVE MATRIX
-  if(!.all_na(save_as)) {
-    write_to_csv(
-      unmix, 
-      save_as,
-      row.names = TRUE
-    )
-  }
-
-  # HEATMAP
-  if(heatmap) {
-    um <- unmix
-    # CONSTRUCT HEATMAP - USE CYTO_PLOT_HEATMAP?
-    heat_map(
-      um,
-      tree_y = TRUE,
-      cell_col_scale = .cyto_plot_point_col_scale(),
-      title = "Spectral Unmixing Matrix"
-    )
-  }
   
   # SPECTRAL UNMIXING MATRIX
   return(unmix)
@@ -493,10 +153,14 @@ cyto_unmix_compute <- function(x,
 #'   by default.
 #' @param unmix an unmixing matrix or the name of a CSV file containing the
 #'   unmixing matrix.
+#' @param auto either \code{FALSE} to subtract autofluorescence prior to
+#'   unmixing or \code{TRUE} to include autofluorescence spectrum in the
+#'   unmixing matrix, set to \code{FALSE} by default. Autofluorescence is
+#'   automatically computed for each parent population using the unstained or
+#'   autofluorescence control in each sample group.
+#' @param type method to use for unmxing, options include \code{"OLS"}.
 #' @param select sample selection criteria to select a subset of samples for
 #'   unmixing, see \code{\link{cyto_select}} for details.
-#' @param copy logical indicating whether unmixing should be applied to a copy
-#'   of the original data, set to FALSE by default.
 #' @param drop logical indicating whether the original channels used compute the
 #'   unmixing matrix should be dropped from the unmixed data, set to TRUE by
 #'   default.
@@ -505,7 +169,11 @@ cyto_unmix_compute <- function(x,
 #'   or \code{cytoset}, set to NA by default.
 #' @param inverse logical to indicate whether inverse data transformations
 #'   should be applied to the data prior to unmixing, set to TRUE by default.
-#' @param ... not in use.
+#' @param save_as name of the output directory to use when writing new unmixed
+#'   FCS files, must be manually supplied by the user.
+#' @param ... additional arguments passed to \code{cyto_save} such as
+#'   \code{name} to specify how the unmixed data should be re-written to new FCS
+#'   files.
 #'
 #' @return unmixed \code{cytoframe}, \code{cytoset}, \code{GatingHierarchy} or
 #'   \code{GatingSet} with fluorescent values on the linear scale.
@@ -542,58 +210,371 @@ cyto_unmix <- function(x,
 cyto_unmix.default <- function(x,
                                parent = "root",
                                unmix = NULL,
+                               auto = FALSE,
+                               type = "OLS",
                                select = NULL,
-                               copy = FALSE,
                                drop = TRUE,
                                trans = NA,
                                inverse = TRUE,
+                               save_as = NULL,
                                ...) {
   
-  # APPLY SPECTRAL UNMIXING TO LINEAR DATA
-  cs <- cyto_apply(
-    x,
-    parent = parent,
-    select = select,
-    FUN = "cyto_unmix",
-    input = "cytoframe",
-    unmix = unmix,
-    copy = copy,
-    drop = drop,
-    trans = trans,
-    inverse = inverse
-  )
+  # TODO: DEFAULT PARENT IS LEAF NODES OF GATINGSET
   
-  # UPDATE DATA IN GATINGHIERARCHY/GATINGSET
-  if(cyto_class(x, "GatingSet")) {
-    # warning gates will be dropped
-    if(length(cyto_nodes(x)) > 1) {
-      warning(
-        "Existing gates will not be transferred to the new unmixed ",
-        cyto_class(x),
-        "!"
+  # TODO: AUTOFLUORESCENCE IS NOT STORED IN UNMIXING MATRIX
+  
+  # NOTE: WE RETURN LINEAR UNMIXED DATA + LINEAR RAW DATA (CYTOSET | GATINGSET)
+  # NOTE: WE CAN'T KEEP TRANSFORMERS AS UNMIXED PARAMETERS WILL ALSO BE TRANSFORMED
+  # DOWNSTREAM - SO WE DON'T TRANSFER GATES
+  
+  # MISSING UNMIX
+  if(is.null(unmix)) {
+    stop(
+      "Supply an unmixing matrix to 'unmix'."
+    )
+    # PREPARE UNMIX
+  } else {
+    # UNMIX FILE
+    if(is.character(unmix)) {
+      # ROWNAMES REQUIRED
+      unmix <- read_from_csv(
+        unmix,
+        data.table = FALSE
       )
     }
-    # create new GatingSet
-    x <- GatingSet(cs)
-    # GATINGHIERARCHY
-    if(cyto_class(x, "GatingHierarchy")) {
-      x <- x[[1]]
-    }
-    return(x)
-  # UNMIXED CYTOSET
-  } else {
-    return(cs)
   }
+  
+  # SAVE_AS REQUIRED
+  if(!is.null(save_as)) {
+    if(!dir.exists(save_as)) {
+      dir.create(save_as)
+    }
+  }
+  
+  # EXTRACT TRANSFORMERS
+  if(.all_na(trans)) {
+    trans <- cyto_transformers_extract(x)
+  }
+  
+  # CHECK CHANNELS
+  channels <- colnames(unmix)
+  rm_idx <- which(
+    !channels %in% cyto_channels(x)
+  )
+  if(length(rm_idx) > 0) {
+    message(
+      "'unmix' references channels absent in 'x': \n",
+      paste(
+        colnames(unmix)[rm_idx],
+        collapse = "\n"
+      )
+    )
+  }
+  
+  # CHECK PARENT
+  if(cyto_class(x, "GatingSet")) {
+    parent <- cyto_nodes_convert(
+      x,
+      nodes = parent,
+      path = "auto"
+    )
+  }
+
+  # MULTI-PARENT ONLY SUPPORTED FOR GATINGSETS
+  if(cyto_class(x, "flowSet")) {
+    parent <- "root"
+  }
+  names(parent) <- parent
+  
+  # SAMPLE SELECTION
+  if(!is.null(select)) {
+    x <- cyto_select(
+      x,
+      select
+    )
+  }
+  
+  # METADATA
+  pd <- cyto_details(x)
+  
+  # UNMIXING REQUIRES GROUP VARIABLE
+  if(any(!c("group", "stain") %in% colnames(pd))) {
+    if(!"group" %in% colnames(pd)) {
+      pData(x) <- cbind(
+        pData(x),
+        "group" =  rep(NA, length(x))
+      )
+    }
+    # UNMIXING REQUIRES STAIN VARIABLE
+    if(!"stain" %in% colnames(pd)) {
+      pData(x) <- cbind(
+        pData(x),
+        "stain" =  rep(NA, length(x))
+      )
+    }
+    # UPDATE METADATA
+    message(
+      "Update 'group' and 'stain' variables to unmix data..."
+    )
+    cyto_details_edit(
+      x
+    )
+  }
+  
+  # SPLIT DATA INTO GROUPS
+  cgs_list <- cyto_group_by(
+    x,
+    group_by = "group"
+  )
+  
+  # UNMIXED PARAMETERS
+  chans <- gsub(
+    "^<(.*)>(.*)", 
+    "\\2",
+    rownames(unmix)
+  )
+  chans <- trimws(chans, "both")
+  
+  # UNMIXING PROGRESS BAR
+  pb <- cyto_progress(
+    label = "cyto_unmix",
+    total = length(x),
+    clear = FALSE
+  )
+  
+  # UNMIX EACH PARENT IN EACH GROUP
+  cf_list <- lapply(
+    cgs_list,
+    function(cgs) {
+      # GROUP METADATA
+      pd <- cyto_details(cgs)
+      # CHECK FOR PARENT VARIABLE
+      if("parent" %in% colnames(pd)) {
+        parent <- unique(
+          pd$parent
+        )
+        # MULTIPLE PARENTS - COMMA SEPARATED - NOT DOCUMENTED
+        parent <- unlist(
+          strsplit(
+            parent, 
+            ","
+          )
+        )
+        names(parent) <- parent
+      }
+      # LOCATE GROUP UNSTAINED
+      unst_idx <- grep(
+        "unst|auto|nil",
+        pd$stain,
+        ignore.case = TRUE
+      )
+      # NOTE: MULTIPLE UNSTAINED WILL BE COERCED
+      # ESTIMATE AUTOFLUORESCENCE FOR EACH PARENT
+      if(length(unst_idx) == 0) {
+        AF <- NULL
+      } else {
+        AF <- do.call(
+          "rbind",
+          lapply(
+            parent,
+            function(pop) {
+              # COMPUTE MEDFI ACROSS DETECTORS - LINEAR SCALE
+              res <- cyto_apply(
+                cgs[unst_idx],
+                parent = parent,
+                channels = channels,
+                FUN = "cyto_stat_median",
+                input = "matrix",
+                coerce = if(length(unst_idx) > 1) {
+                  TRUE
+                } else {
+                  FALSE
+                },
+                barcode = FALSE,
+                trans = trans,
+                inverse = TRUE,
+                copy = TRUE
+              )
+              if(length(parent) > 1) {
+                res <- do.call(
+                  "rbind",
+                  res
+                )
+              }
+              rownames(res) <- parent
+              return(res)
+            }
+          )
+        )
+      }
+      # UNMIX EACH PARENT for EACH SAMPLE
+      idx <- structure(
+        seq_along(cgs), 
+        names = gsub(
+          "\\.fcs",
+          "_unmixed.fcs",
+          cyto_names(cgs)
+        )
+      )
+      # RETURN A LIST OF UNMIXED CYTOFRAMES
+      res <- lapply(
+        idx,
+        function(id) {
+          # UNMIX EACH PARENT CYTOFRAME THEN MERGE
+          # NOTE: COERCED DATA READ FROM TEMPFILE SO NAME VARIABLE WON'T MATCH
+          cf <- as(
+            cytoset(
+              lapply(
+                parent,
+                function(pop) {
+                  # UPDATE UNMIXING MATRIX TO INCLUDE AUTOFLUORESCENCE
+                  if(!is.null(AF)) {
+                    unmix <- rbind(
+                      unmix,
+                      "Autofluorescence" = as.numeric(
+                        AF[
+                          match(pop, rownames(AF)),
+                          colnames(unmix), 
+                          drop = TRUE
+                        ]
+                      )
+                    )
+                  }
+                  # SPECTRAL UNMIXING
+                  res <- cyto_unmix(
+                    cyto_data_extract(
+                      cgs[id],
+                      parent = pop,
+                      channels = NULL,
+                      format = "cytoframe",
+                      trans = trans,
+                      inverse = TRUE,
+                      copy = TRUE
+                    )[[1]][[1]],
+                    unmix = unmix,
+                    auto = auto,
+                    type = type,
+                    drop = drop,
+                    copy = FALSE,
+                    trans = NA,
+                    save_as = NULL
+                  )
+                  # SET NEW FILENAME
+                  cyto_keyword(
+                    cf,
+                    "GUID",
+                    gsub(
+                      "\\.fcs",
+                      "_unmixed.fcs",
+                      cyto_names(cgs)[id]
+                    )
+                  )
+                  cyto_keyword(
+                    cf,
+                    "$FIL",
+                    gsub(
+                      "\\.fcs",
+                      "_unmixed.fcs",
+                      cyto_names(cgs)[id]
+                    )
+                  )
+                  # UPDATE PNTYPE
+                  params <- pData(parameters(cf))
+                  params <- rownames(params)[
+                    match(
+                      chans,
+                      params$name
+                    )
+                  ]
+                  for(param in params) {
+                    cyto_keyword(
+                      cf,
+                      paste0(param, "TYPE"),
+                      "Unmixed_Fluorescence"
+                    )
+                  }
+                  # INCREMENT PROGRESS BAR
+                  cyto_progress(pb)
+                  # RETURN UNMIXED CYTOFRAME
+                  return(res)
+                }
+              )
+            ),
+            "cytoframe"
+            # if(!is.null(save_as)) {
+            #   paste0(save_as, "/", names(id))
+            # } else{
+            #   save_as
+            # },
+            # ...
+          )
+          # RETURN MERGED CYTOFRAME
+          return(cf)
+        }
+      )
+      # RETURN UNMIXED DATA
+      return(res)
+    }
+  )
+  
+  # UNMIXED CYTOSET
+  cs <- cytoset(
+    do.call(
+      "c", 
+      unname(
+        cf_list
+      )
+    )
+  )
+  
+  # SAVE_AS
+  if(!is.null(save_as)) {
+    cyto_save(
+      cs,
+      save_as = save_as,
+      names = cyto_names(cs)
+    )
+  }
+  
+  # INHERIT METDATA
+  pd <- cyto_details(x)[
+    match(
+      gsub(
+        "_unmixed\\.fcs$",
+        ".fcs",
+        cyto_names(cs)
+      ), 
+      cyto_names(x)
+    ),
+    ,
+    drop = FALSE
+  ]
+  pd$name <- cyto_details(cs)$name
+  rownames(pd) <- cyto_names(cs)
+  cyto_details(cs) <- pd
+  
+  # PREPARE LINEAR GATINGSET - ALL DATA SAME SCALE
+  if(cyto_class(x, "GatingSet")) {
+    cs <- GatingSet(cs)
+    if(cyto_class(x, "GatingHierarchy")) {
+      cs <- cs[[1]]
+    }
+  }
+  
+  # RETURN UNMIXED DATA
+  return(cs)
   
 }
 
 #' @export
 cyto_unmix.flowFrame <- function(x, 
                                  unmix = NULL,
-                                 copy = FALSE,
+                                 auto = FALSE,
+                                 type = "OLS",
                                  drop = TRUE,
                                  trans = NA,
                                  inverse = TRUE,
+                                 save_as = NULL,
                                  ...){
   
   # MISSING UNMIX
@@ -613,13 +594,12 @@ cyto_unmix.flowFrame <- function(x,
     }
   }
   
-  # ROW SUM-TO-ONE
-  unmix <- sweep(
-    unmix,
-    1,
-    rowSums(unmix),
-    "/"
-  )
+  # SAVE_AS REQUIRED
+  if(!is.null(save_as)) {
+    if(!dir.exists(save_as)) {
+      dir.create(save_as)
+    }
+  }
   
   # CHANNELS
   channels <- cyto_channels(x)
@@ -644,15 +624,126 @@ cyto_unmix.flowFrame <- function(x,
     drop = FALSE
   )
   
-  # LEAST SQUARES FIT
-  ls <- lsfit(
-    x = t(unmix),
-    y = t(exprs),
-    intercept = FALSE
+  # SUBTRACT AUTOFLUORESCENCE
+  auto_idx <- grep(
+    "Autofluorescence",
+    rownames(unmix),
+    ignore.case = TRUE
+  )
+  if(length(auto_idx) > 0 & !auto) {
+    # NOTE: ONLY ONE AF SPECTRUM SUPPORTED
+    exprs <- sweep(
+      exprs,
+      2,
+      as.numeric(
+        unmix[
+          auto_idx[1], 
+          colnames(exprs), 
+          drop = TRUE
+        ]
+      ),
+      "-"
+    )
+    # DROP AUTOFLUORESCENCE SPECTRA
+    unmix <- unmix[
+      -auto_idx, , 
+      drop = FALSE
+    ]
+  }
+  
+  # ROW SUM-TO-ONE
+  unmix <- sweep(
+    unmix,
+    1,
+    rowSums(unmix),
+    "/"
   )
   
-  # UNMIX
-  unmix_coef <- t(ls$coefficients)
+  # NON-NEGATIVE LEAST SQUARES UNMIXING
+  if(grepl("^n", type, ignore.case = TRUE)) {
+    # NNLS PACKAGE REQUIRED
+    cyto_require(
+      "nnls"
+    )
+    # UNMIX IN PARALLEL
+    unmix_coef <- t(
+      future_apply(
+        exprs,
+        1, 
+        function(z) {
+          cyto_func_call(
+            "nnls::nnls",
+            args = list(
+              rbind(
+                t(unmix),
+                rep(1, nrow(unmix)) # weight = 1 for sum-to-one
+              ),
+              c(z, 1) # weight = 1 for sum-to-one
+            )
+          )$x
+        }
+      )
+    )
+  # FULLY CONSTRAINED LEAST SQUARES
+  } else if(grepl("^f", type, ignore.case = TRUE)) {
+    # QUADPROG PACKAGE REQUIRED
+    cyto_require(
+      "quadprog"
+    )
+    # PREAPRE MATRICES
+    Dmat <- 2 * tcrossprod(unmix)
+    Amat <- t(
+      rbind(
+        rep(1, nrow(unmix)),
+        diag(nrow(unmix))
+      )
+    )
+    bvec <- c(1, rep(0, nrow(unmix)))
+    unmix_coef <- t(
+      future_apply(
+        exprs,
+        1, 
+        function(z) {
+          dvec <- 2 * tcrossprod(z, unmix)
+          cyto_func_call(
+            "quadprog::solve.QP",
+            args = list(
+              Dmat,
+              dvec,
+              Amat,
+              bvec,
+              meq = 1 # first contraint = equality
+            )
+          )$solution
+        }
+      )
+    )
+  # SOLVE - FAST
+  } else if(grepl("^s", type, ignore.case = TRUE)) {
+    unmix_coef <- t(
+      solve(
+        tcrossprod(unmix),
+        t(
+          tcrossprod(
+            exprs,
+            unmix
+          )
+        )
+      )
+    )
+  # ORDINARY LEAST SQUARES
+  } else {
+    unmix_coef <- t(
+      lsfit(
+        x = t(unmix),
+        y = t(exprs),
+        intercept = FALSE
+      )$coefficients
+    )
+  }
+  
+  # SET ENDMEMBER NAMES
+  colnames(unmix_coef) <- rownames(unmix)
   
   # PREPARE NEW PARAMETER NAMES
   mrks <- gsub("^<(.*)>(.*)", "\\1", rownames(unmix))
@@ -704,6 +795,60 @@ cyto_unmix.flowFrame <- function(x,
     mrks <- mrks[idx]
     names(mrks) <- chans[idx]
     cyto_markers(x) <- mrks
+  }
+  
+  # SET PNTYPE FOR UNMIXED PARAMETERS
+  pd <- pData(parameters(x))
+  lapply(
+    chans,
+    function(channel) {
+      # PARAMETER IDENTIFIER
+      id <- rownames(
+        pd[pd$name %in% channel, , drop = FALSE]
+      )
+      # SET PNR KEYWORD
+      cyto_keyword(
+        x,
+        paste0(id, "TYPE"),
+        "Unmixed_Fluorescence"
+      )
+    }
+  )
+  
+  # UPDATE FILENAME KEYWORD
+  cyto_keyword(
+    x,
+    "$FIL",
+    gsub(
+      "\\.fcs",
+      "_unmixed.fcs",
+      cyto_keyword(x, "$FIL")
+    )
+  )
+
+  # UPDATE GUID
+  id <- cyto_keyword(
+    x,
+    c("GUID", "$GUID")
+  )
+  id <- id[!sapply(id, "is.null")]
+  cyto_keyword(
+    x,
+    names(id),
+    gsub(
+      "\\.fcs",
+      "_unmixed.fcs",
+      id[[1]]
+    )
+  )
+  
+  # WRITE UNMIXED CYTOFRAME
+  if(!is.null(save_as)) {
+    cyto_save(
+      x,
+      save_as = save_as,
+      ...
+    )
   }
 
   # RETURN UNMIXED CYTOFRAME

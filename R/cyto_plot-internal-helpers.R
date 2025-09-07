@@ -201,13 +201,7 @@
         x,
         function(z) {
           sum(
-            cyto_apply(
-              z,
-              channels = cyto_channels(z)[1],
-              FUN = "cyto_stat_count",
-              input = "column",
-              copy = FALSE
-            )[, 1]
+            cyto_stat_count(z[[1]])
           )
         }
       )
@@ -469,10 +463,10 @@
                               cs[[q]], 
                               "Event-ID"
                             ) %in%
-                              cyto_exprs(
-                                cs_list[[v]][[match(id, ids)]],
-                                "Event-ID"
-                              )
+                            cyto_exprs(
+                              cs_list[[v]][[match(id, ids)]],
+                              "Event-ID"
+                            )
                           )
                           # ANY MATCHING EVENTS
                           if(m > 0) {
@@ -1096,73 +1090,82 @@
   # RANGE ----------------------------------------------------------------------
   
   # DATA RANGE
-  data_range <- lapply(x, function(z) {
-    if(cyto_class(z, "flowFrame")){
-      if(nrow(z) == 0){
-        type <- "instrument"
-      }else{
-        type <- "data"
-      }
-      # QUANTILE TRIM 1%
-      if(type == "trim") {
-        rng <- cyto_stat_quantile(
-          cyto_exprs(
-            z,
+  data_range <- lapply(
+    x, 
+    function(z) {
+      if(cyto_class(z, "flowFrame")){
+        if(nrow(z) == 0){
+          type <- "instrument"
+        }else{
+          type <- "data"
+        }
+        # QUANTILE TRIM 1%
+        if(type == "trim") {
+          rng <- cyto_stat_quantile(
+            cyto_exprs(
+              z,
+              channels = channels,
+              drop = FALSE
+            ),
+            probs = c(0.01, 1)
+          )
+          rownames(rng) <- c("min", "max")
+        } else {
+          rng <- suppressWarnings(
+            range(
+              z[, channels],
+              type = type
+            )
+          )
+        }
+      }else if(cyto_class(z, "flowSet")){
+        suppressWarnings(
+          cyto_apply(
+            z, 
+            function(y){
+              if(nrow(y) == 0){
+                type <- "instrument"
+              }else{
+                type <- "data"
+              }
+              if(axes_limits == "trim") {
+                rng <- cyto_stat_quantile(
+                  cyto_exprs(
+                    y,
+                    channels = channels,
+                    drop = FALSE
+                  ),
+                  probs = c(0.01, 1)
+                )
+                rownames(rng) <- c("min", "max")
+              } else {
+                rng <- suppressWarnings(
+                  range(
+                    y, 
+                    type = type
+                  )
+                )
+              }
+              return(rng)
+            }, 
+            input = "cytoframe", 
             channels = channels,
-            drop = FALSE
-          ),
-          probs = c(0.01, 1)
-        )
-        rownames(rng) <- c("min", "max")
-      } else {
-        rng <- suppressWarnings(
-          range(
-            z[, channels],
-            type = type)
+            inverse = FALSE
+          )
         )
       }
-    }else if(cyto_class(z, "flowSet")){
-      suppressWarnings(
-        cyto_apply(z, function(y){
-          if(nrow(y) == 0){
-            type <- "instrument"
-          }else{
-            type <- "data"
-          }
-          if(axes_limits == "trim") {
-            rng <- cyto_stat_quantile(
-              cyto_exprs(
-                y,
-                channels = channels,
-                drop = FALSE
-              ),
-              probs = c(0.01, 1)
-            )
-            rownames(rng) <- c("min", "max")
-          } else {
-            rng <- suppressWarnings(
-              range(
-                y, 
-                type = type
-              )
-            )
-          }
-          return(rng)
-        }, 
-        input = "cytoframe", 
-        channels = channels,
-        inverse = FALSE)
-      )
     }
-  })
+  )
   data_range <- do.call("rbind", unname(data_range))
   
   # MIN/MAX DATA RANGE
   data_range <- lapply(
     seq_len(ncol(data_range)),
     function(z){
-      c(min(data_range[, z], na.rm = TRUE), 
-        max(data_range[, z], na.rm = TRUE))
+      c(
+        min(data_range[, z], na.rm = TRUE), 
+        max(data_range[, z], na.rm = TRUE)
+      )
     }
   )
   data_range <- do.call("cbind", data_range)
@@ -1178,26 +1181,31 @@
   
   # MACHINE RANGE
   if(axes_limits == "machine"){
-    machine_range <- lapply(x, function(z){
-      if(cyto_class(z, "flowFrame")){
-        rng <- suppressWarnings(
-          range(z,
-                type = "instrument")[, channels, drop = FALSE]
-        )
-      }else if(cyto_class(z, "flowSet")){
-        rng <- suppressWarnings(
-          cyto_apply(
-            z,
-            "range",
-            type = "instrument",
-            input = "cytoframe",
-            channels = channels,
-            inverse = FALSE
+    machine_range <- lapply(
+      x, 
+      function(z){
+        if(cyto_class(z, "flowFrame")){
+          rng <- suppressWarnings(
+            range(
+              z,
+              type = "instrument"
+            )[, channels, drop = FALSE]
           )
-        )
+        }else if(cyto_class(z, "flowSet")){
+          rng <- suppressWarnings(
+            cyto_apply(
+              z,
+              "range",
+              type = "instrument",
+              input = "cytoframe",
+              channels = channels,
+              inverse = FALSE
+            )
+          )
+        }
+        return(rng)
       }
-      return(rng)
-    })
+    )
     machine_range <- do.call("rbind", machine_range)
     # MIN/MAX DATA RANGE
     machine_range <- lapply(
@@ -1325,6 +1333,12 @@
   lapply(
     seq_along(channels), 
     function(z) {
+      # MANUAL AXES_TEXT
+      if(cyto_class(axes_text[z], "list", TRUE)) {
+        return(
+          axes_text[[z]]
+        )
+      }
       # CHANNEL
       chan <- channels[z]
       # AXES RANGE
@@ -1500,7 +1514,8 @@
               channels = chan,
               axes_limits = axes_limits,
               buffer = axes_limits_buffer
-            )[, chan])
+            )[, chan]
+          )
         }
         # TODO: RESTRICT RANGE TO TRANSFORMATION RANGE
         # RESTRICT AXES TICKS & LABELS BY RANGE
@@ -2445,10 +2460,7 @@
               # NO GATE CENTER
             } else {
               # NO EVENTS
-              if (cyto_apply(pops[[z]][[y]],
-                             "nrow",
-                             input = "matrix",
-                             copy = FALSE)[, 1] == 0) {
+              if (cyto_stat_count(pops[[z]][[y]]) == 0) {
                 # RANGE CENTER - PLOT LIMITS
                 text_x[y] <- mean(c(xmin, xmax))
               } else {
@@ -2494,10 +2506,7 @@
               # NO GATE CENTER
             } else {
               # NO EVENTS
-              if (cyto_apply(pops[[z]][[y]],
-                             "nrow",
-                             input = "matrix",
-                             copy = FALSE)[, 1] < 2) {
+              if (cyto_stat_count(pops[[z]][[y]]) < 2) {
                 # RANGE CENTER
                 text_x[y] <- mean(c(xmin, xmax))
               } else {
@@ -2525,10 +2534,7 @@
             # NO GATE CENTER
             } else {
               # NO EVENTS
-              if (cyto_apply(pops[[z]][[y]],
-                             "nrow",
-                             input = "matrix",
-                             copy = FALSE)[, 1] < 2) {
+              if (cyto_stat_count(pops[[z]][[y]]) < 2) {
                 # RANGE CENTER
                 text_y[y] <- mean(c(ymin, ymax))
               } else {
@@ -3410,7 +3416,7 @@
         seq_along(channels),
         function(z) {
           # BYPASS PLOTTING FOR SPECTRAL LINES
-          if(all(nrow(cs) == 0)) {
+          if(all(cyto_stat_count(cs) == 0)) {
             return(NULL)
           }
           # COMPUTE HISTOGRAM
@@ -4518,12 +4524,7 @@
         hex <- TRUE
       }
       # EVENTS IN LAYER
-      N <- nrow(
-        cyto_exprs(
-          args$x[[z]][[1]],
-          drop = FALSE
-        )
-      )
+      N <- cyto_stat_count(args$x[[z]][[1]])
       # INHERIT KEY_SCALE - BASE LAYER ONLY
       key_scale <- NULL
       if("key_scale" %in% names(args) & z == 1) {

@@ -92,6 +92,8 @@ cyto_transformer_extract <- function(...){
 #'   be plotted using \code{cyto_plot}.
 #' @param events number or frequency of events to display in plots, set to 50000
 #'   events by default. See \code{\link{cyto_plot}} for details.
+#' @param probs quantile to use when estimating cofactor or w using negative
+#'   events, set to 0.05 by default.
 #' @param progress logical indicating whether to display the progress bar(s)
 #'   when computing transformer definitions, set to TRUE by default.
 #' @param ... additional arguments passed to
@@ -124,15 +126,18 @@ cyto_transformers_define <- function(x,
                                      type = "logicle",
                                      select = NULL,
                                      events = 50000,
+                                     probs = 0.05,
                                      plot = TRUE,
                                      progress = TRUE,
                                      ...) {
+  
+  # NOTE: USE DEFAULTS OR OPTIMIZE - FLOWVS OPTION FOR ASINH
   
   # TODO: ADD SUPPORT FOR CSV FILE WITH WIDTHBASIS OR COFACTOR
   
   # NOTE: AXES_LIMITS CAUSE ARGUMENT CONFLICT WITH A FOR LOGICLE
   
-  # NOTE: COFACTORS CAN BE SUPPLIED AS NAMED VECTOR OR CSV
+  # OPTIONAL ARGUMENTS - COFACTOR, WIDTHBASIS
   
   # RESET PROGRESS BAR ON EXIT
   on.exit({
@@ -186,13 +191,13 @@ cyto_transformers_define <- function(x,
     names(type) <- channels
   }
   
-  # PROGRESS BAR
-  if(progress) {
-    pb <- cyto_progress(
-      label = "cyto_transformers_define()",
-      total = length(channels)
-    )
-  }
+  # # PROGRESS BAR
+  # if(progress) {
+  #   pb <- cyto_progress(
+  #     label = "cyto_transformers_define()",
+  #     total = length(channels)
+  #   )
+  # }
   
   # COFACTORS
   if("cofactor" %in% names(args)) {
@@ -203,6 +208,9 @@ cyto_transformers_define <- function(x,
       cofactors <- read_from_csv(
         cofactors
       )
+    }
+    # COFACTORS MATRIX - COLUMNS CHANNEL & COFACTOR
+    if(!is.null(dim(cofactors))) {
       # FORMAT COFACTORS
       cofactors <- structure(
         cofactors[, grep("cofactor", colnames(cofactors), ignore.case = TRUE)],
@@ -212,112 +220,186 @@ cyto_transformers_define <- function(x,
         )
       )
     }
+    # MULTIPLE COFACTORS MUST BE NAMED
+    if(length(cofactors) != length(channels)) {
+      # ESTIMATE MISSING COFACTORS
+      cofactors <- rep(c(cofactors, rep(NA, length(channels))),
+                       length.out = length(channels))
+      names(cofactors) <- channels
+    } else {
+      if(is.null(names(cofactors))) {
+        names(cofactors) <- channels
+      }
+    }
   } else {
-    cofactors <- NULL
+    cofactors <- structure(
+      rep(NA, length(channels)),
+      names = channels
+    )
   }
+  
+  # WIDTHBASIS
+  if("widthBasis" %in% names(args)) {
+    widthBasis <- args[["widthBasis"]]
+    # COFACTOR CSV FILE
+    if(is.character(widthBasis) & length(widthBasis) == 1) {
+      # IMPORT widthBasis
+      widthBasis <- read_from_csv(
+        widthBasis
+      )
+    }
+    # WIDTHBASIS MATRIX
+    if(!is.null(dim(widthBasis))) {
+      # FORMAT widthBasis
+      widthBasis <- structure(
+        widthBasis[, grep("widthBasis", colnames(widthBasis), ignore.case = TRUE)],
+        names = cyto_channels_extract(
+          x,
+          widthBasis[, grep("fluor|channel|marker", colnames(widthBasis))]
+        )
+      )
+    }
+    # MULTIPLE WIDTHBASIS MUST BE NAMED
+    if(length(widthBasis) != length(channels)) {
+      widthBasis <- rep(widthBasis, length.out = length(channels))
+      names(widthBasis) <- channels
+    } else {
+      if(is.null(names(widthBasis))) {
+        names(widthBasis) <- channels
+      }
+    }
+  } else {
+    widthBasis <- structure(
+      rep(-100, length(channels)),
+      names = channels
+    )
+  }
+  
+  # PRINT PARAMETER ESTIMATES PER CHANNEL
+  message("Transformer parameters:")
   
   # TRANSFORMATION DEFINITIONS
   transformer_list <- structure(
     lapply(
       channels, 
       function(z) {
+        id <- match(z, channels)
+        n <- length(channels)
         # TYPE VECTOR
         if(!cyto_class(type, "list", TRUE)) {
           # LOG TRANSFORM
           if(grepl("^log$", type[z], ignore.case = TRUE)) {
             trans <- cyto_func_execute("flowjo_log_trans", args)
+            message(paste0("[", id, "/", n, "]: ", z, ":"))
           # ARCSINH TRANSFORM
           } else if(grepl("^a", type[z], ignore.case = TRUE)) {
-            # ARCSINH GML2 FLOWWORKSPACE
-            if(grepl("^arc", type[z], ignore.case = TRUE) |
-               grepl("g", type[z], ignore.case = TRUE)) {
-              # TRANSFORMERS
-              args[["inverse"]] <- FALSE
-              trans <- cyto_func_execute("asinh_Gml2", args)
-              # INVERSE TRANSFORMERS
-              args[["inverse"]] <- TRUE
-              inv_trans <- cyto_func_execute("asinh_Gml2", args)
-              # COMBINE TRANSFORMERS
-              trans <- flow_trans(
-                "arcsinh_Gml2",
-                trans@.Data,
-                inv_trans@.Data
-              )
-            # ARCSINH - FLOWVS ESTIMATE COFACTOR
-            } else {
-              # FLOWVS - CANNOT TURN OFF PLOTS & MESSAGES USE CAT
-              # COFACTOR SUPPLIED MANUALLY
-              if(length(cofactors) > 0) {
-                # COFACTOR MANUALLY SUPPLIED
-                if(channel %in% names(cofactors)) {
-                  cf <- as.numeric(cofactors[channel])
-                # ESTIMATE COFACTOR USING FLOWVS
-                } else {
-                  # FLOWVS
-                  cyto_require("flowVS",
-                               source = "BioC",
-                               repo = NULL,
-                               version = NULL,
-                               ref = paste0(
-                                 "Azad A, Rajwa B, Pothen A (2016). flowVS:",
-                                 " channel-specific variance stabilisation in",
-                                 " flow cytometry, BMC Bioinformatics 17(291)."))
-                  # ESTIMATE COFACTOR TO STABILISE VARAIANCE
-                  message(
-                    paste0(
-                      "Using flowVS to estimate cofactor for ", z, "..."
-                    )
+            # FLOWVS - CANNOT TURN OFF PLOTS & MESSAGES USE CAT
+            # COFACTOR MANUALLY SUPPLIED
+            cf <- as.numeric(cofactors[z])
+            # COFACTOR ESTIMATION REQUIRED
+            if(is.na(cf)) {
+              # ESTIMATE COFACTOR USING FLOWVS
+              if(grepl("VS", type[z], ignore.case = TRUE)) {
+                # FLOWVS
+                cyto_require(
+                  "flowVS",
+                  source = "BioC",
+                  repo = NULL,
+                  version = NULL,
+                  ref = paste0(
+                    "Azad A, Rajwa B, Pothen A (2016). flowVS:",
+                    " channel-specific variance stabilisation in",
+                    " flow cytometry, BMC Bioinformatics 17(291)."
                   )
-                  invisible(
-                    capture.output(
-                      cf <- cyto_func_call(
-                        "flowVS::estParamFlowVS",
-                        list(
-                          cyto_data_extract(
-                            x,
-                            parent = parent,
-                            select = select,
-                            format = "cytoset",
-                            channels = z
-                          )[[1]],
-                          z
-                        )
+                )
+                # ESTIMATE COFACTOR TO STABILISE VARAIANCE
+                # message(
+                #   paste0(
+                #     "Using flowVS to estimate cofactor for ", z, "..."
+                #   )
+                # )
+                invisible(
+                  capture.output(
+                    cf <- cyto_func_call(
+                      "flowVS::estParamFlowVS",
+                      list(
+                        cyto_data_extract(
+                          x,
+                          parent = parent,
+                          select = select,
+                          format = "cytoset",
+                          channels = z,
+                          events = events
+                        )[[1]],
+                        z
                       )
                     )
                   )
+                )
+                # LOGICLE APPROACH
+              } else {
+                # NOTE: DO WE WANT SAMPLING HERE?
+                # ESTIMATE COFACTOR
+                cf <- abs(
+                  min(
+                    cyto_apply(
+                      x,
+                      parent = parent,
+                      select = select,
+                      channels = z,
+                      input = "column",
+                      FUN = function(v) {
+                        v <- v[v < 0]
+                        if(length(v) == 0) {
+                          return(NA)
+                        } else {
+                          return(
+                            quantile_cpp(v, probs)
+                          )
+                        }
+                      },
+                      simplify = TRUE
+                    ),
+                    na.rm = TRUE
+                  )
+                )
+                # ALL DATA ABOVE ZERO
+                if(is.infinite(cf)) {
+                  cf <- 1
                 }
               }
-              # TRANSFORMER DEFINITIONS
-              trans_fun <- asinh_Gml2(
-                T = sinh(1) * cf,
-                M = 0.43429448190325176
-              )
-              inv_fun <- asinh_Gml2(
-                T = sinh(1) * cf,
-                M = 0.43429448190325176, 
-                inverse = TRUE
-              )
-              
-              # asinh_trans <- function(x, cofactor = cf) {
-              #   asinh(x/cofactor)
-              # }
-              # sinh_trans <- function(x, cofactor = cf) {
-              #   sinh(x) * cofactor
-              # }
-              
-              # TRANSFORMERS
-              trans <- flow_trans(
-                "arcsinh",
-                asinh_trans,
-                sinh_trans
-              )
             }
+            # PRINT COFACTOR
+            message(paste0("[", id, "/", n, "]: ", z, ": ", round(cf, 2)))
+            # # TRANSFORMER DEFINITIONS
+            # trans_fun <- asinh_Gml2(
+            #   T = sinh(1) * cf,
+            #   M = 0.43429448190325176
+            # )
+            # inv_fun <- asinh_Gml2(
+            #   T = sinh(1) * cf,
+            #   M = 0.43429448190325176, 
+            #   inverse = TRUE
+            # )
+            
+            asinh_trans <- function(x, cofactor = cf) {
+              asinh(x/cofactor)
+            }
+            sinh_trans <- function(x, cofactor = cf) {
+              sinh(x) * cofactor
+            }
+            
+            # TRANSFORMERS
+            trans <- flow_trans(
+              "arcsinh",
+              asinh_trans,
+              sinh_trans
+            )
           # BIEXPONENTIAL TRANSFORM
           } else if(grepl("^biex", type[z], ignore.case = TRUE)) {
-            # DEFAULT WIDTHBASIS
-            if(is.null(args[["widthBasis"]])) {
-              args[["widthBasis"]] <- -100
-            }
+            # TODO: WIDTHBASIS SUPPLIED PER CHANNEL
+            # EXTRACT WIDTHBASIS
+            args[["widthBasis"]] <- as.numeric(widthBasis[z])
             # MAXVALUE - HARD CODED
             if(is.null(args[["maxValue"]])) {
               args[["maxValue"]] <- 262144
@@ -350,6 +432,9 @@ cyto_transformers_define <- function(x,
               trans@.Data,
               inv_trans@.Data
             )
+            # PRINT WIDTHBASIS
+            message(paste0("[", id, "/", n, "]: ", z, ": ", 
+                           round(args[["widthBasis"]], 2)))
           # LOGICLE TRANSFORM
           } else if(grepl("^logicle$", type[z], ignore.case = TRUE)) {
             
@@ -399,27 +484,44 @@ cyto_transformers_define <- function(x,
             # COMPUTE W - (R MOST NEGATIVE VALUES FOR DISPLAY)
             if(!"w" %in% names(args)) {
               args$w <- 0
-              # EXTRACT DATA < ZERO
-              d <- do.call(
-                "c",
-                cyto_apply(
-                  x,
-                  parent = parent,
-                  select = select,
-                  channels = z,
-                  input = "column",
-                  FUN = function(v) {
-                    v[v < 0]
-                  },
-                  simplify = FALSE
-                )
+              # # EXTRACT DATA < ZERO - SLOW
+              # d <- do.call(
+              #   "c",
+              #   cyto_apply(
+              #     x,
+              #     parent = parent,
+              #     select = select,
+              #     channels = z,
+              #     input = "column",
+              #     FUN = function(v) {
+              #       v[v < 0]
+              #     },
+              #     simplify = FALSE
+              #   )
+              # )
+              # args$p <- .Machine$double.eps + quantile_cpp(d,0.05)
+              # FASTER METHOD - MIN QUANTILE ACROSS SAMPLES
+              q <- cyto_apply(
+                x,
+                parent = parent,
+                select = select,
+                channels = z,
+                input = "column",
+                FUN = function(v) {
+                  v <- v[v < 0]
+                  if(length(v) == 0) {
+                    return(NA)
+                  } else {
+                    return(
+                      quantile_cpp(v, probs)
+                    )
+                  }
+                },
+                simplify = TRUE
               )
               # COMPUTE MINIMUM VALUE
-              if(length(d) > 0) {
-                args$p <- .Machine$double.eps + quantile(
-                  d,
-                  0.05
-                )
+              if(!.all_na(q)) {
+                args$p <- .Machine$double.eps + min(q, na.rm = TRUE)
                 args$w <- (args$m - log10(args$t/abs(args$p))) / 2
               }
             }
@@ -451,6 +553,8 @@ cyto_transformers_define <- function(x,
               trans@.Data,
               inv@.Data
             )
+            # PRINT W
+            message(paste0("[", id, "/", n, "]: ", z, ": ", round(args$w, 2)))
 
             # # ESTIMATELOGICLE CYTOEXPLORER WRAPPER DOESN'T EXPOSE ARGUMENTS
             # estimateLogicle_args <- c("t", "m", "a", "q")
@@ -500,10 +604,10 @@ cyto_transformers_define <- function(x,
             inv    # INVERSE TRANSFORM
           )
         }
-        # INCREMENT PROGRESS BAR
-        if(progress){
-          cyto_progress(pb)
-        }
+        # # INCREMENT PROGRESS BAR
+        # if(progress){
+        #   cyto_progress(pb)
+        # }
         return(trans)
       }
     ), names = channels
@@ -517,6 +621,7 @@ cyto_transformers_define <- function(x,
   
   # PLOT TRANSFORMATIONS
   if(plot) {
+    message("Visualising transformers using cyto_plot()...")
     # EXTRACT DATA FOR TRANSFORMATION
     cs <- cyto_data_extract(
       x,
@@ -542,8 +647,9 @@ cyto_transformers_define <- function(x,
         channels = channels,
         axes_trans = transformer_list,
         axes_limits = "machine",
-        events = 1 # SAMPLED ABOVE FOR FASTER TRANSFORMATIONS
-      ), 
+        events = 1, # SAMPLED ABOVE FOR FASTER TRANSFORMATIONS
+        header = "Transformer Definitions"
+      ),
       error = function(e){
         if(.grepl("figure margins too large", e$message)) {
           message("Insufficient plotting space to display transformations!")

@@ -1,26 +1,34 @@
 ## CYTO_SPECTRA_COMPARE --------------------------------------------------------
 
-#' Compute spectral similarity between spectra
+#' Compute cosine similarity or unmixing error hotspot matrix
 #'
 #' @param x object of class \code{"matrix"} or list of matrix objects with each
 #'   row representing a uniquely named spectrum and each column representing a
 #'   detector or channel.
 #' @param select vector of row to select from each matrix by name, set to NULL
 #'   by default to compare all rows.
+#' @param type indicates whether to compute the \code{"cosine"} similarity,
+#'   spectral \code{"purity"} or \code{"hotspot"} matrix, set to \code{"cosine"}
+#'   by default. Option \code{"hotspot"} is only available when a single matrix
+#'   has been supplied to \code{x}.
 #' @param save_as name of a CSV file to which the similarity matrix should be
 #'   saved, set to NULL by default to bypass saving.
 #' @param heatmap logical indicating whether the computed similarity scores
 #'   should be displayed in a heatmap, set to to TRUE by default.
+#' @param title text to display in the header of the heatmap when \code{heatmap
+#'   = TRUE}, defaults to either \code{"Cosine Similarity Matrix"},
+#'   \code{"Spectral Purity Matrix"} or \code{"Unmixing Error Hotspot"} matrix
+#'   depending on \code{type}.
 #' @param ... additional arguments passed to \code{HeatmapR::heat_map()} to
-#'   cusomise the displayed heatmap.
+#'   customise the displayed heatmap.
 #'
 #' @return computed similarity matrix, heatmap and exported CSV file if
 #'   requested.
-#'   
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @importFrom HeatmapR heat_map
-#' 
+#'
 #' @seealso \code{\link{cyto_plot_spectra}}
 #' @seealso \code{\link{cyto_unmix_compute}}
 #' @seealso \code{\link{cyto_spillover_compute}}
@@ -28,8 +36,10 @@
 #' @export
 cyto_spectra_compare <- function(x,
                                  select = NULL,
+                                 type = "cosine",
                                  save_as = NULL,
                                  heatmap = TRUE,
+                                 title = NULL,
                                  ...) {
   
   # MATRIX
@@ -64,21 +74,37 @@ cyto_spectra_compare <- function(x,
         "Rownames must be included in 'x' to identify each fluorchrome or event!"
       )
     }
-    # SIMILARITY MATRIX
-    cs <- diag(
-      1, 
-      nrow = nrow(x),
-      ncol = nrow(x)
-    )
-    colnames(cs) <- rownames(x)
-    rownames(cs) <- colnames(cs)
-    for(i in 1:nrow(x)) {
-      for(j in i:nrow(x)) {
-        cs[j, i] <- cs[i, j] <- .cosine(
-          as.numeric(x[i, ]),
-          as.numeric(x[j, ])
-        )
+    # SIMILARITY MATRIX REQUIRED
+    if(grepl("^c|^h", type, ignore.case = TRUE)) {
+      # COSINE SIMILARITY MATRIX
+      cs <- diag(
+        1, 
+        nrow = nrow(x),
+        ncol = nrow(x)
+      )
+      colnames(cs) <- rownames(x)
+      rownames(cs) <- colnames(cs)
+      for(i in 1:nrow(x)) {
+        for(j in i:nrow(x)) {
+          cs[j, i] <- cs[i, j] <- .cosine(
+            as.numeric(x[i, ]),
+            as.numeric(x[j, ])
+          )
+        }
       }
+      # HOTSPOT MATRIX
+      if(grepl("^h", type)) {
+        cs <- sqrt(abs(solve(cs)))
+      }
+    # SPECTRAL PURITY
+    } else if(grepl("^p", type)) {
+      cs <- rbind(
+        "purity" = row_purity_cpp(x)
+      )
+    } else {
+      stop(
+        "Unsupported 'type'!"
+      )
     }
   # LIST
   } else if(cyto_class(x, "list", "TRUE")) {
@@ -138,21 +164,41 @@ cyto_spectra_compare <- function(x,
       )
     )
     keep <- names(cnt)[cnt == length(x)]
-    # SIMILARITY MATRIX - COMPUTE RELATIVE TO FIRST MATRIX
-    cs <- matrix(
-      1,
-      ncol = length(keep),
-      nrow = length(x)
-    )
-    colnames(cs) <- keep
-    rownames(cs) <- names(x)
-    for(i in keep) {
-      for(j in seq_along(x)) {
-        cs[j, match(i, colnames(cs))] <- .cosine(
-          as.numeric(x[[1]][match(i, rownames(x[[1]])), ]),
-          as.numeric(x[[j]][match(i, rownames(x[[j]])), ])
-        )
+    # COSINE SIMILARITY
+    if(grepl("^c", type, ignore.case = TRUE)) {
+      # SIMILARITY MATRIX - COMPUTE RELATIVE TO FIRST MATRIX
+      cs <- matrix(
+        1,
+        ncol = length(keep),
+        nrow = length(x)
+      )
+      colnames(cs) <- keep
+      rownames(cs) <- names(x)
+      for(i in keep) {
+        for(j in seq_along(x)) {
+          cs[j, match(i, colnames(cs))] <- .cosine(
+            as.numeric(x[[1]][match(i, rownames(x[[1]])), ]),
+            as.numeric(x[[j]][match(i, rownames(x[[j]])), ])
+          )
+        }
       }
+    # SPECTRAL PURITY
+    } else if(grepl("^p", type, ignore.case = TRUE)) {
+      cs <- do.call(
+        "rbind",
+        lapply(
+          x,
+          function(z) {
+            row_purity_cpp(z)
+          }
+        )
+      )
+      rownames(cs) <- names(x)
+    # UNSUPPORTED TYPE
+    } else {
+      stop(
+        "Only cosine similarity and spectral purity are supported for lists!"
+      )
     }
   # UNSUPPORTED OBJECT
   } else {
@@ -165,6 +211,17 @@ cyto_spectra_compare <- function(x,
   if(heatmap) {
     HeatmapR::heat_map(
       cs,
+      title = if(is.null(title)) {
+        if(grepl("^c", type)) {
+          "Cosine Similarity Matrix"
+        } else if(grepl("^p", type)) {
+          "Spectral Purity Matrix"
+        } else {
+          "Unmixing Error Hotspot Matrix"
+        }
+      } else {
+        title
+      },
       ...
     )
   }

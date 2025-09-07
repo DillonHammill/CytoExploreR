@@ -211,7 +211,7 @@ cyto_gate_draw <- function(x,
                            seed = 42,
                            ...){
   
-  # TODO: add support for skipping samples whilst drawing.
+  # TODO: GATING WITH SELECT + INDIVIDUAL GROUPING - NOT ALL SAMPLES HAVE GATES
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -413,14 +413,6 @@ cyto_gate_draw <- function(x,
                 gate_new <- !do.call("|", unname(unlist(gates)))
               }
             }
-            # ADD GATE
-            gates <<- c(
-              gates, 
-              structure(
-                list(gate_new),
-                names = paste(alias, collapse = "|") # quad gates
-              )
-            )
             # UPDATE ARGUMENTS - USE EXISTING GATE IF NONE DRAWN
             args$gate <- gate_new
             # WE ASSUME GATES ARE PROPERLY NAMED HERE - INTERNAL USE ONLY
@@ -441,6 +433,14 @@ cyto_gate_draw <- function(x,
                 args$gate <- gate
               }
             }
+            # ADD GATE
+            gates <<- c(
+              gates, 
+              structure(
+                list(args$gate),
+                names = paste(alias, collapse = "|") # quad gates
+              )
+            )
             # LABELS - GATE BASE LAYER
             do.call(".cyto_gate_draw_label", args) # ... not used
           },

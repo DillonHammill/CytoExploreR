@@ -2,34 +2,37 @@
 % Please edit documentation in R/cyto_plot_heatmap.R
 \name{cyto_plot_heatmap}
 \alias{cyto_plot_heatmap}
-\title{Construct a heatmap of cytometry data}
+\title{Plot heatmaps using HeatmapR}
+\usage{
+cyto_plot_heatmap(x, ...)
+}
 \arguments{
-\item{x}{obejct of class \code{flowFrame}, \code{flowSet},
-\code{GatingHierarchy} or \code{GatingSet}.}
+\item{x}{object of class \code{"matrix"} or \code{"data.frame"}.}
 
-\item{alias}{names of the populations for which the statistics should be
-calculated, set to NULL by default.}
-
-\item{parent}{names of the parent populations for which frequency statistics
-should be calculated.}
-
-\item{channels}{names of the channels or markers for which statistics should
-be calculated, set all channels with assigned markers by default.}
-
-\item{stat}{name of the statistic passed to \code{\link{cyto_stats_compute}}
-to perform the calculation, set to \code{median} by default to compute
-median fluorescent intensity in the selected channels.}
-
-\item{merge_by}{vector of experiment variable names to merge the samples into
-groups prior to constructing the heatmap, set to NULL by default.}
-
-\item{...}{additional arguments passed to \code{heat_map()} to construct the
-heatmap.}
+\item{...}{additional arguments passed to \code{HeatmapR::heat_map()}.}
+}
+\value{
+recorded heatmap.
 }
 \description{
-The \code{HeatmapR} package is required for heatmap construction, it can be
-downloaded by running
-\code{devtools::install_github("DillonHammill/HeatmapR")} in the console.
+A CytoExploreR wrapper for \code{HeatmapR::heat_map()} to allow visualisation
+of matrices or data.frames as heatmaps.
+}
+\examples{
+\dontrun{
+  library(CytoExploreRData)
+  gs <- GatingSet(Activation)
+  spill <- cyto_spillover_extract(gs)[[1]]
+  cyto_plot_heatmap(
+    spill,
+    cell_text = TRUE,
+    title = "Spillover Matrix"
+  )
+}
+
+}
+\seealso{
+\code{\link[HeatmapR]{heat_map}}
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)

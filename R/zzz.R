@@ -22,7 +22,7 @@
   options("CytoExploreR_progress" = NULL)
   
   # ACTIVE GATINGTEMPLATE - FALSE TURNS OFF GATINGTEMPLATE
-  options("CytoExploreR_gatingTemplate" = NULL)
+  options("CytoExploreR_gatingTemplate" = TRUE)
   
   # CUSTOM THEME FOR CYTO_PLOT()
   options("cyto_plot_theme" = NULL)

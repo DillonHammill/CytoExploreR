@@ -2,9 +2,17 @@
 % Please edit documentation in R/cyto_spectra_compare.R
 \name{cyto_spectra_compare}
 \alias{cyto_spectra_compare}
-\title{Compute spectral similarity between spectra}
+\title{Compute cosine similarity or unmixing error hotspot matrix}
 \usage{
-cyto_spectra_compare(x, select = NULL, save_as = NULL, heatmap = TRUE, ...)
+cyto_spectra_compare(
+  x,
+  select = NULL,
+  type = "cosine",
+  save_as = NULL,
+  heatmap = TRUE,
+  title = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{"matrix"} or list of matrix objects with each
@@ -14,21 +22,31 @@ detector or channel.}
 \item{select}{vector of row to select from each matrix by name, set to NULL
 by default to compare all rows.}
 
+\item{type}{indicates whether to compute the \code{"cosine"} similarity,
+spectral \code{"purity"} or \code{"hotspot"} matrix, set to \code{"cosine"}
+by default. Option \code{"hotspot"} is only available when a single matrix
+has been supplied to \code{x}.}
+
 \item{save_as}{name of a CSV file to which the similarity matrix should be
 saved, set to NULL by default to bypass saving.}
 
 \item{heatmap}{logical indicating whether the computed similarity scores
 should be displayed in a heatmap, set to to TRUE by default.}
 
+\item{title}{text to display in the header of the heatmap when \code{heatmap
+= TRUE}, defaults to either \code{"Cosine Similarity Matrix"},
+\code{"Spectral Purity Matrix"} or \code{"Unmixing Error Hotspot"} matrix
+depending on \code{type}.}
+
 \item{...}{additional arguments passed to \code{HeatmapR::heat_map()} to
-cusomise the displayed heatmap.}
+customise the displayed heatmap.}
 }
 \value{
 computed similarity matrix, heatmap and exported CSV file if
   requested.
 }
 \description{
-Compute spectral similarity between spectra
+Compute cosine similarity or unmixing error hotspot matrix
 }
 \seealso{
 \code{\link{cyto_plot_spectra}}

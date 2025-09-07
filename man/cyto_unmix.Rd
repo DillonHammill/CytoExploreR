@@ -17,11 +17,16 @@ by default.}
 \item{unmix}{an unmixing matrix or the name of a CSV file containing the
 unmixing matrix.}
 
+\item{auto}{either \code{FALSE} to subtract autofluorescence prior to
+unmixing or \code{TRUE} to include autofluorescence spectrum in the
+unmixing matrix, set to \code{FALSE} by default. Autofluorescence is
+automatically computed for each parent population using the unstained or
+autofluorescence control in each sample group.}
+
+\item{type}{method to use for unmxing, options include \code{"OLS"}.}
+
 \item{select}{sample selection criteria to select a subset of samples for
 unmixing, see \code{\link{cyto_select}} for details.}
-
-\item{copy}{logical indicating whether unmixing should be applied to a copy
-of the original data, set to FALSE by default.}
 
 \item{drop}{logical indicating whether the original channels used compute the
 unmixing matrix should be dropped from the unmixed data, set to TRUE by
@@ -34,7 +39,12 @@ or \code{cytoset}, set to NA by default.}
 \item{inverse}{logical to indicate whether inverse data transformations
 should be applied to the data prior to unmixing, set to TRUE by default.}
 
-\item{...}{not in use.}
+\item{save_as}{name of the output directory to use when writing new unmixed
+FCS files, must be manually supplied by the user.}
+
+\item{...}{additional arguments passed to \code{cyto_save} such as
+\code{name} to specify how the unmixed data should be re-written to new FCS
+files.}
 }
 \value{
 unmixed \code{cytoframe}, \code{cytoset}, \code{GatingHierarchy} or

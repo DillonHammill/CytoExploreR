@@ -127,7 +127,7 @@
         } else {
           text_xy <- c()
           # X CO-ORDINATE
-          if(nrow(pop[[1]]) < 2) {
+          if(cyto_stat_count(pop[[1]]) < 2) {
             text_xy[1] <- mean(par("usr")[1:2])
           } else {
             text_xy[1] <- cyto_apply(
@@ -150,7 +150,7 @@
           if(length(channels) == 1) {
             text_xy[2] <- mean(par("usr")[3:4])
           } else {
-            if(nrow(pop[[1]]) < 2) {
+            if(cyto_stat_count(pop[[1]]) < 2) {
               text_xy[2] <- mean(par("usr")[3:4])
             } else {
               text_xy[2] <- cyto_apply(

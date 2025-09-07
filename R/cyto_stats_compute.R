@@ -378,12 +378,7 @@ cyto_stats_compute <- function(x,
         lapply(
           seq_along(parent), 
           function(z){
-            res <- cyto_apply(
-              parent[[z]],
-              "nrow",
-              input = "matrix",
-              copy = FALSE
-            )
+            res <- cbind(cyto_stat_count(parent[[z]]))
             colnames(res) <- names(parent)[z]
             return(res)
           }
@@ -396,12 +391,7 @@ cyto_stats_compute <- function(x,
         lapply(
           alias, 
           function(z){
-            res <- cyto_apply(
-              z,
-              "nrow",
-              input = "matrix",
-              copy = FALSE
-            )
+            res <- cbind(cyto_stat_count(z))
             res <- res[, rep(1, ncol(parent_counts)), drop = FALSE]
             colnames(res) <- colnames(parent_counts)
             return(res)

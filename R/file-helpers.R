@@ -78,7 +78,7 @@ file_ext_append <- function(x,
     }
     # APPEND EXTENSION
     if (.empty(file_ext(x[z]))) {
-      paste0(x[z], ext)
+      paste0(x[z], ext[z])
     } else {
       x[z]
     }

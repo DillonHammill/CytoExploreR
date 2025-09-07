@@ -27,6 +27,7 @@ cyto_transform(x, trans = NULL, ...)
 \method{cyto_transform}{transformList}(
   x,
   trans = NULL,
+  channels = NULL,
   copy = FALSE,
   plot = TRUE,
   popup = FALSE,
@@ -38,6 +39,7 @@ cyto_transform(x, trans = NULL, ...)
   x,
   trans = NULL,
   inverse = FALSE,
+  channels = NULL,
   copy = FALSE,
   plot = TRUE,
   popup = FALSE,

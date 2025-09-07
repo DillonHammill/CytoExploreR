@@ -133,7 +133,7 @@ a matrix containing the xy co-ordinates of the labels.
 }
 \description{
 \code{cyto_plot_label()} prepares the data in the same way as
-\code{cyto_plot()} by allows uses to interactively add labels to plots that
+\code{cyto_plot()} but allows uses to interactively add labels to plots that
 have already been created.
 }
 \examples{

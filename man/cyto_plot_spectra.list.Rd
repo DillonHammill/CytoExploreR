@@ -11,6 +11,7 @@
   ylim = c(NA, NA),
   xlab = NA,
   ylab = NA,
+  legend_text = NA,
   ...
 )
 }
@@ -32,6 +33,9 @@ axis label making more space for x axis text.}
 
 \item{ylab}{label to use for the y axis, set to Emission percentage by
 default.}
+
+\item{legend_text}{text to use in the legend, defaults to the names of the
+matrices as supplied in \code{x}.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_plot}} including
 all the \code{gate_} aesthetics arguments that can be used to customise the

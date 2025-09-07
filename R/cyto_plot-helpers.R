@@ -416,44 +416,23 @@ cyto_plot_empty <- function(x,
   
   # Convert axes_text to list - allows inheritance from cyto_plot
   if (!cyto_class(axes_text, "list")) {
-    axes_text <- list(
-      list(
-        "label" = NULL,
-        "at" = NULL,
-        "add" = axes_text[1]
-      ),
-      list(
-        "label" = NULL,
-        "at" = NULL,
-        "add" = axes_text[2]
-      )
+    axes_text <- lapply(
+      seq_along(axes_text),
+      function(id) {
+        if(cyto_class(axes_text[id], "list", TRUE)) {
+          axes_text[[id]]
+        } else {
+          list(
+            "label" = NULL,
+            "at" = NULL,
+            "add" = axes_text[id]
+          )
+        }
+      }
     )
   }
   
-  # # X axis breaks and labels -  can be inherited from cyto_plot
-  # if (length(axes_text[[1]]$label) == 0) {
-  #   axes_text[[1]] <- .cyto_plot_axes_text(
-  #     x,
-  #     channels = channels[1],
-  #     axes_text = axes_text[[1]],
-  #     axes_trans = axes_trans,
-  #     axes_range = list(xlim),
-  #     axes_limits = axes_limits
-  #   )[[1]]
-  # }
-  # 
-  # # Y axis breaks and labels - can be inherited from cyto_plot
-  # if (length(axes_text[[2]]$label) == 0) {
-  #   axes_text[[2]] <- .cyto_plot_axes_text(
-  #     x,
-  #     channels = channels[2],
-  #     axes_text = axes_text[[2]],
-  #     axes_trans = axes_trans,
-  #     axes_range = list(ylim),
-  #     axes_limits = axes_limits
-  #   )[[1]]
-  # }
-  
+  # NOTE: MANUAL OVERRIDE NOT POSSIBLE HERE
   # Turn off y axis labels for stacked overlays
   if (length(x) > 1 & hist_stack != 0 & length(channels) == 1) {
     axes_text[[2]]$add <- FALSE

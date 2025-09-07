@@ -778,9 +778,9 @@ cyto_gatingTemplate_active <- function(x = NULL,
     if(is.null(x)) {
       gt <- cyto_option("CytoExploreR_gatingTemplate")
       # ACTIVE GATINGTEMPLATE NOT SET
-      check <- is.null(gt)
+      check <- is.null(gt) | isTRUE(gt)
       if(force) {
-        check <- is.null(gt) | isFALSE(gt)
+        check <- is.null(gt) | isFALSE(gt) | isTRUE(gt)
       }
       if(check & ask == TRUE) {
         if(interactive()) {
@@ -1022,6 +1022,8 @@ cyto_gatingTemplate_edit <- function(x,
 #' @param overwrite logical indicating whether existing gates should be removed
 #'   prior to applying the gatingTemplate, only required when running
 #'   CytoExploreR non-interactively.
+#' @param nodes names of the populations to gate, set to NULL by default to
+#'   include all nodes in the \code{gtaingTemplate}. 
 #' @param ... additional arguments passed to
 #'   \code{\link[openCyto:gt_gating]{gt_gating()}} including \code{start} and
 #'   \code{stop.at} to only apply particular gates from the gatingTemplate.
@@ -1056,7 +1058,10 @@ cyto_gatingTemplate_apply <- function(x,
                                       gatingTemplate = NULL,
                                       active = TRUE,
                                       overwrite = NULL,
+                                      nodes = NULL,
                                       ...) {
+  
+  # TODO: ADD A NODE ARGUMENT TO ONLY APPLY CERTAIN GATES
   
   # GATINGHIERARCHY/GATINGSET REQUIRED
   if (missing(x)) {
@@ -1106,6 +1111,52 @@ cyto_gatingTemplate_apply <- function(x,
       gatingTemplate(
         gatingTemplate
       )
+    )
+  }
+  
+  # NODES
+  if(!is.null(nodes)) {
+    # GET FULL NODE PATHS
+    nodes <- cyto_nodes_convert(
+      gt,
+      nodes = nodes,
+      path = "full"
+    )
+    # GET ALL PARENTAL NODES
+    nodes <- LAPPLY(
+      nodes,
+      function(node) {
+        parents <- c(node)
+        parent <- dirname(node)
+        while(parent != node) {
+          parents <- c(parents, parent)
+          node <- parent
+          parent <- dirname(node)
+        }
+        return(parents)
+      }
+    )
+    nodes <- unique(nodes)
+    nodes <- nodes[!nodes %in% c("root", "/")]
+    # RCMD CHECK
+    parent <- NULL
+    alias <- NULL
+    # CONVERT GATINGTEMPLATE TO DATA.TABLE
+    gt <- as.data.table(gt)
+    # LOCATE REQUIRED ROWS
+    idx <- match(
+      nodes,
+      gsub(
+        "root",
+        "",
+        paste0(gt[, parent], "/", gt[, alias])
+      )
+    )
+    # SUBSET GATINGTEMPLATE
+    gt <- gt[sort(idx), , drop = FALSE]
+    # CONVERT TO GATINGTEMPLATE
+    gt <- suppressMessages(
+      gatingTemplate(gt)
     )
   }
   

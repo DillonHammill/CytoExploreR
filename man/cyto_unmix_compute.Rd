@@ -9,16 +9,20 @@ cyto_unmix_compute(
   parent = "root",
   select = NULL,
   channels = NULL,
-  type = "roca",
-  auto = FALSE,
+  gate = "draw-2d",
+  type = "CytoDecode",
   save_as = NULL,
   gatingTemplate = NULL,
   axes_trans = NA,
   axes_limits = "machine",
   heatmap = TRUE,
   events = 500,
-  iter = 100,
+  model = "rlm",
+  max_iter = 20,
   trim = 0.001,
+  tol = 1e-06,
+  grid_size = 100,
+  resid = "both",
   details = NULL,
   ...
 )
@@ -43,18 +47,19 @@ required to compute the spillover matrix.}
 \item{channels}{names of the channels/markers for which unmixing coefficients
 should be computed, set to all fluorescent channels by default.}
 
-\item{type}{options include \code{"Bagwell"}, \code{"Roca"} or
-\code{"hybrid"} to indicate which method to use when computing the
-spillover matrix, set to \code{"Roca"} by default. The \code{"hybrid"}
-method computes the spillover coefficients using the \code{Bagwell}
-approach (no RLM) and refines the coefficients using the \code{Autospill}
-approach. Refer to \code{references} section for more details about each
-method.}
+\item{gate}{indicates whether to \code{draw} or use \code{auto} gating
+methods to gate the negative and positive populations for each control.
+Gating is optional for \code{"Autospill"} and \code{"CytoDecode"} methods
+but is recommended to achieve better results and ensure compatibility with
+\code{cyto_panel_design()}. Set to \code{"draw"} by default to allow for
+more flexibility over gating. For \code{gate = "draw"} users can also
+specify whether to gate the 1D histograms or 2D scatter plots 1D or 2D
+suffix to \code{gate}. For example, to gate in 2D set \code{gate =
+"draw-2D"} which is the new default manual gating method.}
 
-\item{auto}{logical indicating whether autofluorescence subtraction should be
-performed, set to TRUE by default. Users will be asked which group to use
-for autofluorescence subtraction or the name of the group can be supplied
-manually here.}
+\item{type}{options include \code{"Bagwell" or "autocomp"}, \code{"Roca" or
+"autospill"} or \code{"CytoDecode"} to indicate which method to use when
+computing the spillover matrix, set to \code{"CytoDecode"} by default.}
 
 \item{save_as}{name of a CSV to which the computed unmixing matrix should be
 written, set to \code{Spectral-Unmixing-Matrix.csv} prefixed with the date
@@ -81,15 +86,31 @@ matrix should be displayed in a heatmap, set to TRUE by default.}
 \item{events}{number of events to extract from each control prior to fitting
 RLM models, set to 500 events by default.}
 
-\item{iter}{indicates the maximum number of allowable iterations for refining
-the spillover coefficients, set to 100 by default.}
+\item{model}{indicates the type of model to use when running autospill,
+options include \code{"rlm"} for robust linear models or \code{"vwqr"} for
+variance weighted quantile regression, set to \code{"rlm"} by default.}
+
+\item{max_iter}{indicates the maximum number of allowable iterations for
+refining the spillover coefficients, set to 20 by default.}
 
 \item{trim}{proportion of events to exclude from the top and bottom of each
-scale when fitting RLM models in autospill method, set to 0.001 by default.}
+scale when fitting models in \code{AutoSpill} and \code{CytoDecode}
+methods, set to 0.001 by default.}
+
+\item{tol}{tolerance level for convergence of vwqr model in \code{CytoDecode}
+method, set to \code{1e-6} by default.}
+
+\item{grid_size}{size of the grid to use for wvqr model in \code{CytoDecode}
+method, set to 100 by default. Smaller grid sizes will provide a speed
+boost at the cost of accuracy.}
+
+\item{resid}{indicates whether to use \code{"lower"}, \code{"upper"} or
+\code{"both"} residuals when fitting variance models in vwqr used in
+\code{CytoDecode}, set to \code{"both"} by default.}
 
 \item{details}{name of a CSV file to which the details of the compensation
 controls should be saved, set to NULL by default to use
-\code{date-Compensation-Details.csv}. Setting this argument to \code{NA}
+\code{date-Control-Details.csv}. Setting this argument to \code{NA}
 will prevent details from being written to a CSV file.}
 
 \item{...}{additional arguments passed to \code{cyto_plot()} to allow

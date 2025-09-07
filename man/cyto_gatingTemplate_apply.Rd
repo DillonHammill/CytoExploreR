@@ -9,6 +9,7 @@ cyto_gatingTemplate_apply(
   gatingTemplate = NULL,
   active = TRUE,
   overwrite = NULL,
+  nodes = NULL,
   ...
 )
 }
@@ -25,6 +26,9 @@ set as the current active gatingTemplate set to TRUE by default.}
 \item{overwrite}{logical indicating whether existing gates should be removed
 prior to applying the gatingTemplate, only required when running
 CytoExploreR non-interactively.}
+
+\item{nodes}{names of the populations to gate, set to NULL by default to
+include all nodes in the \code{gtaingTemplate}.}
 
 \item{...}{additional arguments passed to
 \code{\link[openCyto:gt_gating]{gt_gating()}} including \code{start} and

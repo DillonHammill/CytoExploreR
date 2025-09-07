@@ -3,6 +3,9 @@
 # All cyto_stat() functions below accept a pre-processed matrix prepared by
 # cyto_apply() and round the computed statistics to 2 decimal places.
 
+# NOTE: for speed we don't handle NA values users will need to do that before
+# passing their data to these functions.
+
 ## DISPATCH --------------------------------------------------------------------
 
 #' Prepare FUN to dispatch to cyto_stat function
@@ -45,10 +48,39 @@
 #' @param x a vector or matrix
 #' @noRd
 cyto_stat_count <- function(x, 
+                            parent = "root",
                             ...) {
   
+  # FLOWSET - NROW NOT WORK FOR FLOWSETS
+  if(cyto_class(x, "flowSet", TRUE)) {
+    return(
+      structure(
+        sapply(
+          seq_along(x),
+          function(id) {
+            nrow(x[[id]])
+          }
+        ),
+        names = cyto_names(x)
+      )
+    )
+  # CYTOSET OR GATINGSET
+  } else if(cyto_class(x, c("cytoset", "GatingSet"), FALSE)) {
+    if(cyto_class(x, "GatingSet")) {
+      x <- gs_pop_get_data(x, parent)
+    }
+    return(
+      unlist(
+        nrow(x)
+      )
+    )
+  # FLOWFRAME
+  } else if(cyto_class(x, "flowFrame", FALSE)) {
+    return(
+      c("count" = nrow(x))
+    )
   # VECTOR
-  if(is.null(dim(x))) {
+  } else if(is.null(dim(x))) {
     return(
       c("count" = length(x))
     )
@@ -75,18 +107,17 @@ cyto_stat_mean <- function(x,
   if(is.null(dim(x))) {
     return(
       c("mean" = round(
-        mean(x, na.rm = TRUE, ...),
-        round)
+          mean_cpp(x),
+          round
+        )
       )
     )
   # MATRIX - COLMEANS FOR SPEED
   } else {
     return(
       round(
-        colMeans(
-          x, 
-          na.rm = TRUE,
-          ...
+        col_mean_cpp(
+          x
         ), 
         round
       )
@@ -108,12 +139,24 @@ cyto_stat_geomean <- function(x,
   # VECTOR
   if(is.null(dim(x))) {
     return(
-      c("geomean" = suppressWarnings(round(exp(mean(log(x))), round)))
+      c(
+        "geomean" = suppressWarnings(
+          round(
+            geomean_cpp(x),
+            round
+          )
+        )
+      )
     )
   # MATRIX
   } else {
     return(
-      suppressWarnings(round(exp(colMeans(log(x))), round))
+      suppressWarnings(
+        round(
+          col_geomean_cpp(x), 
+          round
+        )
+      )
     )
   }
   
@@ -133,12 +176,18 @@ cyto_stat_median <- function(x,
   # VECTOR
   if(is.null(dim(x))) {
     return(
-      "median" = round(median(x, na.rm = TRUE, ...), round)
+      "median" = round(
+        median_cpp(x),
+        round
+      )
     )
   # MATRIX
   } else {
     return(
-      round(colMedians(x, na.rm = TRUE, ...), round)
+      round(
+        col_median_cpp(x),
+        round
+      )
     )
   }
   
@@ -223,7 +272,7 @@ cyto_stat_mode <- function(x,
     round <- rep(round, length.out = ncol(x))
     # APPLY CYTO_STAT_MODE()
     cnt <- 0
-    apply(
+    future_apply(
       x,
       2, 
       function(z){
@@ -259,18 +308,18 @@ cyto_stat_sd <- function(x,
     return(
       c(
         "sd" = round(
-          sd(x, na.rm = TRUE, ...),
+          sd_cpp(x),
           round
         )
       )
     )
   # MATRIX
   } else {
-    apply(
-      x,
-      2,
-      "cyto_stat_sd",
-      round = round
+    return(
+      round(
+        col_sd_cpp(x),
+        round
+      )
     )
   }
 
@@ -290,32 +339,17 @@ cyto_stat_rsd <- function(x,
   if(is.null(dim(x))) {
     return(
       c(
-        "rsd" = round(
-          median(
-            abs(x - median(x))
-          ) * 1.4826,
-          round
-        )
+        "rsd" = rsd_cpp(x),
+        round
       )
     )
   # MATRIX
   } else {
-    # MEDIANS - COLMEDIANS FOR SPEED
-    md <- cyto_stat_median(x)
-    # ROBUST STANDARD DEVIATIONS
-    cnt <- c(0)
-    apply(
-      x,
-      2,
-      function(z){
-        cnt <<- cnt + 1
-        round(
-          median(
-            abs(z - md[cnt])
-          ) * 1.4826,
-          round
-        )
-      }
+    return(
+      round(
+        col_rsd_cpp(x),
+        round
+      )
     )
   }
 
@@ -331,26 +365,31 @@ cyto_stat_cv <- function(x,
                          round = 2,
                          ...){
   
-  # MEDIANS
-  md <- cyto_stat_median(x)
+  # NOTE: CVs are decimals not percentages
   
-  # STANDARD DEVIATIONS
-  sd <- cyto_stat_sd(x)
-  
-  # COEFFICIENT OF VARIATION
-  cv <- round(sd/md * 100, round)
-  
-  # NAMES
+  # VECTOR
   if(is.null(dim(x))) {
-    names(cv) <- "cv"
-  } 
-  return(cv)
+    return(
+      c(
+        "cv" = cv_cpp(x),
+        round
+      )
+    )
+    # MATRIX
+  } else {
+    return(
+      round(
+        col_cv_cpp(x),
+        round
+      )
+    )
+  }
   
 } 
 
 ## ROBUST COEFFICIENT OF VARIATION ---------------------------------------------
 
-#' Robust Coefficient of Varaition
+#' Robust Coefficient of Variation
 #' @param x a vector or matrix
 #' @param round numeric
 #' @noRd
@@ -363,26 +402,18 @@ cyto_stat_rcv <- function(x,
     return(
       c(
         "rcv" = round(
-          (median(abs(x - median(x))) * 1.4826)/median(x) * 100
-          , round
+          rcv_cpp(x),
+          round
         )
       )
     )
   # MATRIX
   } else {
-    # MEDIANS
-    md <- cyto_stat_median(x)
-    cnt <- 0
-    apply(
-      x,
-      2,
-      function(z){
-        cnt <<- cnt + 1
-        round(
-          (median(abs(z - md[cnt])) * 1.4826)/md[cnt] * 100
-          , round
-        )
-      }
+    return(
+      round(
+        col_rcv_cpp(x),
+        round
+      )
     )
   }
   
@@ -392,9 +423,11 @@ cyto_stat_rcv <- function(x,
 
 #' Quantiles
 #' @param x a vector or matrix
+#' @param probs quantiles to compute
 #' @param round numeric
 #' @noRd
 cyto_stat_quantile <- function(x,
+                               probs = 0.5,
                                round = 2,
                                ...) {
   
@@ -402,10 +435,9 @@ cyto_stat_quantile <- function(x,
   if(is.null(dim(x))) {
     return(
       round(
-        quantile(
+        quantile_cpp(
           x,
-          na.rm = TRUE,
-          ...
+          probs
         ), 
         round
       )
@@ -413,12 +445,12 @@ cyto_stat_quantile <- function(x,
   # MATRIX
   } else {
     return(
-      apply(
-        x,
-        2,
-        "cyto_stat_quantile",
-        round = round,
-        ...
+      round(
+        col_quantile_cpp(
+          x,
+          probs
+        ),
+        round
       )
     )
   }
@@ -494,9 +526,11 @@ cyto_stat_auc <- function(x,
       c(
         "auc" = round(
           integrate(
-            splinefun(x$x, 
-                      x$y, 
-                      method = method),
+            splinefun(
+              x$x, 
+              x$y, 
+              method = method
+            ),
             lower = if(.all_na(min)) {
               min(x$x, na.rm = TRUE)
             } else {
@@ -527,7 +561,7 @@ cyto_stat_auc <- function(x,
     max <- rep(max, length.out = ncol(x))
     # APPLY CYTO_STAT_AUC()
     cnt <- 0
-    apply(
+    future_apply(
       x,
       2,
       function(z){
@@ -565,14 +599,7 @@ cyto_stat_range <- function(x,
     return(
       suppressWarnings(
         round(
-          structure(
-            range(
-              x,
-              na.rm = TRUE,
-              ...
-            ),
-            names = c("min", "max")
-          ),
+          range_cpp(x),
           round
         )
       )
@@ -580,15 +607,13 @@ cyto_stat_range <- function(x,
   # MATRIX
   } else {
     return(
-      apply(
-        x,
-        2,
-        "cyto_stat_range",
-        round = round,
-        ...
+      round(
+        col_range_cpp(x),
+        round
       )
     )
   }
+  
 }
 
 ## DENSITY ---------------------------------------------------------------------
@@ -662,7 +687,7 @@ cyto_stat_density <- function(x,
         bandwidth <- 0
       } else {
         if(.all_na(limits[, 1])) {
-          rng <- range(x, na.rm = TRUE)
+          rng <- range_cpp(x)
         } else {
           rng <- limits[, 1]
         }
@@ -716,7 +741,7 @@ cyto_stat_density <- function(x,
     stat <- rep(stat, length.out = ncol(x))
     # APPLY CYTO_STAT_DENSITY()
     cnt <- 0
-    apply(
+    future_apply(
       x,
       2, 
       function(z) {
@@ -832,7 +857,7 @@ cyto_stat_bin <- function(x,
     }
     # APPLY CYTO_STAT_BIN OVER COLUMNS
     cnt <- c(0)
-    apply(
+    future_apply(
       x,
       2,
       function(z){
@@ -865,68 +890,27 @@ cyto_stat_bin <- function(x,
 #' @noRd
 cyto_stat_scale <- function(x,
                             type = "range",
+                            probs = c(0.01, 0.99),
                             ...) {
-  
-  # BYPASS SCALING
-  if(is.null(type)) {
-    return(x)
-  } else if(type %in% FALSE) {
-    return(x)
-  }
-  
-  # DEFAULT SCALING METHOD
-  if(type %in% TRUE) {
-    type <- "range"
-  }
   
   # VECTOR
   if(is.null(dim(x))) {
-    # RANGE
-    if(grepl("^r", type, ignore.case = TRUE)) {
-      # DATA LIMITS
-      xmin <- min(x, na.rm = TRUE)
-      xmax <- max(x, na.rm = TRUE)
-      # RANGE SCALING
-      return((x - xmin)/(xmax - xmin))
-      # MEAN
-    } else if(grepl("^mea", type, ignore.case = TRUE)) {
-      # DATA LIMITS
-      xmin <- min(x, na.rm = TRUE)
-      xmax <- max(x, na.rm = TRUE)
-      # MEAN
-      xmean <- mean(x, na.rm = TRUE)
-      # MEAN SCALING
-      return((x - xmean)/(xmax-xmin))
-      # MEDIAN
-    } else if(grepl("^med", type, ignore.case = TRUE)) {
-      # DATA LIMITS
-      xmin <- min(x, na.rm = TRUE)
-      xmax <- max(x, na.rm = TRUE)
-      # MEAN
-      xmed <- median(x, na.rm = TRUE)
-      # MEAN SCALING
-      return((x - xmed)/(xmax-xmin))
-      # Z SCORE
-    } else if(grepl("^z", type, ignore.case = TRUE)) {
-      # MEAN 
-      xmean <- mean(x, na.rm = TRUE)
-      # SD
-      xsd <- sd(x, na.rm = TRUE)
-      # Z-SCORE SCALING
-      return((x - xmean)/xsd)
-      # UNSUPPORTED SCALING METHOD
-    } else {
-      stop(
-        "'type' must be either 'range', 'mean', 'median' or 'zscore'!"
-      )
-    }
+    return(
+      scale_cpp(
+        x,
+        type = type,
+        probs = probs
+      ),
+      round
+    )
+    # MATRIX
   } else {
-    apply(
-      x,
-      2,
-      "cyto_stat_scale",
-      type = type,
-      ...
+    return(
+      col_scale_cpp(
+        x,
+        type = type,
+        probs = probs
+      )
     )
   }
   
@@ -957,7 +941,7 @@ cyto_stat_skewness <- function(x,
     )
   # MATRIX
   } else {
-    apply(
+    future_apply(
       x,
       2,
       "cyto_stat_skewness"
@@ -1210,82 +1194,24 @@ cyto_stat_rescale <- function(x,
                               scale = c(0,1),
                               limits = c(NA,NA)) {
   
-  # MATRIX
-  if(!is.null(dim(x))) {
-    # PREPARE LIMITS VECTOR -> MATRIX
-    if(is.null(dim(limits))) {
-      limits <- suppressWarnings(
-        matrix(
-          limits,
-          ncol = ncol(x),
-          nrow = 2,
-          dimnames = list(NULL, colnames(x))
-        )
-      )
-    }
-    # CHECK LIMITS MATRIX
-    if(!setequal(dim(limits), c(2, ncol(x)))) {
-      stop(
-        "'limits' must a matrix of min/max values for each column in x!"
-      )
-    }
-    # PREPARE SCALE VECTOR -> MATRIX
-    if(is.null(dim(scale))) {
-      scale <- suppressWarnings(
-        matrix(
-          scale,
-          ncol = ncol(x),
-          nrow = 2,
-          dimnames = list(
-            NULL,
-            colnames(x)
-          )
-        )
-      )
-    }
-    # CHECK SCALE MATRIX
-    if(!setequal(dim(scale), c(2, ncol(x)))) {
-      stop(
-        "'scale' must a matrix of min/max values for each column in x!"
-      )
-    }
-    # RESCALE EACH COLUMN
-    cnt <- 0
+  # VECTOR
+  if(is.null(dim(x))) {
     return(
-      apply(
+      rescale_cpp(
         x,
-        2,
-        function(z){
-          cnt <<- cnt + 1
-          cyto_stat_rescale(
-            z,
-            scale = if(!is.null(colnames(x)) & !is.null(colnames(scale))) {
-              scale[, colnames(x)[cnt]]
-            } else {
-              scale[, cnt]
-            },
-            limits = if(!is.null(colnames(x)) & !is.null(colnames(limits))) {
-              limits[, colnames(x)[cnt]]
-            } else {
-              limits[, cnt]
-            }
-          )
-        }
+        scale = scale,
+        limits = limits
       )
     )
-  # VECTOR
+    # MATRIX
   } else {
-    # COMPUTE LIMITS
-    if(any(is.na(limits))) {
-      limits[is.na(limits)] <- range(x)[is.na(limits)]
-    }
-    # RESTRICT
-    x[x < min(limits)] <- min(limits)
-    x[x > max(limits)] <- max(limits)
-    # RESCALE
-    x <- min(scale) + ((x-min(limits))/diff(limits))*diff(scale)
-    # RETURN RESCALED DATA
-    return(x)
+    return(
+      col_rescale_cpp(
+        x,
+        scale = scale,
+        limits = limits
+      )
+    )
   }
   
 }

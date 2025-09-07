@@ -1832,6 +1832,35 @@ cyto_transform.default <- function(x,
         gateTemplate
       )
     }
+    # TRANSFORM MATRIX
+  } else if(cyto_class(x, "matrix")) {
+    # TRANSFORMLIST
+    transform_list <- cyto_transform_extract(
+      transformer_list, 
+      inverse = inverse
+    )
+    # APPLY TRANSFORMERS
+    cnt <- 0
+    x[, names(transform_list@transforms)] <- apply(
+      x[, names(transform_list@transforms), drop = FALSE],
+      2,
+      function(z) {
+        cnt <<- cnt + 1
+        transform_list@transforms[[cnt]]@f(z)
+      }
+    )
+    # TRANSFORM NUMERIC VECTOR
+  } else if(cyto_class(x, "numeric")) {
+    # TRANSFORMLIST
+    transform_list <- cyto_transform_extract(
+      transformer_list, 
+      inverse = inverse
+    )
+    # SINGLE TRANSFORMER REQUIRED
+    if(length(names(transform_list@transforms)) != 1) {
+      stop(" A single channel is required to transform a numeric vector!")
+    }
+    x <- transform_list@transforms[[1]]@f(x)
   }
 
   # COMPLETE
@@ -1871,6 +1900,7 @@ cyto_transform.default <- function(x,
 #' @export
 cyto_transform.transformList <- function(x,
                                          trans = NULL,
+                                         channels = NULL,
                                          copy = FALSE,
                                          plot = TRUE,
                                          popup = FALSE,
@@ -1899,29 +1929,61 @@ cyto_transform.transformList <- function(x,
     x <- cyto_copy(x)
   }
   
+  # CHANNELS
+  if(is.null(channels)) {
+    channels <- cyto_channels(x)
+  }
+  
+  # TRANSFOMERS
+  # VALID TRANSFORMERS ONLY
+  if(any(names(trans@transforms) %in% channels)) {
+    # RESTRICT TRANSFORMERS - SUBSETTED DATA MAY LACK CHANNELS
+    trans <- trans@transforms[names(trans) %in% channels]
+    trans <- transformList(
+      names(trans),
+      lapply(
+        trans, 
+        function(z){
+          z@f
+        }
+      )
+    )
+  # NO MATCHING TRANSFORMERS
+  } else {
+    stop(
+      "'trans' doesn't reference any channels in this ",
+      cyto_class(x),
+      "!"
+    )
+  }
+  
   # TRANSFORM FLOWFRAME OR FLOWSET
   if (cyto_class(x, c("flowFrame", "cytoframe", "flowSet", "cytoset"))) {
-    # VALID TRANSFORMERS ONLY
-    if(any(names(trans) %in% cyto_channels(x))) {
-      # RESTRICT TRANSFORMERS - SUBSETTED DATA MAY LACK CHANNELS
-      trans <- trans@transforms[names(trans) %in% cyto_channels(x)]
-      trans <- transformList(
-        names(trans),
-        lapply(
-          trans, 
-          function(z){
-            z@f
-          }
-        )
+    # APPLY TRANSFORMERS
+    x <- suppressMessages(
+      transform(
+        x, 
+        trans
       )
-      # Transformations applied as is - allow for inverse transformList
-      x <- suppressMessages(
-        transform(
-          x, 
-          trans
-        )
-      )
+    )
+  # TRANSFORM MATRIX
+  } else if(cyto_class(x, "matrix")) {
+    cnt <- 0
+    x[, names(trans)] <- apply(
+      x[, names(trans), drop = FALSE],
+      2,
+      function(z) {
+        cnt <<- cnt + 1
+        trans@transforms[[cnt]]@f(z)
+      }
+    )
+  # TRANSFORM NUMERIC VECTOR
+  } else if(cyto_class(x, "numeric")) {
+    # SINGLE TRANSFORMER REQUIRED
+    if(length(names(trans@transforms)) != 1) {
+      stop(" A single channel is required to transform a numeric vector!")
     }
+    x <- trans@transforms[[1]]@f(x)
   }
   
   # COMPLETE
@@ -1957,6 +2019,7 @@ cyto_transform.transformList <- function(x,
 cyto_transform.transformerList <- function(x,
                                            trans = NULL,
                                            inverse = FALSE,
+                                           channels = NULL,
                                            copy = FALSE,
                                            plot = TRUE,
                                            popup = FALSE,
@@ -1977,186 +2040,225 @@ cyto_transform.transformerList <- function(x,
     x <- cyto_copy(x)
   }
   
+  # CHANNELS
+  if(is.null(channels)) {
+    channels <- cyto_channels(x)
+  }
+  
+  # VALID TRANSFORMERS ONLY
+  if(any(names(trans) %in% channels)) {
+    # RESTRICT TRANSFORMERS - SUBSETTED DATA MAY LACK CHANNELS
+    trans <- cyto_transformers_combine(
+      trans[names(trans) %in% channels]
+    )
+  # NO MATCHING TRANSFORMERS  
+  } else {
+    stop(
+      "'trans' doesn't reference any channels in this ",
+      cyto_class(x),
+      "!"
+    )
+  }
+  
   # TRANSFORM FLOWFRAME OR FLOWSET
   if (cyto_class(x, c("flowFrame", "cytoframe", "flowSet", "cytoset"))) {
-    # VALID TRANSFORMERS ONLY
-    if(any(names(trans) %in% cyto_channels(x))) {
-      # RESTRICT TRANSFORMERS - SUBSETTED DATA MAY LACK CHANNELS
-      trans <- cyto_transformers_combine(
-        trans[names(trans) %in% cyto_channels(x)]
+    # TRANSFORMLIST
+    transform_list <- cyto_transform_extract(
+      trans, 
+      inverse = inverse
+    )
+    # APPLY TRANSFORMATIONS
+    x <- suppressMessages(
+      transform(
+        x, 
+        transform_list
       )
+    )
+  # TRANSFORM GATINGHIERARCHY OR GATINGSET
+  } else if (cyto_class(x, "GatingSet")) {
+    # RESTRICT TRANSFORMERS - SUBSETTED DATA MAY LACK CHANNELS
+    trans <- cyto_transformers_combine(
+      trans[names(trans) %in% cyto_channels(x)]
+    )
+    # SPILLOVER
+    spill <- cyto_spillover_extract(x)
+    # EXTRACT DATA
+    cs <- cyto_data_extract(
+      x,
+      parent = "root",
+      copy = ifelse(copy, FALSE, TRUE) # COPIED ABOVE?
+    )[[1]]
+    # GATETEMPLATE
+    gateTemplate <- cyto_gateTemplate(x)
+    # INVERSE TRANSFORMATIONS - APPLIED AT CYTOSET LEVEL - NOT ATTACHED
+    if(inverse) {
       # TRANSFORMLIST
       transform_list <- cyto_transform_extract(
-        trans, 
+        trans,
         inverse = inverse
       )
-      # APPLY TRANSFORMATIONS
-      x <- suppressMessages(
+      # APPLY INVERSE TRANSFORMATIONS
+      cs <- suppressMessages(
         transform(
-          x, 
+          cs,
           transform_list
         )
       )
-    }
-  # TRANSFORM GATINGHIERARCHY OR GATINGSET
-  } else if (cyto_class(x, "GatingSet")) {
-    # VALID TRANSFORMERS ONLY
-    if(any(names(trans) %in% cyto_channels(x))) {
-      # RESTRICT TRANSFORMERS - SUBSETTED DATA MAY LACK CHANNELS
-      trans <- cyto_transformers_combine(
-        trans[names(trans) %in% cyto_channels(x)]
-      )
-      # SPILLOVER
-      spill <- cyto_spillover_extract(x)
-      # EXTRACT DATA
-      cs <- cyto_data_extract(
-        x,
-        parent = "root",
-        copy = ifelse(copy, FALSE, TRUE) # COPIED ABOVE?
-      )[[1]]
-      # GATETEMPLATE
-      gateTemplate <- cyto_gateTemplate(x)
-      # INVERSE TRANSFORMATIONS - APPLIED AT CYTOSET LEVEL - NOT ATTACHED
-      if(inverse) {
-        # TRANSFORMLIST
-        transform_list <- cyto_transform_extract(
-          trans,
-          inverse = inverse
-        )
-        # APPLY INVERSE TRANSFORMATIONS
-        cs <- suppressMessages(
-          transform(
-            cs,
-            transform_list
-          )
-        )
-        # REMOVE COMPENSATION
-        if(!is.null(spill)) {
-          cs <- cyto_compensate(
-            cs, 
-            spillover = spill,
-            remove = TRUE,
-            quiet = TRUE
-          )
-        }
-        # RECONSTRUCT GATINGSET
-        x <- GatingSet(cs)
-        # APPLY COMPENSATION
-        if(!is.null(spill)) {
-          x <- cyto_compensate(
-            x, 
-            spillover = spill,
-            quiet = TRUE
-          )
-        }
-      # DATA TRANSFORMATIONS - APPLIED GATINGSET LEVEL - ATTACHED
-      } else {
-        # REMOVE COMPENSATION
-        if(!is.null(spill)) {
-          cs <- cyto_compensate(
-            cs,
-            spillover = spill,
-            remove = TRUE,
-            quiet = TRUE
-          )
-        }
-        # RECONSTRUCT GATINGSET - REQUIRED ELSE GATINGTEMPLATE GATES EXIST
-        x <- GatingSet(cs)
-        # APPLY COMPENSATION
-        if(!is.null(spill)) {
-          x <- cyto_compensate(
-            x,
-            spillover = spill,
-            quiet = TRUE
-          )
-        }
-        # APPLY DATA TRANSFORMATIONS
-        x <- suppressMessages(
-          transform(
-            x,
-            trans
-          )
+      # REMOVE COMPENSATION
+      if(!is.null(spill)) {
+        cs <- cyto_compensate(
+          cs, 
+          spillover = spill,
+          remove = TRUE,
+          quiet = TRUE
         )
       }
-      # GATINGHIERARCHY - PREPARE GATES
-      if(cyto_class(gateTemplate, "gateTemplate")) {
-        # GATINGHIERARCHY
-        x <- x[[1]]
-        # ATTEMPT TO TRANSFORM GATES
-        if(length(gateTemplate) > 0) {
-          gateTemplate <- structure(
-            lapply(
-              gateTemplate,
-              function(z) {
-                if(any(z$channels %in% names(trans))) {
-                  z$gate <- tryCatch(
-                    cyto_gate_transform(
-                      z$gate,
-                      trans = trans,
-                      inverse = inverse
-                    ),
-                    error = function(e) {
-                      message(
-                        "Transformation of ", cyto_class(z$gate),
-                        " objects is not currently supported!"
-                      )
-                      return(z$gate)
-                    }
-                  )
-                }
-                return(z)
-              }
-            ),
-            names = names(gateTemplate),
-            class = "gateTemplate"
-          )
-        }
-        # GATINGSET - PREPARE GATES
-      } else {
-        # PREPARE NEW GATES
-        if(all(LAPPLY(gateTemplate, "length") > 0)) {
-          gateTemplate <- structure(
-            lapply(
-              seq_along(x),
-              function(v) {
-                structure(
-                  lapply(
-                    gateTemplate[[v]],
-                    function(z) {
-                      if(any(z$channels %in% names(trans))) {
-                        z$gate <- tryCatch(
-                          cyto_gate_transform(
-                            z$gate,
-                            trans = trans,
-                            inverse = inverse
-                          ),
-                          error = function(e) {
-                            message(
-                              "Transformation of ", cyto_class(z$gate),
-                              " objects is not currently supported!"
-                            )
-                            return(z$gate)
-                          }
-                        )
-                      }
-                      return(z)
-                    }
+      # RECONSTRUCT GATINGSET
+      x <- GatingSet(cs)
+      # APPLY COMPENSATION
+      if(!is.null(spill)) {
+        x <- cyto_compensate(
+          x, 
+          spillover = spill,
+          quiet = TRUE
+        )
+      }
+      # DATA TRANSFORMATIONS - APPLIED GATINGSET LEVEL - ATTACHED
+    } else {
+      # REMOVE COMPENSATION
+      if(!is.null(spill)) {
+        cs <- cyto_compensate(
+          cs,
+          spillover = spill,
+          remove = TRUE,
+          quiet = TRUE
+        )
+      }
+      # RECONSTRUCT GATINGSET - REQUIRED ELSE GATINGTEMPLATE GATES EXIST
+      x <- GatingSet(cs)
+      # APPLY COMPENSATION
+      if(!is.null(spill)) {
+        x <- cyto_compensate(
+          x,
+          spillover = spill,
+          quiet = TRUE
+        )
+      }
+      # APPLY DATA TRANSFORMATIONS
+      x <- suppressMessages(
+        transform(
+          x,
+          trans
+        )
+      )
+    }
+    # GATINGHIERARCHY - PREPARE GATES
+    if(cyto_class(gateTemplate, "gateTemplate")) {
+      # GATINGHIERARCHY
+      x <- x[[1]]
+      # ATTEMPT TO TRANSFORM GATES
+      if(length(gateTemplate) > 0) {
+        gateTemplate <- structure(
+          lapply(
+            gateTemplate,
+            function(z) {
+              if(any(z$channels %in% names(trans))) {
+                z$gate <- tryCatch(
+                  cyto_gate_transform(
+                    z$gate,
+                    trans = trans,
+                    inverse = inverse
                   ),
-                  names = names(gateTemplate[[v]]),
-                  class = "gateTemplate"
+                  error = function(e) {
+                    message(
+                      "Transformation of ", cyto_class(z$gate),
+                      " objects is not currently supported!"
+                    )
+                    return(z$gate)
+                  }
                 )
               }
-            ),
-            names = cyto_names(x)
-          )
-        }
+              return(z)
+            }
+          ),
+          names = names(gateTemplate),
+          class = "gateTemplate"
+        )
       }
-      # TRANSFER GATES
-      x <- cyto_gateTemplate_apply(
-        x,
-        gateTemplate
-      )
+      # GATINGSET - PREPARE GATES
+    } else {
+      # PREPARE NEW GATES
+      if(all(LAPPLY(gateTemplate, "length") > 0)) {
+        gateTemplate <- structure(
+          lapply(
+            seq_along(x),
+            function(v) {
+              structure(
+                lapply(
+                  gateTemplate[[v]],
+                  function(z) {
+                    if(any(z$channels %in% names(trans))) {
+                      z$gate <- tryCatch(
+                        cyto_gate_transform(
+                          z$gate,
+                          trans = trans,
+                          inverse = inverse
+                        ),
+                        error = function(e) {
+                          message(
+                            "Transformation of ", cyto_class(z$gate),
+                            " objects is not currently supported!"
+                          )
+                          return(z$gate)
+                        }
+                      )
+                    }
+                    return(z)
+                  }
+                ),
+                names = names(gateTemplate[[v]]),
+                class = "gateTemplate"
+              )
+            }
+          ),
+          names = cyto_names(x)
+        )
+      }
     }
+    # TRANSFER GATES
+    x <- cyto_gateTemplate_apply(
+      x,
+      gateTemplate
+    )
+  # TRANSFORM MATRIX
+  } else if(cyto_class(x, "matrix")) {
+    # TRANSFORMLIST
+    transform_list <- cyto_transform_extract(
+      trans, 
+      inverse = inverse
+    )
+    # APPLY TRANSFORMERS
+    cnt <- 0
+    x[, names(transform_list@transforms)] <- apply(
+      x[, names(transform_list@transforms), drop = FALSE],
+      2,
+      function(z) {
+        cnt <<- cnt + 1
+        transform_list@transforms[[cnt]]@f(z)
+      }
+    )
+  # TRANSFORM NUMERIC VECTOR
+  } else if(cyto_class(x, "numeric")) {
+    # TRANSFORMLIST
+    transform_list <- cyto_transform_extract(
+      trans, 
+      inverse = inverse
+    )
+    # SINGLE TRANSFORMER REQUIRED
+    if(length(names(transform_list@transforms)) != 1) {
+      stop(" A single channel is required to transform a numeric vector!")
+    }
+    x <- transform_list@transforms[[1]]@f(x)
   }
   
   # COMPLETE
@@ -2170,7 +2272,7 @@ cyto_transform.transformerList <- function(x,
   if(plot == TRUE) {
     # INVERSE
     if(inverse == TRUE) {
-      transformer_list <- NA
+      trans <- NA
     }
     # PLOT DATA TRANSFORMATIONS
     tryCatch(
@@ -3883,11 +3985,12 @@ cyto_merge_by <- function(x,
   # CONVERT EACH GROUP TO CYTOFRAME
   } else {
     # SOM CYTOSET|GATINGSET
-    if(cyto_som_check(cs_list[[z]])) {
-      structure(
-        lapply(
-          seq_along(cs_list),
-          function(z) {
+    structure(
+      lapply(
+        seq_along(cs_list),
+        function(z) {
+          # SOM
+          if(cyto_som_check(cs_list[[z]])) {
             # EXTRACT SOM CODES & DIME REDUCTION
             SOM <- cyto_exprs(
               cs_list[[z]][[1]],
@@ -3933,26 +4036,17 @@ cyto_merge_by <- function(x,
               SOM,
               cyto_class(cs_list[[z]][[1]])
             ) 
-          }
-        ),
-        names = names(cs_list)
-      )
-    # CYTOSET | GATINGSET
-    } else {
-      structure(
-        lapply(
-          seq_along(cs_list), 
-          function(z) {
+          } else {
             # flowFrame|cytoframe
             as(
               cs_list[[z]],
               cyto_class(cs_list[[z]][[1]])
             ) 
           }
-        ),
-        names = names(cs_list)
-      )
-    }
+        }
+      ),
+      names = names(cs_list)
+    )
   }
   
 }
@@ -5146,7 +5240,7 @@ cyto_sample.flowFrame <- function(x,
                                   ...) {
   
   # NO SAMPLING - EMPTY FLOWFRAME
-  if (nrow(exprs(x)) == 0) {
+  if (cyto_stat_count(x) == 0) {
     return(x)
   }
   
@@ -5162,7 +5256,7 @@ cyto_sample.flowFrame <- function(x,
         )
       )
     } else {
-      n <- nrow(x)
+      n <- cyto_stat_count(x)
     }
     # n is the number of events to keep
     if (events > 1) {
@@ -5229,13 +5323,7 @@ cyto_sample.flowSet <- function(x,
             )
           )
         } else {
-          nrow(
-            cyto_exprs(
-              z,
-              channels = 1,
-              drop = FALSE
-            )
-          )
+          cyto_stat_count(z)
         }
       },
       input = "cytoframe",
@@ -5370,13 +5458,7 @@ cyto_sample_n <- function(x,
           )
         )
       } else {
-        nrow(
-          cyto_exprs(
-            z,
-            channels = 1,
-            drop = FALSE
-          )
-        )
+        cyto_stat_count(z)
       }
     },
     parent = parent,
@@ -5995,10 +6077,10 @@ cyto_barcode <- function(x,
       event_ids <- lapply(
         seq_along(cs), 
         function(z){
-          if(nrow(cs[[z]]) == 0) {
+          if(cyto_stat_count(cs[[z]]) == 0) {
             return(NA)
           } else {
-            ids <- seq(cnt + 1, cnt + nrow(cs[[z]]))
+            ids <- seq(cnt + 1, cnt + cyto_stat_count(cs[[z]]))
             cnt <<- ids[length(ids)]
             return(ids)
           }
@@ -6323,6 +6405,34 @@ cyto_details_edit <- function(x,
     # SAVE TO FILE
     if(is.null(file)) {
       file <- names(pd_new)
+    }
+    # INHERIT MISSING VARIABLES FROM DATA 
+    if(any(!colnames(pd) %in% colnames(pd_new[[1]]))) {
+      # MISSING COLUMNS
+      cols <- colnames(pd)[
+        !colnames(pd) %in% colnames(pd_new[[1]])
+      ]
+      # ADD MISSING COLUMNS
+      pd_new[[1]] <- cbind(
+        pd_new[[1]],
+        matrix(
+          NA,
+          ncol = length(cols),
+          nrow = nrow(pd_new[[1]]),
+          dimnames = list(
+            rownames(pd_new[[1]]),
+            cols
+          )
+        )
+      )
+      # INSERT VALUES TO ROWS - FILE MAY CONTAIN EXTRA ROWS
+      pd_new[[1]][
+        match(
+          rownames(pd), 
+          rownames(pd_new[[1]])
+        ),
+        cols
+      ] <- pd[ , cols, drop = FALSE]
     }
     pd <- pd_new[[1]]
   }
@@ -8606,7 +8716,7 @@ cyto_apply.default <- function(x,
     # RETURN
     return(res)
     
-    # UNSUPPORTED METHOD  
+  # UNSUPPORTED METHOD  
   } else {
     stop(
       paste0(
@@ -8653,9 +8763,10 @@ cyto_apply.flowSet <- function(x,
   # PREPARE FUNCTION
   FUN <- cyto_func_match(FUN) # namespaced function character covered
   
-  # CHANNELS
+  # CHANNELS - SLOW
   if(!is.null(channels)) {
-    x <- x[, cyto_channels_extract(x, channels), drop = FALSE]
+    channels <- cyto_channels_extract(x, channels)
+    x <- x[, channels, drop = FALSE]
   }
   
   # SELECT
@@ -9085,12 +9196,20 @@ cyto_slot <- function(x,
 
 ## CYTO_CONVERT ----------------------------------------------------------------
 
-#' Convert flowFrame/flowSet objects to cytoframe/cytoset objects
+#' Convert objects to cytoframe/cytoset objects
 #'
 #' @param x object of class \code{flowFrame}, \code{flowSet}, \code{cytoframe}
-#'   or \code{cytoset}.
-#' @param ... additional arguments passed to the appropriate
-#'   \code{\link[flowWorkspace:convert]{conversion}} function.
+#'   \code{cytoset}, \code{matrix}, \code{data.frame} or \code{data.table}.
+#' @param y either convert to a \code{"cytoframe"} or \code{"cytoset"}. For
+#'   backwards compatibility the default for flowFrames/cytoframes is
+#'   \code{"cytoframe"} and the default for flowSets/cytosets is
+#'   \code{"cytoset"}.
+#' @param save_as location to FCS file in the case of flowFrames/cytoframes or a
+#'   directory name for flowSets/cytosets where FCS files should be written
+#'   during conversion, defaults to a tempfile if not specified manually.
+#' @param ... additional arguments passed to
+#'   \code{flowWorkspace::load_cytoframe_from_fcs} to customise how data is read
+#'   from the written FCS files.
 #'
 #' @return a cytoframe or cytoset.
 #'
@@ -9121,8 +9240,225 @@ cyto_convert <- function(x,
     x <- flowSet_to_cytoset(x, emptyValue = FALSE, ...)
   }
   return(x)
-  
+
 }
+
+# #' @noRd
+# #' @export
+# cyto_convert <- function(x, ...){
+#   UseMethod("cyto_convert")
+# }
+# 
+# #' @rdname cyto_convert
+# #' @export
+# cyto_convert.default <- function(x,
+#                                  y = "cytoframe",
+#                                  save_as = NULL,
+#                                  ...) {
+#   
+#   
+#   # EITHER CYTOFRAME OR CYTOSET ONLY
+#   if(!y %in% c("cytoframe", "cytoset")) {
+#     stop(
+#       "Only conversion to cytoframe and cytoset objects is supported!"
+#     )
+#   }
+#   
+#   # CREATE FLOWFRAME -> CYTOFRAME
+#   res <- cyto_convert(
+#     flowFrame(
+#       data.matrix(x)
+#     ),
+#     "cytoframe",
+#     save_as = save_as,
+#     emptyValue = FALSE,
+#     ...
+#   )
+#   
+#   # CREATE CYTOSET
+#   if(y == "cytoset") {
+#     res <- cytoset(
+#       structure(
+#         list(
+#           res
+#         ),
+#         names = identifier(res)
+#       )
+#     )
+#   }
+#   
+#   # RETURN CYTOFRAME OR CYTOSET
+#   return(res)
+#   
+# }
+# 
+# #' @rdname cyto_convert
+#' #' @export
+# cyto_convert.flowFrame <- function(x,
+#                                    y = "cytoframe",
+#                                    save_as = NULL,
+#                                    ...) {
+#   
+#   # EITHER CYTOFRAME OR CYTOSET ONLY
+#   if(!y %in% c("cytoframe", "cytoset")) {
+#     stop(
+#       "Only conversion to cytoframe and cytoset objects is supported!"
+#     )
+#   }
+#   
+#   # X IS ALREADY A CYTOFRAME
+#   if(cyto_class(x, "cytoframe")) {
+#     res <- x
+#   } else {
+#     # USE A TEMPFILE
+#     if(is.null(save_as)) {
+#       save_as <- tempfile()
+#       # CREATE PARENT DIRECTORY IF MISSING
+#     } else {
+#       # SAVE_AS SPECIFIES FILE + DIRECTORY
+#       if(!dirname(save_as) %in% ".") {
+#         # CREATE DIRECTORY
+#         if(!dir.exists(dirname(save_as))) {
+#           dir.create(
+#             dirname(save_as)
+#           )
+#         }
+#       }
+#     }
+#     # WRITE FCS FILE
+#     write.FCS(
+#       x,
+#       filename = save_as
+#     )
+#     # READ INTO CYTOFRAME
+#     res <- load_cytoframe_from_fcs(
+#       save_as,
+#       ...
+#     )
+#   }
+#   
+#   # CYTOSET
+#   if(y == "cytoset") {
+#     res <- cytoset(
+#       structure(
+#         list(
+#           res
+#         ),
+#         names = identifier(cf)
+#       )
+#     )
+#   }
+#   
+#   # RETURN CYTOFRAME OR CYTOSET
+#   return(res)
+#   
+# }
+# 
+# #' @rdname cyto_convert
+# #' @export
+# cyto_convert.flowSet <- function(x,
+#                                  y = "cytoset",
+#                                  save_as = NULL,
+#                                  ...) {
+#   
+#   # NOTE: SAVE_AS IS LOCATION TO WRITE FILES TO 
+#   
+#   # EITHER CYTOFRAME OR CYTOSET ONLY
+#   if(!y %in% c("cytoframe", "cytoset")) {
+#     stop(
+#       "Only conversion to cytoframe and cytoset objects is supported!"
+#     )
+#   }
+#   
+#   # FLOWSET -> CYTOFRAME
+#   if(cyto_class(x, "flowSet", TRUE)) {
+#     # FLOWSET -> CYTOFRAME
+#     if(y == "cytoframe") {
+#       # SOM CHECK
+#       som <- cyto_som_check(x)
+#       # COERCE
+#       res <- as(
+#         x,
+#         "flowFrame"
+#       )
+#       # CONVERT
+#       res <- cyto_convert(
+#         res,
+#         "cytoframe",
+#         save_as = save_as,
+#         ...
+#       )
+#       # SOM KEYWORD
+#       if(som) {
+#         cyto_keyword(
+#           som,
+#           keyword = "CytoExploreR_SOM",
+#           value = cyto_keyword(
+#             x[[1]],
+#             "CytoExploreR_SOM"
+#           )[[1]]
+#         )
+#       }
+#     # FLOWSET -> CYTOSET
+#     } else {
+#       res <- cytoset(
+#         structure(
+#           lapply(
+#             cyto_names(x),
+#             function(id) {
+#               cyto_convert(
+#                 x[[id]],
+#                 "cytoframe",
+#                 if(is.null(save_as)) {
+#                   NULL
+#                 } else {
+#                   paste0(
+#                     save_as,
+#                     "/",
+#                     id
+#                   )
+#                 },
+#                 ...
+#               )
+#             }
+#           ),
+#           names = cyto_names(x)
+#         )
+#       )
+#     }
+#   # CYTOSET -> CYTOFRAME OR CYTOSET
+#   } else {
+#     # CYTOSET -> CYTOFRAME
+#     if(y == "cytoframe") {
+#       # SOM CHECK
+#       som <- cyto_som_check(x)
+#       # CYTOFRAME COERCION
+#       res <- cyto_convert(
+#         as(x, "flowFrame"),
+#         "cytoframe",
+#         save_as = save_as,
+#         emptyValue = FALSE,
+#         ...
+#       )
+#       # SOM KEYWORD
+#       if(som) {
+#         cyto_keyword(
+#           som,
+#           keyword = "CytoExploreR_SOM",
+#           value = cyto_keyword(
+#             x[[1]],
+#             "CytoExploreR_SOM"
+#           )[[1]]
+#         )
+#       }
+#     # CYTOSET -> CYTOSET
+#     } else {
+#       res <- x
+#     }
+#   }
+#   
+#   return(res)
+# }
 
 ## CYTO_CBIND ------------------------------------------------------------------
 
@@ -9192,12 +9528,7 @@ cyto_cbind.flowSet <- function(x,
   # MATRIX
   if(is.matrix(cols)){
     # COUNTS
-    cyto_counts <- cyto_apply(
-      x, 
-      "nrow", 
-      input = "matrix",
-      copy = FALSE
-    )
+    cyto_counts <- cyto_stat_count(x) 
     # SAME NUMBER OF EVENTS
     if(nrow(cols) != sum(cyto_counts)){
       stop(
@@ -9574,7 +9905,7 @@ cyto_keyword <- function(x,
                          ...) {
   
   # DATA.FRAMES & MATRICES DONT HAVE KEYWORDS
-  if(!cyto_class(x, "list")) {
+  if(cyto_class(x, "list")) {
     return(NULL)
   }
   
@@ -9679,5 +10010,100 @@ cyto_keyword <- function(x,
   
   # RETURN KEYWORD VALUE
   return(value)
+  
+}
+
+# CYTO_INTERACTIVE -------------------------------------------------------------
+
+#' Check for interactive CytoExploreR session
+#' 
+#' @param interactive logical requesting for the current CytoExploreR session to 
+#' be run interactively or not.
+#' 
+#' @return logical indicating whether the current CytoExploreR session is 
+#' interactive or not.
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @examples
+#' \dontrun{
+#' # Run CytoExploreR non-interactively
+#' cyto_interactive(FALSE)
+#' }
+#' 
+#' @export
+cyto_interactive <- function(interactive = NULL) {
+  
+  # CHECK INTERACTIVITY
+  if(is.null(interactive)) {
+    return(
+      interactive() & cyto_option("CytoExploreR_interactive")
+    )
+  # SET INTERACTIVE SESSION
+  } else if(interactive) {
+    if(interactive()) {
+      cyto_option("CytoExploreR_interactive", TRUE)
+    } else {
+      stop(
+        "An interactive R session is required!"
+      )
+      cyto_option("CytoExploreR_interactive", FALSE)
+    }
+  } else {
+    cyto_option("CytoExploreR_interactive", FALSE)
+  }
+  
+  # CHECK INTERACTIVITY
+  return(
+    cyto_option("CytoExploreR_interactive")
+  )
+  
+}
+
+# CYTO_PARALLEL ----------------------------------------------------------------
+
+#' Configure parallel processing for CytoExploreR
+#'
+#' @param plan future plan to use for parallel processing, options include
+#'   \code{"sequential"}, \code{"multisession"}, \code{"multicore"} or
+#'   \code{"cluster"}. Only \code{"sequential"} and \code{"multisession"} are
+#'   supported on Windows.
+#' @param workers number of workers to assign to jobs, set to all but one of the
+#'   available cores.
+#'
+#' @importFrom future availableCores plan
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @return the name of the current future plan.
+#'
+#' @export
+cyto_parallel <- function(plan,
+                          workers = NULL,
+                          ...) {
+  
+  # DETERMINE WORKERS
+  if(is.null(workers)) {
+    workers <- future::availableCores() - 1
+  }
+  
+  # DEFAULT PLAN
+  if(missing(plan)) {
+    if(.Platform$OS.type == "windows") {
+      plan <- "multisession"
+    } else {
+      plan <- "multicore"
+    }
+  }
+  
+  # CONFIGURE FUTURE
+  plan(
+    "multisession",
+    workers = workers,
+    ...
+  ) 
+  
+  # INVISIBLE RETURN
+  return(plan)
   
 }

@@ -2,22 +2,32 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_convert}
 \alias{cyto_convert}
-\title{Convert flowFrame/flowSet objects to cytoframe/cytoset objects}
+\title{Convert objects to cytoframe/cytoset objects}
 \usage{
 cyto_convert(x, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame}, \code{flowSet}, \code{cytoframe}
-or \code{cytoset}.}
+\code{cytoset}, \code{matrix}, \code{data.frame} or \code{data.table}.}
 
-\item{...}{additional arguments passed to the appropriate
-\code{\link[flowWorkspace:convert]{conversion}} function.}
+\item{...}{additional arguments passed to
+\code{flowWorkspace::load_cytoframe_from_fcs} to customise how data is read
+from the written FCS files.}
+
+\item{y}{either convert to a \code{"cytoframe"} or \code{"cytoset"}. For
+backwards compatibility the default for flowFrames/cytoframes is
+\code{"cytoframe"} and the default for flowSets/cytosets is
+\code{"cytoset"}.}
+
+\item{save_as}{location to FCS file in the case of flowFrames/cytoframes or a
+directory name for flowSets/cytosets where FCS files should be written
+during conversion, defaults to a tempfile if not specified manually.}
 }
 \value{
 a cytoframe or cytoset.
 }
 \description{
-Convert flowFrame/flowSet objects to cytoframe/cytoset objects
+Convert objects to cytoframe/cytoset objects
 }
 \examples{
 library(CytoExploreRData)

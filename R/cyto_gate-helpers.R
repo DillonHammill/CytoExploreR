@@ -2082,10 +2082,9 @@ cyto_gate_edit <- function(x,
         }
       }
       
+      # TODO: THIS SHOULD BE OBSOLETE NOW CYTO_GATE_DRAW RETURNS ORIGINAL GATES
       # POPULATIONS WITH NEW GATES
       pops_new <- names(gate_new)[!LAPPLY(gate_new, "is.null")]
-      
-      # UPDATE GATES IN PLACE
       if(length(pops_new) > 0) {
         gates_gs[[y]][pops_new] <<- gate_new[pops_new]
       }

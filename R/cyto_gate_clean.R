@@ -332,7 +332,8 @@ cyto_gate_clean <- function(x,
                              ...) {
   
   # BYPASS EMPTY CYTOFRAMES
-  if(nrow(fr) == 0) {
+  n <- cyto_stat_count(fr)
+  if(n == 0) {
     return(logical(0))
   }
   
@@ -388,7 +389,7 @@ cyto_gate_clean <- function(x,
         )[[1]]
       )
       # LOGICAL VECTOR
-      gate <- rep(TRUE, nrow(fr))
+      gate <- rep(TRUE, n)
       if(length(remove) > 0) {
         gate[remove] <- FALSE
       }
@@ -416,7 +417,7 @@ cyto_gate_clean <- function(x,
         )
       )
       # LOGICAL VECTOR
-      gate <- rep(TRUE, nrow(fr))
+      gate <- rep(TRUE, n)
       if(length(remove) > 0) {
         gate[remove] <- FALSE
       }
@@ -467,7 +468,7 @@ cyto_gate_clean <- function(x,
         args_default[!names(args_default) %in% names(args)]
       )
       # EVENT INDICES
-      ind <- seq_len(nrow(fr))
+      ind <- seq_len(n)
       # REMOVE MARGINS - LIST(FR, INDICES)
       res <- cyto_func_execute(
         "PeacoQC::RemoveMargins",
@@ -492,7 +493,7 @@ cyto_gate_clean <- function(x,
       if(length(keep) > 0) {
         ind <- ind[keep]
       }
-      gate <- rep(FALSE, nrow(fr))
+      gate <- rep(FALSE, n)
       if(length(ind) > 0) {
         gate[ind] <- TRUE
       }

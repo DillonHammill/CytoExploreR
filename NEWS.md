@@ -1,8 +1,35 @@
-# CytoExploreR 2.0.14 (pre-release)
+# CytoExploreR 2.0.15 (pre-release)
 
 * The behavior of `cyto_merge_by()` when `merge_by = NA` has changed from collapsing all samples to instead split samples individually. This is because splitting by `name` may not always work in cases where multiple samples share the same file names. This change requires updates to openCyto which should be re-installed when updating to the new version of CytoExploreR.
 
-<<<<<<< HEAD
+# CytoExploreR 2.0.15
+
+* Add new `cyto_panel_design()` to compute statistics from single colour controls to aid in panel design.
+* Add `nodes` argument to `cyto_gatingTemplate_apply()` to allow application of a subset of nodes within a gatingTemplate.
+* Improve automated assignment of peak detectors in single colour controls using `cyto_peaks_assign()`.
+* Improve automated watershed gating algorithm to automate gating of negative and positive populations in single colour controls using the new `gate = "auto"` option in `cyto_spillover_compute()` and `cyto_unmix_compute()`.
+* Implement new CytoDecode method for `cyto_spillover_compute()` and `cyto_unmix_compute()` to improve the accuracy of spectral estimates without requiring iterative refinement.
+* Add new `cyto_unmix_channels()` to extract the names of unmixed parameters from samples unmixed with `cyto_unmix()`.
+* Add support for `CytoDecode` as the model option for AutoSpill's iterative refinement of spillover coefficients.
+* `cyto_transform()` can now be directly applied to matrices, data.frames, data.tables and numeric vectors.
+* `cyto_details_edit()` now inherits additional metadata from the `cytoset` or `GatingSet` if variables are missing in the CSV file.
+* Switched over to using faster versions of statistical functions across the entire code base to improve efficiency.
+* Add `cyto_parallel()` to provide users with a convenient way to configure parallel processing using the `future` package.
+* Significant updates to `cyto_channel_match()` including addition of new required variables `label` and `select`, switch to `cyto_peak_assign()` for automated peak detection and rename channel match file as `Controls-Details.csv`.
+* Add support for manual override of axes ticks and labels in `cyto_plot()`.
+* Add support for new spectral purity index in `cyto_spectra_compare()`.
+* Complete overhaul of `cyto_unmix()` to support population-level autofluorescence subtraction/extraction. `save_as` argument added to specify a directory to write the new unmixed FCS files to. Keywords are now appropriately set to allow easy identification of unmixed parameters using `cyto_unmix_channels()`.
+* `cyto_spillover_spread_compute()` has been removed in favour of the more sophisticated `cyto_panel_design()`.
+* Add new automated asinh cofactor estimator to `cyto_transformers_define()`.
+
+# CytoExploreR 2.0.14
+
+* Add support for spectral purity in `cyto_spectra_compare()`.
+* Add `cyto_panel_design()` to provide statistics from single colour controls to aid in panel design.
+* Add 2D gating for controls in `cyto_spillover_compute()` and `cyto_unmix_compute()` to make it easier to identify outliers.
+* Add watershed method for automated gating of controls in `cyto_spilover_compute()` and `cyto_unmix_compute()` with new `gate` argument to control whether `auto` or `draw` gating methods should be used. The default remains `draw` for backwards compatibility and versatility.
+* Move all statistical functions to C++ for speed.
+
 # CytoExploreR 2.0.13
 
 * `cyto_plot()` gains a new logical `point_stack` argument to allow stacking of merged samples for 2D plots in a similar way to `hist_stack`.
@@ -12,11 +39,6 @@
 * Add support for CSV `asinh` cofactors through cofactor argument in `cyto_transformers_define()`.
 * Add `cyto_spectra_compare()` to compute cosine similarity scores between different spectra.
 * Add `cyto_plot_line()` to add lines to `cyto_plot()` plots.
-=======
-# CytoExploreR Note
-
-* Hybrid method for `cyto_spillover_compute()` and `cyto_unmix_compute()` has been updated to use the same number of negative and positive events for each control.
->>>>>>> e5f2efe42488c133da6f1a29b15def334355015d
 
 # CytoExploreR 2.0.12
 
@@ -91,7 +113,7 @@
 * `cyto_channel_match()` can now automatically detect the channel associated with each compensation control by matching marker and channel combinations to the file names. Samples where channels cannot be matched by file name will instead be matched by the intensities in the fluorescent channels. `cyto_channel_match()` also gains the ability to automatically detect which compensation controls are beads or cells, an important distinction for `cyto_spillover_compute()`.
 * Added new `label_memory` argument to `cyto_plot()` to allow interactively positioned label co-ordinates to be passed to `cyto_plot()` when `cyto_plot_save()` in called (as we cannot interactively position labels on these graphics devices).
 * Added new `cyto_unmix_compute()` and `cyto_unmix()` to compute and apply spectral unmixing matrices to spectral flow cytometry data.
-* `channel_match` argument has now been removed from `cyto_spillover_compute()` and `cyto_spillover_edit()` as CytoExploreR will automatically search in the current working directory for a file called `Compensation-Details` to import these details. 
+* `channel_match` argument has now been removed from `cyto_spillover_compute()` and `cyto_spillover_edit()` as CytoExploreR will automatically search in the current working directory for a file called `Control-Details` to import these details. 
 * Bagwell method in `cyto_spillover_compute()` has been updated to better handle controls from different sources (i.e. beads or cells). `cyto_spillover_compute()` will also automatically handle controls for the same channels split between groups by selecting the control with the highest spillover coefficients. If multiple unstained controls are supplied within a group,  `cyto_spillover_compute()` will use the control with the lowest CVs across all channels. `cyto_spillover_compute()` will now suggest a channel for each control if this information has not been manually supplied. A non-interactive gating method has been added to the Bagwell method to automatically gate negative and positive populations using `openCyto::mindensity()`.
 * `cyto_transform()` can now perform inverse transformations on GatingHierarchies and GatingSets by applying transformations to gates as well.
 * `cyto_transformers_define()` now accepts custom transformers through a named list of the form `list('PE-A' = list('transform' = asinh, 'inverse' = sinh))` where `asinh` and `sinh` are the names of the tranformer functions.

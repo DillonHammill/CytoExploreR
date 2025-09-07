@@ -3,7 +3,7 @@
 #' Add labels to cyto_plot
 #'
 #' \code{cyto_plot_label()} prepares the data in the same way as
-#' \code{cyto_plot()} by allows uses to interactively add labels to plots that
+#' \code{cyto_plot()} but allows uses to interactively add labels to plots that
 #' have already been created.
 #'
 #' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}},

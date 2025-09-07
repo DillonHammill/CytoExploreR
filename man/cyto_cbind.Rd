@@ -4,7 +4,8 @@
 \alias{cyto_cbind}
 \alias{cyto_cbind.flowFrame}
 \alias{cyto_cbind.flowSet}
-\title{Bind new columns to cytoframe or cytoset}
+\title{#' @export
+Bind new columns to cytoframe or cytoset}
 \usage{
 \method{cyto_cbind}{flowFrame}(x, cols = NULL)
 
@@ -18,6 +19,7 @@
 list for \code{cytoset} method.}
 }
 \description{
+#' @export
 Bind new columns to cytoframe or cytoset
 }
 \author{

@@ -187,14 +187,10 @@ cyto_map <- function(x,
   x_names <- cyto_names(x)
   
   # COUNTS PER SAMPLE (NEED TO REMOVE ZERO EVENT SAMPLES)
-  x_counts <- cyto_apply(
+  x_counts <- cyto_stat_count(
     x,
-    parent = parent,
-    FUN = "nrow",
-    input = "matrix",
-    channels = channels[1], # DON'T LOAD ENTIRE MATRIX INTO MEMORY
-    copy = FALSE
-  )[, 1]
+    parent = parent
+  ) 
   
   # EXCLUDE ZERO EVENT SAMPLES
   x_data <- cyto_select(

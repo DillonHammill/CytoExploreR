@@ -45,13 +45,18 @@
 #' @param channels names of the channels or markers for which spillover
 #'   coefficients should be computed, set to all area fluorescent channels by
 #'   default.
-#' @param type options include \code{"Bagwell"}, \code{"Roca"} or
-#'   \code{"hybrid"} to indicate which method to use when computing the
-#'   spillover matrix, set to \code{"Roca"} by default. The \code{"hybrid"}
-#'   method supports gating like the \code{Bagwell} approach and samples
-#'   positive and negative events in each control before refining the
-#'   coefficients using the \code{Autospill} approach. Refer to
-#'   \code{references} section for more details about each method.
+#' @param gate indicates whether to \code{draw} or use \code{auto} gating
+#'   methods to gate the negative and positive populations for each control.
+#'   Gating is optional for \code{"Autospill"} and \code{"CytoDecode"} methods but
+#'   is recommended to achieve better results and ensure compatibility with
+#'   \code{cyto_panel_design()}. Set to \code{"draw"} by default to allow for
+#'   more flexibility over gating. For \code{gate = "draw"} users can also
+#'   specify whether to gate the 1D histograms or 2D scatter plots 1D or 2D
+#'   suffix to \code{gate}. For example, to gate in 2D set \code{gate =
+#'   "draw-2D"} which is the new default manual gating method.
+#' @param type options include \code{"Bagwell" or "autocomp"}, \code{"Roca" or
+#'   "autospill"} or \code{"CytoDecode"} to indicate which method to use when
+#'   computing the spillover matrix, set to \code{"CytoDecode"} by default.
 #' @param save_as name of a csv file to which the computed spillover matrix
 #'   should be written, set to \code{Spillover-Matrix.csv} prefixed with the
 #'   date by default.
@@ -74,13 +79,26 @@
 #'   should be displayed in a heatmap, set to TRUE by default.
 #' @param events number of events to extract from each control prior to fitting
 #'   RLM models, set to 500 events by default.
-#' @param iter indicates the maximum number of allowable iterations for refining
-#'   the spillover coefficients, set to 100 by default.
+#' @param model indicates the type of model to use when running autospill,
+#'   options include \code{"rlm"} for robust linear models or \code{"vwqr"} for
+#'   variance weighted quantile regression used in \code{CytoDecode}, set to
+#'   \code{"rlm"} by default for speed and backwards compatibility.
+#' @param max_iter indicates the maximum number of allowable iterations for
+#'   refining the spillover coefficients, set to 20 by default.
 #' @param trim proportion of events to exclude from the top and bottom of each
-#'   scale when fitting RLM models in autospill method, set to 0.001 by default.
-#' @param details name of a CSV file to which the details of the compensation
+#'   scale when fitting models in \code{AutoSpill} and \code{CytoDecode} methods,
+#'   set to 0.001 by default.
+#' @param tol tolerance level for convergence of vwqr model in \code{CytoDecode}
+#'   method, set to \code{1e-6} by default.
+#' @param grid_size size of the grid to use for wvqr model in \code{CytoDecode}
+#'   method, set to 100 by default. Smaller grid sizes will provide a speed
+#'   boost at the cost of accuracy.
+#' @param resid indicates whether to use \code{"lower"}, \code{"upper"} or
+#'   \code{"both"} residuals when fitting variance models in vwqr used in
+#'   \code{CytoDecode}, set to \code{"both"} by default.
+#' @param details name of a CSV file to which the details of the single colour
 #'   controls should be saved, set to NULL by default to use
-#'   \code{date-Compensation-Details.csv}. Setting this argument to \code{NA}
+#'   \code{date-Control-Details.csv}. Setting this argument to \code{NA}
 #'   will prevent details from being written to a CSV file.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
@@ -88,16 +106,13 @@
 #'   accordance with \code{save_as}.
 #'
 #' @importFrom flowWorkspace cytoset
-#' @importFrom openCyto mindensity gs_add_gating_method
+#' @importFrom openCyto gs_add_gating_method
 #' @importFrom flowWorkspace gs_pop_remove
 #' @importFrom HeatmapR heat_map
 #'
 #' @examples
 #' \dontrun{
 #' library(CytoExploreRData)
-#'
-#' # Bypass directory check for external files
-#' options("CytoExploreR_wd_check" = FALSE)
 #'
 #' # Load in compensation controls
 #' fs <- Compensation
@@ -114,16 +129,14 @@
 #' )
 #'
 #' # Compute fluorescent spillover matrix
-#' spill <- cyto_spillover_compute(cyto_extract(gs, "Single Cells"),
-#'   channel_match = cmfile,
-#'   spillover = "Example-spillover.csv"
+#' spill <- cyto_spillover_compute(
+#'   gs,
+#'   save_as = "Example-spillover.csv"
 #' )
 #'
 #' # Compensate samples
 #' gs <- cyto_compensate(gs, spill)
 #'
-#' # Return CytoExploreR_wd_check to default
-#' options("CytoExploreR_wd_check" = TRUE)
 #' }
 #'
 #' @seealso \code{\link{cyto_channel_match}}
@@ -146,7 +159,8 @@ cyto_spillover_compute <- function(x,
                                    parent = "root",
                                    select = NULL,
                                    channels = NULL,
-                                   type = "roca",
+                                   gate = "draw",
+                                   type = "CytoDecode",
                                    save_as = NULL,
                                    gatingTemplate = NULL,
                                    axes_trans = NA,
@@ -154,19 +168,14 @@ cyto_spillover_compute <- function(x,
                                    spillover = NULL,
                                    heatmap = TRUE,
                                    events = 500,
-                                   iter = 100,
+                                   model = "rlm",
+                                   max_iter = 20,
                                    trim = 0.001,
+                                   tol = 1e-6,
+                                   grid_size = 100,
+                                   resid = "both",
                                    details = NULL,
                                    ...) {
-
-  # TODO: SAMPLE CHECKS PERFORMED PRIOR TO GROUPING
-  # FITC ON BEADS AND CELLS - BOTH KEPT 
-  
-  # NOTE: GATES ARE SAVED BUT RE-RUN CAUSES ISSUES
-  # WATERSHED GATING
-  # GATING CAN BE SIMPLIFIED TO A SINGLE CYTO_GATE_DRAW CALL PER CHANNEL
-  # SELECT SAMPLE AND OVERLAY UNSTAINED IF PROVIDED
-  # ATTACH GATES TO ALL SAMPLES
   
   # SPILLOVER ------------------------------------------------------------------
   
@@ -190,12 +199,12 @@ cyto_spillover_compute <- function(x,
       paste0(
         "'channel_match' is no longer supported. CytoExploreR will ",
         "automatically create and search for a file called ",
-        "'Compensation-Details.csv'."
+        "'Control-Details.csv'."
       )
     )
   }
   
-  # INTERNAL UNMIX ARGUMENT
+  # INTERNAL UNMIX ARGUMENT - COMPUTE UNMIXING MATRIX?
   unmix <- FALSE
   if("unmix" %in% names(args)) {
     unmix <- args[["unmix"]]
@@ -204,14 +213,17 @@ cyto_spillover_compute <- function(x,
   
   # PREPARE DATA ---------------------------------------------------------------
   
-  # SELECT CONTROLS
-  x <- cyto_select(
-    x,
-    select
-  )
+  # NOTE: GATES ONLY ATTACHED TO SELECTED SAMPLES
+  
+  # # SELECT CONTROLS
+  # x <- cyto_select(
+  #   x,
+  #   select
+  # )
   
   # CHANNELS
   if(is.null(channels)) {
+    # DEFAULT TO -A FLUORESCENT CHANNELS
     channels <- cyto_fluor_channels(x)
     # DEFAULT - ALL AREA PARAMETERS
     channels <- channels[
@@ -221,6 +233,7 @@ cyto_spillover_compute <- function(x,
         ignore.case = TRUE
       )
     ]
+  # USE PROVIDED CHANNELS
   } else {
     channels <- unique(
       cyto_channels_extract(
@@ -229,74 +242,72 @@ cyto_spillover_compute <- function(x,
       )
     )
   }
+  names(channels) <- unname(channels)
   
-  # DEATILS PREPARED FOR UNMIXING
-  if(!unmix) {
-    # MATCH CHANNELS
-    pd <- cyto_channel_match(
-      x,
-      channels = channels,
-      save_as = details
-    )
-    pd <- pd[
-      match(
-        rownames(cyto_details(x)), 
-        rownames(pd)
-      ),
-      , 
-      drop = FALSE
-    ]
-    
-    # CHECK COMPENSATION DETAILS
-    lapply(
-      seq_len(nrow(pd)),
-      function(z) {
-        # CHANNEL
-        if(!pd$channel[z] %in% c("Unstained",
-                                 "unstained",
-                                 cyto_channels(x))) {
-          stop(
-            paste0(
-              pd$channel[z], 
-              " is not a valid channel for this ", 
-              cyto_class(x), 
-              "!"
-            )
+  # MATCH CHANNELS
+  pd <- cyto_channel_match(
+    x,
+    channels = channels,
+    save_as = details,
+    peaks = TRUE
+  )
+  pd <- pd[
+    match(
+      rownames(cyto_details(x)),
+      rownames(pd)
+    ),
+    ,
+    drop = FALSE
+  ]
+  
+  # CHECK COMPENSATION DETAILS
+  # CHANNEL CAN BE INVALID FOR UNMIXED DATA - USE LABEL INSTEAD
+  lapply(
+    seq_len(nrow(pd)),
+    function(z) {
+      # CHANNEL
+      if(!pd$channel[z] %in% c("Unstained",
+                               "unstained",
+                               cyto_channels(x))) {
+        stop(
+          paste0(
+            pd$channel[z], 
+            " is not a valid channel for this ", 
+            cyto_class(x), 
+            "!"
           )
-          # PARENT
-          if(cyto_class(x, "GatingSet")) {
-            cyto_nodes_convert(x, pd$parent[z]) # ERRORS IF MISSING
-          }
+        )
+        # PARENT
+        if(cyto_class(x, "GatingSet")) {
+          cyto_nodes_convert(x, pd$parent[z]) # ERRORS IF MISSING
         }
       }
-    )
-    
-    # MISSING VARIABLES
-    vars <- c("name", "group", "parent", "channel")
-    if(!all(vars %in% colnames(pd))) {
-      stop(
+    }
+  )
+  
+  # MISSING VARIABLES
+  vars <- c("name", "group", "parent", "channel", "marker", "label", "select")
+  if(!all(vars %in% colnames(pd))) {
+    stop(
+      paste0(
+        "cyto_details(x) is missing required variables: ",
         paste0(
-          "cyto_details(x) is missing required variables: ",
-          paste0(
-            vars[!vars %in% colnames(pd)],
-            collapse = " & "
-          )
+          vars[!vars %in% colnames(pd)],
+          collapse = " & "
         )
       )
+    )
+  }
+  
+  # DECOMPENSATE
+  if(cyto_class(x, "GatingSet")) {
+    if(!is.null(cyto_spillover_extract(x))) {
+      x <- cyto_compensate(
+        x,
+        remove = TRUE,
+        quiet = FALSE
+      )
     }
-    
-    # DECOMPENSATE
-    if(cyto_class(x, "GatingSet")) {
-      if(!is.null(cyto_spillover_extract(x))) {
-        x <- cyto_compensate(
-          x,
-          remove = TRUE,
-          quiet = TRUE
-        )
-      }
-    }
-  } else {
-    pd <- pData(x)
   }
   
   # TRANSFORMATIONS
@@ -304,9 +315,52 @@ cyto_spillover_compute <- function(x,
     axes_trans <- cyto_transformers_extract(x)
   }
   
-  # BAGWELL METHOD REQUIRES TRANSFORMED DATA
-  if(grepl("^b|^h", type, ignore.case = TRUE)) {
+  # PREPARE TYPE - SUPPORT AUTOCOMP & AUTOSPILL
+  if(grepl("^b|comp", type, ignore.case = TRUE)) {
+    type <- "Bagwell"
+  } else if(grepl("^r|spill", type, ignore.case = TRUE)) {
+    type <- "Roca"
+  } else if(grepl("^d|cy", type, ignore.case = TRUE)) {
+    type <- "CytoDecode"
+  } else {
+    stop(
+      "'type' must be either Autocomp, AutoSpill or CytoDecode!"
+    )
+  }
+  
+  # NOTE: MANUAL GATING IS DEFAULT - OPTION DRAW | AUTO | TRUE -> DRAW | FALSE
+  # PREPARE GATING ARGUMENT
+  if(gate %in% c(FALSE, NA)) {
+    if(!type %in% "Bagwell") {
+      gate <- NA
+    } else {
+      gate <- "draw-2d"
+    }
+  } else if(gate %in% TRUE) {
+    gate <- "draw-2d"
+  } else if(grepl("draw|1d|2d", gate, ignore.case = TRUE)) {
+    if(!cyto_interactive()) {
+      warning(
+        "Manual gating is only supported in interactive CytoExploreR sessions! \n",
+        "Using automated gating instead..."
+      )
+      gate <- "auto"
+    } else {
+      # DEFAULT IS 2D GATING NOW
+      if(grepl("1d", gate, ignore.case = TRUE)) {
+        gate <- "draw-1d"
+      } else {
+        gate <- "draw-2d"
+      }
+    }
+  } else {
+    gate <- "auto"
+  }
+  
+  # TRANSFORMED DATA REQUIRED FOR GATING
+  if(!.all_na(gate)) {
     if(any(!channels %in% names(axes_trans))) {
+      # TODO: SWITCH TO ARCSINH HERE
       # DEFINE NEW TRANSFORMERS
       trans_new <- cyto_transformers_define(
         x, 
@@ -355,288 +409,275 @@ cyto_spillover_compute <- function(x,
   diag(spill_mat) <- 1
   
   # PREPARE GATINGTEMPLATE -----------------------------------------------------
-  
+
   # STORE GATES FOR BAGWELL & HYBRID METHODS
-  if(cyto_class(x, "GatingSet") & grepl("^(b|h)", type, ignore.case = TRUE)) {
-    # ACTIVE GATINGTEMPLATE
-    if(is.null(gatingTemplate)) {
-      gatingTemplate <- cyto_gatingTemplate_active(
-        ask = TRUE
-      )
+  if(cyto_class(x, "GatingSet") & !.all_na(gate)) {
+    # CHECK IF GATINGTEMPLATES ARE BEING USED
+    if(!cyto_option("CytoExploreR_gatingTemplate") %in% FALSE) {
+      # ACTIVE GATINGTEMPLATE
+      if(is.null(gatingTemplate)) {
+        gatingTemplate <- cyto_gatingTemplate_active(
+          ask = TRUE
+        )
+      }
+      # CREATE GATINGTEMPLATE
+      if(!file_exists(gatingTemplate)) {
+        cyto_gatingTemplate_create(
+          gatingTemplate,
+          active = TRUE
+        )
+      }
+    } else {
+      gatingTemplate <- NULL
     }
-    # CREATE GATINGTEMPLATE
-    if(!file_exists(gatingTemplate)) {
-      cyto_gatingTemplate_create(
-        gatingTemplate,
-        active = TRUE
-      )
-    }
-    # READ GATINGTEMPLATE
-    gt <- cyto_gatingTemplate_read(
-      gatingTemplate,
-      data.table = TRUE
-    )
   }
-  
+
   # GATED POPULATIONS ----------------------------------------------------------
-  
+
   # EXTRACT NODES FROM GATINGSET
+  # NOTE: ALL SAMPLES HAVE THE SAME GATES
   if(cyto_class(x, "GatingSet")) {
     nodes <- cyto_nodes(
       x,
-      path = "auto"
+      path = "full"
     )
   } else {
     nodes <- NULL
   }
-  
-  # SPILLOVER COMPUTATION ------------------------------------------------------
-  
-  # BAGWELL METHOD
-  if(grepl("^b|^h", type, ignore.case = TRUE)) {
-    
-    # NOTE: CS - LIST PER CONTROL WITH NEGATIVE & POSITIVE EVENTS
 
-    # MESSAGE REFERENCE
-    if(!unmix) {
-      message(
-        "Computing spillover matrix using the Bagwell et al. (1993) method... \n"
-      )
-      message(
-        paste0(
-          "C. B. Bagwell & E. G. Adams (1993). Fluorescence spectral ",
-          "overlap compensation for any number of flow cytometry parameters. in:",
-          " Annals of the New York Academy of Sciences, 677:167-184.", "\n"
-        )
-      )
-    }
-    
-    # SPLIT SAMPLES INTO GROUPS
-    cs_list <- cyto_group_by(
+  # SPILLOVER COMPUTATION ------------------------------------------------------
+
+  # MESSAGE REFERENCE
+  message(
+    "Computing ",
+    if(unmix){"unmixing "} else {"spillover "},
+    "matrix using the ",
+    type, 
+    " method... \n"
+  )
+  
+  # BAGWELL & HYBRID METHODS REQUIRE GATING
+  if(!.all_na(gate)) {
+
+    # SPLIT CYTOSET|GATINGSET SAMPLES INTO GROUPS
+    cyto_list <- cyto_group_by(
       x,
       group_by = "group"
     )
     
-    # PREPARE EACH GROUP
-    pd_list <- list()
-    cs_list <- structure(
+    # GATE POPULATIONS & COMPUTE SPILLOVER COEFFICIENTS - DROP GROUPING
+    gate_list <- list()
+    gate_edit <- list()
+    pops <- do.call(
+      "c",
       lapply(
-        seq_along(cs_list),
-        function(w) {
-          # CYTOSET
-          cs <- cs_list[[w]]
-          # GROUP DETAILS
-          pd <- cyto_details(cs)
-          # UNSTAINED INDEX
-          unst_ind <- c()
-          # SINGLE COLOUR INDEX
-          comp_ind <- c()
-          # GET INDEX OF CONTROLS AND UNSTAINED FOR GROUP
-          lapply(
-            unique(pd$channel),
-            function(z) {
-              # FIND BEST CONTROL PER CHANNEL
-              ind <- which(pd$channel == z)
-              # UNSTAINED CONTROL
-              if(grepl("unstained", z, ignore.case = TRUE)) {
-                # MULTIPLE UNSTAINED CONTROLS - CV
-                if(length(ind) > 1) {
-                  # CHANNELS TO COMPUTE CV
-                  chans <- pd$channel[
-                    !grepl(
-                      "Unstained",
-                      pd$channel,
-                      ignore.case = TRUE
-                    )
-                  ]
-                  # COMPUTE CV IN CHANNELS - PARENT
-                  cv <- lapply(
-                    ind, 
-                    function(i) {
-                      cyto_apply(
-                        cs[i],
-                        parent = pd$parent[i],
-                        FUN = "cyto_stat_cv",
-                        channels = channels,
-                        input = "matrix",
-                        trans = axes_trans,
-                        inverse = TRUE,
-                        copy = TRUE, 
-                        simplify = FALSE
-                      )
-                    }
-                  )
-                  unst_ind <<- ind[
-                    which.min(
-                      LAPPLY(cv, "mean")
-                    )
-                  ]
-                } else {
-                  unst_ind <<- ind
-                }
-              # SINGLE COLOUR CONTROL
-              } else {
-                # MULTIPLE SINGLE COLOUR CONTROLS - MEDFI
-                if(length(ind) > 1) {
-                  # COMPUTE MEDFI IN CHANNEL - PARENT
-                  medFI <- LAPPLY(
-                    ind,
-                    function(i) {
-                      cyto_apply(
-                        cs[i],
-                        parent = pd$parent[i],
-                        FUN = "cyto_stat_median",
-                        channels = z,
-                        input = "matrix",
-                        trans = axes_trans,
-                        inverse = TRUE,
-                        copy = TRUE, 
-                        simplify = TRUE
-                      )
-                    }
-                  )
-                  comp_ind <<- c(comp_ind, ind[
-                    which.max(medFI)
-                  ])
-                } else {
-                  comp_ind <<- c(comp_ind, ind)
-                }
-              }
-            }
-          )
-          # STORE EXPERIMENT DETAILS PER GROUP
-          pd_list[[names(cs_list)[w]]] <<- pd[comp_ind, ,drop = FALSE]
-          # NOTE: IF UNSTAINED MISSING IN GROUP USER MUST GATE + AND - SIGNAL
-          # IN EACH CONTROL
-          # LIST OF POSITIVE & NEGATIVE CYTOFRAMES PER CHANNEL
-          structure(
-            lapply(
-              comp_ind,
-              function(v) {
-                structure(
-                  list(
-                    "-" = if(length(unst_ind) == 0) {
-                      NULL
-                    } else {
-                      cyto_data_extract(
-                        cs,
-                        select = unst_ind,
-                        parent = pd$parent[v], # USE UNSTAINED POP HERE?
-                        format = "cytoset",
-                        inverse = FALSE,
-                        copy = FALSE,
-                        events = events
-                      )[[1]]
-                    },
-                    "+" = cyto_data_extract(
-                      cs,
-                      select = v,
-                      parent = pd$parent[v],
-                      format = "cytoset",
-                      inverse = FALSE,
-                      copy = FALSE,
-                      events = events
-                    )[[1]]
-                  )
-                )
-              }
-            ),
-            names = pd$channel[comp_ind]
-          )
-        }
-      ),
-      names = names(cs_list)
-    )
-    
-    # GATE POPULATIONS & COMPUTE SPILLOVER COEFFICIENTS
-    spill <- structure(
-      lapply(
-        seq_along(cs_list),
-        function(q) {
+        seq_along(cyto_list),
+        function(id) {
+          # GROUP
+          group <- names(cyto_list)[id]
+          # GROUP CYTOSET/GATINGSET
+          cyto <- cyto_list[[id]]
           # EXPERIMENT DETAILS
-          pd <- pd_list[[q]]
-          # GATE POPULATIONS PER CHANNEL
-          pops <- structure(
-            lapply(
-              names(cs_list[[q]]),
-              function(y) {
-                # PARENT
-                parent <- pd[pd$channel %in% y, "parent"]
-                # ESCAPED CHANNEL NAME - GATINGSET STORAGE
-                label <- gsub(
+          pd <- cyto_details(cyto)
+          # LOCATE GROUP STAINED CONTROLS
+          idx <- seq_along(cyto)[
+            !grepl("Unstained", pd$channel, ignore.case = TRUE)
+          ]
+          # LOCATE UNSTAINED CONTROLS
+          unst_idx <- seq_along(cyto)[-idx]
+          # LOCATE GROUP SELECTED STAINED CONTROLS
+          idx <- idx[as.logical(pd$select[idx])]
+          names(idx) <- cyto_names(cyto)[idx]
+          # LOCATE GROUP SELECTED UNSTAINED CONTROLS
+          if(length(unst_idx) > 0) {
+            unst_idx <- unst_idx[as.logical(pd$select[unst_idx])]
+            names(unst_idx) <- cyto_names(cyto)[unst_idx]
+          }
+          # NO STAINED CONTROLS FOR GROUP
+          if(length(idx) == 0){
+            return(NULL)
+          }
+          # LOOP THROUGH MARKER & DYE COMBINATIONS
+          pops <- lapply(
+            idx,
+            function(z) {
+              # <MARKER> LABEL
+              nm <- paste0(
+                "<",
+                pd$marker[z],
+                "> ",
+                pd$label[z]
+              )
+              # PARENT
+              parent <- pd$parent[z]
+              # PEAK DETECTOR
+              peak <- pd$channel[z]
+              # CHANNELS TO COMPUTE SPILLOVER
+              # DYE LABEL
+              label <- pd$label[z]
+              if(!is.null(label)) {
+                if(label %in% c("NA", "", NA)) {
+                  label <- NULL
+                }
+              }
+              # GATED POPULATIONS - REPLACE ILLEGAL CHARACTERS FROM NAME
+              pops <- paste0(
+                gsub(
                   "[\\|\\&|\\:|\\,|\\/]",
-                  "",
-                  if(!unmix){
-                    y
-                  } else {
-                    pd$label[
-                      pd$channel %in% y
-                    ]
-                  }
-                )
-                pops <- c(
-                  paste0(label, "-"),
-                  paste0(label, "+")
-                )
-                # REFERENCE CYTOSETS
-                neg_events <- cs_list[[q]][[y]][["-"]]
-                pos_events <- cs_list[[q]][[y]][["+"]]
-                # EXTRACT GATES FROM GATINGSET
-                if(cyto_class(x, "GatingSet")) {
-                  # LOCATE NEGATIVE GATE
-                  neg_ind <- grep(pops[1], nodes)
-                  # NO NEGTAIVE GATE LOCATED
-                  if(length(neg_ind) == 0) {
-                    neg_gt <- NULL
-                  # NEGATIVE GATE LOCATED
-                  } else {
-                    # INTERNAL
-                    if(is.null(neg_events)) {
-                      neg_gt <- cyto_gate_extract(
-                        x,
-                        select = cyto_names(
-                          cs_list[[q]][[y]][["+"]]
-                        ),
-                        parent = parent,
-                        alias = nodes[
-                          grep(paste0(label, "\\-"), nodes)
-                        ]
-                      )[[1]][[1]]
-                    # UNIVERSAL
+                  "-",
+                  nm
+                ),
+                c("-", "+")
+              )
+              # LOCATE BEST UNSTAINED CONTROL - LOWEST CV IN PEAK DETECTOR
+              if(length(unst_idx) > 1) {
+                # COMPUTE CV IN PEAK DETECTOR
+                # NOTE: CANNOT UPDATE SELECTION IN PDATA AS CHANGES PER FILE
+                # NOTE: PARENT MAY VARY BY CONTROL SO WE NEED TO DO THIS HERE
+                # NOTE: ONLY PEAK DETECTOR  USED FOR SPEED
+                unst_idx <- unst_idx[
+                  which.min(
+                    cyto_apply(
+                      cyto[unst_idx],
+                      "cyto_stat_rcv",
+                      parent = parent,
+                      channels = peak, # ALL CHANNELS IS SLOW & REPETITIVE
+                      input = "matrix",
+                      inverse = TRUE,
+                      copy = TRUE
+                    )
+                  )
+                ]
+              }
+              
+              # NEGATIVE & POSITIVE POPULATIONS (MAY BE CYTOSETS ALREADY)
+              # NOTE: EVENTS BARCODES NOT REQUIRED AS OVERLAY NOT USED
+              # WE USE SMAPLE-ID TO OFFSET THEN DISPLAY MERGED DATA
+              
+              # PARENT POPULATIONS -------------------------------------------
+              if(length(unst_idx) == 1) {
+                neg_pop <- cyto_data_extract(
+                  cyto[unst_idx],
+                  parent = parent,
+                  channels = channels,
+                  format = "cytoframe",
+                  # events = events,
+                  inverse = FALSE,
+                  copy = TRUE
+                )[[1]][[1]]
+                # APPEND SAMPLE-ID
+                if(grepl("2d", gate)) {
+                  neg_pop <- cyto_cbind(
+                    neg_pop,
+                    matrix(
+                      1,
+                      nrow = nrow(neg_pop),
+                      ncol = 1,
+                      dimnames = list(
+                        NULL,
+                        "Sample-ID"
+                      )
+                    )
+                  )
+                }
+              } else {
+                neg_pop <- NULL
+              }
+              pos_pop <- cyto_data_extract(
+                cyto[z],
+                parent = parent,
+                channels = channels,
+                format = "cytoframe",
+                # events = events,
+                inverse = FALSE,
+                copy = TRUE
+              )[[1]][[1]]
+              if(grepl("2d", gate)) {
+                pos_pop <- cyto_cbind(
+                  pos_pop,
+                  matrix(
+                    if(length(unst_idx) == 1) {
+                      2
                     } else {
-                      neg_gt <- cyto_gate_extract(
-                        x,
-                        select = cyto_names(
-                          cs_list[[q]][[y]][["-"]]
-                        ),
-                        parent = parent,
-                        alias = nodes[
-                          grep(paste0(label, "\\-"), nodes)
-                        ]
-                      )[[1]][[1]]
-                    }
-                  }
-                  # LOCATE POSITIVE GATE
-                  pos_ind <- grep(pops[2], nodes)
-                  # NO POSITIVE GATE LOCATED
-                  if(length(pos_ind) == 0) {
-                    pos_gt <- NULL
-                  # POSITIVE GATE LOCATED
-                  } else {
-                    # EXTRACT POSITIVE GATE
-                    pos_gt <- cyto_gate_extract(
-                      x,
-                      select = cyto_names(
-                        cs_list[[q]][[y]][["+"]]
-                      ),
-                      alias = nodes[
-                        grep(paste0(label, "\\+"), nodes)
-                      ]
-                    )[[1]][[1]]
-                  }
+                      1
+                    },
+                    nrow = nrow(pos_pop),
+                    ncol = 1,
+                    dimnames = list(
+                      NULL,
+                      "Sample-ID"
+                    )
+                  )
+                )
+              }
+              
+              # POSITIVE & NEGATIVE CYTOSET
+              pop <- list(
+                "+" = pos_pop,
+                "-" = neg_pop
+              )
+              pop <- pop[!sapply(pop, "is.null")]
+              pop <- cytoset(pop)
+              
+              # BARCODING REQUIRED FOR 1D OVERLAYS
+              if(grepl("1d", gate) & length(pop) > 1) {
+                pop <- cyto_barcode(pop, "events")
+              }
+              
+              # FREE UP SOME MEMORY
+              rm(neg_pop, pos_pop)
+              
+              # EXISTING GATES -----------------------------------------------
+              
+              # NO EXISTING GATES
+              gates <- NA
+              
+              # CHECK GATINGSET FOR GATES
+              if(cyto_class(cyto, "GatingSet")) {
+                # LOCATE NEGATIVE GATE
+                neg_ind <- grep(
+                  gsub(
+                    "\\-",
+                    "\\\\-",
+                    paste0(parent, "\\/", pops[1])
+                  ),
+                  nodes
+                )
+                # EXTRACT NEGATIVE GATE
+                neg_gt <- NULL
+                if(length(neg_ind) == 1) {
+                  neg_gt <- cyto_gate_extract(
+                    cyto[
+                      if(length(unst_idx) == 0) {
+                        z
+                      } else {
+                        unst_idx
+                      } 
+                    ],
+                    parent = parent,
+                    alias = nodes[neg_ind]
+                  )[[1]][[1]]
+                }
+                # EXTRACT POSITIVE GATE
+                pos_ind <- grep(
+                  gsub(
+                    "\\+",
+                    "\\\\+",
+                    paste0(parent, "\\/", pops[2])
+                  ),
+                  nodes
+                )
+                # EXTRACT POSITIVE GATE
+                pos_gt <- NULL
+                if(length(pos_ind) == 1) {
+                  pos_gt <- cyto_gate_extract(
+                    cyto[z],
+                    parent = parent,
+                    alias = nodes[pos_ind]
+                  )[[1]][[1]]
                 }
                 # COMBINE GATES FOR PLOTTING
-                gts <- structure(
+                gates <- structure(
                   list(
                     neg_gt,
                     pos_gt
@@ -644,385 +685,568 @@ cyto_spillover_compute <- function(x,
                   names = pops
                 )
                 # REMOVE MISSING GATES
-                gts[LAPPLY(gts, "is.null")] <- NULL
-                # CYTO_PLOT
+                gates[LAPPLY(gates, "is.null")] <- NULL
+                if(length(gates) == 0) {
+                  gates <- NA
+                }
+              }
+              
+              # CYTO_PLOT() --------------------------------------------------
+              
+              # NOTE: WE MAY NEED TO SUPPORT HISTOGRAM GATING HERE
+              
+              # CYTO_PLOT
+              if(grepl("draw", gate)) {
                 do.call(
                   "cyto_plot",
                   c(
                     list(
-                      "x" = if(is.null(neg_events)){
-                        pos_events
+                      "x" = if(grepl("1d", gate)) {
+                        pop[1]
                       } else {
-                        neg_events
+                        pop
                       },
-                      "channels" = y,
-                      "overlay" = if(!is.null(neg_events)){
-                        pos_events
+                      # NOTE: IF GATES EXIST WE GATE IN THE SAME DIMENSION
+                      "channels" = c(
+                        peak,
+                        if(grepl("2d", gate)) {
+                          "Sample-ID"
+                        } else {
+                          NULL
+                        }
+                      ),
+                      "merge_by" = if(grepl("2d", gate)) {
+                        "all"
+                      } else {
+                        "name"
+                      },
+                      "overlay" = if(grepl("1d", gate) & length(pop) > 1) {
+                        pop[2]
                       } else {
                         NA
                       },
-                      "gate" = if(!is.null(gts)) {
-                        gts
-                      } else {
-                        NA
-                      },
-                      "hist_stack" = 0,
-                      "hist_fill" = if(is.null(neg_events)){
-                        "dodgerblue"
-                      } else {
-                        c("red", "dodgerblue")
-                      },
-                      "hist_fill_alpha" = 0.6,
-                      "title" = cyto_names(pos_events),
-                      "axes_limits" = axes_limits, 
+                      "gate" = gates,
+                      "gate_line_col" = "magenta",
+                      "gate_line_alpha" = 0.5,
+                      "title" = paste0(
+                        cyto_names(cyto)[z],
+                        "\n",
+                        parent
+                      ),
+                      "axes_limits" = "data",
                       "axes_trans" = axes_trans,
-                      "legend" = FALSE
+                      "legend" = FALSE,
+                      hist_stack = 0,
+                      hist_layers = length(pop),
+                      ylab = if(grepl("2d", gate)) {
+                        "Single Colour Control"
+                      } else {
+                        "% of Mode"
+                      },
+                      axes_text = list(
+                        list(
+                          "label" = NULL,
+                          "at" = NULL,
+                          "add" = TRUE
+                        ),
+                        if(grepl("1d", gate)) {
+                          list(
+                            "label" = NULL,
+                            "at" = NULL,
+                            "add" = TRUE
+                          )
+                        } else {
+                          list(
+                            "label" = c(
+                              if(length(pop) > 1) {"Unstained"}else{NULL},
+                              paste0(
+                                if(length(label) > 0) {
+                                  label
+                                } else {
+                                  peak
+                                },
+                                "+"
+                              )
+                            ),
+                            "at" = c(1, if(length(pop) > 1) {2} else{NULL}),
+                            "add" = TRUE,
+                            "las" = 0
+                          )
+                        }
+                      ),
+                      label = FALSE,
+                      ylim = if(grepl("2d", gate)) {
+                        c(0, length(pop) + 1)
+                      } else {
+                        NA
+                      }
                     ),
                     args
                   )
                 )
-                # INTERACTIVE - USE CYTO_GATE_DRAW()
-                if(interactive() & cyto_option("CytoExploreR_interactive")) {
-                  # GATE NEGATIVE POPULATION
-                  if(is.null(neg_gt)) {
-                    if(is.null(neg_events)) {
-                      neg_gt <- cyto_gate_draw(
-                        x = pos_events,
-                        alias = pops[1],
-                        channels = y,
-                        type = "interval",
-                        plot = FALSE
-                      )[[1]][[1]]
-                    } else {
-                      neg_gt <- cyto_gate_draw(
-                        x = neg_events,
-                        alias = pops[1],
-                        channels = y,
-                        type = "interval",
-                        plot = FALSE
-                      )[[1]][[1]]
-                    }
-                    neg_gt@filterId <- pops[1]
-                  }
-                  # GATE POSITIVE POPULATION
-                  if(is.null(pos_gt)) {
-                    pos_gt <- cyto_gate_draw(
-                      x = pos_events,
-                      alias = pops[2],
-                      channels = y,
-                      type = "interval",
-                      plot = FALSE
-                    )[[1]][[1]]
-                    pos_gt@filterId <- pops[2]
-                  }
-                # NON-INTERACTIVE - USE MINDENSITY()
-                } else {
-                  # COMPUTE RANGE TO ELIMINATE OUTLIERS
-                  rng <- cyto_apply(
-                    pos_events,
-                    FUN = "cyto_stat_quantile",
-                    probs = c(0.025, 0.975),
-                    input = "matrix",
-                    channels = y,
-                    copy = FALSE,
-                    inverse = FALSE
-                  )
-                  # GATE NEGATIVE POPULATION
-                  if(is.null(neg_gt)) {
-                    if(is.null(neg_events)) {
-                      # MINDENSITY - GATE NEGATIVE EVENTS
-                      neg_gt <- mindensity(
-                        pos_events[[1]], # CYTOFRAME REQUIRED
-                        channel = y,
-                        filterId = pops[1],
-                        positive = FALSE,
-                        min = min(rng),
-                        max = max(rng)
-                      )
-                      # PLOT GATE
-                      cyto_plot_gate(
-                        neg_gt
-                      )
-                    } else {
-                      # MINDENSITY - GATE NEGATIVE EVENTS
-                      neg_gt <- mindensity(
-                        neg_events[[1]], # CYTOFRAME REQUIRED
-                        channel = y,
-                        filterId = pops[1],
-                        positive = FALSE,
-                        min = min(rng),
-                        max = max(rng)
-                      )
-                      # PLOT GATE
-                      cyto_plot_gate(
-                        neg_gt
-                      )
-                    }
-                  }
-                  # MINDENSITY - GATE POSITIVE EVENTS
-                  if(is.null(pos_gt)) {
-                    pos_gt <- mindensity(
-                      pos_events[[1]], # CYTOFRAME REQUIRED
-                      channel = y,
-                      filterId = pops[2],
-                      positive = TRUE,
-                      min = min(rng),
-                      max = max(rng)
-                    )
-                    # PLOT GATE
-                    cyto_plot_gate(
-                      pos_gt
-                    )
-                  }
-                }
-                # APPLY GATES TO GATINGSET & STORE IN GATINGTEMPLATE
-                if(cyto_class(x, "GatingSet")) {
-                  # ADD NEW GATES TO GATINGSET & GATINGTEMPLATE
-                  lapply(
-                    pops[!pops %in% names(gts)],
-                    function(r) {
-                      # GATINGTEMPLATE
-                      gt <<- rbind(
-                        gt,
-                        .suppress_all_messages(
-                          gs_add_gating_method(
-                            gs = x,
-                            alias = r,
-                            parent = parent,
-                            pop = "+",
-                            dims = y,
-                            gating_method = "cyto_gate_draw",
-                            gating_args = list(
-                              gate = list(
-                                "Combined Events" = filters(
-                                  if(grepl("\\-$", r)) {
-                                    list(
-                                      neg_gt
-                                    )
-                                  } else {
-                                    list(
-                                      pos_gt
-                                    )
-                                  }
-                                )
-                                
-                              ),
-                              openCyto.minEvents = -1
-                            ),
-                            groupBy = NA,
-                            collapseDataForGating = TRUE,
-                            preprocessing_method = "pp_cyto_gate_draw"
-                          )
-                        )
-                      )
-                      # WRITE UPDATED GATINGTEMPLATE - WRITING ERROR - SYNC GS
-                      tryCatch(
-                        cyto_gatingTemplate_write(
-                          gt,
-                          gatingTemplate
-                        ),
-                        error = function(e) {
-                          gs_pop_remove(
-                            x,
-                            r
-                          )
-                        }
-                      )
-                    }
-                  )
-                }
-                # RETURN GATED POSITIVE/NEGATIVE POPULATIONS
-                return(
+              }
+              
+              # GATING -------------------------------------------------------
+              
+              # TODO: WE NEED TO CARRY INFORMATIVE GROUP NAMES 
+              
+              # MANUAL GATING - BYPASS GATE EDITING
+              if(grepl("draw", gate)) {
+                # GATE NEGATIVE POPULATION
+                neg_gt <- cyto_func_call(
+                  "cyto_gate_draw",
                   list(
-                    "-" = if(!is.null(neg_gt)) {
-                      cyto_gate_apply(
-                        pos_events,
-                        neg_gt
-                      )[[1]][[1]] # LIST OF POPULATIONS PER GATE
-                    } else {
-                      cyto_gate_apply(
-                        neg_events,
-                        neg_gt
-                      )[[1]][[1]] # LIST OF POPULATIONS PER GATE
+                    pop[length(pop)],
+                    "alias" = pops[1],
+                    "channels" = peak,
+                    "type" = "interval",
+                    "gate" = if(!.all_na(gates)) {
+                      gates[[1]]
+                    } else{
+                      NA
                     },
-                    "+" = cyto_gate_apply(
-                      pos_events,
-                      pos_gt
-                    )[[1]][[1]] # LIST OF POPULATIONS PER GATE
+                    "plot" = FALSE
                   )
-                )
-              }
-            ),
-            names = names(cs_list[[q]])
-          )
-          # STORE GATED POPULATIONS IN CS_LIST
-          cs_list[[q]] <<- pops
-          # COMPUTE SPILLOVER COEFFICIENTS PER CHANNEL
-          sp <- do.call(
-            "rbind",
-            lapply(
-              names(pops), 
-              function(w){
-                # TODO: QUANTILE RESTRICTION?
-                # COMPUTE NEGATIVE STATS
-                neg_stats <- cyto_apply(
-                  pops[[w]][["-"]],
-                  channels = channels,
-                  FUN = "cyto_stat_median",
-                  input = "matrix",
-                  trans = axes_trans,
-                  inverse = TRUE,
-                  copy = TRUE,
-                  simplify = FALSE
-                )[[1]]
-                # COMPUTE POSITIVE STATS
-                pos_stats <- cyto_apply(
-                  pops[[w]][["+"]],
-                  channels = channels,
-                  FUN = "cyto_stat_median",
-                  input = "matrix",
-                  trans = axes_trans,
-                  inverse = TRUE,
-                  copy = TRUE,
-                  simplify = FALSE
-                )[[1]]
-                # SUBTRACT BACKGROUND
-                coef <- pos_stats - neg_stats
-                # NORMALISE
-                return(as.numeric(coef/coef[w]))
-              }
-            )
-          )
-          rownames(sp) <- names(pops)
-          colnames(sp) <- channels
-          return(sp)
-        }
-      ),
-      names = names(cs_list)
-    )
-    
-    # SPILLOVER MATRIX - SINGLE GROUP
-    if(length(spill) == 1) {
-      spill <- spill[[1]]
-    # SPILLOVER MATRIX - MULTIPLE GROUPS - DUPLICATE CHANNELS?
-    } else {
-      spill <- do.call(
-        "rbind",
-        lapply(
-          pd$channel[!grepl("Unstained", pd$channel, ignore.case = TRUE)],
-          function(z) {
-            # SPILLOVER COEFICIENTS FOR CHANNEL
-            sp <- list()
-            lapply(
-              spill,
-              function(q) {
-                if(z %in% rownames(q)) {
-                  sp <<- c(
-                    sp, 
-                    list(q[match_ind(z, rownames(q)), , drop = FALSE])
+                )[[1]][[1]]
+                neg_gt@filterId <- pops[1]
+                # GATE POSITIVE POPULATION
+                pos_gt <- cyto_func_call(
+                  "cyto_gate_draw",
+                  list(
+                    pop[1],
+                    "alias" = pops[2],
+                    "channels" = peak,
+                    "type" = "interval",
+                    "gate" = if(!.all_na(gates)) {
+                      gates[[2]]
+                    } else{
+                      NA
+                    },
+                    "plot" = FALSE
                   )
-                }
-              }
-            )
-            # DUPLICATE COEFFICIENTS FOR CHANNEL
-            if(length(sp) > 1) {
-              sp <- sp[[
-                which.max(
-                  LAPPLY(sp, "rowSums")
-                )
-              ]]
-            } else {
-              sp <- sp[[1]]
-            }
-            return(sp)
-          }
-        )
-      )
-    }
-    
-    # HYBRID METHOD - SPILLOVER REFINEMENT
-    if(.grepl("^h", type, ignore.case = TRUE)) {
-      
-      # SUBSAMPLING THEN AUTOSPILL
-      if(!unmix) {
-        message(
-          "Computing the spillover matrix using the hybrid method... \n"
-        )
-        message(
-          paste0(
-            "C. B. Bagwell & E. G. Adams (1993). Fluorescence spectral ",
-            "overlap compensation for any number of flow cytometry parameters. in:",
-            " Annals of the New York Academy of Sciences, 677:167-184.", "\n"
-          )
-        )
-        message(
-          paste0(
-            "Roca et al. (2021). AutoSpill is a principled framework that ",
-            "simplifies the analysis of multichromatic flow cytometry data. Nature",
-            " Communications 12(2890)."
-          )
-        )
-      }
-      # RESTRICT EACH CONTROL TO HAVE SAME COUNTS FOR NEGATIVE & POSITIVE
-      cs_list <- structure(
-        lapply(
-          cs_list,
-          function(grp) {
-            structure(
-              lapply(
-                grp,
-                function(dye) {
-                  # COMPUTE MINIMUM COUNTS
-                  min_count <- min(
-                    c(
-                      nrow(dye[["-"]][[1]]),
-                      nrow(dye[["+"]][[1]])
-                    )
-                  )
-                  # COUNTS ARE ALREADY THE SAME
-                  if(events == min_count) {
-                    return(dye)
-                  }
-                  # DOWNSAMPLING REQUIRED
-                  return(
+                )[[1]][[1]]
+                pos_gt@filterId <- pops[2]
+                gates <- filters(
+                  structure(
                     list(
-                      "-" = cyto_sample(
-                        dye[["-"]],
-                        events = min_count
+                      neg_gt,
+                      pos_gt
+                    ),
+                    names = pops
+                  )
+                )
+                # AUTOMATED GATING REQUIRED
+              } else {
+                gate <- "auto"
+              }
+              
+              # AUTOMATED GATING
+              if(gate == "auto") {
+                gates <- watershed_1d(
+                  pop[[1]],
+                  x_control = if(length(pop) == 2) {
+                    pop[[2]]
+                  } else {
+                    NULL
+                  },
+                  channel = peak,
+                  peak = TRUE
+                )
+                gates <- gates[c(1, length(gates))]
+                names(gates) <- pops
+                # NOTE: STATS ARE DISPLAYED FOR STAINED CONTROL DATA - ONLY
+                # NOTE: ONLY NEW GATES ARE DISPLAYED
+                do.call(
+                  "cyto_plot",
+                  c(
+                    list(
+                      "x" = pop,
+                      "channels" = peak,
+                      "merge_by" = "name",
+                      "overlay" = NA,
+                      "gate" = gates,
+                      "title" = paste0(
+                        cyto_names(cyto)[z],
+                        "\n",
+                        parent
                       ),
-                      "+" = cyto_sample(
-                        dye[["+"]],
-                        events = min_count
-                      )
+                      "axes_limits" = "data",
+                      "axes_trans" = axes_trans,
+                      "legend" = FALSE,
+                      hist_stack = 0,
+                      hist_layers = 2,
+                      label_text = c(pops, NA, NA),
+                      label_stat = c("percent", "percent", NA, NA)
+                    ),
+                    args
+                  )
+                )
+              }
+              
+              # STORE GATES --------------------------------------------------
+              
+              # GATES PER CONTROL
+              gate_list[[cyto_names(cyto)[z]]] <<- gates
+              
+              # GATE EDIT CHECK
+              gate_edit[[cyto_names(cyto)[z]]] <<- structure(
+                c(
+                  identical(neg_gt, gates[[1]]),
+                  identical(pos_gt, gates[[2]])
+                ),
+                names = pops
+              )
+              
+              # APPLY GATES --------------------------------------------------
+              
+              # RETURN GATED POPULATIONS - CURRENT SCALE
+              cs <- cytoset(
+                list(
+                  "+" = cyto_gate_apply(
+                    pop[1],
+                    gate = gates[[2]]
+                  )[[1]][[1]][[1]],
+                  "-" = cyto_gate_apply(
+                    pop[length(pop)],
+                    gate = gates[[1]]
+                  )[[1]][[1]][[1]]
+                )
+              )
+              # UPDATE METADATA
+              pData(cs) <- cbind(
+                pData(cs),
+                pd[
+                  c(z, z),
+                  c("group", "parent","channel","marker","label", "select"),
+                  drop = FALSE
+                ]
+              )
+              return(cs)
+            }
+          )
+          gate_list <<- gate_list
+          return(pops)
+        }
+      )
+    )
+    # DROP EMPTY GROUPS
+    pops <- pops[!sapply(pops, "is.null")]
+  # NO GATING REQUIRED
+  } else {
+    unst_idx <- grep(
+      "Unstained",
+      pData(x)$channel,
+      ignore.case = TRUE
+    )
+    idx <- seq_along(x)[-unst_idx]
+    idx <- idx[
+      sapply(
+        idx, 
+        function(id){
+          pData(x)$select[id] %in% "TRUE"
+        }
+      )
+    ]
+    names(idx) <- cyto_names(x)[idx]
+    pops <- lapply(
+      idx,
+      function(id) {
+        cs <- cyto_data_extract(
+          x[id],
+          parent = pData(x)$parent[id],
+          channels = channels,
+          format = "cytoset",
+          inverse = FALSE,
+          copy = TRUE
+        )[[1]]
+        return(cs)
+      }
+    )
+  }
+  
+  # IDENTIFY BEST STAINED CONTROL PER DETECTOR - HIGHEST POSITIVE MEDFI
+  if(!unmix) {
+    cnt <- table(
+      pd$channel[
+        !pd$channel %in% c(NA, "", "NA", "Unstained") &
+        pd$select
+      ]
+    )
+    if(any(cnt > 1)) {
+      message(
+        "Identifying the best control for each dye..."
+      )
+      # NOTE: FOR UNGATED DATA - MEDIAN OF WHOLE FILE IS USED
+      # DETECTORS WITH DUPLICATE CONTROLS
+      detectors <- names(cnt)[cnt > 0]
+      # CONTROLS TO REMOVE
+      pops_rm <- LAPPLY(
+        detectors,
+        function(detector) {
+          # LOCATE CONTROLS FOR THE SAME DETECTOR
+          idx <- cyto_names(x)[
+            which(
+              pd$channel %in% detector
+            )
+          ]
+          # PEAK DETECTOR
+          peak <- pd$channel[
+            match(idx[1], cyto_names(x))
+          ]
+          # COMPUTE MEDIAN OF POSITIVE POPULATION
+          idx[
+            !which.max(
+              sapply(
+                idx,
+                function(id) {
+                  median(
+                    cyto_exprs(
+                      pops[[id]][[1]],
+                      channels = peak
                     )
                   )
                 }
-              ),
-              names = names(grp)
+              )
             )
-
-          }
-        ),
-        names = names(cs_list)
+          ]
+        }
       )
-      # REFINE SPILLOVER MATRIX
-      spill <- .cyto_asp_spill_refine(
-        cs_list,
-        spill = list(coef = spill),
-        trans = axes_trans,
-        channels = channels,
-        iter = iter,
-        trim = 0 # USE MEDIANS OF NEGATIVE & POSITIVE POPULATIONS
-      )
+      # DROP POOR QUALITY CONTROLS
+      pops <- pops[-pops_rm]
     }
-    
-  # AUTOSPILL - ROCA METHOD  
-  } else {
-    # MESSAGE REFERENCE
-    if(!unmix) {
-      message(
-        "Computing spillover matrix using the Roca et al. (2021) method... \n"
+  }
+
+  # UPDATE SAMPLE SELECTION
+  pData(x)$select[match(names(pops), cyto_names(x))] <- "TRUE"
+  
+  # TODO: GH_POP_SET_GATE() + RECOMPUTE()
+  # TODO: MANUAL GATINGTEMPLATE ENTRY
+  
+  # TODO: FOR SPEED WE COULD MODIFY GATES IN PLACE THEN REGENERATE GATINGTEMPLATE
+  # STORE GATES IN GATINGSET & GATINGTEMPLATE
+  if(cyto_class(x, "GatingSet") & !.all_na(gate)) {
+    message(
+      "Adding gates to GatingSet and gatingTemplate..."
+    )
+    # FOR EACH MARKER DYE COMBO PREPARE GATES FOR ALL SAMPLES ON EACH PARENT
+    rm_idx <- which(
+      pd$channel %in% c("Unstained", "unstained", "NA", NA, "") |
+        !pd$select
+    )
+    # PREPARE GATE PREFIX
+    nms <- paste0(
+      "<",
+      pd$marker,
+      "> ",
+      pd$label
+    )
+    # REPLACE ILLEGAL CHARACTERS
+    nms <- gsub(
+      "[\\|\\&|\\:|\\,|\\/]",
+      "-",
+      nms
+    )
+    # UPDATE GATES IN GATINGSET & GATINGTEMPLATE
+    lapply(
+      unique(nms[-rm_idx]),
+      function(nm) {
+        # GET SAMPLE NAMES WITH MATCHING MARKER & LABEL
+        ids <- cyto_names(x)[match(nm, nms)]
+        # CREATE A GATE TEMPLATE
+        gate <- structure(
+          rep(list(NULL), length(x)),
+          names = cyto_names(x)
+        )
+        # INHERIT GATES FOR GATED SAMPLES
+        gate[ids] <- gate_list[ids]
+        # USE SELECTED CONTROL GATES FOR OTHER CONTROLS
+        if(length(ids) < length(x)) {
+          # ONLY UPDATE SAMPLES WITHOUT GATES
+          drop_idx <- match(ids, names(gate))
+          # SELECT FIRST CONTROL COPY GATES TO OTHER SAMPLES
+          id <- names(gate_list)[match(ids, names(gate_list))][1]
+          # COPY GATES TO OTHER CONTROLS
+          gate[-drop_idx] <- structure(
+            rep(
+              list(gate_list[[id]]),
+              length(x) - length(ids)
+            ),
+            names = names(gate)[-drop_idx]
+          )
+        }
+        # NAMES OF GATED POPULATIONS
+        pops <- paste0(nm, c("-", "+"))
+        names(pops) <- pops  # IMPORTANT FOR GATES
+        parent <- pd$parent[match(ids, cyto_names(x))][1]
+        # GATE ALREADY EXISTS
+        if(any(
+          sapply(paste0(parent, "/", pops), function(w){
+            w <- gsub("\\-", "\\\\-", w)
+            w <- gsub("\\+", "\\\\+", w)
+          any(grepl(w, nodes))
+        }))) {
+          cyto_gate_remove(
+            x,
+            parent = parent,
+            alias = pops,
+            gatingTemplate = gatingTemplate
+          )
+        }
+        # IMPORT GATINGTEMPLATE
+        if(!is.null(gatingTemplate)) {
+          gt <- cyto_gatingTemplate_read(
+            gatingTemplate,
+            data.table = TRUE
+          )
+        } else {
+          gt <- NULL
+        }
+        # ADD GATES TO GATINGSET & GATINGTEMPLATE
+        lapply(
+          pops,
+          function(pop) {
+            gt <<- rbind(
+              gt,
+              .suppress_all_messages(
+                gs_add_gating_method(
+                  gs = x,
+                  alias = pop,
+                  parent = parent,
+                  pop = "+",
+                  dims = parameters(gate[[1]][[1]]),
+                  gating_method = "cyto_gate_draw",
+                  gating_args = list(
+                    "gate" = filters(
+                      lapply(
+                        gate,
+                        `[[`,
+                        gsub("\\\\", "", pop)
+                      )
+                    ),
+                    "openCyto.minEvents" = -1
+                  ),
+                  groupBy = NA,
+                  collapseDataForGating = TRUE,
+                  preprocessing_method = "pp_cyto_gate_draw"
+                )
+              )
+            )
+          }
+        )
+        # UPDATE GATING
+        recompute(gs)
+        # WRITE UPDATED GATINGTEMPLATE - WRITING ERROR - SYNC GS
+        if(!is.null(gatingTemplate)) {
+          cyto_gatingTemplate_write(
+            gt,
+            gatingTemplate
+          )
+        }
+      }
+    )
+  }
+  
+  # BAGWELL SPILLOVER
+  if(type == "Bagwell") {
+    message(
+      paste0(
+        "C. B. Bagwell & E. G. Adams (1993). Fluorescence spectral ",
+        "overlap compensation for any number of flow cytometry parameters.",
+        " in: Annals of the New York Academy of Sciences, 677:167-184.", 
+        "\n"
       )
+    )
+    # COMPUTE MEDFI OF NEGATIVE & POSITIVE POPULATIONS
+    spill <- do.call(
+      "rbind",
+      lapply(
+        seq_along(pops),
+        function(id) {
+          # PEAK DETECTOR
+          peak <- pData(pops[[id]])$channel[1]
+          # COMPUTE MEDFI
+          medfi <- cyto_apply(
+            pops[[id]],
+            channels = channels,
+            FUN = "cyto_stat_median",
+            round = 4,
+            input = "matrix",
+            trans = axes_trans,
+            inverse = TRUE,
+            copy = TRUE
+          )
+          # SUBTRACT BACKGROUND
+          medfi <- (medfi[1, , drop = FALSE] - medfi[2, , drop = FALSE])
+          rownames(medfi) <- peak
+          # NORMALISE
+          return(
+            medfi/medfi[1, peak]
+          )
+        }
+      )
+    )
+  # AUTOSPILL OR CytoDecode SPILLOVER
+  } else {
+    # GATED DATA - SAMPLE & MERGE UNSTAINED AND STAINED DATA
+    pops <- cytoset(
+      do.call(
+        "c",
+        lapply(
+          pops,
+          function(pop) {
+            # EQUAL SAMPLE SIZE FOR BOTH POPULATIONS
+            if(length(pop) >  1) {
+              cf <- cyto_merge_by(
+                pop,
+                merge_by = "all",
+                format = "cytoframe",
+                events = min(c(events, nrow(pop)[[1]])),
+                overwrite = FALSE
+              )[[1]]
+            # DOUBLE SAMPLE SIZE 
+            } else {
+              cf <- cyto_sample(
+                pop[[1]],
+                events = min(c(2*events, nrow(pop)[[1]]))
+              )
+            }
+            return(cf)
+          }
+        )
+      )
+    )
+    # UPDATE DETAILS
+    pData(pops)[, c(
+      "group",
+      "parent",
+      "channel", 
+      "marker",
+      "label",
+      "select"
+    )] <- 
+      pd[
+        match(cyto_names(pops), cyto_names(x)),
+        c(
+          "group",
+          "parent",
+          "channel", 
+          "marker",
+          "label",
+          "select"
+        )
+      ]
+    # AUTOSPILL & CytoDecode REQUIRE LINEAR DATA
+    pops <- .suppress_all_messages(
+      cyto_transform(
+        pops,
+        trans = axes_trans,
+        inverse = TRUE,
+        plot = FALSE
+      )
+    )
+    # AUTOSPILL
+    if(type %in% "Roca") {
+      # MESSAGE REFERENCE
       message(
         paste0(
           "Roca et al. (2021). AutoSpill is a principled framework that ",
@@ -1030,100 +1254,163 @@ cyto_spillover_compute <- function(x,
           " Communications 12(2890)."
         )
       )
-    }
-    # DROP UNSTAINED CONTROLS
-    if(any(.grepl("Unstained", pd$channel, ignore.case = TRUE))) {
-      x <- cyto_select(
-        x,
-        channel = "Unstained",
-        exclude = TRUE,
-        exact = FALSE
+      # NOTE: PD$CHANNEL REQUIRED
+      # REFINE SPILLOVER MATRIX
+      if(unmix) {
+        spill <- do.call(
+          "rbind",
+          lapply(
+            seq_along(pops),
+            function(id) {
+              .cyto_asp_spill(
+                pops,
+                trans = axes_trans,
+                channels = channels,
+                model = model,
+                max_iter = max_iter,
+                trim = trim,
+                unmix = unmix
+              )
+            }
+          )
+        )
+      } else {
+        spill <- .cyto_asp_spill(
+          pops,
+          trans = axes_trans,
+          channels = channels,
+          model = model,
+          max_iter = max_iter,
+          trim = trim,
+          unmix = unmix
+        )
+      }
+    # CytoDecode
+    } else {
+      # PROGRESS BAR
+      pb <- cyto_progress(
+        label = "CytoDecode",
+        total = length(pops),
+        clear = FALSE
       )
-    }
-    # EXPERIMENT DETAILS
-    pd <- cyto_details(x)
-    # EXTRACT DATA FROM BEST CONTROLS
-    nms <- c()
-    cs <- cytoset(
-      structure(
+      spill <- do.call(
+        "rbind",
         lapply(
-          unique(pd$channel),
-          function(z) {
-            # FIND BEST CONTROL PER CHANNEL
-            ind <- which(pd$channel == z)
-            # MULTIPLE SINGLE COLOUR CONTROLS - MEDFI
-            if(length(ind) > 1) {
-              # COMPUTE MEDFI IN CHANNEL - PARENT
-              medFI <- LAPPLY(
-                ind,
-                function(i) {
-                  cyto_apply(
-                    x[i],
-                    parent = pd$parent[i],
-                    FUN = "cyto_stat_median",
-                    channels = z,
-                    input = "matrix",
-                    trans = axes_trans,
+          seq_along(pops),
+          function(id) {
+            x_chan <- pData(pops)$channel[id]
+            coef <- sapply(
+              channels,
+              function(y_chan) {
+                # Y = X
+                if(x_chan %in% y_chan) {
+                  return(1)
+                  # VWQR
+                } else {
+                  exprs <- cyto_data_extract(
+                    pops[id], 
+                    channels = c(
+                      x_chan,
+                      y_chan
+                    ),
+                    format = "matrix",
+                    markers = TRUE,
                     inverse = TRUE,
-                    copy = TRUE, 
-                    simplify = TRUE
+                    copy = TRUE
+                  )[[1]][[1]]
+                  # OUTLIER REMOVAL
+                  q <- quantile(exprs[, 1], c(trim, 1 - trim))
+                  exprs <- exprs[
+                    exprs[, 1] >= min(q) & exprs[, 1] <= max(q),
+                    ,
+                    drop = FALSE
+                  ]
+                  return(
+                    coefficients(
+                      vwqr_cpp(
+                        data.frame(
+                          "x" = exprs[, 1],
+                          "y" = exprs[, 2]
+                        ),
+                        max_iter = max_iter,
+                        residual_type = resid,
+                        grid_size = grid_size,
+                        tol = tol
+                      )
+                    )[2]
                   )
                 }
-              )
-              ind <- ind[which.max(medFI)]
-            }
-            # EXTRACT DATA
-            nms <<- c(nms, cyto_names(x[ind]))
-            cyto_data_extract(
-              x[ind],
-              parent = pd$parent[ind],
-              format = "cytoframe",
-              channels = channels, # ALL CHANNELS?
-              trans = axes_trans,
-              inverse = TRUE,
-              copy = TRUE,
-              events = events
-            )[[1]][[1]]
+              }
+            )
+            # PROGRESS BAR
+            cyto_progress(pb)
+            # RETURN COEFFICIENTS
+            return(coef)
           }
-        ),
-        names = nms
+        )
       )
-    )
-    # AUTOSPILL - SPILLOVER MATRIX
-    spill <- .cyto_asp_spill(
-      cs,
-      channels = channels,
-      trans = axes_trans, # PASS TRANSFORMERS
-      iter = iter,
-      trim = trim
-    )
+      if(!unmix) {
+        colnames(spill) <- channels
+        rownames(spill) <- pData(pops)$channel
+      } else {
+        colnames(spill) <- channels
+        rownames(spill) <- sapply(
+          seq_along(pops),
+          function(id) {
+            if(is.na(pData(pops)$marker[id])|.empty(pData(pops)$marker[id])) {
+              paste0(
+                "<NA> ",
+                pData(pops)$label[id]
+              )
+            } else {
+              paste0(
+                "<",
+                pData(pops)$marker[id],
+                "> ",
+                pData(pops)$label[id]
+              )
+            }
+          }
+        )
+        spill[spill < 0] <- 0
+      }
+    }
   }
   
-  # FILL SPILLOVER TEMPLATE
-  cols <- channels[channels %in% colnames(spill)]
-  lapply(
-    seq_len(nrow(spill)),
-    function(z) {
-      spill_mat[
-        match(rownames(spill)[z], rownames(spill_mat)), 
-        cols
-      ] <<- spill[z, cols]
-    }
-  )
-  
+  # CREATE SPILLOVER MATRIX
+  if(!unmix) {
+    res <- diag(
+      1,
+      nrow = length(channels),
+      ncol = length(channels)
+    )
+    colnames(res) <- channels
+    rownames(res) <- channels
+    res[match(rownames(spill), rownames(res)), colnames(res)] <-
+      spill[, colnames(res)]
+    diag(res) <- 1
+  # FORMAT UNMIXING MATRIX
+  } else {
+    res <- spill
+  }
+
   # DEFAULT CSV FILENAME
   if (is.null(save_as)) {
     save_as <- cyto_file_name(
       paste0(
         format(
-          Sys.Date(), 
+          Sys.Date(),
           "%d%m%y"
-        ), 
-        "-Spillover-Matrix.csv"
+        ),
+        if(!unmix) {
+          "-Spillover-Matrix.csv"
+        } else {
+          "-Unmixing-Matrix.csv"
+        }
       )
     )
   }
-  
+
   # EXPORT SPILLOVER MATRIX TO CSV FILE
   if(!is.na(save_as)) {
     if (!cyto_class(save_as, "character")) {
@@ -1132,28 +1419,441 @@ cyto_spillover_compute <- function(x,
       )
     }
     write_to_csv(
-      spill_mat, 
+      res,
       save_as,
       row.names = TRUE
     )
   }
-  
+
   # HEATMAP
   if(heatmap) {
-    sp <- spill_mat
-    if(is.null(rownames(sp))) {
-      rownames(sp) <- colnames(sp)
+    if(!unmix) {
+      diag(res) <- NA
     }
-    diag(sp) <- NA
     # CONSTRUCT HEATMAP - USE CYTO_PLOT_HEATMAP?
     heat_map(
-      sp,
+      res,
       cell_col_empty = "black",
       cell_col_scale = .cyto_plot_point_col_scale(),
       title = "Spillover Matrix",
-      cell_text = TRUE
+      cell_text = TRUE,
+      tree_y = if(unmix) {
+        TRUE
+      } else {
+        NULL
+      }
+    )
+    if(!unmix) {
+      diag(res) <- 1
+    }
+  }
+  
+  # RETURN SPILLOVER OR UNMIX
+  return(res)
+  
+}
+
+## WATERSHED -------------------------------------------------------------------
+
+#' Automated gating using watershed algorithm
+#'
+#' @param x a cytoset object.
+#' @param x_control a cytoset object representing background.
+#' @param channel name of the channel or marker to gate.
+#' @param smooth numeric to control the smoothness of the kernel density
+#'   estimate, set to 3 by default.
+#' @param bins number of bins to used for the kernel density estimate, set to
+#'   \code{128} by default.
+#' @param limits numeric limits over which the density is to be estimated, set
+#'   to the range of values in \code{x} by default.
+#' @param bandwidth optional bandwidth for the density estimate.
+#' @param alpha density cutoff as a proportion of the maximum density to
+#'   eliminate small peaks, set to \code{0.05} by default.
+#' @param beta numeric to control the proportion of the x axis to be allocated
+#'   to negative expression values, set to 0.3 by default.
+#' @param peak logical to indicate whether the last gate should have the peak
+#'   density as its lower bound, set to FALSE by default.
+#' @param plot logical to plot the kernel density estimate, density peaks, beta
+#'   and segmentation boundaries, set to FALSE by default.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @return a set of \code{filters} containing \code{rectangleGate} objects to
+#'   segment the specified \code{channel}.
+#'
+#' @export
+watershed_1d <- function(x,
+                         x_control = NULL,
+                         channel, 
+                         smooth = 3,
+                         bins = 128,
+                         limits = c(NA,NA),
+                         bandwidth = NA,
+                         alpha = 0.05,
+                         beta = 0.3,
+                         peak = FALSE,
+                         plot = FALSE,
+                         ...) {
+  
+  # CHANNEL REQUIRED
+  if(missing(channel)) {
+    stop("'Supply the channel to use for gating!")
+  }
+  
+  # CONVERT CHANNELS
+  channel <- cyto_channels_extract(
+    x,
+    channel
+  )
+  
+  # STAINED DATA
+  exprs <- cyto_data_extract(
+    x,
+    channels = channel,
+    format = "matrix",
+    inverse = FALSE,
+    copy = FALSE
+  )[[1]][[1]]
+  
+  # COMPUTE LIMITS
+  rng <- range(exprs)
+  
+  # UNSTAINED DATA
+  if(!is.null(x_control)) {
+    exprs_control <- cyto_data_extract(
+      x_control,
+      channels = channel,
+      format = "matrix",
+      inverse = FALSE,
+      copy = FALSE
+    )[[1]][[1]]
+    # UPDATE LIMITS
+    rng <- range(c(rng, exprs_control[, 1]))
+  }
+  
+  # UPDATE GLOBAL LIMITS
+  limits[is.na(limits)] <- rng[is.na(limits)]
+  
+  # COMPUTE BETA
+  if(!is.null(x_control)) {
+    neg_gate <- .watershed(
+      exprs_control,
+      smooth = smooth,
+      bins = bins,
+      limits = limits,
+      bandwidth = bandwidth,
+      alpha = alpha,
+      beta = NA,
+      plot = plot,
+      ...
+    )
+    # GATE MAIN PEAK
+    neg_gate <- neg_gate[which.max(sapply(neg_gate, `[[`, "peak"))]
+    # GET RANGE OF UNSTAINED - LOWEST GATE ONLY
+    rng <- neg_gate[[1]][["range"]]
+    # UPDATE BETA 
+    beta <- min(rng) + 0.95 * (max(rng) - min(rng))
+    # MAP BETA TO GLOABL LIMITS
+    beta <- (beta - min(limits))/(max(limits) - min(limits))
+  }
+
+  # WATERSHED SEGMENTATION
+  gate <- .watershed(
+    exprs,
+    smooth = smooth,
+    bins = bins,
+    limits = limits,
+    bandwidth = bandwidth,
+    alpha = alpha,
+    beta = beta,
+    plot = plot,
+    ...
+  )
+  
+  # RESTRICT LAST GATE TO PEAK
+  if(peak) {
+    gate[[length(gate)]] <- list(
+      "range" = c(
+        gate[[length(gate)]][["peak"]],
+        max(gate[[length(gate)]][["range"]])
+      ),
+      "peak" = gate[[length(gate)]][["peak"]]
     )
   }
   
-  return(spill_mat)
+  # LOCATE RANGES ABOVE BACKGROUND GATE
+  if(!is.null(x_control)) {
+    gate <- c(
+      neg_gate,
+      gate[
+        which(
+          sapply(
+            lapply(
+              gate,
+              `[[`,
+              "range"
+            ),
+            function(z) {
+              !(min(neg_gate[[1]][["range"]]) <= max(z) && 
+                min(z) <= max(neg_gate[[1]][["range"]]))
+            }
+          )
+          
+        )
+      ]
+    )
+  }
+
+  # CONSTRUCT GATES
+  gate <- filters(
+    lapply(
+      seq_along(gate),
+      function(id) {
+        rectangleGate(
+          structure(
+            list(
+              gate[[id]][["range"]]
+            ),
+            names = channel
+          ),
+          filterId = paste0(
+            channel,
+            "-",
+            id
+          )
+        )
+      }
+    )
+  )
+  
+  # GATES
+  return(gate)
+  
+}
+
+#' Watershed algorithm
+#'
+#' Computes watershed segmentation on a kernel density estimate by setting
+#' values with density less than a threshold to zero.
+#'
+#' @param x a numeric vector or density object.
+#' @param smooth numeric to control the smoothness of the kernel density
+#'   estimate, set to 3 by default.
+#' @param bins number of bins to use for the density estimate.
+#' @param limits numeric limits over which the density is to be estimated, set
+#'   to the range of values in \code{x} by default.
+#' @param bandwidth optional bandwidth for the density estimate.
+#' @param alpha density cutoff as a proportion of the maximum density to
+#'   eliminate small peaks, set to \code{0.05} by default. Bins with density
+#'   below this threshold are set to zero.
+#' @param beta numeric to control the proportion of the x axis to be allocated
+#'   to negative expression values, set to 0.3 by default.
+#' @param plot logical indicating whether plots should be shown to troubleshoot
+#'   the computed watershed segmentation, set to FALSE by default.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @importFrom graphics plot abline lines legend
+#'
+#' @noRd
+.watershed <- function(x,
+                       smooth = 3,
+                       bins = 128,
+                       limits = c(NA, NA),
+                       bandwidth = NA,
+                       alpha = 0.05,
+                       beta = 0.3,
+                       plot = TRUE,
+                       ...) {
+  
+  # COMPUTE KERNEL DENSITY ESTIMATE IF NOT PROVIDED
+  if (!inherits(x, "density")) {
+    x <- cyto_stat_density(
+      x,
+      smooth = smooth,
+      bins = bins,
+      limits = limits,
+      bandwidth = bandwidth,
+      ...
+    )[[1]]
+  }
+  
+  # STORE ORIGINAL DENSITY AND INITIALIZE MODIFIED DENSITY
+  y_original <- x$y
+  y_modified <- y_original
+  
+  # COMPUTE THE DENSITY THRESHOLD BASED ON ALPHA
+  density_threshold <- alpha * (max(y_original) - min(y_original)) + min(y_original)
+  
+  # IDENTIFY BINS WITH DENSITY BELOW THE THRESHOLD
+  below_threshold_indices <- which(y_original < density_threshold)
+  
+  # SET DENSITY FOR BINS BELOW THE THRESHOLD TO ZERO
+  if (length(below_threshold_indices) > 0) {
+    y_modified[below_threshold_indices] <- 0
+  }
+  
+  # UPDATE THE DENSITY OBJECT WITH THE THRESHOLDED VALUES
+  x$y <- y_modified
+  
+  #--- WATERSHED ALGORITHM ---#
+  
+  n_bins <- length(x$x)
+  bin_width <- x$x[2] - x$x[1]
+  
+  # COMPUTE BETA CUTOFF FOR NEGATIVE POPULATION
+  beta_cutoff <- (min(x$x) - 0.5 * bin_width) +
+    beta * ((max(x$x) + 0.5 * bin_width) - (min(x$x) - 0.5 * bin_width))
+  
+  # INITIALIZE CLUSTER LABELS AND PEAK STORAGE
+  cluster_count <- 0
+  cluster_labels <- rep(0, n_bins)
+  peaks <- c()
+  
+  # ASSIGN LABELS TO BINS ORDERED BY DECREASING DENSITY
+  sorted_indices <- order(x$y, decreasing = TRUE)
+  for (i in sorted_indices) {
+    
+    # DO NOT ASSIGN LABELS TO ZERO-DENSITY BINS
+    if (x$y[i] == 0) {
+      next
+    }
+    
+    # SKIP ALREADY-LABELED BINS
+    if (cluster_labels[i] != 0) {
+      next
+    }
+    
+    # CHECK NEIGHBORS FOR EXISTING LABELS
+    left_label <- if (i > 1) cluster_labels[i - 1] else 0
+    right_label <- if (i < n_bins) cluster_labels[i + 1] else 0
+    
+    if (left_label != 0) {
+      cluster_labels[i] <- left_label
+    } else if (right_label != 0) {
+      cluster_labels[i] <- right_label
+    } else {
+      # CREATE A NEW CLUSTER FOR A NEW PEAK
+      cluster_count <- cluster_count + 1
+      cluster_labels[i] <- cluster_count
+      peaks <- c(peaks, x$x[i])
+    }
+  }
+  
+  # SPLIT X VALUES BY THEIR ASSIGNED CLUSTER LABEL
+  breaks <- split(x$x, cluster_labels)
+  
+  # REMOVE THE GROUP OF UNLABELED (ZERO-DENSITY) BINS
+  breaks <- breaks[names(breaks) != "0"]
+  
+  # CALCULATE THE RANGE AND PEAK FOR EACH CLUSTER
+  cuts <- lapply(seq_along(breaks), function(j) {
+    current_label <- as.integer(names(breaks)[j])
+    peak_index_in_labels <- which(
+      cluster_labels == current_label & x$x %in% peaks
+    )
+    rng <- range(breaks[[j]])
+    rng[1] <- rng[1] - 0.5 * bin_width
+    rng[2] <- rng[2] + 0.5 * bin_width
+    list(range = rng, peak = x$x[peak_index_in_labels[1]])
+  })
+  
+  # IDENTIFY GATES THAT FALL BELOW THE BETA CUTOFF
+  beta_indices <- which(
+    sapply(
+      cuts,
+      function(cut) {
+        any(cut$range < beta_cutoff)
+      }
+    )
+  )
+  
+  # MERGE GATES BELOW THE BETA CUTOFF INTO A SINGLE NEGATIVE GATE
+  if (length(beta_indices) > 1) {
+    merged_range <- range(unlist(sapply(cuts[beta_indices], `[[`, "range")))
+    merged_peak <- max(unlist(sapply(cuts[beta_indices], `[[`, "peak")))
+    cuts <- c(
+      list(list("range" = merged_range, "peak" = merged_peak)),
+      cuts[-beta_indices]
+    )
+  }
+  
+  # ORDER GATES BY THEIR PEAK LOCATION
+  cuts <- cuts[order(sapply(cuts, `[[`, "peak"))]
+  names(cuts) <- NULL
+  
+  # IF ONLY ONE GATE IS FOUND, SPLIT IT AT THE BETA CUTOFF
+  if (length(cuts) == 1 && !is.na(beta_cutoff)) {
+    cuts <- list(
+      list(
+        "range" = c(min(x$x), beta_cutoff),
+        "peak" = x$x[
+          which.max(
+            y_original[x$x >= min(x$x) & x$x < beta_cutoff]
+          )
+        ]
+      ),
+      list(
+        "range" = c(beta_cutoff, max(x$x)),
+        "peak" = x$x[
+          which.max(y_original[x$x >= beta_cutoff & x$x <= max(x$x)])
+        ]
+      )
+    )
+  }
+  
+  # VISUALIZE RESULTS IF REQUESTED
+  if (plot) {
+    plot(
+      x$x,
+      y_original,
+      main = "Watershed Segmentation",
+      type = "l",
+      col = "gray50",
+      xlab = "x",
+      ylab = "Density"
+    )
+    # THRESHOLDED DENSITY
+    lines(
+      x$x,
+      y_modified,
+      col = "blue",
+      lwd = 1.5
+    )
+    # GATE BOUNDARIES
+    abline(
+      v = unlist(sapply(cuts, `[[`, "range")),
+      col = "red"
+    )
+    # PEAKS
+    abline(
+      v = sapply(cuts, `[[`, "peak"),
+      col = "green",
+      lty = 2
+    )
+    # BETA CUTOFF
+    abline(
+      v = beta_cutoff,
+      col = "magenta",
+      lty = 3,
+      lwd = 2
+    )
+    # LEGEND
+    legend(
+      "topright",
+      legend = c(
+        "Original Density",
+        "Thresholded Density",
+        "Gate Boundaries",
+        "Peaks",
+        "Beta Cutoff"
+      ),
+      col = c("gray50", "blue", "red", "green", "magenta"),
+      lty = c(1, 1, 1, 2, 3),
+      lwd = c(1, 1.5, 1, 1, 2),
+      bty = "n"
+    )
+  }
+  
+  return(cuts)
 }

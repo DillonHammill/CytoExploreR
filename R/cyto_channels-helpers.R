@@ -528,6 +528,53 @@ cyto_fluor_channels <- function(x,
 
 }
 
+## CYTO_UNMIX_CHANNELS ---------------------------------------------------------
+
+#' Extract unmixed channels
+#' 
+#' @param x object of class cytoframe, cytoset, GatingHierrachy or GatingSet 
+#' potentially containing unmixed parameters.
+#' 
+#' @return the names of the unmixed parameters or NULL.
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @examples
+#' \dontrun{
+#' cyto_unmix_channels(gs)
+#' }
+#' 
+#' 
+#' @export
+cyto_unmix_channels <- function(x) {
+  
+  # NOTE: CHECK FOR PNTYPE = UNMIXED FLUORESCENCE
+  if(cyto_class(x, c("FlowSet", "cytoset", "GatingSet"), TRUE)) {
+    x <- x[[1]]
+  }
+  kw <- cyto_keyword(x)
+  kw <- unlist(kw[grepl("\\$P[0-9]{1,3}TYPE", names(kw))])
+  kw <- kw[grep("Unmixed_Fluorescence", kw, ignore.case = TRUE)]
+  if(length(kw) == 0) {
+    return(NULL)
+  }
+  # EXTRACT UNMIXED PARAMETERS
+  return(
+    unname(
+      unlist(
+        cyto_keyword(
+          x
+        )[gsub(
+          "TYPE",
+          "N", 
+          names(kw)
+        )]
+      )
+    )
+  )
+  
+}
+
 ## CYTO_CHANNELS_EXTRACT -------------------------------------------------------
 
 #' Extract channels associated with certain markers
@@ -979,36 +1026,27 @@ cyto_channel_select <- function(x){
 
 ## CYTO_CHANNEL_MATCH ----------------------------------------------------------
 
-#' Match each compensation control to a fluorescent channel
+#' Match each single colour control to a fluorescent channel
 #'
 #' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param channels names of the possible channels or markers to be matched to
 #'   each control, set to all area fluorescent parameters by default.
+#' @param peaks logical to indicate whether peak detectors should be
+#'   automatically assigned using \code{cyto_peaks_assign()}, set to FALSE by
+#'   default.
 #' @param file name of a CSV file from which the channel matching information
 #'   should be inherited. If not supplied, \code{cyto_channel_match()} will
-#'   automatically search for a file named \code{"Compensation-Details.csv"} or
+#'   automatically search for a file named \code{"Control-Details.csv"} or
 #'   create interactively create such a file.
 #' @param save_as name of a CSV file to which the channel matching should be
-#'   written for downstream use, set to \code{"Compensation-Details.csv"}
+#'   written for downstream use, set to \code{"Control-Details.csv"}
 #'   prefixed with the date by default. Users can set custom file names here,
-#'   but the file name should contain \code{"Compensation-Details.csv"} in order
+#'   but the file name should contain \code{"Control-Details.csv"} in order
 #'   to be automatically detected by CytoExploreR within
 #'   \code{cyto_spillover_compute()}, \code{cyto_spillover_edit()},
 #'   \code{cyto_spillover_spread()} and \code{cyto_plot_compensation()}.
-#' @param strip logical indicating whether overlapping characters in file names
-#'   should be stripped prior to matching, set to TRUE by default for more
-#'   accurate matching.
-#' @param ignore.case logical indicating whether all case insensitive matches
-#'   should be found, set to TRUE by default.
-#' @param insertions logical indicating whether character insertions are allowed
-#'   when matching the marker/channel combinations to the sample names, set to
-#'   FALSE by default to only allow deletions.
-#' @param label logicla to indicate whether a \code{label} column is required in
-#'   the case of spectral unmxing, set to FALSE by default.
-#' @param ... additional arguments passed to \code{link{grep}} when performing
-#'   character matching.
 #'
 #' @return a data.frame written to a CSV file containing information matching
 #'   each file name to a channel. This channel matching information is also
@@ -1016,6 +1054,8 @@ cyto_channel_select <- function(x){
 #'   where it can be easily accessed by CytoExploreR downstream.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @seealso \code{\link{cyto_peaks_assign}}
 #'
 #' @examples
 #' library(CytoExploreRData)
@@ -1029,15 +1069,10 @@ cyto_channel_select <- function(x){
 #' @export
 cyto_channel_match <- function(x,
                                channels = NULL,
+                               peaks = FALSE,
                                file = NULL,
                                save_as = NULL,
-                               strip = TRUE,
-                               ignore.case = TRUE,
-                               insertions = FALSE,
-                               label = FALSE,
                                ...) {
-  
-  # NOTE: MARKER COLUMN IS OPTIONAL - INCLUDED FOR UNMIXING
   
   # CYTOFRAMES NOT SUPPORTED
   if(cyto_class(x, "flowFrame")) {
@@ -1110,21 +1145,14 @@ cyto_channel_match <- function(x,
             Sys.Date(), 
             "%d%m%y"
           ), 
-          if(!label) {
-            "-Compensation-Details.csv"
-          } else {
-            "-Unmixing-Details.csv"
-          }
+          "-Control-Details.csv"
         )
       )
     }
   }
   
   # ADD MISSING PARAMETERS
-  vars <- c("group", "parent", "channel", "marker")
-  if(label) {
-    vars <- c(vars, "label")
-  }
+  vars <- c("group", "parent", "channel", "marker", "label", "select")
   vars <- vars[!vars %in% colnames(pd)]
   
   # PREPARE MISSING VARIABLES
@@ -1150,6 +1178,8 @@ cyto_channel_match <- function(x,
   
   # GROUPS/PARENTS -------------------------------------------------------------
   
+  # TODO: IMPROVE PARENT ASSIGNMENT SO PEAK DTECTOR ASSIGNMENTS ARE CORRECT
+  
   # GROUPS/PARENTS IGNORED FOR CYTOSETS
   if(cyto_class(x, "GatingSet")) {
     # SAMPLES WITH PARENTS MISSING
@@ -1166,7 +1196,7 @@ cyto_channel_match <- function(x,
         x[ind],
         parent = pops,
         channels = channels[1],
-        input = "matrix",
+        input = "cytoset",
         FUN = "cyto_stat_count",
         copy = FALSE
       )
@@ -1192,311 +1222,32 @@ cyto_channel_match <- function(x,
   
   # CHANNELS -------------------------------------------------------------------
   
-  # MISSING CHANNEL ASSIGNMENTS
-  ind <- which(is.na(pd$channel))
-  ind <- ind[ind %in% x_ind]
+  # LOCATE UNSTAINED CONTROLS
+  unst_idx <- grep(
+    "Unstained|NIL",
+    cyto_names(x),
+    ignore.case = TRUE
+  )
   
-  # DEFAULT CHANNEL ASSIGNMENTS
-  if(length(ind) > 0) {
-    # NAMES
-    file_names <- rownames(pd)[ind]
-    names(file_names) <- file_names
-    # LOCATE UNSTAINED CONTROL(S)
-    unst_ind <- grep("Unst|NIL", file_names, ignore.case = TRUE)
-    # ANNOTATE UNSTAINED CONTROLS - REMOVE FROM FILE NAMES
-    if(length(unst_ind) > 0) {
-      pd$channel[
-        match(file_names[unst_ind], rownames(pd))
-      ] <- "Unstained"
-      file_names <- file_names[-unst_ind]
-    }
-    # ADDITIONAL FILE NAMES TO MATCH
-    if(length(file_names) > 0) {
-      # REPLACE ABNORMAL CHARACTERS
-      file_names <- gsub(",2f,", "/", file_names, ignore.case = TRUE)
-      # REMOVE WHITESPACE & SPECIAL CHARACTERS
-      file_names <- gsub("[^[:alnum:]]", "", file_names)
-      # STRIP OVERLAPPING CHARACTERS - NO PADDING REQUIRED
-      if(strip) {
-        file_names <- .cyto_string_strip(file_names)
-      }
-      # COMBINE MARKERS & CHANNELS FOR MATCHING - "MARKER CHANNEL"
-      chans <- unlist(
-        lapply(
-          seq_along(channels),
-          function(z) {
-            # CHANNEL
-            channel <- channels[z]
-            # MARKER(S) ASSIGNED
-            if(!is.na(names(channel)) & names(channel) != "NA") {
-              # HANDLE MULTIPLE MARKERS PER CHANNEL
-              markers <- strsplit(names(channel), "\\||\\/")[[1]]
-              # STORE CHANNEL NAME
-              channel <- rep(channel, length.out = length(markers))
-              # APPEND CHANNEL NAME
-              channel <- structure(
-                paste(
-                  markers,
-                  channel
-                ),
-                names = channel
-              )
-            # NO MARKER
-            } else {
-              names(channel) <- channel # STORE CHANNEL NAME 
-            }
-            return(channel)
-          }
-        )
-      )
-      # MATCH FILENAMES TO MARKER/CHANNEL COMBOS
-      file_channel_match <- structure(
-        lapply(
-          seq_along(file_names),
-          function(z) {
-            # SPLIT FILE NAME INTO INDIVIDUAL CHARACTERS
-            file_name_split <- strsplit(file_names[[z]], "")[[1]]
-            # LOOP THROUGH MARKER/CHANNEL COMBOS
-            channel_match_opts <- structure(
-              lapply(
-                seq_along(chans),
-                function(q) {
-                  # SPLIT ALPHNUMERIC CHARACTERS - NO SUFFIX
-                  channel_split <- strsplit(
-                    gsub(
-                      "[^[:alnum:]]",
-                      "",
-                      gsub(
-                        "\\-A$|\\-H$|\\-W$",
-                        "",
-                        chans[q]
-                      ),
-                    ),
-                    ""
-                  )[[1]]
-                  # MATCHES PER CHARACTER
-                  channel_split_match <- structure(
-                    lapply(
-                      channel_split,
-                      function(char) {
-                        grep(
-                          char, 
-                          file_name_split, 
-                          ignore.case = ignore.case, 
-                          ...
-                        )
-                      }
-                    ),
-                    names = channel_split
-                  )
-                  # NUMBER OF CHARACTERS
-                  n <- length(channel_split_match)
-                  # STORE BEST MATCHES PER STARTING CHARACTER
-                  cm <- list()
-                  # LOOP THROUGH CHARACTER MATCHES
-                  for(i in seq_len(n)) {
-                    # BEST MATCH PER STARTING LETTER
-                    m <- c()
-                    # BREAK LOOP - LONGER MATCH IMPOSSIBLE
-                    if(length(cm) > 0) {
-                      if((n-i) < max(
-                        unlist(
-                          lapply(
-                            cm,
-                            function(g) {
-                              length(g[g > 0])
-                            }
-                          )
-                        )
-                      )) {
-                        break()
-                      }
-                    }
-                    # FIRST CHARACTER MUST MATCH
-                    if(length(channel_split_match[[i]])> 0) {
-                      # LOOP THROUGH STARTING CHARACTER OPTIONS
-                      for(v in channel_split_match[[i]]) {
-                        # INITIATE WITH STARTING LETTER
-                        m_new <- structure(
-                          v,
-                          names = names(channel_split_match[i])
-                        )
-                        # DESCEND TREE - SEARCH FOR VALID INDEX
-                        for(q in (i + 1):n) {
-                          if(q <= n) {
-                            # NO MATCH FOUND
-                            if(length(channel_split_match[[q]]) == 0) {
-                              # SPACER
-                              m_new <- c(
-                                m_new,
-                                structure(
-                                  0,
-                                  names = names(channel_split_match[q])
-                                )
-                              )
-                              # MATCHES FOUND
-                            } else {
-                              # MINIMUM INDEX
-                              if(length(m_new) == 0) {
-                                m_new_ind <- 1
-                              } else {
-                                m_new_ind <- max(m_new)
-                              }
-                              # CHECK FOR VALID MATCHES
-                              w <- channel_split_match[[q]][
-                                channel_split_match[[q]] > m_new_ind
-                              ]
-                              # MATCH LOCATED
-                              if(length(w) > 0) {
-                                # NO INSERTIONS
-                                if(!insertions) {
-                                  if(!any(w == m_new_ind + 1)) {
-                                    break()
-                                  } else {
-                                    w <- w[w == m_new_ind + 1][1]
-                                  }
-                                }
-                                # UPDATE M
-                                m_new <- c(
-                                  m_new,
-                                  structure(
-                                    w[1],
-                                    names = names(channel_split_match[q])
-                                  )
-                                )
-                                # NO MATCH FOUND
-                              } else {
-                                # UPDATE M - EMPTY MATCH
-                                m_new <- c(
-                                  m_new,
-                                  structure(
-                                    0,
-                                    names = names(channel_split_match[q])
-                                  )
-                                )
-                              }
-                            }
-                          }
-                        }
-                        # UPDATE M
-                        if(length(m_new[m_new > 0]) > length(m[m > 0])) {
-                          m <- m_new
-                        }
-                      }
-                    }
-                    # UPDATE CM
-                    if(length(m[m > 0]) > 0) {
-                      cm <- c(
-                        cm, 
-                        list(m)
-                      )
-                    }
-                  }
-                  # RETURN LONGEST MATCH
-                  if(length(cm) == 0) {
-                    return(0)
-                  } else {
-                    return(
-                      max(
-                        unlist(
-                          lapply(
-                            cm,
-                            function(p) {
-                              length(p[p>0])
-                            }
-                          )
-                        )
-                      )
-                    )
-                  }
-                }
-              ),
-              names = chans
-            )
-            # TODO: MUST HAVE AT LEAST 2 CONSECUTIVE CHARACTERS FOR A MATCH
-            # UPDATE CHANNEL_MATCH
-            if(sum(unlist(channel_match_opts)) > 0) {
-              ind <- which(
-                channel_match_opts == max(unlist(channel_match_opts))
-              )
-              # MULTIPLE CHANNEL MATCHES - CHOOSE SHORTEST CHANNEL OPTION
-              if(length(ind) > 0) {
-                ind <- ind[which.min(nchar(chans[ind]))]
-                # CANNOT ASSIGN CHANNELS WITH LENGTH - AMBIGUOUS
-                if(length(ind) == 1) {
-                  pd[
-                    match(names(file_names)[z], rownames(pd)),
-                    "channel"
-                  ] <<- names(chans)[ind] # NEED TO STORE ORIGINAL CHANNELS
-                }
-              }
-            }
-          }
-        ),
-        names = file_names
-      )
-    }
+  # SET UNSTAINED CHANNEL
+  pd$channel[unst_idx][pd$channel[unst_idx] %in% c(NA, "NA")] <- "Unstained"
+  
+  # UPDATE METADATA
+  cyto_details(x) <- pd[match(rownames(cyto_details(x)), rownames(pd)), ,]
+  
+  # ASSIGN PEAK DETECTORS
+  if(peaks) {
+    x <- cyto_peaks_assign(
+      x,
+      overwrite = FALSE
+    )
   }
   
-  # TODO: DECIDE QUALITY OF MATCH & SET TO NA OTHERWISE
+  # UPDATE METADATA
+  pd <- cyto_details(x)
   
-  # UNMATCHED CHANNELS
-  ind <- which(is.na(pd$channel))
-  ind <- ind[ind %in% x_ind]
-  
-  # MATCH CHANNELS BY FLUORESCENT INTENSITIES
-  if(length(ind) > 0) {
-    message(
-      paste0(
-        "The following samples could not be matched to a channel by name:",
-        "\n",
-        paste0(
-          pd$name[ind],
-          collapse = "\n"
-        ),
-        "\n",
-        "CytoExploreR will make an educated guess for these samples using ",
-        "the intensities in the fluorescent channels."
-      )
-    )
-    # EXTRACT DATA - CURRENT SCALE
-    cs_list <- structure(
-      lapply(
-        ind,
-        function(z) {
-          cyto_data_extract(
-            x[z],
-            parent = pd$parent[z],
-            format = "cytoset",
-            copy = FALSE
-          )[[1]]
-        }
-      ),
-      names = rownames(pd)[ind]
-    )
-    # COMPUTE STATISTICS
-    chans <- cyto_apply(
-      cs_list,
-      input = "matrix",
-      channels = channels,
-      FUN = function(z) {
-        # DEFAULT CHANNEL
-        res <- channels[1]
-        # QUANTILE
-        if(nrow(z) > 0) {
-          res <- cyto_stat_quantile(
-            z,
-            probs = 0.95
-          )
-          res <- names(res)[which.max(res)]
-        }
-        # MATCHING CHANNEL
-        return(res)
-      },
-      copy = FALSE
-    )
-    pd$channel[ind] <- unlist(chans)
-  }
+  # CONVERT SELECT COLUMN TO LOGICAL FOR RENDERING
+  pd$select <- as.logical(pd$select)
   
   # INTERACTIVE EDITING & EXPORT -----------------------------------------------
   
@@ -1516,7 +1267,8 @@ cyto_channel_match <- function(x,
         } else {
           "root"
         },
-        "channel" = c(unname(channels), "Unstained")
+        "channel" = c(unname(channels), "Unstained"),
+        "select" = c(TRUE, FALSE)
       ),
       quiet = TRUE,
       hide = TRUE,
@@ -1524,6 +1276,9 @@ cyto_channel_match <- function(x,
     )
     rownames(pd) <- rn
   }
+  
+  # SET FALSE OPTIONS FOR SELECT COLUMN
+  pd[is.na(pd[, "select"]), "select"] <- FALSE
   
   # ROWNAMES MISSING IN FILE
   if(is.null(rownames(pd))) {

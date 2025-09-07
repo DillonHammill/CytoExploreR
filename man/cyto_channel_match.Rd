@@ -2,17 +2,14 @@
 % Please edit documentation in R/cyto_channels-helpers.R
 \name{cyto_channel_match}
 \alias{cyto_channel_match}
-\title{Match each compensation control to a fluorescent channel}
+\title{Match each single colour control to a fluorescent channel}
 \usage{
 cyto_channel_match(
   x,
   channels = NULL,
+  peaks = FALSE,
   file = NULL,
   save_as = NULL,
-  strip = TRUE,
-  ignore.case = TRUE,
-  insertions = FALSE,
-  label = FALSE,
   ...
 )
 }
@@ -24,35 +21,22 @@ cyto_channel_match(
 \item{channels}{names of the possible channels or markers to be matched to
 each control, set to all area fluorescent parameters by default.}
 
+\item{peaks}{logical to indicate whether peak detectors should be
+automatically assigned using \code{cyto_peaks_assign()}, set to FALSE by
+default.}
+
 \item{file}{name of a CSV file from which the channel matching information
 should be inherited. If not supplied, \code{cyto_channel_match()} will
-automatically search for a file named \code{"Compensation-Details.csv"} or
+automatically search for a file named \code{"Control-Details.csv"} or
 create interactively create such a file.}
 
 \item{save_as}{name of a CSV file to which the channel matching should be
-written for downstream use, set to \code{"Compensation-Details.csv"}
+written for downstream use, set to \code{"Control-Details.csv"}
 prefixed with the date by default. Users can set custom file names here,
-but the file name should contain \code{"Compensation-Details.csv"} in order
+but the file name should contain \code{"Control-Details.csv"} in order
 to be automatically detected by CytoExploreR within
 \code{cyto_spillover_compute()}, \code{cyto_spillover_edit()},
 \code{cyto_spillover_spread()} and \code{cyto_plot_compensation()}.}
-
-\item{strip}{logical indicating whether overlapping characters in file names
-should be stripped prior to matching, set to TRUE by default for more
-accurate matching.}
-
-\item{ignore.case}{logical indicating whether all case insensitive matches
-should be found, set to TRUE by default.}
-
-\item{insertions}{logical indicating whether character insertions are allowed
-when matching the marker/channel combinations to the sample names, set to
-FALSE by default to only allow deletions.}
-
-\item{label}{logicla to indicate whether a \code{label} column is required in
-the case of spectral unmxing, set to FALSE by default.}
-
-\item{...}{additional arguments passed to \code{link{grep}} when performing
-character matching.}
 }
 \value{
 a data.frame written to a CSV file containing information matching
@@ -61,7 +45,7 @@ a data.frame written to a CSV file containing information matching
   where it can be easily accessed by CytoExploreR downstream.
 }
 \description{
-Match each compensation control to a fluorescent channel
+Match each single colour control to a fluorescent channel
 }
 \examples{
 library(CytoExploreRData)
@@ -72,6 +56,9 @@ gs <- GatingSet(Compensation)
 # Channel matching
 cyto_channel_match(gs)
 
+}
+\seealso{
+\code{\link{cyto_peaks_assign}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

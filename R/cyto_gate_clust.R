@@ -339,7 +339,7 @@ cyto_gate_clust <- function(x,
   # TODO: APPLY GATE TO NEW DATA - RESET ALIAS?
   
   # BYPASS EMPTY CYTOFRAME
-  if(nrow(fr) == 0) {
+  if(cyto_stat_count(fr) == 0) {
     return(
       structure(
         lapply(
@@ -714,7 +714,7 @@ cyto_gate_clust <- function(x,
   }
   
   # IMPUTE MISSING LABELS
-  if(length(gate) != BiocGenerics::nrow(fr)) {
+  if(length(gate) != cyto_stat_count(fr)) {
     gate <- factor(
       cyto_impute(
         train = args$x,
