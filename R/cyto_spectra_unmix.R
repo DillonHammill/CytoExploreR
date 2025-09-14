@@ -219,6 +219,8 @@ cyto_unmix.default <- function(x,
                                save_as = NULL,
                                ...) {
   
+  # TODO: ENFORCE SAVE_AS - AVOID TEMPFILES SO METADATA MATCHES
+  
   # TODO: DEFAULT PARENT IS LEAF NODES OF GATINGSET
   
   # TODO: AUTOFLUORESCENCE IS NOT STORED IN UNMIXING MATRIX
@@ -441,7 +443,7 @@ cyto_unmix.default <- function(x,
                     )
                   }
                   # SPECTRAL UNMIXING
-                  res <- cyto_unmix(
+                  cf <- cyto_unmix(
                     cyto_data_extract(
                       cgs[id],
                       parent = pop,
@@ -496,7 +498,7 @@ cyto_unmix.default <- function(x,
                   # INCREMENT PROGRESS BAR
                   cyto_progress(pb)
                   # RETURN UNMIXED CYTOFRAME
-                  return(res)
+                  return(cf)
                 }
               )
             ),
