@@ -259,8 +259,6 @@
   # RERUN UNTIL PEAK LOCATED - 5 ATTEMPTS
   iter <- 0
   while(any(spill >= 1) & iter < 5) {
-    print("YASS")
-    print(spill)
     # ITERATION
     iter <- iter + 1
     # UPDATED METADATA

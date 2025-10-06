@@ -1086,6 +1086,20 @@ cyto_spillover_compute <- function(x,
       "-",
       nms
     )
+    # IMPORT GATINGTEMPLATE
+    if(!is.null(gatingTemplate)) {
+      gt <- cyto_gatingTemplate_read(
+        gatingTemplate,
+        data.table = TRUE
+      )
+      # GET GATINGTEMPLATE
+      gT <- suppressPrint(
+        gatingTemplate(gatingTemplate)
+      )
+    } else {
+      gt <- NULL
+      gT <- NULL
+    }
     # UPDATE GATES IN GATINGSET & GATINGTEMPLATE
     lapply(
       unique(nms[-rm_idx]),
@@ -1118,20 +1132,6 @@ cyto_spillover_compute <- function(x,
         pops <- paste0(nm, c("-", "+"))
         names(pops) <- pops  # IMPORTANT FOR GATES
         parent <- pd$parent[match(ids, cyto_names(x))][1]
-        # IMPORT GATINGTEMPLATE
-        if(!is.null(gatingTemplate)) {
-          gt <- cyto_gatingTemplate_read(
-            gatingTemplate,
-            data.table = TRUE
-          )
-          # GET GATINGTEMPLATE
-          gT <- suppressPrint(
-            gatingTemplate(gatingTemplate)
-          )
-        } else {
-          gt <- NULL
-          gT <- NULL
-        }
         # UPDATE POPULATIONS IN GATINGSET & GATINGTEMPLATE
         for(pop in pops) {
           pop_sub <- gsub(
@@ -1555,7 +1555,6 @@ cyto_spillover_compute <- function(x,
     }
     # FORMAT SPECTRA
     if(unmix) {
-      print(spill)
       colnames(spill) <- channels
       rownames(spill) <- sapply(
         seq_along(pops),
