@@ -25,6 +25,7 @@ cyto_spillover_compute(
   grid_size = 100,
   resid = "both",
   details = NULL,
+  rerun = FALSE,
   ...
 )
 }
@@ -51,8 +52,8 @@ default.}
 
 \item{gate}{indicates whether to \code{draw} or use \code{auto} gating
 methods to gate the negative and positive populations for each control.
-Gating is optional for \code{"Autospill"} and \code{"CytoDecode"} methods but
-is recommended to achieve better results and ensure compatibility with
+Gating is optional for \code{"Autospill"} and \code{"CytoDecode"} methods
+but is recommended to achieve better results and ensure compatibility with
 \code{cyto_panel_design()}. Set to \code{"draw"} by default to allow for
 more flexibility over gating. For \code{gate = "draw"} users can also
 specify whether to gate the 1D histograms or 2D scatter plots 1D or 2D
@@ -101,8 +102,8 @@ variance weighted quantile regression used in \code{CytoDecode}, set to
 refining the spillover coefficients, set to 20 by default.}
 
 \item{trim}{proportion of events to exclude from the top and bottom of each
-scale when fitting models in \code{AutoSpill} and \code{CytoDecode} methods,
-set to 0.001 by default.}
+scale when fitting models in \code{AutoSpill} and \code{CytoDecode}
+methods, set to 0.001 by default.}
 
 \item{tol}{tolerance level for convergence of vwqr model in \code{CytoDecode}
 method, set to \code{1e-6} by default.}
@@ -117,8 +118,11 @@ boost at the cost of accuracy.}
 
 \item{details}{name of a CSV file to which the details of the single colour
 controls should be saved, set to NULL by default to use
-\code{date-Control-Details.csv}. Setting this argument to \code{NA}
-will prevent details from being written to a CSV file.}
+\code{date-Control-Details.csv}. Setting this argument to \code{NA} will
+prevent details from being written to a CSV file.}
+
+\item{rerun}{logicla indicating whether to bypass gating and simply rerun the
+algorithm using existing gates, set to FALSE by default.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 }

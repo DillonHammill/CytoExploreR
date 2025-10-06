@@ -8,6 +8,10 @@
 #'   to identify peak detectors, set to 500 events by default.
 #' @param overwrite logical indicating whether existing detector assignments in
 #'   \code{cyto_details(x)$channel} be overwritten, set to FALSE by default.
+#'   2param plot logical indicating whether the estimated spectrum for each
+#'   control should be displayed for visual inspection, set to FALSE by default.
+#' @param plot logical indicating whether the results should be plotted for
+#'   troubleshooting, set to FALSE by default.
 #'
 #' @return updated \code{"channel"} column in \code{cyto_details(x)}.
 #'
@@ -17,8 +21,10 @@
 #'
 #' @export
 cyto_peaks_assign <- function(x,
+                              type = "nmf",
                               events = 500,
-                              overwrite = FALSE) {
+                              overwrite = FALSE,
+                              plot = FALSE) {
   
   # RSVD PACKAGE REQUIRED
   cyto_require(
@@ -67,7 +73,10 @@ cyto_peaks_assign <- function(x,
   # PROGRESS BAR
   pb <- cyto_progress(
     label = "cyto_peaks_assign()",
-    total = ,
+    total = sum(
+      !(pd$channel %in% "Unstained" | 
+          grepl("Unstained|NIL", cyto_names(x), ignore.case = TRUE))
+    ),
     clear = FALSE
   )
   
@@ -79,10 +88,12 @@ cyto_peaks_assign <- function(x,
       gs <- x_list[[id]]
       # GROUP DETAILS
       pd <- pData(gs)
+      # AUTOFLUORESCENCE SPECTRUM
+      auto <- NULL
       # GROUP UNSTAINED CONTROL
       unst_idx <- which(
         pd$channel %in% "Unstained" | 
-          grepl("Unstained|NIL", cyto_names(gs), ignore.case = TRUE)
+        grepl("Unstained|NIL", cyto_names(gs), ignore.case = TRUE)
       )
       # STAINED CONTROLS
       idx <- seq_along(gs)
@@ -105,6 +116,41 @@ cyto_peaks_assign <- function(x,
               )
             # LOCATE PEAK
             } else {
+              # AUTOFLUORESCENCE SUBTRACTION
+              auto <- NULL
+              if(length(unst_idx) > 0) {
+                # ESTIMATE SPECTRUM FOR UNSTAINED
+                exprs <- cyto_data_extract(
+                  gs[unst_idx],
+                  parent = pd$parent[w],
+                  channels = cyto_fluor_channels(gs),
+                  format = "matrix",
+                  inverse = TRUE,
+                  copy = TRUE,
+                  coerce = TRUE,
+                  events = events
+                )[[1]][[1]]
+                # DROP NEGATIVE VALUES
+                exprs[exprs < 0] <- 0
+                # NMF
+                nmf <- RcppML::nmf(
+                  exprs,
+                  k = 1
+                )
+                auto <- nmf$h
+                # auto <- t(
+                #   rsvd::rsvd(
+                #     exprs,
+                #     k = 1
+                #   )$v
+                # )
+                # rownames(H) <- 1
+                # colnames(H) <- colnames(exprs)
+                # AUTOFLUORESCENCE SPECTRUM
+                
+                rownames(auto) <- "auto"
+                colnames(auto) <- colnames(exprs)
+              }
               # EXTRACT & COERCE UNSTAINED & STAINED DATA
               exprs <- cyto_data_extract(
                 gs[c(unst_idx, w)],
@@ -119,13 +165,60 @@ cyto_peaks_assign <- function(x,
               # TODO: ADD WARNING FOR TOO FEW EVENTS
               # COMPUTE SVD 
               if(nrow(exprs) > 0) {
-                rsvd <- rsvd::rsvd(
-                  exprs
+                # rsvd <- rsvd::rsvd(
+                #   exprs,
+                #   k = 5
+                # )
+                # res <- t(abs(rsvd$v))
+                # colnames(res) <- colnames(exprs)
+                # rownames(res) <- seq_len(nrow(res))
+                # print(res)
+                # cyto_plot_spectra(
+                #   list(res)
+                # )
+                # peak <- structure(
+                #   c(colnames(exprs)[which.max(abs(rsvd$v[, 1]))]),
+                #   names = cyto_names(gs)[w]
+                # )
+                exprs[exprs < 0] <- 0
+                nmf <- RcppML::nmf(
+                  exprs,
+                  k = 1
                 )
-                peak <- structure(
-                  c(colnames(exprs)[which.max(abs(rsvd$v[, 1]))]),
+                H <- nmf$h
+                rownames(H) <- cyto_names(gs)[w]
+                colnames(H) <- colnames(exprs)
+                
+                # H <- t(
+                #   rsvd::rsvd(
+                #     exprs,
+                #     k = 1
+                #   )$v
+                # )
+                # rownames(H) <- 1
+                # colnames(H) <- colnames(exprs)
+                # AUTOFLUORESCENCE SUBTRACTION
+                if(!is.null(auto)) {
+                  H[1, ] <- residuals(
+                    lm(
+                      as.numeric(H[1, ]) ~ as.numeric(auto[1, ]) - 1
+                    )
+                  )
+                  H[H < 0] <- 0
+                }
+                peak <-  structure(
+                  colnames(exprs)[
+                    which.max(H[1, ])
+                  ],
                   names = cyto_names(gs)[w]
                 )
+                if(plot) {
+                  cyto_plot_spectra(
+                    list(
+                      H
+                    )
+                  )
+                }
               } else {
                 peak <- structure(
                   NA,
@@ -135,8 +228,6 @@ cyto_peaks_assign <- function(x,
             }
             # UPDATE PROGRESS BAR
             cyto_progress(pb)
-            # TROUBLESHOOTING
-            # plot(rsvd$v[, 1], type = "b", main = cyto_names(gs)[w])
             # EXTRACT PEAK DETECTOR
             return(
               peak

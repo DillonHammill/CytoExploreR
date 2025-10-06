@@ -137,3 +137,7 @@ vwqr_cpp <- function(data, tau = 0.5, max_iter = 10L, tol = 1e-6, residual_type 
     .Call(`_CytoExploreR_vwqr_cpp`, data, tau, max_iter, tol, residual_type, grid_size, span)
 }
 
+wasserstein1d_cpp <- function(a, b, p = 1.0, wa_ = NULL, wb_ = NULL) {
+    .Call(`_CytoExploreR_wasserstein1d_cpp`, a, b, p, wa_, wb_)
+}
+

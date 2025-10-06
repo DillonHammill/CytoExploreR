@@ -4,7 +4,13 @@
 \alias{cyto_peaks_assign}
 \title{Assign peak detectors to pre-gated single colour controls}
 \usage{
-cyto_peaks_assign(x, events = 500, overwrite = FALSE)
+cyto_peaks_assign(
+  x,
+  type = "nmf",
+  events = 500,
+  overwrite = FALSE,
+  plot = FALSE
+)
 }
 \arguments{
 \item{x}{object of class \code{cytoset}, \code{GatingHierarchy} or
@@ -14,7 +20,12 @@ cyto_peaks_assign(x, events = 500, overwrite = FALSE)
 to identify peak detectors, set to 500 events by default.}
 
 \item{overwrite}{logical indicating whether existing detector assignments in
-\code{cyto_details(x)$channel} be overwritten, set to FALSE by default.}
+\code{cyto_details(x)$channel} be overwritten, set to FALSE by default.
+2param plot logical indicating whether the estimated spectrum for each
+control should be displayed for visual inspection, set to FALSE by default.}
+
+\item{plot}{logical indicating whether the results should be plotted for
+troubleshooting, set to FALSE by default.}
 }
 \value{
 updated \code{"channel"} column in \code{cyto_details(x)}.

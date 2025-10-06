@@ -400,6 +400,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// wasserstein1d_cpp
+double wasserstein1d_cpp(Rcpp::NumericVector a, Rcpp::NumericVector b, double p, Rcpp::Nullable<Rcpp::NumericVector> wa_, Rcpp::Nullable<Rcpp::NumericVector> wb_);
+RcppExport SEXP _CytoExploreR_wasserstein1d_cpp(SEXP aSEXP, SEXP bSEXP, SEXP pSEXP, SEXP wa_SEXP, SEXP wb_SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type a(aSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type b(bSEXP);
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type wa_(wa_SEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type wb_(wb_SEXP);
+    rcpp_result_gen = Rcpp::wrap(wasserstein1d_cpp(a, b, p, wa_, wb_));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_CytoExploreR_rcpp_median_inplace", (DL_FUNC) &_CytoExploreR_rcpp_median_inplace, 1},
@@ -436,6 +451,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_CytoExploreR_purity_cpp", (DL_FUNC) &_CytoExploreR_purity_cpp, 1},
     {"_CytoExploreR_row_purity_cpp", (DL_FUNC) &_CytoExploreR_row_purity_cpp, 1},
     {"_CytoExploreR_vwqr_cpp", (DL_FUNC) &_CytoExploreR_vwqr_cpp, 7},
+    {"_CytoExploreR_wasserstein1d_cpp", (DL_FUNC) &_CytoExploreR_wasserstein1d_cpp, 5},
     {NULL, NULL, 0}
 };
 

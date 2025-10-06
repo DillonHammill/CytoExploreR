@@ -37,8 +37,6 @@
                             unmix = FALSE,
                             ...) {
   
-  # TODO: ADD PROGRESS BAR TO AUTOSPILL
-  
   # AUTOSPILL - COMPUTE SPILLOVER COEFFICIENTS ---------------------------------
   
   # CHANNELS
@@ -77,6 +75,11 @@
     trim = trim,
     ...
   )
+  
+  # RETURN ROW FOR UNMIXING MATRIX
+  if(unmix) {
+    spill <- spill[rowSums(spill) != 1, , drop = FALSE]
+  }
   
   # RETURN SPILLOVER MATRIX
   return(spill)
@@ -148,9 +151,9 @@
       t <- summary(rlm)$coefficients[, 3]
       df <- summary(rlm)$df[2]
       pval <- 2*(pt(abs(t), df, lower.tail = FALSE))
-      # RLM NOT CONVERGED - USE LM INSTEAD
+    # RLM NOT CONVERGED - USE LM INSTEAD
     } else {
-      rlm <- lm(exprs[, 2] ~ exprs[, 1])
+      rlm <- lm(y ~ x)
       coef <- rlm$coefficients
       pval <- summary(rlm)$coefficients[, 4]
     }
@@ -241,15 +244,27 @@
   #     mar = c(4.1,4.1,2.1,2.1))
   
   # COMPUTE COEFFICIENTS & UPDATE PEAK DETECTORS IF INCORRECT
-  spill_coef <- Inf
-  while(any(spill_coef > 1)) {
-    # UPDATE PEAK DETECTORS
-    if(length(spill_coef) > 1) {
-      cyto_details(x)$channel <- channels[
-        apply(spill_coef, 1, which.max)
-      ]
-      pd <- cyto_details(x)
-    }
+  spill <- matrix(
+    0, 
+    ncol = length(channels),
+    nrow = length(channels),
+    dimnames = list(
+      channels,
+      channels
+    )
+  )
+  diag(spill) <- 1
+
+  # COMPUTE INITIAL ESTIMATES & UPDATE PEAK DETECTOR FOR UNMIXING
+  # RERUN UNTIL PEAK LOCATED - 5 ATTEMPTS
+  iter <- 0
+  while(any(spill >= 1) & iter < 5) {
+    print("YASS")
+    print(spill)
+    # ITERATION
+    iter <- iter + 1
+    # UPDATED METADATA
+    pd <- cyto_details(x)
     # FIT RLM & EXTRACT INTERCEPTS & COEFFICIENTS
     spill_coef <- do.call(
       "rbind",
@@ -265,7 +280,7 @@
               )[[1]]
             )[, unname(channels)]
             # FIT RLM MODELS & UPDATE INTERCEPTS & COEFFICIENTS
-            res <- future_lapply(
+            res <- lapply(
               channels, 
               function(w) {
                 # DIAGONAL PARAMETERS COMBINATIONS
@@ -296,8 +311,38 @@
         names = pd$channel
       )
     )
+    # UPDATE SPILLOVER
+    cnt <- 0
+    apply(
+      spill_coef[, (n+1):(2*n), drop = FALSE],
+      1,
+      function(z) {
+        cnt <<- cnt + 1
+        spill[
+          match(
+            rownames(spill_coef[, (n+1):(2*n), drop = FALSE])[cnt],
+            rownames(spill)
+          ),
+        ] <<- z[
+          match(
+            colnames(spill_coef[, (n+1):(2*n), drop = FALSE]), 
+            colnames(spill)
+          )
+        ]
+      }
+    )
+    diag(spill) <- 1
+    # ONLY SEARCH FOR PEAKS WHEN UNMIXING
     if(!unmix) {
       break
+    } else {
+      if(any(spill > 1)) {
+        cyto_details(x)$channel <- channels[
+          apply(spill, 1, which.max)[match(pd$channel, channels)]
+        ]
+      } else {
+        break
+      }
     }
   }
   

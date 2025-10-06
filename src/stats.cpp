@@ -1,7 +1,7 @@
 #include <Rcpp.h>
-#include <algorithm>
-#include <cmath>     // For std::log and std::exp
-#include <numeric>   // For std::accumulate
+#include <algorithm> // std::sort, std::unique
+#include <cmath>     // std::log std::exp std::pow, std::abs
+#include <numeric>   // std::accumulate std::iota
 #include <sstream>   // For std::stringstream
 
 using namespace Rcpp;
@@ -1038,4 +1038,154 @@ List vwqr_cpp(DataFrame data,
   
   fit.push_back(weights, "weights");
   return fit;
+}
+
+// --- 1D WASSERSTEIN DISTANCE ---
+
+// [[Rcpp::export]]
+double wasserstein1d_cpp(
+    Rcpp::NumericVector a, 
+    Rcpp::NumericVector b, 
+    double p = 1.0, 
+    Rcpp::Nullable<Rcpp::NumericVector> wa_ = R_NilValue, 
+    Rcpp::Nullable<Rcpp::NumericVector> wb_ = R_NilValue
+) {
+  size_t m = a.size();
+  size_t n = b.size();
+  
+  if (m == 0 || n == 0) {
+    Rcpp::stop("Input vectors 'a' and 'b' must not be empty.");
+  }
+  
+  // ========================================================================
+  // Fast Path for unweighted, equal-sized inputs
+  // ========================================================================
+  if (wa_.isNull() && wb_.isNull() && m == n) {
+    // Use Rcpp::clone to avoid modifying the original R vectors
+    Rcpp::NumericVector a_sorted = Rcpp::clone(a).sort();
+    Rcpp::NumericVector b_sorted = Rcpp::clone(b).sort();
+    
+    double total_dist = 0.0;
+    for (size_t i = 0; i < m; ++i) {
+      total_dist += std::pow(std::abs(a_sorted[i] - b_sorted[i]), p);
+    }
+    return std::pow(total_dist / m, 1.0 / p);
+  }
+  
+  // ========================================================================
+  // Handle Weights (creation, validation, and filtering)
+  // ========================================================================
+  Rcpp::NumericVector wa, wb;
+  
+  if (wa_.isNull()) {
+    wa = Rcpp::NumericVector(m, 1.0);
+  } else {
+    wa = Rcpp::NumericVector(wa_);
+    if (wa.size() != m) Rcpp::stop("Weights 'wa' must have the same size as 'a'.");
+  }
+  
+  if (wb_.isNull()) {
+    wb = Rcpp::NumericVector(n, 1.0);
+  } else {
+    wb = Rcpp::NumericVector(wb_);
+    if (wb.size() != n) Rcpp::stop("Weights 'wb' must have the same size as 'b'.");
+  }
+  
+  // Filter out points with zero weight
+  std::vector<double> a_filtered_std, wa_filtered_std;
+  for (size_t i = 0; i < m; ++i) {
+    if (wa[i] > 0) {
+      a_filtered_std.push_back(a[i]);
+      wa_filtered_std.push_back(wa[i]);
+    }
+  }
+  
+  std::vector<double> b_filtered_std, wb_filtered_std;
+  for (size_t i = 0; i < n; ++i) {
+    if (wb[i] > 0) {
+      b_filtered_std.push_back(b[i]);
+      wb_filtered_std.push_back(wb[i]);
+    }
+  }
+  
+  // Convert std::vector back to Rcpp::NumericVector
+  a = Rcpp::NumericVector(a_filtered_std.begin(), a_filtered_std.end());
+  wa = Rcpp::NumericVector(wa_filtered_std.begin(), wa_filtered_std.end());
+  b = Rcpp::NumericVector(b_filtered_std.begin(), b_filtered_std.end());
+  wb = Rcpp::NumericVector(wb_filtered_std.begin(), wb_filtered_std.end());
+  
+  m = a.size();
+  n = b.size();
+  
+  if (m == 0 || n == 0) return 0.0;
+  
+  // ========================================================================
+  // Sort data and weights together
+  // ========================================================================
+  std::vector<size_t> orda(m);
+  std::iota(orda.begin(), orda.end(), 0);
+  std::sort(orda.begin(), orda.end(), [&](size_t i1, size_t i2) { return a[i1] < a[i2]; });
+  
+  Rcpp::NumericVector a_sorted(m), wa_sorted(m);
+  for (size_t i = 0; i < m; ++i) {
+    a_sorted[i] = a[orda[i]];
+    wa_sorted[i] = wa[orda[i]];
+  }
+  
+  std::vector<size_t> ordb(n);
+  std::iota(ordb.begin(), ordb.end(), 0);
+  std::sort(ordb.begin(), ordb.end(), [&](size_t i1, size_t i2) { return b[i1] < b[i2]; });
+  
+  Rcpp::NumericVector b_sorted(n), wb_sorted(n);
+  for (size_t i = 0; i < n; ++i) {
+    b_sorted[i] = b[ordb[i]];
+    wb_sorted[i] = wb[ordb[i]];
+  }
+  
+  // ========================================================================
+  // Calculate ECDF jump points (cumulative weights)
+  // ========================================================================
+  double sum_wa = std::accumulate(wa_sorted.begin(), wa_sorted.end(), 0.0);
+  double sum_wb = std::accumulate(wb_sorted.begin(), wb_sorted.end(), 0.0);
+  
+  std::vector<double> cua(m > 1 ? m - 1 : 0);
+  double current_sum_a = 0.0;
+  for (size_t i = 0; i < m - 1; ++i) {
+    current_sum_a += wa_sorted[i];
+    cua[i] = current_sum_a / sum_wa;
+  }
+  
+  std::vector<double> cub(n > 1 ? n - 1 : 0);
+  double current_sum_b = 0.0;
+  for (size_t i = 0; i < n - 1; ++i) {
+    current_sum_b += wb_sorted[i];
+    cub[i] = current_sum_b / sum_wb;
+  }
+  
+  // ========================================================================
+  // Calculate the integral of the difference between quantile functions
+  // ========================================================================
+  double total_dist = 0.0;
+  
+  std::vector<double> u = cua;
+  u.insert(u.end(), cub.begin(), cub.end());
+  std::sort(u.begin(), u.end());
+  u.erase(std::unique(u.begin(), u.end()), u.end());
+  
+  double last_u = 0.0;
+  size_t i_a = 0, i_b = 0;
+  
+  for (double current_u : u) {
+    double delta_u = current_u - last_u;
+    if (delta_u > 0) {
+      total_dist += delta_u * std::pow(std::abs(a_sorted[i_a] - b_sorted[i_b]), p);
+    }
+    if (i_a < m - 1 && current_u >= cua[i_a]) i_a++;
+    if (i_b < n - 1 && current_u >= cub[i_b]) i_b++;
+    last_u = current_u;
+  }
+  
+  total_dist += (1.0 - last_u) * std::pow(std::abs(a_sorted[m-1] - b_sorted[n-1]), p);
+  
+  return std::pow(total_dist, 1.0 / p);
 }

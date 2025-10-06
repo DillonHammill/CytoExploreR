@@ -47,8 +47,8 @@
 #'   default.
 #' @param gate indicates whether to \code{draw} or use \code{auto} gating
 #'   methods to gate the negative and positive populations for each control.
-#'   Gating is optional for \code{"Autospill"} and \code{"CytoDecode"} methods but
-#'   is recommended to achieve better results and ensure compatibility with
+#'   Gating is optional for \code{"Autospill"} and \code{"CytoDecode"} methods
+#'   but is recommended to achieve better results and ensure compatibility with
 #'   \code{cyto_panel_design()}. Set to \code{"draw"} by default to allow for
 #'   more flexibility over gating. For \code{gate = "draw"} users can also
 #'   specify whether to gate the 1D histograms or 2D scatter plots 1D or 2D
@@ -86,8 +86,8 @@
 #' @param max_iter indicates the maximum number of allowable iterations for
 #'   refining the spillover coefficients, set to 20 by default.
 #' @param trim proportion of events to exclude from the top and bottom of each
-#'   scale when fitting models in \code{AutoSpill} and \code{CytoDecode} methods,
-#'   set to 0.001 by default.
+#'   scale when fitting models in \code{AutoSpill} and \code{CytoDecode}
+#'   methods, set to 0.001 by default.
 #' @param tol tolerance level for convergence of vwqr model in \code{CytoDecode}
 #'   method, set to \code{1e-6} by default.
 #' @param grid_size size of the grid to use for wvqr model in \code{CytoDecode}
@@ -98,8 +98,10 @@
 #'   \code{CytoDecode}, set to \code{"both"} by default.
 #' @param details name of a CSV file to which the details of the single colour
 #'   controls should be saved, set to NULL by default to use
-#'   \code{date-Control-Details.csv}. Setting this argument to \code{NA}
-#'   will prevent details from being written to a CSV file.
+#'   \code{date-Control-Details.csv}. Setting this argument to \code{NA} will
+#'   prevent details from being written to a CSV file.
+#' @param rerun logicla indicating whether to bypass gating and simply rerun the
+#'   algorithm using existing gates, set to FALSE by default.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
 #' @return spillover matrix and write spillover matrix to csv file named in
@@ -109,6 +111,7 @@
 #' @importFrom openCyto gs_add_gating_method
 #' @importFrom flowWorkspace gs_pop_remove
 #' @importFrom HeatmapR heat_map
+#' @importFrom data.table rbindlist `:=` as.data.table
 #'
 #' @examples
 #' \dontrun{
@@ -175,6 +178,7 @@ cyto_spillover_compute <- function(x,
                                    grid_size = 100,
                                    resid = "both",
                                    details = NULL,
+                                   rerun = FALSE,
                                    ...) {
   
   # SPILLOVER ------------------------------------------------------------------
@@ -226,13 +230,16 @@ cyto_spillover_compute <- function(x,
     # DEFAULT TO -A FLUORESCENT CHANNELS
     channels <- cyto_fluor_channels(x)
     # DEFAULT - ALL AREA PARAMETERS
-    channels <- channels[
-      grepl(
-        "\\-A$",
-        channels,
-        ignore.case = TRUE
-      )
-    ]
+    rm_idx <- grep(
+      "\\-[HW]$",
+      channels,
+      ignore.case = TRUE
+    )
+    if(length(rm_idx) > 0) {
+      channels <- channels[
+        -rm_idx
+      ]
+    }
   # USE PROVIDED CHANNELS
   } else {
     channels <- unique(
@@ -301,9 +308,11 @@ cyto_spillover_compute <- function(x,
   
   # DECOMPENSATE
   if(cyto_class(x, "GatingSet")) {
-    if(!is.null(cyto_spillover_extract(x))) {
+    spill <- cyto_spillover_extract(x)
+    if(!is.null(spill)) {
       x <- cyto_compensate(
         x,
+        spillover = spill,
         remove = TRUE,
         quiet = FALSE
       )
@@ -357,6 +366,8 @@ cyto_spillover_compute <- function(x,
     gate <- "auto"
   }
   
+  # NOTE: TRANSFORMATIONS ARE NOW APPLIED IN PLACE
+  
   # TRANSFORMED DATA REQUIRED FOR GATING
   if(!.all_na(gate)) {
     if(any(!channels %in% names(axes_trans))) {
@@ -365,26 +376,37 @@ cyto_spillover_compute <- function(x,
       trans_new <- cyto_transformers_define(
         x, 
         channels = channels[!channels %in% names(axes_trans)],
-        type = "biex",
+        type = "asinh",
         plot = FALSE,
         progress = FALSE
       )
-      # APPLY NEW TRANSFORMERS
+      # REVERSE OLD TRANSFORMERS
+      if(!.all_na(axes_trans)) {
+        x <- suppressWarnings(
+          cyto_transform(
+            x,
+            trans = axes_trans,
+            copy = FALSE,
+            inverse = TRUE,
+            plot = FALSE,
+            quiet = TRUE
+          )
+        )
+        axes_trans <- cyto_transformers_combine(axes_trans, trans_new)
+      } else {
+        axes_trans <- trans_new
+      }
+      # APPLY COMBINED TRANSFORMERS IN PLACE
       x <- suppressWarnings(
         cyto_transform(
           x,
-          trans = trans_new,
-          copy = TRUE,
+          trans = axes_trans,
+          copy = FALSE,
+          inverse = FALSE,
           plot = FALSE,
           quiet = TRUE
         )
       )
-      # COMBINE TRANSFROMERS
-      if(.all_na(axes_trans)) {
-        axes_trans <- trans_new
-      } else {
-        axes_trans <- cyto_transformers_combine(axes_trans, trans_new)
-      }
     }
   }
   
@@ -792,40 +814,43 @@ cyto_spillover_compute <- function(x,
               
               # MANUAL GATING - BYPASS GATE EDITING
               if(grepl("draw", gate)) {
-                # GATE NEGATIVE POPULATION
-                neg_gt <- cyto_func_call(
-                  "cyto_gate_draw",
-                  list(
-                    pop[length(pop)],
-                    "alias" = pops[1],
-                    "channels" = peak,
-                    "type" = "interval",
-                    "gate" = if(!.all_na(gates)) {
-                      gates[[1]]
-                    } else{
-                      NA
-                    },
-                    "plot" = FALSE
-                  )
-                )[[1]][[1]]
-                neg_gt@filterId <- pops[1]
-                # GATE POSITIVE POPULATION
-                pos_gt <- cyto_func_call(
-                  "cyto_gate_draw",
-                  list(
-                    pop[1],
-                    "alias" = pops[2],
-                    "channels" = peak,
-                    "type" = "interval",
-                    "gate" = if(!.all_na(gates)) {
-                      gates[[2]]
-                    } else{
-                      NA
-                    },
-                    "plot" = FALSE
-                  )
-                )[[1]][[1]]
-                pos_gt@filterId <- pops[2]
+                # CHECK & EDIT GATES
+                if(!rerun) {
+                  # GATE NEGATIVE POPULATION
+                  neg_gt <- cyto_func_call(
+                    "cyto_gate_draw",
+                    list(
+                      pop[length(pop)],
+                      "alias" = pops[1],
+                      "channels" = peak,
+                      "type" = "interval",
+                      "gate" = if(!.all_na(gates)) {
+                        gates[[1]]
+                      } else{
+                        NA
+                      },
+                      "plot" = FALSE
+                    )
+                  )[[1]][[1]]
+                  neg_gt@filterId <- pops[1]
+                  # GATE POSITIVE POPULATION
+                  pos_gt <- cyto_func_call(
+                    "cyto_gate_draw",
+                    list(
+                      pop[1],
+                      "alias" = pops[2],
+                      "channels" = peak,
+                      "type" = "interval",
+                      "gate" = if(!.all_na(gates)) {
+                        gates[[2]]
+                      } else{
+                        NA
+                      },
+                      "plot" = FALSE
+                    )
+                  )[[1]][[1]]
+                  pos_gt@filterId <- pops[2]
+                }
                 gates <- filters(
                   structure(
                     list(
@@ -842,18 +867,30 @@ cyto_spillover_compute <- function(x,
               
               # AUTOMATED GATING
               if(gate == "auto") {
-                gates <- watershed_1d(
-                  pop[[1]],
-                  x_control = if(length(pop) == 2) {
-                    pop[[2]]
-                  } else {
-                    NULL
-                  },
-                  channel = peak,
-                  peak = TRUE
-                )
-                gates <- gates[c(1, length(gates))]
-                names(gates) <- pops
+                if(!rerun) {
+                  gates <- watershed_1d(
+                    pop[[1]],
+                    x_control = if(length(pop) == 2) {
+                      pop[[2]]
+                    } else {
+                      NULL
+                    },
+                    channel = peak,
+                    peak = TRUE
+                  )
+                  gates <- gates[c(1, length(gates))]
+                  names(gates) <- pops
+                } else {
+                  gates <- filters(
+                    structure(
+                      list(
+                        neg_gt,
+                        pos_gt
+                      ),
+                      names = pops
+                    )
+                  )
+                }
                 # NOTE: STATS ARE DISPLAYED FOR STAINED CONTROL DATA - ONLY
                 # NOTE: ONLY NEW GATES ARE DISPLAYED
                 do.call(
@@ -873,10 +910,10 @@ cyto_spillover_compute <- function(x,
                       "axes_limits" = "data",
                       "axes_trans" = axes_trans,
                       "legend" = FALSE,
-                      hist_stack = 0,
-                      hist_layers = 2,
-                      label_text = c(pops, NA, NA),
-                      label_stat = c("percent", "percent", NA, NA)
+                      "hist_stack" = 0,
+                      "hist_layers" = 2,
+                      "label_text" = c(pops, NA, NA),
+                      "label_stat" = c("percent", "percent", NA, NA)
                     ),
                     args
                   )
@@ -938,7 +975,10 @@ cyto_spillover_compute <- function(x,
       pData(x)$channel,
       ignore.case = TRUE
     )
-    idx <- seq_along(x)[-unst_idx]
+    idx <- seq_along(x)
+    if(length(unst_idx) > 0) {
+      idx <- idx[-unst_idx]
+    }
     idx <- idx[
       sapply(
         idx, 
@@ -1078,63 +1118,181 @@ cyto_spillover_compute <- function(x,
         pops <- paste0(nm, c("-", "+"))
         names(pops) <- pops  # IMPORTANT FOR GATES
         parent <- pd$parent[match(ids, cyto_names(x))][1]
-        # GATE ALREADY EXISTS
-        if(any(
-          sapply(paste0(parent, "/", pops), function(w){
-            w <- gsub("\\-", "\\\\-", w)
-            w <- gsub("\\+", "\\\\+", w)
-          any(grepl(w, nodes))
-        }))) {
-          cyto_gate_remove(
-            x,
-            parent = parent,
-            alias = pops,
-            gatingTemplate = gatingTemplate
-          )
-        }
         # IMPORT GATINGTEMPLATE
         if(!is.null(gatingTemplate)) {
           gt <- cyto_gatingTemplate_read(
             gatingTemplate,
             data.table = TRUE
           )
+          # GET GATINGTEMPLATE
+          gT <- suppressPrint(
+            gatingTemplate(gatingTemplate)
+          )
         } else {
           gt <- NULL
+          gT <- NULL
         }
-        # ADD GATES TO GATINGSET & GATINGTEMPLATE
-        lapply(
-          pops,
-          function(pop) {
-            gt <<- rbind(
-              gt,
-              .suppress_all_messages(
-                gs_add_gating_method(
-                  gs = x,
-                  alias = pop,
-                  parent = parent,
-                  pop = "+",
-                  dims = parameters(gate[[1]][[1]]),
-                  gating_method = "cyto_gate_draw",
-                  gating_args = list(
-                    "gate" = filters(
-                      lapply(
-                        gate,
-                        `[[`,
-                        gsub("\\\\", "", pop)
-                      )
-                    ),
-                    "openCyto.minEvents" = -1
-                  ),
-                  groupBy = NA,
-                  collapseDataForGating = TRUE,
-                  preprocessing_method = "pp_cyto_gate_draw"
-                )
-              )
+        # UPDATE POPULATIONS IN GATINGSET & GATINGTEMPLATE
+        for(pop in pops) {
+          pop_sub <- gsub(
+            "([\\+\\-])",
+            "\\\\\\1",
+            paste0(
+              parent, 
+              "/", 
+              pop
+            )
+          )
+          # POP GATES
+          gate_new <- lapply(
+            gate,
+            `[[`,
+            pop
+          )
+          # UPDATE GATES IN GATINGSET
+          if(any(grepl(pop_sub, nodes))) {
+            gs_pop_set_gate(
+              x,
+              pop,
+              gate_new,
+              parent = parent
+            )
+          # ADD NEW POPULATION
+          } else {
+            gs_pop_add(
+              x,
+              gate_new,
+              parent = parent
             )
           }
-        )
-        # UPDATE GATING
-        recompute(gs)
+          # UPDATE GATES IN GATINGTEMPLATE
+          if(!is.null(gt)) {
+            # PREPARE GATES FOR GATINGTEMPLATE
+            gate_new <- lapply(
+              gate_new,
+              function(g) {
+                filters(
+                  list(
+                    g
+                  )
+                )
+              }
+            )
+            # POPULATION EXISTS IN GATINGTEMPLATE
+            if(any(grepl(pop_sub, cyto_nodes(gt)))) {
+              # EXTRACT GATINGTEMPLATE GATES
+              gt_gate <- eval(
+                gt_get_gate(
+                  gT,
+                  cyto_nodes_convert(
+                    gT,
+                    nodes = parent,
+                    path = "full"
+                  ),
+                  cyto_nodes_convert(
+                    gT,
+                    nodes = pop,
+                    path = "full"
+                  )
+                )@args$gate
+              )
+              # UPDATE GATES
+              gt_gate[names(gate_new)] <- gate_new
+              # UPDATE GATINGTEMPLATE
+              gating_args <- NULL
+              alias <- NULL
+              prnt <- parent
+              # TODO: IMPROVE MATCHING HERE
+              gt[
+                alias == pop & parent == prnt,
+                gating_args := CytoExploreR_.argDeparser(
+                  list(
+                    "gate" = gt_gate,
+                    "openCyto.minEvents" = -1
+                  )
+                )
+              ]
+            # POPULATION MISSING FROM GATINGTEMPLATE
+            } else {
+              gt <- rbindlist(
+                list(
+                  gt, 
+                  as.data.table(
+                    list(
+                      "alias" = basename(pop),
+                      "pop" = "+",
+                      "parent" = parent,
+                      "dims" = parameters(gate_new[[1]][[1]]),
+                      "gating_method" = "cyto_gate_draw",
+                      "gating_args" = CytoExploreR_.argDeparser(
+                        list(
+                          "gate" = gate_new,
+                          "openCyto.minEvents" = -1
+                        )
+                      ),
+                      "collapseDataForGating" = TRUE,
+                      "groupBy" = NA,
+                      "preprocessing_method" = "pp_cyto_gate_draw",
+                      "preprocessing_args" = NA
+                    )
+                  )
+                )
+              )
+            }
+            # RE-WRITE GATINGTEMPLATE
+            cyto_gatingTemplate_write(
+              gt,
+              gatingTemplate
+            )
+          }
+        }
+        # # GATE ALREADY EXISTS
+        # if(any(
+        #   sapply(paste0(parent, "/", pops), function(w){
+        #     w <- gsub("\\-", "\\\\-", w)
+        #     w <- gsub("\\+", "\\\\+", w)
+        #   any(grepl(w, nodes))
+        # }))) {
+        #   cyto_gate_remove(
+        #     x,
+        #     parent = parent,
+        #     alias = pops,
+        #     gatingTemplate = gatingTemplate
+        #   )
+        # }
+
+        # # ADD GATES TO GATINGSET & GATINGTEMPLATE
+        # lapply(
+        #   pops,
+        #   function(pop) {
+        #     gt <<- rbind(
+        #       gt,
+        #       .suppress_all_messages(
+        #         gs_add_gating_method(
+        #           gs = x,
+        #           alias = pop,
+        #           parent = parent,
+        #           pop = "+",
+        #           dims = parameters(gate[[1]][[1]]),
+        #           gating_method = "cyto_gate_draw",
+        #           gating_args = list(
+        #             "gate" = filters(
+        #               lapply(
+        #                 gate,
+        #                 `[[`,
+        #                 gsub("\\\\", "", pop)
+        #               )
+        #             ),
+        #             "openCyto.minEvents" = -1
+        #           ),
+        #           groupBy = NA,
+        #           collapseDataForGating = TRUE,
+        #           preprocessing_method = "pp_cyto_gate_draw"
+        #         )
+        #       )
+        #     )
+        #   }
+        # )
         # WRITE UPDATED GATINGTEMPLATE - WRITING ERROR - SYNC GS
         if(!is.null(gatingTemplate)) {
           cyto_gatingTemplate_write(
@@ -1144,6 +1302,8 @@ cyto_spillover_compute <- function(x,
         }
       }
     )
+    # UPDATE GATING
+    recompute(x)
   }
   
   # BAGWELL SPILLOVER
@@ -1177,7 +1337,23 @@ cyto_spillover_compute <- function(x,
           )
           # SUBTRACT BACKGROUND
           medfi <- (medfi[1, , drop = FALSE] - medfi[2, , drop = FALSE])
-          rownames(medfi) <- peak
+          rownames(medfi) <- if(unmix) {
+            if(pData(pops[[id]])$marker[1] %in% c("", "NA", NA)) {
+              paste0(
+                "<NA> ",
+                pData(pops[[id]])$label[1]
+              )
+            } else {
+              paste0(
+                "<",
+                pData(pops[[id]])$marker[1],
+                "> ",
+                pData(pops[[id]])$label[1]
+              )
+            }
+          } else {
+            peak
+          }
           # NORMALISE
           return(
             medfi/medfi[1, peak]
@@ -1263,7 +1439,7 @@ cyto_spillover_compute <- function(x,
             seq_along(pops),
             function(id) {
               .cyto_asp_spill(
-                pops,
+                pops[id],
                 trans = axes_trans,
                 channels = channels,
                 model = model,
@@ -1285,7 +1461,7 @@ cyto_spillover_compute <- function(x,
           unmix = unmix
         )
       }
-    # CytoDecode
+    # CYTODECODE
     } else {
       # PROGRESS BAR
       pb <- cyto_progress(
@@ -1299,12 +1475,22 @@ cyto_spillover_compute <- function(x,
           seq_along(pops),
           function(id) {
             x_chan <- pData(pops)$channel[id]
-            coef <- sapply(
-              channels,
-              function(y_chan) {
+            coef <- c()
+            iter <- 0
+            # NOTE: ASSIGNED PEAK DETECTOR NEEDS TO BE GOOD ENOUGH FOR GATING
+            # ONLY 5 ATTEMPTS TO LOCATE PEAK DETECTOR
+            while(iter <= 5) {
+              iter <- iter + 1
+              for(y_chan in channels) {
                 # Y = X
                 if(x_chan %in% y_chan) {
-                  return(1)
+                  coef <- c(
+                    coef,
+                    structure(
+                      1,
+                      names = y_chan
+                    )
+                  )
                   # VWQR
                 } else {
                   exprs <- cyto_data_extract(
@@ -1325,23 +1511,35 @@ cyto_spillover_compute <- function(x,
                     ,
                     drop = FALSE
                   ]
-                  return(
-                    coefficients(
-                      vwqr_cpp(
-                        data.frame(
-                          "x" = exprs[, 1],
-                          "y" = exprs[, 2]
-                        ),
-                        max_iter = max_iter,
-                        residual_type = resid,
-                        grid_size = grid_size,
-                        tol = tol
-                      )
-                    )[2]
+                  coef <- c(
+                    coef,
+                    structure(
+                      coefficients(
+                        vwqr_cpp(
+                          data.frame(
+                            "x" = exprs[, 1],
+                            "y" = exprs[, 2]
+                          ),
+                          max_iter = max_iter,
+                          residual_type = resid,
+                          grid_size = grid_size,
+                          tol = tol
+                        )
+                      )[2],
+                      names = y_chan
+                    )
                   )
                 }
               }
-            )
+              # PEAK DETECTOR CORRECT
+              if(!unmix | all(coef <= 1)) {
+                break
+                # UPDATE PEAK DETECTOR
+              } else {
+                x_chan <- names(coef)[which.max(coef)][1]
+                coef <- c()
+              }
+            }
             # PROGRESS BAR
             cyto_progress(pb)
             # RETURN COEFFICIENTS
@@ -1349,31 +1547,35 @@ cyto_spillover_compute <- function(x,
           }
         )
       )
+      # FORMAT SPILLOVER MATRIX
       if(!unmix) {
         colnames(spill) <- channels
         rownames(spill) <- pData(pops)$channel
-      } else {
-        colnames(spill) <- channels
-        rownames(spill) <- sapply(
-          seq_along(pops),
-          function(id) {
-            if(is.na(pData(pops)$marker[id])|.empty(pData(pops)$marker[id])) {
-              paste0(
-                "<NA> ",
-                pData(pops)$label[id]
-              )
-            } else {
-              paste0(
-                "<",
-                pData(pops)$marker[id],
-                "> ",
-                pData(pops)$label[id]
-              )
-            }
+      } 
+    }
+    # FORMAT SPECTRA
+    if(unmix) {
+      print(spill)
+      colnames(spill) <- channels
+      rownames(spill) <- sapply(
+        seq_along(pops),
+        function(id) {
+          if(is.na(pData(pops)$marker[id])|.empty(pData(pops)$marker[id])) {
+            paste0(
+              "<NA> ",
+              pData(pops)$label[id]
+            )
+          } else {
+            paste0(
+              "<",
+              pData(pops)$marker[id],
+              "> ",
+              pData(pops)$label[id]
+            )
           }
-        )
-        spill[spill < 0] <- 0
-      }
+        }
+      )
+      spill[spill < 0] <- 0
     }
   }
   
@@ -1435,9 +1637,13 @@ cyto_spillover_compute <- function(x,
       res,
       cell_col_empty = "black",
       cell_col_scale = .cyto_plot_point_col_scale(),
-      title = "Spillover Matrix",
+      title = if(!unmix) {
+        "Spillover Matrix"
+      } else {
+        "Spectral Unmixing Matrix"
+      },
       cell_text = TRUE,
-      tree_y = if(unmix) {
+      tree_y = if(unmix & nrow(res) > 1) {
         TRUE
       } else {
         NULL
