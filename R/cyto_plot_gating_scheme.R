@@ -119,6 +119,8 @@ cyto_plot_gating_scheme <- function(x,
                                     ylim = c(NA, NA), 
                                     ...) {
   
+  # TODO: SUPPORT CONTROLS ONLY MATCHING CORRECT TERMINAL NODE
+  
   # CYTO_PLOT_COMPLETE ---------------------------------------------------------
   
   # CYTO_PLOT METHOD & EXIT
