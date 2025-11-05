@@ -6,6 +6,8 @@
 
 * Plotting bug fixes.
 * Addition of C++ geometric median to statistics suite.
+* Add `stat` argument to `cyto_spillover_compute()` and `cyto_unmix_compute()` to allow custom statistic for Bagwell method.
+* Universal unstained controls are now gated using all negative gates to ensure removal of autofluorescent contaminating events.
 
 # CytoExploreR 2.0.15
 
