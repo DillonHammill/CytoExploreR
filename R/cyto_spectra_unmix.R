@@ -45,6 +45,9 @@
 #' @param type options include \code{"Bagwell" or "autocomp"}, \code{"Roca" or
 #'   "autospill"} or \code{"CytoDecode"} to indicate which method to use when
 #'   computing the spillover matrix, set to \code{"CytoDecode"} by default. 
+#' @param stat indicates whether to use \code{"median"} or \code{"geomedian"} as
+#'   the statistic of choice for the \code{"Bagwell"} method, set to
+#'   \code{"median"} by default.
 #' @param save_as name of a CSV to which the computed unmixing matrix should be
 #'   written, set to \code{Spectral-Unmixing-Matrix.csv} prefixed with the date
 #'   by default. Set this argument to NA if you don't want to write the unmixing
@@ -109,6 +112,7 @@ cyto_unmix_compute <- function(x,
                                channels = NULL,
                                gate = "draw-2d",
                                type = "CytoDecode",
+                               stat = "median", 
                                save_as = NULL,
                                gatingTemplate = NULL,
                                axes_trans = NA,

@@ -11,6 +11,7 @@ cyto_unmix_compute(
   channels = NULL,
   gate = "draw-2d",
   type = "CytoDecode",
+  stat = "geomedian",
   save_as = NULL,
   gatingTemplate = NULL,
   axes_trans = NA,
@@ -60,6 +61,10 @@ suffix to \code{gate}. For example, to gate in 2D set \code{gate =
 \item{type}{options include \code{"Bagwell" or "autocomp"}, \code{"Roca" or
 "autospill"} or \code{"CytoDecode"} to indicate which method to use when
 computing the spillover matrix, set to \code{"CytoDecode"} by default.}
+
+\item{stat}{indicates whether to use \code{"median"} or \code{"geomedian"} as
+the statistic of choice for the \code{"Bagwell"} method, set to
+\code{"geomedian"} by default.}
 
 \item{save_as}{name of a CSV to which the computed unmixing matrix should be
 written, set to \code{Spectral-Unmixing-Matrix.csv} prefixed with the date

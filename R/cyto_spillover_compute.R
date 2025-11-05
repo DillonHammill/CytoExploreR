@@ -57,6 +57,9 @@
 #' @param type options include \code{"Bagwell" or "autocomp"}, \code{"Roca" or
 #'   "autospill"} or \code{"CytoDecode"} to indicate which method to use when
 #'   computing the spillover matrix, set to \code{"CytoDecode"} by default.
+#' @param stat indicates whether to use \code{"median"} or \code{"geomedian"} as
+#'   the statistic of choice for the \code{"Bagwell"} method, set to
+#'   \code{"median"} by default.
 #' @param save_as name of a csv file to which the computed spillover matrix
 #'   should be written, set to \code{Spillover-Matrix.csv} prefixed with the
 #'   date by default.
@@ -164,6 +167,7 @@ cyto_spillover_compute <- function(x,
                                    channels = NULL,
                                    gate = "draw",
                                    type = "CytoDecode",
+                                   stat = "median",
                                    save_as = NULL,
                                    gatingTemplate = NULL,
                                    axes_trans = NA,
@@ -478,7 +482,9 @@ cyto_spillover_compute <- function(x,
     " method... \n"
   )
   
-  # BAGWELL & HYBRID METHODS REQUIRE GATING
+  # TODO: USE UNSTAINED EVENTS THAT FALL INSIDE ALL NEGATIVE GATES
+  
+  # METHODS REQUIRE GATING
   if(!.all_na(gate)) {
 
     # SPLIT CYTOSET|GATINGSET SAMPLES INTO GROUPS
@@ -961,7 +967,45 @@ cyto_spillover_compute <- function(x,
               return(cs)
             }
           )
+          # UPDATE GATES
           gate_list <<- gate_list
+          # CREATE UNIVERSAL UNSTAINED GATE VENTS
+          unst_gate <- NULL
+          if(length(unst_idx) > 0) {
+            # EVENTS THAT EXIST IN ALL UNSTAINED GATES
+            unst_gate <- Reduce(
+              "&",
+              lapply(
+                gate_list,
+                function(w) {
+                  w[[grep(".*\\-$", names(w))]]
+                }
+              )
+            )
+            # GATE UNIVERSAL UNSTAINED
+            unst_cf <- cyto_gate_apply(
+              pops[[1]][["-"]],
+              gate = unst_gate
+            )[[1]][[1]]
+            # UPDATE UNIVERSAL UNSTAINED WITH COMBINED GATE
+            pops <- structure(
+              lapply(
+                seq_along(pops),
+                function(id) {
+                  pop_pd <- cyto_details(pops[[id]])
+                  res <- cytoset(
+                    list(
+                      "+" = pops[[id]][["+"]],
+                      "-" = unst_cf
+                    )
+                  )
+                  cyto_details(res) <- pop_pd
+                  return(res)
+                }
+              ),
+              names = names(pops)
+            )
+          }
           return(pops)
         }
       )
@@ -1059,10 +1103,6 @@ cyto_spillover_compute <- function(x,
   # UPDATE SAMPLE SELECTION
   pData(x)$select[match(names(pops), cyto_names(x))] <- "TRUE"
   
-  # TODO: GH_POP_SET_GATE() + RECOMPUTE()
-  # TODO: MANUAL GATINGTEMPLATE ENTRY
-  
-  # TODO: FOR SPEED WE COULD MODIFY GATES IN PLACE THEN REGENERATE GATINGTEMPLATE
   # STORE GATES IN GATINGSET & GATINGTEMPLATE
   if(cyto_class(x, "GatingSet") & !.all_na(gate)) {
     message(
@@ -1246,53 +1286,6 @@ cyto_spillover_compute <- function(x,
             )
           }
         }
-        # # GATE ALREADY EXISTS
-        # if(any(
-        #   sapply(paste0(parent, "/", pops), function(w){
-        #     w <- gsub("\\-", "\\\\-", w)
-        #     w <- gsub("\\+", "\\\\+", w)
-        #   any(grepl(w, nodes))
-        # }))) {
-        #   cyto_gate_remove(
-        #     x,
-        #     parent = parent,
-        #     alias = pops,
-        #     gatingTemplate = gatingTemplate
-        #   )
-        # }
-
-        # # ADD GATES TO GATINGSET & GATINGTEMPLATE
-        # lapply(
-        #   pops,
-        #   function(pop) {
-        #     gt <<- rbind(
-        #       gt,
-        #       .suppress_all_messages(
-        #         gs_add_gating_method(
-        #           gs = x,
-        #           alias = pop,
-        #           parent = parent,
-        #           pop = "+",
-        #           dims = parameters(gate[[1]][[1]]),
-        #           gating_method = "cyto_gate_draw",
-        #           gating_args = list(
-        #             "gate" = filters(
-        #               lapply(
-        #                 gate,
-        #                 `[[`,
-        #                 gsub("\\\\", "", pop)
-        #               )
-        #             ),
-        #             "openCyto.minEvents" = -1
-        #           ),
-        #           groupBy = NA,
-        #           collapseDataForGating = TRUE,
-        #           preprocessing_method = "pp_cyto_gate_draw"
-        #         )
-        #       )
-        #     )
-        #   }
-        # )
         # WRITE UPDATED GATINGTEMPLATE - WRITING ERROR - SYNC GS
         if(!is.null(gatingTemplate)) {
           cyto_gatingTemplate_write(
@@ -1328,7 +1321,7 @@ cyto_spillover_compute <- function(x,
           medfi <- cyto_apply(
             pops[[id]],
             channels = channels,
-            FUN = "cyto_stat_median",
+            FUN = .cyto_stat_dispatch(stat),
             round = 4,
             input = "matrix",
             trans = axes_trans,
@@ -1370,21 +1363,41 @@ cyto_spillover_compute <- function(x,
         lapply(
           pops,
           function(pop) {
-            # EQUAL SAMPLE SIZE FOR BOTH POPULATIONS
+            # EVENTS
+            if(events < 1) {
+              events <- events * nrow(pop)[[1]]
+            }
+            # EQUAL SAMPLE SIZE FOR BOTH GATED POPULATIONS
             if(length(pop) >  1) {
               cf <- cyto_merge_by(
                 pop,
                 merge_by = "all",
                 format = "cytoframe",
-                events = min(c(events, nrow(pop)[[1]])),
+                events = min(
+                  c(
+                    events, 
+                    nrow(pop)[[1]]
+                  )
+                ),
                 overwrite = FALSE
               )[[1]]
-            # DOUBLE SAMPLE SIZE 
+            # UNGATED
             } else {
-              cf <- cyto_sample(
-                pop[[1]],
-                events = min(c(2*events, nrow(pop)[[1]]))
-              )
+              # USE ALL EVENTS
+              if(events == 1) {
+                cf <- pop[[1]]
+              # DOUBLE SAMPLE SIZE - POOLED -VE & +VE
+              } else {
+                cf <- cyto_sample(
+                  pop[[1]],
+                  events = min(
+                    c(
+                      2*events,
+                      nrow(pop)[[1]]
+                    )
+                  )
+                )
+              }
             }
             return(cf)
           }
@@ -1574,7 +1587,6 @@ cyto_spillover_compute <- function(x,
           }
         }
       )
-      spill[spill < 0] <- 0
     }
   }
   
@@ -1593,6 +1605,7 @@ cyto_spillover_compute <- function(x,
   # FORMAT UNMIXING MATRIX
   } else {
     res <- spill
+    res[res < 0] <- 0
   }
 
   # DEFAULT CSV FILENAME
