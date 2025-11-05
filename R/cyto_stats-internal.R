@@ -18,6 +18,7 @@
                     "mean",
                     "geomean",
                     "median",
+                    "geomedian",
                     "mode",
                     "sd",
                     "rsd",
@@ -186,6 +187,36 @@ cyto_stat_median <- function(x,
     return(
       round(
         col_median_cpp(x),
+        round
+      )
+    )
+  }
+  
+}
+
+## GEOMEDIAN -------------------------------------------------------------------
+
+#' Geometric Median
+#' @param x a vector or matrix
+#' @param round numeric
+#' @noRd
+cyto_stat_geomedian <- function(x,
+                                round = 2,
+                                ...) {
+  
+  # VECTOR
+  if(is.null(dim(x))) {
+    return(
+      "median" = round(
+        unname(geometric_median_cpp(matrix(x, ncol = 1))),
+        round
+      )
+    )
+    # MATRIX
+  } else {
+    return(
+      round(
+        geometric_median_cpp(x),
         round
       )
     )

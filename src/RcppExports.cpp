@@ -43,6 +43,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// geometric_median_cpp
+NumericVector geometric_median_cpp(NumericMatrix x, double eps, int maxiter);
+RcppExport SEXP _CytoExploreR_geometric_median_cpp(SEXP xSEXP, SEXP epsSEXP, SEXP maxiterSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
+    rcpp_result_gen = Rcpp::wrap(geometric_median_cpp(x, eps, maxiter));
+    return rcpp_result_gen;
+END_RCPP
+}
 // geomean_cpp
 double geomean_cpp(Rcpp::NumericVector x);
 RcppExport SEXP _CytoExploreR_geomean_cpp(SEXP xSEXP) {
@@ -420,6 +433,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_CytoExploreR_rcpp_median_inplace", (DL_FUNC) &_CytoExploreR_rcpp_median_inplace, 1},
     {"_CytoExploreR_median_cpp", (DL_FUNC) &_CytoExploreR_median_cpp, 1},
     {"_CytoExploreR_col_median_cpp", (DL_FUNC) &_CytoExploreR_col_median_cpp, 1},
+    {"_CytoExploreR_geometric_median_cpp", (DL_FUNC) &_CytoExploreR_geometric_median_cpp, 3},
     {"_CytoExploreR_geomean_cpp", (DL_FUNC) &_CytoExploreR_geomean_cpp, 1},
     {"_CytoExploreR_col_geomean_cpp", (DL_FUNC) &_CytoExploreR_col_geomean_cpp, 1},
     {"_CytoExploreR_sd_cpp", (DL_FUNC) &_CytoExploreR_sd_cpp, 1},

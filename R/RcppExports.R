@@ -13,6 +13,10 @@ col_median_cpp <- function(x) {
     .Call(`_CytoExploreR_col_median_cpp`, x)
 }
 
+geometric_median_cpp <- function(x, eps = 1e-5, maxiter = 100L) {
+    .Call(`_CytoExploreR_geometric_median_cpp`, x, eps, maxiter)
+}
+
 geomean_cpp <- function(x) {
     .Call(`_CytoExploreR_geomean_cpp`, x)
 }

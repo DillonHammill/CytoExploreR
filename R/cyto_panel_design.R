@@ -167,7 +167,7 @@ cyto_panel_design <- function(x,
   if(is.null(channels)) {
     channels <- cyto_fluor_channels(
       x,
-      select = "-A"
+      exclude = "\\-[HW]$"
     )
   } else {
     channels <- unique(
@@ -554,7 +554,7 @@ cyto_panel_design <- function(x,
                 nodes = paste0(dye, "-"),
                 anchor = pd$parent[z]
               ),
-              channels = colnames(spec),
+              channels = unique(pd$channel[idx]),
               input = "matrix",
               inverse = TRUE,
               copy = TRUE
@@ -572,7 +572,7 @@ cyto_panel_design <- function(x,
                 nodes = paste0(dye, "+"),
                 anchor = pd$parent[z]
               ),
-              channels = colnames(spec),
+              channels = unique(pd$channel[idx]),
               input = "matrix",
               inverse = TRUE,
               copy = TRUE
@@ -581,7 +581,7 @@ cyto_panel_design <- function(x,
             pos_sd <- pos_sd[1, ] - pos_sd[2, ]
             # COMPUTE SPREAD
             spread <- (pos_sd^2) - (neg_sd^2)
-            spread[match(pd$channel[z], colnames(spec))] <- 0
+            spread[match(pd$channel[z], unique(pd$channel[idx]))] <- 0
             spread[spread < 0] <- 0
             spread <- sqrt(spread)
             # TOTAL SPILLOVER SPREAD
@@ -597,7 +597,7 @@ cyto_panel_design <- function(x,
         ord <- order(
           match(
             pd$channel[idx], 
-            colnames(spec)
+            unique(pd$channel[idx])
           )
         )
         SSM <- SSM[ord, , drop = FALSE]

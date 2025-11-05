@@ -65,6 +65,59 @@ Rcpp::NumericVector col_median_cpp(Rcpp::NumericMatrix x) {
   return out;
 }
 
+// --- GEOMETRIC MEDIAN ---
+
+// Function to calculate Euclidean distance between two vectors
+double euclidean_dist(NumericVector p1, NumericVector p2) {
+  return sqrt(sum(pow(p1 - p2, 2.0)));
+}
+
+// [[Rcpp::export]]
+NumericVector geometric_median_cpp(NumericMatrix x, double eps = 1e-5, int maxiter = 100) {
+  int n_rows = x.nrow();
+  int n_cols = x.ncol();
+  CharacterVector cnames = colnames(x); // Get column names from the input matrix
+  
+  // 1. Initial guess: the centroid (column means)
+  NumericVector y = colMeans(x);
+  NumericVector y_new(n_cols);
+  
+  for (int k = 0; k < maxiter; ++k) {
+    double den = 0.0; // Denominator for the update formula
+    NumericVector num(n_cols); // Numerator vector
+    
+    // 2. Iterate through each data point to calculate sums
+    for (int i = 0; i < n_rows; ++i) {
+      NumericVector xi = x(i, _);
+      double dist = euclidean_dist(xi, y);
+      
+      // Handle the case where the estimate coincides with a data point
+      if (dist < 1e-9) { // Use a small threshold for floating point comparison
+        xi.names() = cnames; // Set names before returning
+        return xi;
+      }
+      
+      den += 1.0 / dist;
+      num += xi / dist;
+    }
+    
+    y_new = num / den;
+    
+    // 3. Check for convergence
+    if (euclidean_dist(y_new, y) < eps) {
+      y_new.names() = cnames; // Set names before returning
+      return y_new;
+    }
+    
+    y = y_new; // Update for the next iteration
+  }
+  
+  // Warning if max iterations reached without convergence
+  Rcpp::warning("Algorithm did not converge within the specified number of iterations.");
+  y.names() = cnames; // Set names before returning
+  return y;
+}
+
 // --- GEOMETRIC MEAN ---
 
 // [[Rcpp::export]]

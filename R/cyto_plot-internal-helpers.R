@@ -3668,7 +3668,7 @@
           key_box_y[z + 1],
           xpd = TRUE,
           col = key_cols[z],
-          border = NA
+          border = key_cols[z]
         )
       }
     )
@@ -3837,6 +3837,11 @@
   
   # KEY_TITLE
   key_title <- unname(rep(key_title, length.out = length(x)))
+  
+  # FORCE LOGICAL NA 
+  if(.all_na(point_col[[1]])) {
+    point_col[[1]] <- as.logical(NA)
+  }
   
   # PREPARE KEY - MARKERS|CHANNELS OR COLOURS
   if(cyto_class(point_col[[1]], "character")) {
@@ -4497,21 +4502,35 @@
     )
   }
   
-  # REMAINING LAYERS - SELECT FROM POINT_COLS
-  if (any(LAPPLY(args$point_col[-1], ".all_na"))) {
-    # NUMBER OF REQUIRED COLOURS
-    n <- length(
-      args$point_col[-1][
-        LAPPLY(args$point_col[-1], ".all_na")
-      ]
-    )
-    # GET MISSING COLOURS FROM POINT_COLS
-    clrs <- args$point_cols(n)
-    # UPDATE COLOURS IN POINT_COL
-    args$point_col[
-      c(FALSE, LAPPLY(args$point_col[-1], ".all_na"))
-    ] <- clrs
+  # LOCATE POINT_COL = NA LAYERS
+  # FIRST NA IS TREATED AS DENSITY LAYER
+  # REMAINING LAYERS INHERIT SOLID COLOURS
+  idx <- which(LAPPLY(args$point_col, ".all_na"))
+  if(length(idx) > 0) {
+    args$point_col[[idx[1]]] <- as.logical(NA)
+    if(length(idx) > 1) {
+      args$point_col[idx[-1]] <- args$point_cols(length(idx[-1]))
+    }
+    idx <- idx[1]
+  } else {
+    idx <- 0
   }
+  
+  # # REMAINING LAYERS - SELECT FROM POINT_COLS
+  # if (any(LAPPLY(args$point_col[-1], ".all_na"))) {
+  #   # NUMBER OF REQUIRED COLOURS
+  #   n <- length(
+  #     args$point_col[-1][
+  #       LAPPLY(args$point_col[-1], ".all_na")
+  #     ]
+  #   )
+  #   # GET MISSING COLOURS FROM POINT_COLS
+  #   clrs <- args$point_cols(n)
+  #   # UPDATE COLOURS IN POINT_COL
+  #   args$point_col[
+  #     c(FALSE, LAPPLY(args$point_col[-1], ".all_na"))
+  #   ] <- clrs
+  # }
   
   # NOTE: WE ONLY SUPPORT DENSITY ON BASE LAYER - POINT_COL = NA REPEATED
   # NOTE: KEY_SCALE ONLY SUPPORTED FOR BASE LAYER
