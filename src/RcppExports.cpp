@@ -349,14 +349,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // rescale_cpp
-Rcpp::NumericVector rescale_cpp(Rcpp::NumericVector x, Rcpp::NumericVector scale, Rcpp::Nullable<Rcpp::NumericVector> limits);
+Rcpp::NumericVector rescale_cpp(Rcpp::NumericVector x, Rcpp::Nullable<Rcpp::RObject> scale, Rcpp::Nullable<Rcpp::RObject> limits);
 RcppExport SEXP _CytoExploreR_rescale_cpp(SEXP xSEXP, SEXP scaleSEXP, SEXP limitsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type scale(scaleSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type limits(limitsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::RObject> >::type scale(scaleSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::RObject> >::type limits(limitsSEXP);
     rcpp_result_gen = Rcpp::wrap(rescale_cpp(x, scale, limits));
     return rcpp_result_gen;
 END_RCPP

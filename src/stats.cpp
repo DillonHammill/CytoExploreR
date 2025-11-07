@@ -679,159 +679,108 @@ Rcpp::NumericMatrix col_scale_cpp(
     Rcpp::Nullable<Rcpp::NumericVector> probs = R_NilValue
 ) {
   
-  std::string type_str = type;
-  std::transform(type_str.begin(), type_str.end(), type_str.begin(), ::tolower);
-  
   int ncol = x.ncol();
-  int nrow = x.nrow();
-  
   Rcpp::NumericMatrix out = Rcpp::clone(x);
   
-  // Determine scaling type
-  bool is_range = (type_str.rfind("r", 0) == 0);
-  bool is_mean = (type_str.rfind("mea", 0) == 0);
-  bool is_median = (type_str.rfind("med", 0) == 0);
-  bool is_quantile = (type_str.rfind("q", 0) == 0);
-  bool is_zscore = (type_str.rfind("z", 0) == 0);
-  
-  // Prepare probs vector for quantile scaling
-  Rcpp::NumericVector probs_vec;
-  if (is_quantile) {
-    if (probs.isNotNull()) {
-      probs_vec = Rcpp::NumericVector(probs);
-      if (probs_vec.size() != 2) {
-        Rcpp::stop("If provided, 'probs' must be a numeric vector of length 2.");
-      }
-      if (probs_vec[0] < 0 || probs_vec[0] > 1 || probs_vec[1] < 0 || probs_vec[1] > 1 || probs_vec[0] >= probs_vec[1]) {
-        Rcpp::stop("'probs' must contain two values between 0 and 1, with the first being smaller than the second.");
-      }
-    } else {
-      probs_vec = Rcpp::NumericVector::create(0.01, 0.99);
-    }
-  }
-  
   for (int j = 0; j < ncol; ++j) {
-    Rcpp::NumericVector col = out.column(j);
-    
-    if (is_range || is_mean || is_median) {
-      Rcpp::NumericVector range_vals = range_cpp(col);
-      double min_val = range_vals[0];
-      double max_val = range_vals[1];
-      double range_diff = max_val - min_val;
-      
-      if (range_diff == 0) {
-        for(int i = 0; i < nrow; ++i) col[i] = 0.0;
-        continue;
-      }
-      
-      double center = 0.0;
-      if (is_range) {
-        center = min_val;
-      } else if (is_mean) {
-        center = mean_cpp(col);
-      } else if (is_median) {
-        Rcpp::NumericVector col_no_na; // Create fresh vector
-        for(int i = 0; i < nrow; ++i) {
-          if(!R_IsNA(col[i])) {
-            col_no_na.push_back(col[i]);
-          }
-        }
-        center = median_cpp(col_no_na);
-      }
-      
-      for (int i = 0; i < nrow; ++i) {
-        col[i] = (col[i] - center) / range_diff;
-      }
-      
-    } else if (is_quantile) {
-      Rcpp::NumericVector temp_col = Rcpp::clone(col);
-      Rcpp::NumericVector quant_vals = quantile_cpp(temp_col, probs_vec);
-      
-      double lower_q = quant_vals[0];
-      double upper_q = quant_vals[1];
-      double quant_diff = upper_q - lower_q;
-      
-      if (quant_diff == 0) {
-        for(int i = 0; i < nrow; ++i) col[i] = 0.5;
-        continue;
-      }
-      
-      for (int i = 0; i < nrow; ++i) {
-        double scaled_val = (col[i] - lower_q) / quant_diff;
-        if (scaled_val < 0.0) scaled_val = 0.0;
-        if (scaled_val > 1.0) scaled_val = 1.0;
-        col[i] = scaled_val;
-      }
-      
-    } else if (is_zscore) {
-      double sd_val = sd_cpp(col);
-      if (sd_val == 0) {
-        for(int i = 0; i < nrow; ++i) col[i] = 0.0;
-        continue;
-      }
-      double mean_val = mean_cpp(col);
-      for (int i = 0; i < nrow; ++i) {
-        col[i] = (col[i] - mean_val) / sd_val;
-      }
-    } else {
-      Rcpp::stop("'type' must be 'range', 'mean', 'median', 'quantile' or 'zscore'!");
-    }
+    Rcpp::NumericVector original_col = x.column(j);
+    Rcpp::NumericVector scaled_col = scale_cpp(original_col, type, probs);
+    out.column(j) = scaled_col;
   }
   
   Rcpp::colnames(out) = Rcpp::colnames(x);
+
   return out;
 }
 
 // --- RESCALE ---
 
-// [[Rcpp::export]]
-Rcpp::NumericVector rescale_cpp(
+Rcpp::NumericVector rescale_cpp_internal(
     Rcpp::NumericVector x,
-    Rcpp::NumericVector scale = Rcpp::NumericVector::create(0, 1),
-    Rcpp::Nullable<Rcpp::NumericVector> limits = R_NilValue
+    Rcpp::NumericVector current_scale,
+    Rcpp::NumericVector current_limits
 ) {
-  Rcpp::NumericVector out = Rcpp::clone(x);
-  int n = out.size();
+  int n = x.size();
+  // Create a copy to store the rescaled values
+  Rcpp::NumericVector out = Rcpp::clone(x); 
   
-  // Determine limits
-  Rcpp::NumericVector limits_vec(2);
-  if (limits.isNotNull()) {
-    limits_vec = Rcpp::NumericVector(limits);
-  } else {
-    limits_vec = Rcpp::NumericVector::create(NA_REAL, NA_REAL);
+  // Use a copy of limits to avoid modifying the input
+  Rcpp::NumericVector limits_to_use = Rcpp::clone(current_limits);
+  
+  // Fill in NA limits from data range
+  if (R_IsNA(limits_to_use[0]) || R_IsNA(limits_to_use[1])) {
+    Rcpp::NumericVector data_range = range_cpp(out); // Assumes na.rm=true
+    if (R_IsNA(limits_to_use[0])) limits_to_use[0] = data_range[0];
+    if (R_IsNA(limits_to_use[1])) limits_to_use[1] = data_range[1];
   }
   
-  if (R_IsNA(limits_vec[0]) || R_IsNA(limits_vec[1])) {
-    Rcpp::NumericVector data_range = range_cpp(out); // na.rm = true
-    if (R_IsNA(limits_vec[0])) limits_vec[0] = data_range[0];
-    if (R_IsNA(limits_vec[1])) limits_vec[1] = data_range[1];
-  }
-  
-  double old_min = limits_vec[0];
-  double old_max = limits_vec[1];
-  double new_min = scale[0];
-  double new_max = scale[1];
+  double old_min = limits_to_use[0];
+  double old_max = limits_to_use[1];
+  double new_min = current_scale[0];
+  double new_max = current_scale[1];
   
   double old_range = old_max - old_min;
   double new_range = new_max - new_min;
   
   if (old_range == 0) {
+    // If original range is zero, set all values to the new min
     std::fill(out.begin(), out.end(), new_min);
     return out;
   }
   
   for (int i = 0; i < n; ++i) {
-    // Cap the values
     double val = out[i];
-    if (val < old_min) val = old_min;
-    if (val > old_max) val = old_max;
-    // Rescale
-    out[i] = new_min + ((val - old_min) / old_range) * new_range;
+    
+    // Only process non-NA values
+    if (!R_IsNA(val)) {
+      // Clamp the value to the specified limits *before* scaling
+      if (val < old_min) val = old_min;
+      if (val > old_max) val = old_max;
+      
+      // Perform the rescale operation
+      out[i] = new_min + ((val - old_min) / old_range) * new_range;
+    }
   }
   
   return out;
 }
 
+// [[Rcpp::export]]
+Rcpp::NumericVector rescale_cpp(
+    Rcpp::NumericVector x,
+    Rcpp::Nullable<Rcpp::RObject> scale = R_NilValue,
+    Rcpp::Nullable<Rcpp::RObject> limits = R_NilValue
+) {
+  
+  // --- Prepare scale vector ---
+  Rcpp::NumericVector current_scale(2);
+  Rcpp::NumericVector default_scale = Rcpp::NumericVector::create(0, 1);
+  
+  if (scale.isNotNull()) {
+    current_scale = Rcpp::as<Rcpp::NumericVector>(Rcpp::RObject(scale));
+    if (current_scale.size() != 2) {
+      Rcpp::stop("'scale' must be a numeric vector of length 2.");
+    }
+  } else {
+    current_scale = default_scale;
+  }
+  
+  // --- Prepare limits vector ---
+  Rcpp::NumericVector current_limits(2);
+  Rcpp::NumericVector default_limits = Rcpp::NumericVector::create(NA_REAL, NA_REAL);
+  
+  if (limits.isNotNull()) {
+    current_limits = Rcpp::as<Rcpp::NumericVector>(Rcpp::RObject(limits));
+    if (current_limits.size() != 2) {
+      Rcpp::stop("'limits' must be a numeric vector of length 2.");
+    }
+  } else {
+    current_limits = default_limits;
+  }
+  
+  // --- Call the internal workhorse function ---
+  return rescale_cpp_internal(x, current_scale, current_limits);
+}
 
 // [[Rcpp::export]]
 Rcpp::NumericMatrix col_rescale_cpp(
@@ -840,10 +789,11 @@ Rcpp::NumericMatrix col_rescale_cpp(
     Rcpp::Nullable<Rcpp::RObject> limits = R_NilValue
 ) {
   int ncol = x.ncol();
-  int nrow = x.nrow();
+  
+  // Create the output matrix as a clone.
   Rcpp::NumericMatrix out = Rcpp::clone(x);
   
-  // Prepare scale and limits matrices
+  // --- Prepare scale and limits matrices ---
   Rcpp::NumericMatrix scale_mat(2, ncol);
   Rcpp::NumericMatrix limits_mat(2, ncol);
   
@@ -853,8 +803,12 @@ Rcpp::NumericMatrix col_rescale_cpp(
     Rcpp::RObject scale_r_obj(scale);
     if (Rf_isMatrix(scale_r_obj)) {
       scale_mat = Rcpp::as<Rcpp::NumericMatrix>(scale_r_obj);
+      if (scale_mat.nrow() != 2 || scale_mat.ncol() != ncol) {
+        Rcpp::stop("If 'scale' is a matrix, it must have 2 rows and ncol(x) columns.");
+      }
     } else {
       Rcpp::NumericVector scale_vec = Rcpp::as<Rcpp::NumericVector>(scale_r_obj);
+      if (scale_vec.size() != 2) Rcpp::stop("'scale' vector must have length 2.");
       for(int j = 0; j < ncol; ++j) scale_mat.column(j) = scale_vec;
     }
   } else {
@@ -867,49 +821,34 @@ Rcpp::NumericMatrix col_rescale_cpp(
     Rcpp::RObject limits_r_obj(limits);
     if (Rf_isMatrix(limits_r_obj)) {
       limits_mat = Rcpp::as<Rcpp::NumericMatrix>(limits_r_obj);
+      if (limits_mat.nrow() != 2 || limits_mat.ncol() != ncol) {
+        Rcpp::stop("If 'limits' is a matrix, it must have 2 rows and ncol(x) columns.");
+      }
     } else {
       Rcpp::NumericVector limits_vec = Rcpp::as<Rcpp::NumericVector>(limits_r_obj);
+      if (limits_vec.size() != 2) Rcpp::stop("'limits' vector must have length 2.");
       for(int j = 0; j < ncol; ++j) limits_mat.column(j) = limits_vec;
     }
   } else {
     for(int j = 0; j < ncol; ++j) limits_mat.column(j) = default_limits;
   }
+  // --- End of parameter preparation ---
   
-  // Loop through columns and rescale
+  
+  // Loop through columns, rescale, and assign to 'out'
   for (int j = 0; j < ncol; ++j) {
-    Rcpp::NumericVector col = out.column(j);
-    Rcpp::NumericVector current_scale = scale_mat.column(j);
-    Rcpp::NumericVector current_limits = limits_mat.column(j);
     
-    // Fill in NA limits from data range
-    if (R_IsNA(current_limits[0]) || R_IsNA(current_limits[1])) {
-      Rcpp::NumericVector data_range = range_cpp(col); // na.rm = true
-      if (R_IsNA(current_limits[0])) current_limits[0] = data_range[0];
-      if (R_IsNA(current_limits[1])) current_limits[1] = data_range[1];
-    }
-    
-    double old_min = current_limits[0];
-    double old_max = current_limits[1];
-    double new_min = current_scale[0];
-    double new_max = current_scale[1];
-    
-    double old_range = old_max - old_min;
-    double new_range = new_max - new_min;
-    
-    if (old_range == 0) {
-      for(int i = 0; i < nrow; ++i) col[i] = new_min;
-      continue;
-    }
-    
-    for (int i = 0; i < nrow; ++i) {
-      double val = col[i];
-      if (val < old_min) val = old_min;
-      if (val > old_max) val = old_max;
-      col[i] = new_min + ((val - old_min) / old_range) * new_range;
-    }
+    // Call the internal workhorse function
+    out.column(j) = rescale_cpp_internal(
+      x.column(j), 
+      scale_mat.column(j), 
+      limits_mat.column(j)
+    );
   }
   
   Rcpp::colnames(out) = Rcpp::colnames(x);
+  
+  // Return the modified copy
   return out;
 }
 

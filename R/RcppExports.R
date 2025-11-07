@@ -121,7 +121,7 @@ col_scale_cpp <- function(x, type = "range", probs = NULL) {
     .Call(`_CytoExploreR_col_scale_cpp`, x, type, probs)
 }
 
-rescale_cpp <- function(x, scale = as.numeric( c(0, 1)), limits = NULL) {
+rescale_cpp <- function(x, scale = NULL, limits = NULL) {
     .Call(`_CytoExploreR_rescale_cpp`, x, scale, limits)
 }
 
