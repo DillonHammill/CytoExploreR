@@ -5,6 +5,7 @@
 # CytoExploreR 2.0.17
 
 * Bug fixes to scale and rescale C++ functions.
+* Bug fix to unstained gating in `cyto_spillover_compute()` and `cyto_unmix_compute()`.
 
 # CytoExploreR 2.0.16
 

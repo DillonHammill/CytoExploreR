@@ -11,7 +11,7 @@ cyto_unmix_compute(
   channels = NULL,
   gate = "draw-2d",
   type = "CytoDecode",
-  stat = "geomedian",
+  stat = "median",
   save_as = NULL,
   gatingTemplate = NULL,
   axes_trans = NA,
@@ -64,7 +64,7 @@ computing the spillover matrix, set to \code{"CytoDecode"} by default.}
 
 \item{stat}{indicates whether to use \code{"median"} or \code{"geomedian"} as
 the statistic of choice for the \code{"Bagwell"} method, set to
-\code{"geomedian"} by default.}
+\code{"median"} by default.}
 
 \item{save_as}{name of a CSV to which the computed unmixing matrix should be
 written, set to \code{Spectral-Unmixing-Matrix.csv} prefixed with the date

@@ -969,24 +969,34 @@ cyto_spillover_compute <- function(x,
           )
           # UPDATE GATES
           gate_list <<- gate_list
-          # CREATE UNIVERSAL UNSTAINED GATE VENTS
-          unst_gate <- NULL
+          # CREATE UNIVERSAL UNSTAINED GATE EVENTS
           if(length(unst_idx) > 0) {
-            # EVENTS THAT EXIST IN ALL UNSTAINED GATES
-            unst_gate <- Reduce(
-              "&",
-              lapply(
-                gate_list,
-                function(w) {
-                  w[[grep(".*\\-$", names(w))]]
-                }
-              )
+            # GET MERGED UNSTAINED GATES PER PARENT
+            parents <- sapply(
+              pops,
+              function(pop) {
+                unique(
+                  cyto_details(pop)$parent
+                )
+              }
             )
-            # GATE UNIVERSAL UNSTAINED
-            unst_cf <- cyto_gate_apply(
-              pops[[1]][["-"]],
-              gate = unst_gate
-            )[[1]][[1]]
+            names(parents) <- parents
+            parent_unst_gates <- lapply(
+              unique(parents),
+              function(p) {
+                idx <- which(parents %in% p)
+                Reduce(
+                  "&",
+                  lapply(
+                    gate_list[names(pops)[idx]],
+                    function(w) {
+                      w[[grep(".*\\-$", names(w))]]
+                    }
+                  )
+                )
+              }
+            )
+            names(parent_unst_gates) <- unique(parents)
             # UPDATE UNIVERSAL UNSTAINED WITH COMBINED GATE
             pops <- structure(
               lapply(
@@ -996,7 +1006,10 @@ cyto_spillover_compute <- function(x,
                   res <- cytoset(
                     list(
                       "+" = pops[[id]][["+"]],
-                      "-" = unst_cf
+                      "-" = cyto_gate_apply(
+                        pops[[id]][["-"]],
+                        gate = parent_unst_gates[[parents[id]]]
+                      )[[1]][[1]]
                     )
                   )
                   cyto_details(res) <- pop_pd
