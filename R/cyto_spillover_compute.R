@@ -981,22 +981,29 @@ cyto_spillover_compute <- function(x,
               }
             )
             names(parents) <- parents
-            parent_unst_gates <- lapply(
+            print(parents)
+            parent_unst <- lapply(
               unique(parents),
               function(p) {
+                # SELECT FIRST UNSTAINED 
                 idx <- which(parents %in% p)
-                Reduce(
-                  "&",
-                  lapply(
-                    gate_list[names(pops)[idx]],
-                    function(w) {
-                      w[[grep(".*\\-$", names(w))]]
-                    }
+                # APPLY UNIVERSAL GATE ACROSS CONTROLS
+                cyto_gate_apply(
+                  pops[[idx[1]]][["-"]],
+                  gate = Reduce(
+                    "&",
+                    lapply(
+                      gate_list[names(pops)[idx]],
+                      function(w) {
+                        w[[grep(".*\\-$", names(w))]]
+                      }
+                    )
                   )
-                )
+                )[[1]][[1]]
               }
             )
-            names(parent_unst_gates) <- unique(parents)
+            names(parent_unst) <- unique(parents)
+            print(parent_unst)
             # UPDATE UNIVERSAL UNSTAINED WITH COMBINED GATE
             pops <- structure(
               lapply(
@@ -1006,10 +1013,7 @@ cyto_spillover_compute <- function(x,
                   res <- cytoset(
                     list(
                       "+" = pops[[id]][["+"]],
-                      "-" = cyto_gate_apply(
-                        pops[[id]][["-"]],
-                        gate = parent_unst_gates[[parents[id]]]
-                      )[[1]][[1]]
+                      "-" = parent_unst[[parents[id]]]
                     )
                   )
                   cyto_details(res) <- pop_pd
@@ -1117,7 +1121,7 @@ cyto_spillover_compute <- function(x,
   pData(x)$select[match(names(pops), cyto_names(x))] <- "TRUE"
   
   # STORE GATES IN GATINGSET & GATINGTEMPLATE
-  if(cyto_class(x, "GatingSet") & !.all_na(gate)) {
+  if(cyto_class(x, "GatingSet") & !.all_na(gate) & !rerun) {
     message(
       "Adding gates to GatingSet and gatingTemplate..."
     )
