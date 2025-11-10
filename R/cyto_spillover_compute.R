@@ -956,14 +956,12 @@ cyto_spillover_compute <- function(x,
                 )
               )
               # UPDATE METADATA
-              pData(cs) <- cbind(
-                pData(cs),
-                pd[
-                  c(z, z),
-                  c("group", "parent","channel","marker","label", "select"),
-                  drop = FALSE
-                ]
-              )
+              cyto_details(cs)$group <- pd$group[z]
+              cyto_details(cs)$parent <- pd$parent[z]
+              cyto_details(cs)$channel <- pd$channel[z]
+              cyto_details(cs)$marker<- pd$marker[z]
+              cyto_details(cs)$label <- pd$label[z]
+              cyto_details(cs)$select <- pd$select[z]
               return(cs)
             }
           )
@@ -981,7 +979,6 @@ cyto_spillover_compute <- function(x,
               }
             )
             names(parents) <- parents
-            print(parents)
             parent_unst <- lapply(
               unique(parents),
               function(p) {
@@ -1003,7 +1000,6 @@ cyto_spillover_compute <- function(x,
               }
             )
             names(parent_unst) <- unique(parents)
-            print(parent_unst)
             # UPDATE UNIVERSAL UNSTAINED WITH COMBINED GATE
             pops <- structure(
               lapply(
