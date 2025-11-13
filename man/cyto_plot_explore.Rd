@@ -35,7 +35,9 @@ default.}
 
 \item{channels_x}{vector of channels or markers to plot on the x axis of the
 plots, by default we use channels returned by
-\code{\link{cyto_fluor_channels}}.}
+\code{\link{cyto_fluor_channels}}. If \code{channel} metadata variable is
+present each sample with be plotted with the specified channel on the x
+axis.}
 
 \item{channels_y}{vector of channels or markers to plot on the y axis of the
 plots, by default we use all channels as returned by
@@ -48,8 +50,8 @@ select samples using \code{\link{cyto_select}} when a \code{flowSet} or
 details. Sample selection occurs prior to grouping with \code{merge_by}.}
 
 \item{merge_by}{a vector of pData variables to sort and merge samples into
-groups prior to plotting, set to NA by default to prevent merging. To
-merge all samples set this argument to \code{TRUE} or \code{"all"}.}
+groups prior to plotting, set to NA by default to prevent merging. To merge
+all samples set this argument to \code{TRUE} or \code{"all"}.}
 
 \item{overlay}{name(s) of the populations to overlay or a \code{cytoset},
 \code{list of cytosets} or \code{list of cytoset lists} containing

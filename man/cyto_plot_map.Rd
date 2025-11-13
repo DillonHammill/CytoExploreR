@@ -46,8 +46,8 @@ select samples using \code{\link{cyto_select}} when a \code{flowSet} or
 details. Sample selection occurs prior to grouping with \code{merge_by}.}
 
 \item{merge_by}{a vector of pData variables to sort and merge samples into
-groups prior to plotting, set to NA by default to prevent merging. To
-merge all samples set this argument to \code{TRUE} or \code{"all"}.}
+groups prior to plotting, set to NA by default to prevent merging. To merge
+all samples set this argument to \code{TRUE} or \code{"all"}.}
 
 \item{overlay}{name(s) of the populations to overlay or a \code{cytoset},
 \code{list of cytosets} or \code{list of cytoset lists} containing
@@ -58,8 +58,8 @@ populations to be overlaid onto the plot(s). This argument can be set to
 \item{order}{can be either \code{"channels"} or \code{"groups"} to control
 the order in which the data is plotted. Setting \code{order = "channels"}
 will plot each group on a single page with a plot for each channel in
-\code{channels_y}. On the other hand, setting \code{order = "groups"} will
-plot each channel on a separate page with a plot for each group in
+\code{point_col}. On the other hand, setting \code{order = "groups"} will
+plot each \code{point_col} on a separate page with a plot for each group in
 \code{merge_by}.}
 
 \item{alias}{name of the gated population(s) to gated in the plot when a
@@ -81,7 +81,9 @@ these boolean gates, users will need to explicitly pass the names of the
 gates they want to display to alias.}
 
 \item{point_col}{names of the channels or markers to use for the colour scale
-of each plot, set to all fluorescent channels by default.}
+of each plot, set to all fluorescent channels by default. If \code{channel}
+is supplied in the metadata, data for each sample will be coloured by the
+specified channel.}
 
 \item{point_col_scale}{vector of colours to use for the colour scale within
 each plot. \code{point_col_scale} can also be supplied as a list of length

@@ -11,7 +11,9 @@
 #'   default.
 #' @param channels_x vector of channels or markers to plot on the x axis of the
 #'   plots, by default we use channels returned by
-#'   \code{\link{cyto_fluor_channels}}.
+#'   \code{\link{cyto_fluor_channels}}. If \code{channel} metadata variable is
+#'   present each sample with be plotted with the specified channel on the x
+#'   axis.
 #' @param channels_y vector of channels or markers to plot on the y axis of the
 #'   plots, by default we use all channels as returned by
 #'   \code{\link{cyto_channels}}. \code{channels_y} overlapping with
@@ -21,8 +23,8 @@
 #'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
 #'   details. Sample selection occurs prior to grouping with \code{merge_by}.
 #' @param merge_by a vector of pData variables to sort and merge samples into
-#'   groups prior to plotting, set to NA by default to prevent merging. To
-#'   merge all samples set this argument to \code{TRUE} or \code{"all"}.
+#'   groups prior to plotting, set to NA by default to prevent merging. To merge
+#'   all samples set this argument to \code{TRUE} or \code{"all"}.
 #' @param overlay name(s) of the populations to overlay or a \code{cytoset},
 #'   \code{list of cytosets} or \code{list of cytoset lists} containing
 #'   populations to be overlaid onto the plot(s). This argument can be set to
@@ -138,6 +140,12 @@ cyto_plot_explore <- function(x,
   
   # PREPARE DATA ---------------------------------------------------------------
   
+  # METADATA
+  pd <- cyto_details(x)
+  
+  # CONTROLS PROVIDED
+  controls <- FALSE
+  
   # TRANSFORMERS
   if(.all_na(axes_trans)) {
     axes_trans <- cyto_transformers_extract(x)
@@ -145,7 +153,27 @@ cyto_plot_explore <- function(x,
   
   # X CHANNELS - DEFAULT TO FLUORESCENT CHANNELS
   if(is.null(channels_x)) {
-    channels_x <- cyto_fluor_channels(x)
+    # PEAK DETECTOR X CHANNEL FOR CONTROLS
+    if("channel" %in% colnames(pd)) {
+      # DROP UNSTAINED CONTROLS
+      rm_idx <- which(
+        pd$channel %in% c("", "NA", NA, "Unstained", "unstained")
+      )
+      if(length(rm_idx) > 0) {
+        x <- x[-rm_idx]
+      }
+      # UPDATE METADATA TO EXCLUDE UNSTAINED
+      pd <- cyto_details(x)
+      # CHECK CHANNELS
+      channels_x <- cyto_channels_extract(
+        x, 
+        channels = pd$channel
+      )
+      # CONTROLS PROVIDED
+      controls <- TRUE
+    } else {
+      channels_x <- cyto_fluor_channels(x)
+    }
   } else {
     channels_x <- cyto_channels_extract(x, channels_x)
   }
@@ -186,6 +214,10 @@ cyto_plot_explore <- function(x,
     # } else if(length(x) == 1) {
     #   order <- "groups"
     # }
+    # CONTROLS USE CHHANEL ORDER
+    if(controls) {
+      order <- "channels"
+    }
     # CHANNEL ORDER
     if(grepl("^c", order, ignore.case = TRUE)) {
       # EXCLUDE DUPLICATE CHANNELS
@@ -209,14 +241,23 @@ cyto_plot_explore <- function(x,
   if(grepl("^c", order, ignore.case = TRUE)) {
     # NUMBER OF GROUPS TO PLOT
     n <- length(x)
+    # NUMBER OF X CHANNELS PER GROUP
+    if(controls) {
+      nx <- 1
+    } else {
+      nx <- length(channels_x)
+    }
     # PAGES PER GROUP - X CHANNEL SEPARATE PAGE BY UNIQUE Y CHANNELS
-    pg <- ceiling(length(channels_y)/np) * length(channels_x)
+    pg <- ceiling(length(channels_y)/np) * nx
     # TOTAL PAGES
     tpg <- n * pg
     # TOTAL PLOTS
-    tp <- n * length(channels_y) * length(channels_x)
-    # PAGES - GROUPS FOR each X/Y CHANNEL COMBINATION
+    tp <- n * length(channels_y) * nx
+  # PAGES - GROUPS FOR each X/Y CHANNEL COMBINATION
   } else {
+    # NOTE: GROUPS ORDER NOT SUPPORTED FOR CONTROLS
+    # NUMBER OF X CHANNELS PER GROUP
+    nx <- length(channels_x)
     # NUMBER OF GROUPS TO PLOT
     n <- length(channels_x) * length(channels_y)
     # PAGES PER GROUP - LENGTH(X)
@@ -311,20 +352,20 @@ cyto_plot_explore <- function(x,
     if(grepl("^c", order, ignore.case = TRUE)) {
       title <- rep(
         "",
-        length.out = length(x) * length(channels_x) * length(channels_y)
+        length.out = length(x) * nx * length(channels_y)
       )
     # GROUP ORDER
     } else {
       title <- rep(
         names(x),
-        times = length(channels_x) * length(channels_y)
+        times = nx * length(channels_y)
       )
     }
   # TITLES SUPPLIED
   } else {
     title <- rep(
       title,
-      length.out = length(x) * length(channels_x) * length(channels_y)
+      length.out = length(x) * nx * length(channels_y)
     )
   }
   
@@ -348,10 +389,18 @@ cyto_plot_explore <- function(x,
           # RECORDED PLOTS PER GROUP - LOOP THROUGH CHANNELS_X
           structure(
             lapply(
-              seq_along(channels_x), 
+              if(controls) {
+                1
+              } else {
+                seq_along(channels_x)
+              }, 
               function(w) {
                 # X CHANNEL
-                x_chan <- channels_x[w]
+                if(controls) {
+                  x_chan <- pd$channel[z]
+                }else {
+                  x_chan <- channels_x[w]
+                }
                 # RESTRICT Y CHANNELS
                 y_chans <- channels_y
                 # LOOP THROUGH CHANNELS_Y
@@ -373,7 +422,7 @@ cyto_plot_explore <- function(x,
                       hist_layers = length(x[[z]]), # SINGLE PANEL ONLY
                       layout = layout,
                       title = title[
-                        (z - 1) * length(channels_x) * length(channels_y) + 
+                        (z - 1) * nx * length(channels_y) + 
                           (w - 1) * length(channels_y) + v
                       ],
                       header = header[cnt + ceiling(w/np)],
@@ -395,13 +444,17 @@ cyto_plot_explore <- function(x,
                 return(p)
               }
             ),
-            names = channels_x
+            names = if(controls) {
+              "controls"
+            } else {
+              channels_x
+            }
           )
         }
       ),
       names = names(x)
     )
-  # CALL CYTO_PLOT - GROUP ORDER
+  # CALL CYTO_PLOT - GROUP ORDER - NOT SUPPORTED FOR CONTROLS
   } else {
     # CONSTRUCT & RECORD PLOTS
     plots <- structure(

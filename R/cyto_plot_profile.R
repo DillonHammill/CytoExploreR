@@ -22,8 +22,8 @@
 #'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
 #'   details. Sample selection occurs prior to grouping with \code{merge_by}.
 #' @param merge_by a vector of pData variables to sort and merge samples into
-#'   groups prior to plotting, set to NA by default to prevent merging. To
-#'   merge all samples set this argument to \code{TRUE} or \code{"all"}.
+#'   groups prior to plotting, set to NA by default to prevent merging. To merge
+#'   all samples set this argument to \code{TRUE} or \code{"all"}.
 #' @param order can be either \code{"channels"} or \code{"groups"} to control
 #'   the order in which the data is plotted. Setting \code{order = "channels"}
 #'   will plot each group on a single page in all the supplied channels. On the
@@ -104,7 +104,7 @@ cyto_plot_profile <- function(x,
                               page_fill_alpha = 1,
                               ...) {
   
-  # TODO: REMOVE EXCES ARGUMENTS - PASS THROUGH ... TO .CYTO_PLOT_DATA()
+  # TODO: REMOVE EXCESS ARGUMENTS - PASS THROUGH ... TO .CYTO_PLOT_DATA()
   
   # CYTO_PLOT_COMPLETE ---------------------------------------------------------
   
@@ -124,39 +124,77 @@ cyto_plot_profile <- function(x,
   
   # PREPARE DATA ---------------------------------------------------------------
   
+  # METADATA
+  pd <- cyto_details(x)
+  
+  # CONTROLS PROVIDED
+  controls <- FALSE
+  if("channel" %in% colnames(pd)) {
+    controls <- TRUE
+  }
+  
   # TRANSFORMERS
   if(.all_na(axes_trans)) {
     axes_trans <- cyto_transformers_extract(x)
   }
   
   # CHANNELS
+  unst_idx <- c()
   if(is.null(channels)) {
-    channels <- cyto_channels(
-      x, 
-      exclude = c("Time", "Event-ID")
-    )
+    if("channel" %in% colnames(pd)) {
+      controls <- TRUE
+      channels <- pd$channel
+      unst_idx <- which(channels %in% c("Unstained", "unstained", NA, "NA"))
+      if(length(unst_idx) > 0) {
+        channels <- cyto_channels_extract(
+          x, 
+          channels = channels[-unst_idx]
+        )
+      }
+    } else {
+      channels <- cyto_channels(
+        x, 
+        exclude = c("Time", "Event-ID", "Sample-ID")
+      )
+    }
+  } else {
+    channels <- cyto_channels_extract(x, channels)
   }
   
+  # TODO: CYTO_PLOT_DATA FOR CONTROLS - CANNOT SET SEPARATE PARENTS
   # CALL .CYTO_PLOT_DATA - PASS A SINGLE CHANNEL FOR FORMATTING - HIST_LAYERS
-  args <- .args_list(...)
-  args$channels <- channels[1]
-  x <- cyto_func_execute(
-    ".cyto_plot_data",
-    args
-  )
-  rm(args)
-  
-  # SIGNAL CYTO_PLOT_DATA
-  cyto_option("cyto_plot_data", TRUE)
+  if(!controls) {
+    args <- .args_list(...)
+    args$channels <- channels[1]
+    x <- cyto_func_execute(
+      ".cyto_plot_data",
+      args
+    )
+    rm(args)
+    
+    # SIGNAL CYTO_PLOT_DATA
+    cyto_option("cyto_plot_data", TRUE)
+  }
   
   # PREPARE PLOT PARAMETERS ----------------------------------------------------
+  
+  # CONTROLS - ALL SAMPLES SAME PAGE DIFFERENT X CHANNEL PER PANEL
+  if(controls) {
+    order <- "groups"
+  }
+  
+  # NUMBER OF SAMPLES TO PLOT - CONTROLS DROP UNSTAINED PANELS
+  x_n <- length(x)
+  if(controls & length(unst_idx) > 0) {
+    x_n <- x_n[-unst_idx]
+  }
   
   # PREPARE LAYOUT
   if(missing(layout)) {
     # SWITCH LAYOUTS FOR SINGLE PLOTS
     if(length(channels) == 1) {
       order <- "groups"
-    } else if(length(x) == 1) {
+    } else if(x_n == 1) {
       order <- "channels"
     }
     # CHANNEL ORDER
@@ -164,7 +202,13 @@ cyto_plot_profile <- function(x,
        layout <- .cyto_plot_layout(channels)
     # GROUP ORDER
     } else {
-      layout <- .cyto_plot_layout(x)
+      layout <- .cyto_plot_layout(
+        if(controls & length(unst_idx) > 0) {
+          x[-unst_idx]
+        } else {
+          x
+        }
+      )
     }
   }
     
@@ -177,15 +221,20 @@ cyto_plot_profile <- function(x,
   
   # PAGES
   if(grepl("^c", order, ignore.case = TRUE)) {
-    n <- length(x)
+    n <- x_n
     pg <- ceiling(length(channels)/np)
     tpg <- n * pg
     tp <- n * length(channels)
   } else {
-    n <- length(channels)
-    pg <- ceiling(length(x)/np)
+    # NUMBER OF GROUPS TO PLOT
+    if(controls) {
+      n <- 1
+    } else {
+      n <- length(channels)
+    }
+    pg <- ceiling(x_n/np)
     tpg <- n * pg
-    tp <- n * length(x)
+    tp <- n * x_n
   }
   
   # PREPARE PAGE_FILL ARGUMENTS
@@ -214,14 +263,23 @@ cyto_plot_profile <- function(x,
       }
     # GROUP ORDER
     } else {
-      header <- rep(
-        cyto_markers_extract(
-          x,
-          channels = channels,
-          append = TRUE
-        ),
-        each = pg
-      )
+      if(controls) {
+        header <- paste0(
+          "Single Colour Controls"
+        )
+        if(length(pg) > 1) {
+          header <- paste0(header, " - ", seq_len(pg))
+        }
+      } else {
+        header <- rep(
+          cyto_markers_extract(
+            x,
+            channels = channels,
+            append = TRUE
+          ),
+          each = pg
+        )
+      }
     }
   # SUPPLIED HEADERS
   } else {
@@ -261,82 +319,120 @@ cyto_plot_profile <- function(x,
   # CALL CYTO_PLOT IN CHANNEL ORDER
   if(grepl("^c", order, ignore.case = TRUE)) {
     # CONSTRUCT & RECORD PLOTS
-    plots <- lapply(
-      seq_along(x), 
-      function(z) {
-        # HEADER COUNTER
-        cnt <- (z - 1) * pg
-        # RECORDED PLOTS PER GROUP
-        p <- lapply(
-          seq_along(channels), 
-          function(w) {
-            # CONSTRUCT PLOT
-            cyto_plot(
-              x[[z]], # USE LIST METHOD - CYTO_PLOT_DATA CALLED ALREADY
-              channels = channels[w],
-              axes_trans = axes_trans,
-              layout = layout,
-              hist_stack = hist_stack, 
-              header = header[cnt + ceiling(w/np)],
-              title = NA,
-              page = if(w == length(channels)) {
-                TRUE
-              } else {
-                FALSE
-              },
-              page_fill = page_fill[cnt + ceiling(w/np)],
-              page_fill_alpha = page_fill_alpha[cnt + ceiling(w/np)],
-              ...
-            )
-          }
-        )
-        # PREPARE RECORDED PLOTS
-        p[LAPPLY(p, "is.null")] <- NULL
-        return(p)
-      }
-    )
-  # CALL CYTO_PLOT IN GROUP ORDER 
-  } else {
-    # CONSTRUCT & RECORD PLOTS
-    plots <- lapply(
-      seq_along(channels), 
-      function(z){
-        # HEADER COUNTER
-        cnt <- (z - 1) * pg
-        # RECORDED PLOTS PER GROUP
-        p <- lapply(
-          seq_along(x), 
-          function(w) {
-            # OVERLAY
-            if(length(x[[w]]) > 1) {
-              overlay <- x[[w]][-1]
-            } else {
-              overlay <- NA
+    plots <- structure(
+      lapply(
+        seq_along(x), 
+        function(z) {
+          # HEADER COUNTER
+          cnt <- (z - 1) * pg
+          # RECORDED PLOTS PER GROUP
+          p <- lapply(
+            seq_along(channels), 
+            function(w) {
+              # CONSTRUCT PLOT
+              cyto_plot(
+                x[[z]], # USE LIST METHOD - CYTO_PLOT_DATA CALLED ALREADY
+                channels = channels[w],
+                axes_trans = axes_trans,
+                layout = layout,
+                hist_stack = hist_stack, 
+                header = header[cnt + ceiling(w/np)],
+                title = NA,
+                page = if(w == length(channels)) {
+                  TRUE
+                } else {
+                  FALSE
+                },
+                page_fill = page_fill[cnt + ceiling(w/np)],
+                page_fill_alpha = page_fill_alpha[cnt + ceiling(w/np)],
+                ...
+              )
             }
-            # CONSTRUCT PLOT
-            cyto_plot(
-              x[[w]], # USE METHOD CYTO_PLOT_DATA CALLED ALREADY
-              channels = channels[z],
-              axes_trans = axes_trans,
-              layout = layout,
-              hist_stack = hist_stack, 
-              header = header[cnt + ceiling(w/np)],
-              # title = NA,
-              page = if(w == length(x)) {
-                TRUE
-              } else {
-                FALSE
-              },
-              page_fill = page_fill[cnt + ceiling(w/np)],
-              page_fill_alpha = page_fill_alpha[cnt + ceiling(w/np)],
-              ...
-            )
+          )
+          # PREPARE RECORDED PLOTS
+          p[LAPPLY(p, "is.null")] <- NULL
+          return(p)
+        }
+      ),
+      names = cyto_names(x)
+    )
+    # CALL CYTO_PLOT IN GROUP ORDER 
+  } else {
+    # CONSTRUCT & RECORD PLOTS - CONTROLS
+    plots <- structure(
+      lapply(
+        seq_along(channels), 
+        function(z){
+          # HEADER COUNTER
+          if(controls) {
+            cnt <- 0
+          } else {
+            cnt <- (z - 1) * pg
           }
-        )
-        # PREPARE RECORDED PLOTS
-        p[LAPPLY(p, "is.null")] <- NULL
-        return(p)
-      }
+          # LOCTAE CONTROL
+          if(controls) {
+            idx <- ifelse(
+              length(unst_idx) == 0,
+              z,
+              seq_along(x)[-unst_idx][z]
+            )
+          } else {
+            idx <- seq_along(x)
+          }
+          # RECORDED PLOTS PER GROUP
+          p <- lapply(
+            idx, 
+            function(w) {
+              # OVERLAY
+              if(length(x[[w]]) > 1) {
+                overlay <- x[[w]][-1]
+              } else {
+                overlay <- NA
+              }
+              # PARENT POPULATION
+              if(controls & "parent" %in% colnames(pd)) {
+                if(pd$parent[w] %in% c(NA, "NA")) {
+                  parent <- "root"
+                } else {
+                  parent <- pd$parent[w]
+                }
+              } else {
+                parent <- "root"
+              }
+              # INDEXING
+              q <- ifelse(controls, z, w)
+              # CONSTRUCT PLOT
+              cyto_plot(
+                x[[w]], # USE METHOD CYTO_PLOT_DATA CALLED ALREADY
+                parent = parent,
+                channels = channels[z],
+                axes_trans = axes_trans,
+                merge_by = if(!parent == "root") {
+                  "parent"
+                } else {
+                  "name"
+                },
+                layout = layout,
+                hist_stack = hist_stack, 
+                header = header[cnt + ceiling(q/np)],
+                # title = NA,
+                page = if(q == length(x)) {
+                  TRUE
+                } else {
+                  FALSE
+                },
+                page_fill = page_fill[cnt + ceiling(q/np)],
+                page_fill_alpha = page_fill_alpha[cnt + ceiling(q/np)],
+                ...
+              )
+            }
+          )
+          # PREPARE RECORDED PLOTS
+          p[LAPPLY(p, "is.null")] <- NULL
+          return(p)
+        }
+      ),
+      names = channels
     )
   }
   

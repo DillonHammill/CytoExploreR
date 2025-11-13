@@ -303,7 +303,7 @@ cyto_plot_point <- function(x,
   # TODO: SORT OUT POINT_COL FOR HEXBINS & BKDE2D PRE-COMPUTED FORMAT
   
   # POINT_COL ------------------------------------------------------------------
-  
+
   # GET POINT COLOURS - PASS KEY_SCALE & BKDE2D
   args$point_col <- cyto_func_call(
     ".cyto_plot_point_col",

@@ -664,29 +664,34 @@
         length.out = length(x)/hist_layers[1]
       )
     }
-    # UNPACK X
-    x <- structure(
-      unlist(x),
-      names = names(x)
-    )
-    # FORMAT X
-    L <- split(
-      seq_along(x), 
-      rep(1:(length(x)/hist_layers[1]),
-      each = hist_layers[1])
-    )
-    x <- structure(
-      lapply(
-        L,
-        function(z) {
-          x[z]
-        }
-      ),
-      names = paste(
-        merge_by, 
-        collapse = " : "
+    if(!all(hist_layers == 1)) {
+      # UNPACK X
+      x <- structure(
+        unlist(x),
+        names = names(x)
       )
-    )
+      # FORMAT X
+      L <- split(
+        seq_along(x), 
+        rep(1:(length(x)/hist_layers[1]),
+            each = hist_layers[1])
+      )
+      x <- structure(
+        lapply(
+          L,
+          function(z) {
+            x[z]
+          }
+        ),
+        names = rep(
+          paste(
+            merge_by, 
+            collapse = " : "
+          ),
+          length(L)
+        )
+      )
+    }
   }
   
   # FORMAT DATA FOR STACKED POINTS - NO OVERLAY

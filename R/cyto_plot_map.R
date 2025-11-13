@@ -17,8 +17,8 @@
 #'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
 #'   details. Sample selection occurs prior to grouping with \code{merge_by}.
 #' @param merge_by a vector of pData variables to sort and merge samples into
-#'   groups prior to plotting, set to NA by default to prevent merging. To
-#'   merge all samples set this argument to \code{TRUE} or \code{"all"}.
+#'   groups prior to plotting, set to NA by default to prevent merging. To merge
+#'   all samples set this argument to \code{TRUE} or \code{"all"}.
 #' @param overlay name(s) of the populations to overlay or a \code{cytoset},
 #'   \code{list of cytosets} or \code{list of cytoset lists} containing
 #'   populations to be overlaid onto the plot(s). This argument can be set to
@@ -27,8 +27,8 @@
 #' @param order can be either \code{"channels"} or \code{"groups"} to control
 #'   the order in which the data is plotted. Setting \code{order = "channels"}
 #'   will plot each group on a single page with a plot for each channel in
-#'   \code{channels_y}. On the other hand, setting \code{order = "groups"} will
-#'   plot each channel on a separate page with a plot for each group in
+#'   \code{point_col}. On the other hand, setting \code{order = "groups"} will
+#'   plot each \code{point_col} on a separate page with a plot for each group in
 #'   \code{merge_by}.
 #' @param alias name of the gated population(s) to gated in the plot when a
 #'   GatingHierarchy or GatingSet object is supplied. Setting alias to "" will
@@ -46,7 +46,9 @@
 #'   these boolean gates, users will need to explicitly pass the names of the
 #'   gates they want to display to alias.
 #' @param point_col names of the channels or markers to use for the colour scale
-#'   of each plot, set to all fluorescent channels by default.
+#'   of each plot, set to all fluorescent channels by default. If \code{channel}
+#'   is supplied in the metadata, data for each sample will be coloured by the
+#'   specified channel.
 #' @param point_col_scale vector of colours to use for the colour scale within
 #'   each plot. \code{point_col_scale} can also be supplied as a list of length
 #'   \code{point_col} to use a different colour scale for each marker/channel.
@@ -190,6 +192,12 @@ cyto_plot_map <- function(x,
   
   # PREPARE DATA ---------------------------------------------------------------
   
+  # METADATA
+  pd <- cyto_details(x)
+  
+  # CONTROLS PROVIDED
+  controls <- FALSE
+  
   # TRANSFORMERS
   if(.all_na(axes_trans)) {
     axes_trans <- cyto_transformers_extract(x)
@@ -206,8 +214,29 @@ cyto_plot_map <- function(x,
   
   # POINT_COL
   if(.all_na(point_col)) {
-    # DEFAULT - ALL FLUORESCENT  CHANNELS
-    point_col <- cyto_fluor_channels(x)
+    # PEAK DETECTOR FOR EACH CONTROL
+    if("channel" %in% colnames(pd)) {
+      # DROP UNSTAINED CONTROLS
+      rm_idx <- which(
+        pd$channel %in% c("", "NA", NA, "Unstained", "unstained")
+      )
+      if(length(rm_idx) > 0) {
+        x <- x[-rm_idx]
+      }
+      # UPDATE METADATA TO EXCLUDE UNSTAINED
+      pd <- cyto_details(x)
+      # CHECK CHANNELS
+      point_col <- cyto_channels_extract(
+        x, 
+        channels = pd$channel
+      )
+      # CONTROLS PROVIDED
+      controls <- TRUE
+    # DEFAULT FLUORESCENT CHANNELS
+    } else {
+      # DEFAULT - ALL FLUORESCENT  CHANNELS
+      point_col <- cyto_fluor_channels(x)
+    }
     # POINT_COL SUPPLIED
   } else {
     point_col <- cyto_channels_extract(x, point_col)
@@ -267,6 +296,11 @@ cyto_plot_map <- function(x,
     )
   }
   
+  # CONTROLS - ALL SAMPLES SAME PAGE DIFFERENT POINT_COL PER PANEL
+  if(controls) {
+    order <- "groups"
+  }
+  
   # LAYOUT
   if(missing(layout)) {
     if(length(point_col) == 1) {
@@ -303,7 +337,11 @@ cyto_plot_map <- function(x,
   # PAGES - GROUPS ON SAME PAGE
   } else {
     # NUMBER OF GROUPS TO PLOT
-    n <- length(point_col)
+    if(controls) {
+      n <- 1
+    } else {
+      n <- length(point_col)
+    }
     # PAGES PER GROUP
     pg <- ceiling(length(x)/np)
     # TOTAL PAGES
@@ -326,14 +364,23 @@ cyto_plot_map <- function(x,
       )
     # GROUP ORDER - CHANNELS AS HEADERS
     } else {
-      header <- rep(
-        cyto_markers_extract(
-          x,
-          channels = point_col,
-          append = TRUE
-        ),
-        each = pg
-      )
+      if(controls) {
+        header <- paste0(
+          "Single Colour Controls"
+        )
+        if(length(pg) > 1) {
+          header <- paste0(header, " - ", seq_len(pg))
+        }
+      } else {
+        header <- rep(
+          cyto_markers_extract(
+            x,
+            channels = point_col,
+            append = TRUE
+          ),
+          each = pg
+        )
+      }
     }
   # SUPPLIED HEADERS
   } else {
@@ -373,14 +420,14 @@ cyto_plot_map <- function(x,
     } else {
       title <- rep(
         names(x), 
-        times = length(point_col)
+        times = n
       )
     }
   # TITLES SUPPLIED
   } else {
     title <- rep(
       title, 
-      length.out = length(x) * length(point_col)
+      length.out = length(x) * n
     )
   }
   
@@ -391,9 +438,10 @@ cyto_plot_map <- function(x,
     label = "cyto_plot_map()",
     total = tp
   )
-  
+
   # CALL CYTO_PLOT - CHANNEL ORDER
   if(grepl("^c", order, ignore.case = TRUE)) {
+    # NOTE: CONTROLS NOT SUPPORTED HERE
     # CONSTRUCT PLOTS
     plots <- structure(
       lapply(
@@ -440,10 +488,11 @@ cyto_plot_map <- function(x,
     )
   # CALL CYTO_PLOT - GROUP ORDER
   } else {
+    # NOTE: CONTROLS SUPPORTED HERE
     # CONSTRUCT PLOTS
     plots <- structure(
       lapply(
-        seq_along(point_col), 
+        seq_along(n), # CONTROLS N=1 ELSE N=LENGTH(POINT_COL)
         function(z){
           # HEADER COUNTER
           cnt <- (z - 1) * pg
@@ -466,8 +515,16 @@ cyto_plot_map <- function(x,
                   } else {
                     FALSE
                   },
-                  point_col = point_col[z],
-                  point_col_scale = point_col_scale[[z]],
+                  point_col = if(controls) {
+                    point_col[w]
+                  }else {
+                    point_col[z]
+                  },
+                  point_col_scale = if(controls){
+                    point_col_scale[[w]]
+                  }else {
+                    point_col_scale[[z]]
+                  },
                   page_fill = page_fill[cnt + ceiling(w/np)],
                   page_fill_alpha = page_fill_alpha[cnt + ceiling(w/np)],
                   ...
@@ -481,7 +538,11 @@ cyto_plot_map <- function(x,
           return(p)
         }
       ),
-      names = point_col
+      names = if(controls) {
+        "controls"
+      } else {
+        point_col
+      }
     )
   }
   

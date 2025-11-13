@@ -691,7 +691,10 @@ cyto_plot <- function(x,
     args$title <- LAPPLY(
       seq_along(args$title), 
       function(z){
-        paste0(args$title[z], names(args$x)[z])
+        paste0(
+          args$title[z], 
+          names(args$x)[z]
+        )
       }
     )
     # GROUPS
