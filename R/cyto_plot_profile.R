@@ -407,11 +407,6 @@ cyto_plot_profile <- function(x,
                 parent = parent,
                 channels = channels[z],
                 axes_trans = axes_trans,
-                merge_by = if(!parent == "root") {
-                  "parent"
-                } else {
-                  "name"
-                },
                 layout = layout,
                 hist_stack = hist_stack, 
                 header = header[cnt + ceiling(q/np)],
