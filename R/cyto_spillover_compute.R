@@ -1367,7 +1367,7 @@ cyto_spillover_compute <- function(x,
         }
       )
     )
-  # AUTOSPILL OR CytoDecode SPILLOVER
+  # AUTOSPILL OR CYTODECODE SPILLOVER
   } else {
     # GATED DATA - SAMPLE & MERGE UNSTAINED AND STAINED DATA
     pops <- cytoset(

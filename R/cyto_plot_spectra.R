@@ -206,11 +206,22 @@ cyto_plot_spectra.list <- function(x,
   if(is.matrix(x)) {
     x <- list("spectra" = x)
   } else if(is.list(x)) {
-    if(!all(LAPPLY(x, cyto_class, expect = "matrix", class = FALSE))) {
-      stop(
-        "'x' must be either a matrix or list of matrices!"
-      )
-    }
+    x <- structure(
+      lapply(
+        x,
+        function(z) {
+          tryCatch(
+            as.matrix(z),
+            error = function(e) {
+              stop(
+                "'x' must be a list of matrix compatible objects!"
+              )
+            }
+          )
+        }
+      ),
+      names = names(x)
+    )
   } else {
     stop(
       "'x' must be either a matrix or list of matrices!"
@@ -230,7 +241,14 @@ cyto_plot_spectra.list <- function(x,
   # DYES MUST MATCH IN ALL MATRICES
   dyes <- lapply(
     args$x,
-    rownames
+    function(z) {
+      if(is.null(rownames(z))) {
+        stop(
+          "Rownames for each element of 'x' must contain the spectra names."
+        )
+      }
+      sort(rownames(z))
+    }
   )
   dyes <- unique(dyes)
   if(length(dyes) != 1) {
