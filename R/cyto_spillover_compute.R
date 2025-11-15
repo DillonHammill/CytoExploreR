@@ -103,7 +103,10 @@
 #'   controls should be saved, set to NULL by default to use
 #'   \code{date-Control-Details.csv}. Setting this argument to \code{NA} will
 #'   prevent details from being written to a CSV file.
-#' @param rerun logicla indicating whether to bypass gating and simply rerun the
+#' @param search logical indicating whether the algorithms can set new peak
+#'   detectors for unmixing controls when better alternatives are found, set to
+#'   TRUE by default.
+#' @param rerun logical indicating whether to bypass gating and simply rerun the
 #'   algorithm using existing gates, set to FALSE by default.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
@@ -182,6 +185,7 @@ cyto_spillover_compute <- function(x,
                                    grid_size = 100,
                                    resid = "both",
                                    details = NULL,
+                                   search = FALSE,
                                    rerun = FALSE,
                                    ...) {
   
@@ -217,6 +221,11 @@ cyto_spillover_compute <- function(x,
   if("unmix" %in% names(args)) {
     unmix <- args[["unmix"]]
     args <- args[-match("unmix", names(args))]
+  }
+  
+  # ONLY SEARCH FOR UNMIXING
+  if(!unmix) {
+    search <- FALSE
   }
   
   # PREPARE DATA ---------------------------------------------------------------
@@ -1322,6 +1331,12 @@ cyto_spillover_compute <- function(x,
         "\n"
       )
     )
+    # PROGRESS BAR
+    pb <- cyto_progress(
+      label = "AutoComp",
+      total = length(pops),
+      clear = FALSE
+    )
     # COMPUTE MEDFI OF NEGATIVE & POSITIVE POPULATIONS
     spill <- do.call(
       "rbind",
@@ -1329,41 +1344,57 @@ cyto_spillover_compute <- function(x,
         seq_along(pops),
         function(id) {
           # PEAK DETECTOR
-          peak <- pData(pops[[id]])$channel[1]
-          # COMPUTE MEDFI
-          medfi <- cyto_apply(
-            pops[[id]],
-            channels = channels,
-            FUN = .cyto_stat_dispatch(stat),
-            round = 4,
-            input = "matrix",
-            trans = axes_trans,
-            inverse = TRUE,
-            copy = TRUE
-          )
-          # SUBTRACT BACKGROUND
-          medfi <- (medfi[1, , drop = FALSE] - medfi[2, , drop = FALSE])
-          rownames(medfi) <- if(unmix) {
-            if(pData(pops[[id]])$marker[1] %in% c("", "NA", NA)) {
-              paste0(
-                "<NA> ",
-                pData(pops[[id]])$label[1]
-              )
+          x_chan <- pData(pops[[id]])$channel[1]
+          coef <- c()
+          iter <- 0
+          # NOTE: ASSIGNED PEAK DETECTOR NEEDS TO BE GOOD ENOUGH FOR GATING
+          # ONLY 5 ATTEMPTS TO LOCATE PEAK DETECTOR
+          while(iter <= 5) {
+            # COMPUTE MEDFI
+            medfi <- cyto_apply(
+              pops[[id]],
+              channels = channels,
+              FUN = .cyto_stat_dispatch(stat),
+              round = 4,
+              input = "matrix",
+              trans = axes_trans,
+              inverse = TRUE,
+              copy = TRUE
+            )
+            # SUBTRACT BACKGROUND
+            medfi <- (medfi[1, , drop = FALSE] - medfi[2, , drop = FALSE])
+            rownames(medfi) <- if(unmix) {
+              if(pData(pops[[id]])$marker[1] %in% c("", "NA", NA)) {
+                paste0(
+                  "<NA> ",
+                  pData(pops[[id]])$label[1]
+                )
+              } else {
+                paste0(
+                  "<",
+                  pData(pops[[id]])$marker[1],
+                  "> ",
+                  pData(pops[[id]])$label[1]
+                )
+              }
             } else {
-              paste0(
-                "<",
-                pData(pops[[id]])$marker[1],
-                "> ",
-                pData(pops[[id]])$label[1]
-              )
+              x_chan
             }
-          } else {
-            peak
+            # NORMALISE
+            coef <- medfi/medfi[1, x_chan]
+            # PEAK DETECTOR CORRECT
+            if(all(coef <= 1) | !search) {
+              break
+              # UPDATE PEAK DETECTOR
+            } else {
+              x_chan <- names(coef)[which.max(coef)][1]
+              coef <- c()
+            }
           }
-          # NORMALISE
-          return(
-            medfi/medfi[1, peak]
-          )
+          # PROGRESS BAR
+          cyto_progress(pb)
+          # RETURN COEFFICIENTS
+          return(coef)
         }
       )
     )
@@ -1471,7 +1502,8 @@ cyto_spillover_compute <- function(x,
                 model = model,
                 max_iter = max_iter,
                 trim = trim,
-                unmix = unmix
+                unmix = unmix,
+                search = search
               )
             }
           )
@@ -1484,7 +1516,8 @@ cyto_spillover_compute <- function(x,
           model = model,
           max_iter = max_iter,
           trim = trim,
-          unmix = unmix
+          unmix = unmix,
+          search = search
         )
       }
     # CYTODECODE
@@ -1558,7 +1591,7 @@ cyto_spillover_compute <- function(x,
                 }
               }
               # PEAK DETECTOR CORRECT
-              if(!unmix | all(coef <= 1)) {
+              if(all(coef <= 1) | !search) {
                 break
                 # UPDATE PEAK DETECTOR
               } else {
@@ -1574,6 +1607,7 @@ cyto_spillover_compute <- function(x,
         )
       )
       # FORMAT SPILLOVER MATRIX
+      # TODO: INHERIT X CHANNEL FOR PLOTTING FROM EXISTING GATE
       if(!unmix) {
         colnames(spill) <- channels
         rownames(spill) <- pData(pops)$channel
