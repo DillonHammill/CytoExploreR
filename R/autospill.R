@@ -19,6 +19,9 @@
 #'   set to \code{0.001} by default.
 #' @param unmix logical indicating whether an unmixing matrix is being computed,
 #'   set to FALSE by default.
+#' @param search logical indicating whether the algorithms can set new peak
+#'   detectors for unmixing controls when better alternatives are found, set to
+#'   TRUE by default.
 #' @param ... additional arguments to the specified model.
 #'
 #' @references Roca et al (2021), AutoSpill is a principled framework that
@@ -35,6 +38,7 @@
                             max_iter = 20,
                             trim = 0.001,
                             unmix = FALSE,
+                            search = FALSE,
                             ...) {
   
   # AUTOSPILL - COMPUTE SPILLOVER COEFFICIENTS ---------------------------------
@@ -61,6 +65,7 @@
     model = model,
     trim = trim,
     unmix = unmix,
+    search = search,
     ...
   )
   
@@ -214,6 +219,9 @@
 #'   fitting robust linear models, set to \code{0.01} by default.
 #' @param unmix logical indicating whether an unmixing matrix is being computed,
 #'   set to FALSE by default.
+#' @param search logical indicating whether the algorithms can set new peak
+#'   detectors for unmixing controls when better alternatives are found, set to
+#'   TRUE by default.
 #' @param ... additional arguments to the specified model.
 #'
 #' @return list of matrices with regression intercepts and coefficients.
@@ -226,6 +234,7 @@
                                  model = "rlm",
                                  trim = 0.001,
                                  unmix = FALSE,
+                                 search = FALSE,
                                  ...) {
   
   # EXPERIMENT DETAILS
@@ -258,8 +267,8 @@
   # COMPUTE INITIAL ESTIMATES & UPDATE PEAK DETECTOR FOR UNMIXING
   # RERUN UNTIL PEAK LOCATED - 5 ATTEMPTS
   iter <- 0
-  while(any(spill >= 1) & iter < 5) {
-    # ITERATION
+  while(iter <= 5) {
+    # SEARCH FOR PEAK DETECTOR
     iter <- iter + 1
     # UPDATED METADATA
     pd <- cyto_details(x)
@@ -331,7 +340,7 @@
     )
     diag(spill) <- 1
     # ONLY SEARCH FOR PEAKS WHEN UNMIXING
-    if(!unmix) {
+    if(!unmix | !search) {
       break
     } else {
       if(any(spill > 1)) {

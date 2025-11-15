@@ -25,6 +25,8 @@ cyto_unmix_compute(
   grid_size = 100,
   resid = "both",
   details = NULL,
+  search = TRUE,
+  rerun = FALSE,
   ...
 )
 }
@@ -117,6 +119,13 @@ boost at the cost of accuracy.}
 controls should be saved, set to NULL by default to use
 \code{date-Control-Details.csv}. Setting this argument to \code{NA}
 will prevent details from being written to a CSV file.}
+
+\item{search}{logical indicating whether the algorithms can set new peak
+detectors for unmixing controls when better alternatives are found, set to
+TRUE by default.}
+
+\item{rerun}{logicla indicating whether to bypass gating and simply rerun the
+algorithm using existing gates, set to FALSE by default.}
 
 \item{...}{additional arguments passed to \code{cyto_plot()} to allow
 customisation of plots used for gating.}

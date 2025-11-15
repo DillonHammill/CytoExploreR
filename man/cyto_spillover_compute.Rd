@@ -26,6 +26,7 @@ cyto_spillover_compute(
   grid_size = 100,
   resid = "both",
   details = NULL,
+  search = FALSE,
   rerun = FALSE,
   ...
 )
@@ -126,7 +127,11 @@ controls should be saved, set to NULL by default to use
 \code{date-Control-Details.csv}. Setting this argument to \code{NA} will
 prevent details from being written to a CSV file.}
 
-\item{rerun}{logicla indicating whether to bypass gating and simply rerun the
+\item{search}{logical indicating whether the algorithms can set new peak
+detectors for unmixing controls when better alternatives are found, set to
+TRUE by default.}
+
+\item{rerun}{logical indicating whether to bypass gating and simply rerun the
 algorithm using existing gates, set to FALSE by default.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}

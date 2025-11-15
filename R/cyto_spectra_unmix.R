@@ -87,6 +87,11 @@
 #'   controls should be saved, set to NULL by default to use
 #'   \code{date-Control-Details.csv}. Setting this argument to \code{NA}
 #'   will prevent details from being written to a CSV file.
+#' @param search logical indicating whether the algorithms can set new peak
+#'   detectors for unmixing controls when better alternatives are found, set to
+#'   TRUE by default.
+#' @param rerun logicla indicating whether to bypass gating and simply rerun the
+#'   algorithm using existing gates, set to FALSE by default.
 #' @param ... additional arguments passed to \code{cyto_plot()} to allow
 #'   customisation of plots used for gating.
 #'
@@ -126,6 +131,8 @@ cyto_unmix_compute <- function(x,
                                grid_size = 100,
                                resid = "both",
                                details = NULL,
+                               search = TRUE,
+                               rerun = FALSE,
                                ...) {
  
   # PULL DOWN ARGUMENTS
