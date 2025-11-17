@@ -256,7 +256,9 @@ cyto_plot_spectra.list <- function(x,
       "All matrices must contain the same set of dyes as rownames!"
     )
   }
-  dyes <- dyes[[1]]
+  
+  # ORDER DYES BY FIRST MATRIX
+  dyes <- rownames(args$x[[1]])
   
   # EXPERIMENT NAMES
   nms <- names(x)
