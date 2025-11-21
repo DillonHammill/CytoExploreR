@@ -1309,6 +1309,28 @@ cyto_stat_hex <- function(x,
        x[, 2] <= max(limits[[2]])),
   ]
   
+  # JITTER SAMPLE-ID BARCODES
+  ind <- grep("^Sample\\-ID$", colnames(x))
+  # POINT FOR HEXBINS ALREADY JITTERED ABOVE
+  if(length(ind) == 1) {
+    # SET SEED FOR REPRODUCIBLE SAMPLING - REQUIRED
+    set.seed(42)
+    x[, ind] <- LAPPLY(
+      unique(x[, ind]),
+      function(w) {
+        rnorm(
+          n = length(
+            x[x[, ind] == w, ind]
+          ),
+          mean = w,
+          sd = 0.1
+        )
+      }
+    )
+    # RESET SEED
+    rm(list=".Random.seed", envir=globalenv())
+  }
+  
   # require hexbin package
   cyto_require(
     "hexbin"

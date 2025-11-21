@@ -440,7 +440,8 @@ cyto_plot_point <- function(x,
         if(nrow(exprs) != 0) {
           # JITTER SAMPLE-ID BARCODES
           ind <- grep("^Sample\\-ID$", colnames(exprs))
-          if(length(ind) == 1) {
+          # POINT FOR HEXBINS ALREADY JITTERED ABOVE
+          if(length(ind) == 1 & .all_na(args$hex[[z]]$x)) {
             # SET SEED FOR REPRODUCIBLE SAMPLING - REQUIRED
             set.seed(42)
             exprs[, ind] <- LAPPLY(
@@ -468,7 +469,7 @@ cyto_plot_point <- function(x,
               y = rep.int(args$hex[[z]]$coords$y, n) + 
                 rep.int(args$hex[[z]]$y, n7),
               col = args$point_col[[z]],
-              border = NA
+              border = args$point_col[[z]]
             )
           # POINTS
           } else {

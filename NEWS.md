@@ -1,6 +1,18 @@
-# CytoExploreR 2.0.18 (pre-release)
+# CytoExploreR 2.0.21 (pre-release)
 
 * The behavior of `cyto_merge_by()` when `merge_by = NA` has changed from collapsing all samples to instead split samples individually. This is because splitting by `name` may not always work in cases where multiple samples share the same file names. This change requires updates to openCyto which should be re-installed when updating to the new version of CytoExploreR.
+
+# CytoExploreR 2.0.20
+
+* Bug fixes to plotting of sample IDs using with `point_shape = "hex"`.
+
+# CytoExploreR 2.0.19
+
+* Add new `search` argument to `cyto_spillover_compute()` and `cyto_unmix_compute()` to control whether the algorithms can change the assigned peak detectors for controls if required. Only supported for controls used to generate spectral unmixing matrices.
+
+# CytoExploreR 2.0.18
+
+* Plotting bug fixes and support for automatic plotting of reference controls in `cyto_plot_profile()`, `cyto_plot_explore()` and `cyto_plot_map()`.
 
 # CytoExploreR 2.0.17
 
