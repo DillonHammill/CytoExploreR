@@ -1073,16 +1073,17 @@ double wasserstein1d_cpp(
     wa = Rcpp::NumericVector(m, 1.0);
   } else {
     wa = Rcpp::NumericVector(wa_);
-    if (wa.size() != m) Rcpp::stop("Weights 'wa' must have the same size as 'a'.");
+    // Cast the SIGNED wa.size() to the UNSIGNED type of m
+    if (static_cast<size_t>(wa.size()) != m) Rcpp::stop("Weights 'wa' must have the same size as 'a'.");  
   }
   
   if (wb_.isNull()) {
     wb = Rcpp::NumericVector(n, 1.0);
   } else {
     wb = Rcpp::NumericVector(wb_);
-    if (wb.size() != n) Rcpp::stop("Weights 'wb' must have the same size as 'b'.");
+    // Cast the SIGNED wb.size() to the UNSIGNED type of n
+    if (static_cast<size_t>(wb.size()) != n) Rcpp::stop("Weights 'wb' must have the same size as 'b'.");  
   }
-  
   // Filter out points with zero weight
   std::vector<double> a_filtered_std, wa_filtered_std;
   for (size_t i = 0; i < m; ++i) {

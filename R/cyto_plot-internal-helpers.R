@@ -3387,6 +3387,7 @@
 #' Add spectra to plot
 #' @param x list of cytosets
 #' @importFrom grDevices colorRamp colorRampPalette adjustcolor
+#' @importFrom KernSmooth bkde
 #' @noRd
 .cyto_plot_spectra <- function(x,
                                channels = NULL,
@@ -3394,12 +3395,7 @@
                                spectra_col = NA,
                                spectra_cols = NA,
                                spectra_col_alpha = 1) {
-  
-  # # SPECTRAL PROFILES AS GATES
-  # if(all(nrow(x) == 0)) {
-  #   
-  # }
-
+    
   # SPECTRA COLOUR SCALES
   spectra_col <- .cyto_plot_spectra_col(
     x,
@@ -3411,62 +3407,221 @@
   # PLOT LIMITS
   ylim <- .par("usr")[[1]][3:4]
   
+  # BANDWIDTH
+  bw <- diff(ylim) / 256
+  
   # ADD SPECTRA
   mapply(
-    function(cs,
-             spectra_col,
-             spectra_col_alpha) {
+    function(cs, s_col, s_alpha) {
       
-      lapply(
-        seq_along(channels),
-        function(z) {
-          # BYPASS PLOTTING FOR SPECTRAL LINES
-          if(all(cyto_stat_count(cs) == 0)) {
-            return(NULL)
-          }
-          # COMPUTE HISTOGRAM
-          d <- cyto_apply(
-            cs,
-            channels = channels[z],
-            input = "matrix",
-            FUN = "cyto_stat_density",
-            n = 150,
-            smooth = 4,
-            bandwidth = diff(ylim/256),
-            stat = "count"
-          )[[1]][[1]]
-          # BIN WIDTH
-          x_bin <- diff(d$x)/2
-          # MAP Y -> [0,1]
-          d$y <- cyto_stat_rescale(
-            d$y,
-            scale = c(0,1)
-          )
-          # MAP COLOURS
-          d$z <- rgb(
-            spectra_col(d$y),
-            maxColorValue = 255
-          )
-          for(i in 1:length(d$y)) {
-            if(d$y[i] > 0.1) {
-              # RECTANGLE
-              rect(
-                xleft = z - 0.495,
-                xright = z + 0.495,
-                ytop = d$x[i] + x_bin,
-                ybottom = d$x[i] - x_bin,
-                col = adjustcolor(d$z[i], spectra_col_alpha),
-                border = NA
-              )
-            }
-          }
+      mat <- cyto_data_extract(
+        cs,
+        format = "matrix",
+        channels = channels,
+        inverse = FALSE,
+        copy = FALSE
+      )[[1]][[1]]
+      
+      # EMPTY PLOT
+      if(nrow(mat) == 0) return(NULL)
+      
+      rect_list <- lapply(seq_len(ncol(mat)), function(i) {
+        channel_data <- mat[, i]
+        # BKDE FASTER THAN DENSITY
+        den <- bkde(
+          x = channel_data, 
+          kernel = "normal", 
+          bandwidth = bw,
+          gridsize = 1024,      
+          range.x = ylim       
+        )
+        d_x <- den$x
+        d_y <- den$y
+        # NORMALISE DENSITY [0, 1]
+        max_y <- max(d_y, na.rm = TRUE)
+        if(max_y > 0) d_y <- d_y / max_y
+        # DENSITY THRESHOLD
+        idx <- which(d_y > 0.1)
+        if(length(idx) > 0) {
+          # BIN WIDTH - HALF DISTANCE BETWEEN GRID POINTS
+          x_bin <- (d_x[2] - d_x[1]) / 2
+          # RECTANGEL COLOURS
+          colors <- rgb(s_col(d_y[idx]), maxColorValue = 255)
+          # RECTANGLE CO-ORDINATES
+          return(data.frame(
+            xl = i - 0.495,       
+            xr = i + 0.495,
+            yb = d_x[idx] - x_bin,
+            yt = d_x[idx] + x_bin,
+            col = adjustcolor(colors, s_alpha),
+            stringsAsFactors = FALSE
+          ))
         }
-      )
+        return(NULL)
+      })
+      
+      # 3. COMBINE AND PLOT
+      # Combine all channel data for this sample
+      master_df <- do.call(rbind, rect_list)
+      
+      if(!is.null(master_df) && nrow(master_df) > 0) {
+        rect(
+          xleft   = master_df$xl,
+          xright  = master_df$xr,
+          ybottom = master_df$yb,
+          ytop    = master_df$yt,
+          col     = master_df$col,
+          border  = NA
+        )
+      }
+      
     },
     x,
     spectra_col,
-    spectra_col_alpha
+    MoreArgs = list(s_alpha = spectra_col_alpha)
   )
+  
+  # VECTORISED IMPLEMENTATION
+  # # # SPECTRAL PROFILES AS GATES
+  # # if(all(nrow(x) == 0)) {
+  # #   
+  # # }
+  # 
+  # # SPECTRA COLOUR SCALES
+  # spectra_col <- .cyto_plot_spectra_col(
+  #   x,
+  #   spectra_col_scale = spectra_col_scale,
+  #   spectra_col = spectra_col,
+  #   spectra_cols = spectra_cols
+  # )
+  # 
+  # # PLOT LIMITS
+  # ylim <- .par("usr")[[1]][3:4]
+  # 
+  # # ADD SPECTRA
+  # # Extract and flatten all required data points into a single data frame
+  # plot_data <- mapply(
+  #   function(cs, s_col, s_alpha) {
+  #     
+  #     # Process each channel and return a combined data frame for this cytoset
+  #     do.call(rbind, lapply(seq_along(channels), function(z) {
+  #       
+  #       # Bypass for empty data
+  #       if(all(cyto_stat_count(cs) == 0)) return(NULL)
+  #       
+  #       # Compute density
+  #       d <- cyto_apply(
+  #         cs,
+  #         channels = channels[z],
+  #         input = "matrix",
+  #         FUN = "cyto_stat_density",
+  #         n = 150,
+  #         smooth = 4,
+  #         bandwidth = diff(ylim/256),
+  #         stat = "count"
+  #       )[[1]][[1]]
+  #       
+  #       # Calculate bin width and rescale
+  #       x_bin <- (d$x[2] - d$x[1]) / 2
+  #       d$y <- cyto_stat_rescale(d$y, scale = c(0, 1))
+  #       
+  #       # Filter indices above threshold
+  #       idx <- which(d$y > 0.1)
+  #       
+  #       if(length(idx) > 0) {
+  #         # Map colors and apply alpha
+  #         colors <- rgb(s_col(d$y[idx]), maxColorValue = 255)
+  #         
+  #         return(data.frame(
+  #           xl = z - 0.495,
+  #           xr = z + 0.495,
+  #           yb = d$x[idx] - x_bin,
+  #           yt = d$x[idx] + x_bin,
+  #           col = adjustcolor(colors, s_alpha),
+  #           stringsAsFactors = FALSE
+  #         ))
+  #       }
+  #       return(NULL)
+  #     }))
+  #   },
+  #   x,
+  #   spectra_col,
+  #   spectra_col_alpha,
+  #   SIMPLIFY = FALSE
+  # )
+  # 
+  # # Combine all cytoset data into one master data frame
+  # master_df <- do.call(rbind, plot_data)
+  # 
+  # # SINGLE VECTORIZED CALL
+  # if(!is.null(master_df) && nrow(master_df) > 0) {
+  #   rect(
+  #     xleft   = master_df$xl,
+  #     xright  = master_df$xr,
+  #     ybottom = master_df$yb,
+  #     ytop    = master_df$yt,
+  #     col     = master_df$col,
+  #     border  = NA
+  #   )
+  # }
+  
+  # ORIGINAL IMPLEMENTATION
+  # # ADD SPECTRA
+  # mapply(
+  #   function(cs,
+  #            spectra_col,
+  #            spectra_col_alpha) {
+  #     
+  #     lapply(
+  #       seq_along(channels),
+  #       function(z) {
+  #         # BYPASS PLOTTING FOR SPECTRAL LINES
+  #         if(all(cyto_stat_count(cs) == 0)) {
+  #           return(NULL)
+  #         }
+  #         # COMPUTE HISTOGRAM
+  #         d <- cyto_apply(
+  #           cs,
+  #           channels = channels[z],
+  #           input = "matrix",
+  #           FUN = "cyto_stat_density",
+  #           n = 150,
+  #           smooth = 4,
+  #           bandwidth = diff(ylim/256),
+  #           stat = "count"
+  #         )[[1]][[1]]
+  #         # BIN WIDTH
+  #         x_bin <- diff(d$x)/2
+  #         # MAP Y -> [0,1]
+  #         d$y <- cyto_stat_rescale(
+  #           d$y,
+  #           scale = c(0,1)
+  #         )
+  #         # MAP COLOURS
+  #         d$z <- rgb(
+  #           spectra_col(d$y),
+  #           maxColorValue = 255
+  #         )
+  #         for(i in 1:length(d$y)) {
+  #           if(d$y[i] > 0.1) {
+  #             # RECTANGLE
+  #             rect(
+  #               xleft = z - 0.495,
+  #               xright = z + 0.495,
+  #               ytop = d$x[i] + x_bin,
+  #               ybottom = d$x[i] - x_bin,
+  #               col = adjustcolor(d$z[i], spectra_col_alpha),
+  #               border = NA
+  #             )
+  #           }
+  #         }
+  #       }
+  #     )
+  #   },
+  #   x,
+  #   spectra_col,
+  #   spectra_col_alpha
+  # )
   
 }
 
