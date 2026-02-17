@@ -1176,9 +1176,24 @@ cyto_channel_match <- function(x,
   nms <- rownames(cyto_details(x))
   x_ind <- which(rownames(pd) %in% rownames(cyto_details(x)))
   
+  # UNSTAINED CONTROLS ---------------------------------------------------------
+  
+  # LOCATE UNSTAINED CONTROLS
+  unst_idx <- grep(
+    "Unstained|NIL|Negative",
+    cyto_names(x),
+    ignore.case = TRUE
+  )
+  
+  # SET UNSTAINED CHANNEL
+  pd$channe[pd$channel[unst_idx] %in% c(NA, "NA", "")] <- "Unstained"
+  
+  # UPDATE METADATA
+  cyto_details(x) <- pd[match(rownames(cyto_details(x)), rownames(pd)), ,]
+  
   # GROUPS/PARENTS -------------------------------------------------------------
   
-  # TODO: IMPROVE PARENT ASSIGNMENT SO PEAK DTECTOR ASSIGNMENTS ARE CORRECT
+  # TODO: IMPROVE PARENT ASSIGNMENT SO PEAK DETECTOR ASSIGNMENTS ARE CORRECT
   
   # GROUPS/PARENTS IGNORED FOR CYTOSETS
   if(cyto_class(x, "GatingSet")) {
@@ -1221,19 +1236,6 @@ cyto_channel_match <- function(x,
   }
   
   # CHANNELS -------------------------------------------------------------------
-  
-  # LOCATE UNSTAINED CONTROLS
-  unst_idx <- grep(
-    "Unstained|NIL",
-    cyto_names(x),
-    ignore.case = TRUE
-  )
-  
-  # SET UNSTAINED CHANNEL
-  pd$channel[unst_idx][pd$channel[unst_idx] %in% c(NA, "NA")] <- "Unstained"
-  
-  # UPDATE METADATA
-  cyto_details(x) <- pd[match(rownames(cyto_details(x)), rownames(pd)), ,]
   
   # ASSIGN PEAK DETECTORS
   if(peaks) {
