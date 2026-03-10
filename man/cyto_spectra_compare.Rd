@@ -23,9 +23,10 @@ detector or channel.}
 by default to compare all rows.}
 
 \item{type}{indicates whether to compute the \code{"cosine"} similarity,
-spectral \code{"purity"} or \code{"hotspot"} matrix, set to \code{"cosine"}
-by default. Option \code{"hotspot"} is only available when a single matrix
-has been supplied to \code{x}.}
+spectral \code{"purity"}, \code{"hotspot"} matrix or panel
+\code{"complexity"}, set to \code{"cosine"} by default. Option
+\code{"hotspot"} is only available when a single matrix has been supplied
+to \code{x}.}
 
 \item{save_as}{name of a CSV file to which the similarity matrix should be
 saved, set to NULL by default to bypass saving.}

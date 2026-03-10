@@ -8,9 +8,10 @@
 #' @param select vector of row to select from each matrix by name, set to NULL
 #'   by default to compare all rows.
 #' @param type indicates whether to compute the \code{"cosine"} similarity,
-#'   spectral \code{"purity"} or \code{"hotspot"} matrix, set to \code{"cosine"}
-#'   by default. Option \code{"hotspot"} is only available when a single matrix
-#'   has been supplied to \code{x}.
+#'   spectral \code{"purity"}, \code{"hotspot"} matrix or panel
+#'   \code{"complexity"}, set to \code{"cosine"} by default. Option
+#'   \code{"hotspot"} is only available when a single matrix has been supplied
+#'   to \code{x}.
 #' @param save_as name of a CSV file to which the similarity matrix should be
 #'   saved, set to NULL by default to bypass saving.
 #' @param heatmap logical indicating whether the computed similarity scores
@@ -75,7 +76,7 @@ cyto_spectra_compare <- function(x,
       )
     }
     # SIMILARITY MATRIX REQUIRED
-    if(grepl("^c|^h", type, ignore.case = TRUE)) {
+    if(grepl("^cos|^sim|^h", type, ignore.case = TRUE)) {
       # COSINE SIMILARITY MATRIX
       cs <- diag(
         1, 
@@ -101,6 +102,9 @@ cyto_spectra_compare <- function(x,
       cs <- rbind(
         "purity" = row_purity_cpp(x)
       )
+    # CONDITION NUMBER
+    } else if(grepl("^com|^cond", type, ignore.case = TRUE)) {
+      cs <- kappa(x)
     } else {
       stop(
         "Unsupported 'type'!"
@@ -165,7 +169,7 @@ cyto_spectra_compare <- function(x,
     )
     keep <- names(cnt)[cnt == length(x)]
     # COSINE SIMILARITY
-    if(grepl("^c", type, ignore.case = TRUE)) {
+    if(grepl("^cos|^sim", type, ignore.case = TRUE)) {
       # SIMILARITY MATRIX - COMPUTE RELATIVE TO FIRST MATRIX
       cs <- matrix(
         1,
@@ -194,6 +198,12 @@ cyto_spectra_compare <- function(x,
         )
       )
       rownames(cs) <- names(x)
+    # COMPLEXITY 
+    } else if(grepl("^com|^cond", type, ignore.case = TRUE)) {
+      cs <- LAPPLY(
+        x,
+        "kappa"
+      )
     # UNSUPPORTED TYPE
     } else {
       stop(
@@ -208,11 +218,11 @@ cyto_spectra_compare <- function(x,
   }
 
   # PLOT HEATMAPS
-  if(heatmap) {
+  if(heatmap & !grep("^com|^cond", type, ignore.case = TRUE)) {
     HeatmapR::heat_map(
       cs,
       title = if(is.null(title)) {
-        if(grepl("^c", type)) {
+        if(grepl("^cos|^sim", type)) {
           "Cosine Similarity Matrix"
         } else if(grepl("^p", type)) {
           "Spectral Purity Matrix"
