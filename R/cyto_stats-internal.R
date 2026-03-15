@@ -177,9 +177,11 @@ cyto_stat_median <- function(x,
   # VECTOR
   if(is.null(dim(x))) {
     return(
-      "median" = round(
-        median_cpp(x),
-        round
+      c(
+        "median" = round(
+          median_cpp(x),
+          round
+        )
       )
     )
   # MATRIX
@@ -207,9 +209,11 @@ cyto_stat_geomedian <- function(x,
   # VECTOR
   if(is.null(dim(x))) {
     return(
-      "median" = round(
-        unname(geometric_median_cpp(matrix(x, ncol = 1))),
-        round
+      c(
+        "median" = round(
+          unname(geometric_median_cpp(matrix(x, ncol = 1))),
+          round
+        )
       )
     )
     # MATRIX
@@ -370,8 +374,10 @@ cyto_stat_rsd <- function(x,
   if(is.null(dim(x))) {
     return(
       c(
-        "rsd" = rsd_cpp(x),
-        round
+        "rsd" = round(
+          rsd_cpp(x),
+          round
+        )
       )
     )
   # MATRIX
@@ -402,8 +408,10 @@ cyto_stat_cv <- function(x,
   if(is.null(dim(x))) {
     return(
       c(
-        "cv" = cv_cpp(x),
-        round
+        "cv" = round(
+          cv_cpp(x),
+          round
+        )
       )
     )
     # MATRIX
@@ -574,7 +582,9 @@ cyto_stat_auc <- function(x,
             },
             subdivisions = 2000,
             ...
-          )$value, round)
+          )$value, 
+          round
+        )
       )
     )
   # MATRIX
@@ -727,7 +737,7 @@ cyto_stat_density <- function(x,
     }
     # SMOOTH - INACCURATE COUNTS OTHERWISE
     if(smooth < 1) {
-      stop("'smooth' must be greater than or equal to 1!")
+      warning("'smooth' should be greater than or equal to 1!")
     }
     # RESTRICT DATA TO LIMITS - DATA OUTSIDE PLOT LIMITS MESSES UP BANDWIDTH
     if(!.all_na(limits[, 1])) {
@@ -931,8 +941,7 @@ cyto_stat_scale <- function(x,
         x,
         type = type,
         probs = probs
-      ),
-      round
+      )
     )
     # MATRIX
   } else {
@@ -972,7 +981,7 @@ cyto_stat_skewness <- function(x,
     )
   # MATRIX
   } else {
-    future_apply(
+    apply(
       x,
       2,
       "cyto_stat_skewness"
@@ -1076,20 +1085,25 @@ cyto_stat_bkde2d <- function(x,
         if(length(x[, z]) < 2) {
           return(NA)
         } else {
+          bw <- tryCatch(
+            suppressWarnings(
+              dpik(
+                x[, z],
+                gridsize = M[z],
+                range.x = limits[[z]],
+                truncate = TRUE
+              )
+            ),
+            error = function(e) {
+              return(diff(limits[[z]])/M[z])
+            }
+          )
+          # REDUCE BANDWIDTH FOR SAMPLE-ID
+          if(grepl("^Sample\\-ID$", colnames(x)[z])) {
+            bw <- bw/(8*length(unique(x[, z])))
+          }
           return(
-            tryCatch(
-              suppressWarnings(
-                dpik(
-                  x[, z],
-                  gridsize = M[z],
-                  range.x = limits[[z]],
-                  truncate = TRUE
-                )
-              ),
-              error = function(e) {
-                return(diff(limits[[z]])/M[z])
-              }
-            )
+            bw
           )
         }
       } else {
@@ -1375,17 +1389,21 @@ cyto_stat_hex <- function(x,
     )
   )
   
-  # NOTE: HEXBVIN SMOOTHING ISN'T GREAT
-  # # smooth hexbin counts
-  # if(smooth) {
-  #   hex <- cyto_func_call(
-  #     "hexbin::smooth.hexbin",
-  #     list(
-  #       hex,
-  #       wts = c(48, 4, 1)
-  #     )
-  #   )
-  # }
+  # NOTE: HEXBIN PACKAGE SMOOTHING IS SLOWER AND REDUCES RESOLUTION
+  # smooth hexbin counts
+  if(smooth) {
+    hex <- .hexbin_smooth(
+      hex,
+      wts = c(1,5)
+    )
+    # hex <- cyto_func_call(
+    #   "hexbin::smooth.hexbin",
+    #   list(
+    #     hex,
+    #     wts = c(20, 5, 1)
+    #   )
+    # )
+  }
   
   # compute hexagon widths
   sx <- hex@xbins / diff(hex@xbnds)
@@ -1417,4 +1435,96 @@ cyto_stat_hex <- function(x,
   # return computed hexbin
   return(hb)
   
+}
+
+#' Fast Hexbin Smoothing (Resolution Preserving)
+#'
+#' This function smoothes hexbin counts using a weighted average of neighbors.
+#' Unlike the standard smooth.hexbin(), this function:
+#' 1. Preserves the exact grid resolution and plot dimensions.
+#' 2. Is optimized for speed (pure R, faster than the original Fortran).
+#'
+#' @param bin A hexbin object.
+#' @param wts Numeric vector of length 2: c(center_weight, neighbor_weight).
+#' @return A smoothed hexbin object.
+#' Fast & Resolution-Preserving Hexbin Smoothing
+#'
+#' @param bin A hexbin object.
+#' @param wts Numeric vector of length 2: c(center_weight, neighbor_weight).
+#' @param normalize Logical. If TRUE, scales counts back to original magnitude to prevent "fat" hexagons.
+.hexbin_smooth <- function(bin, wts = c(48, 4), normalize = TRUE) {
+  if (!inherits(bin, "hexbin")) stop("Input must be a hexbin object")
+  
+  # 1. SETUP (Transposed Layout for Speed)
+  dims <- bin@dimen
+  nrow <- dims[1]
+  ncol <- dims[2]
+  
+  # Padded Matrix
+  mat <- matrix(0L, nrow = ncol + 2L, ncol = nrow + 2L)
+  
+  # 2. CALCULATE INDICES (Store these for retrieval later)
+  # We map the original 1-based cells to our padded, transposed matrix
+  cell <- bin@cell - 1L
+  c_idx <- cell %% ncol + 2L 
+  r_idx <- cell %/% ncol + 2L
+  
+  # Fill the matrix at the original locations
+  fill_locs <- cbind(c_idx, r_idx)
+  mat[fill_locs] <- bin@count
+  
+  # 3. ACCUMULATE (The Smoothing Step)
+  w1 <- as.integer(wts[1])
+  w2 <- as.integer(wts[2])
+  
+  ix_c <- 2L:(ncol + 1L)
+  ix_r <- 2L:(nrow + 1L)
+  
+  accum <- mat[ix_c, ix_r] * w1
+  
+  if (w2 > 0L) {
+    mat_w2 <- mat * w2
+    
+    # Horizontal Neighbors
+    accum <- accum + mat_w2[1L:ncol, ix_r] + mat_w2[3L:(ncol + 2L), ix_r]
+    
+    # Vertical Neighbors
+    src_top <- mat_w2[, 1L:nrow]
+    src_bot <- mat_w2[, 3L:(nrow + 2L)]
+    is_odd_col <- (seq_len(nrow) %% 2L == 1L)
+    is_even_col <- !is_odd_col
+    
+    # Top Neighbors
+    accum[, is_odd_col] <- accum[, is_odd_col] + 
+      src_top[1L:ncol, is_odd_col] + src_top[2L:(ncol+1L), is_odd_col]
+    accum[, is_even_col] <- accum[, is_even_col] + 
+      src_top[2L:(ncol+1L), is_even_col] + src_top[3L:(ncol+2L), is_even_col]
+    
+    # Bottom Neighbors
+    accum[, is_odd_col] <- accum[, is_odd_col] + 
+      src_bot[1L:ncol, is_odd_col] + src_bot[2L:(ncol+1L), is_odd_col]
+    accum[, is_even_col] <- accum[, is_even_col] + 
+      src_bot[2L:(ncol+1L), is_even_col] + src_bot[3L:(ncol+2L), is_even_col]
+  }
+  
+  # 4. EXTRACT (The Fix)
+  # Instead of finding NEW non-zero cells, we sample 'accum' ONLY at the 
+  # original fill locations.
+  # Note: 'accum' is unpadded (ncol x nrow), so we shift indices back by -1L
+  extract_locs <- cbind(c_idx - 1L, r_idx - 1L)
+  new_counts <- accum[extract_locs]
+  
+  # 5. NORMALIZE & UPDATE
+  if (normalize) {
+    total_weight <- w1 + (6 * w2)
+    new_counts <- as.integer((new_counts + total_weight/2) / total_weight)
+    # Ensure original events remain visible (don't round down to 0)
+    new_counts[new_counts < 1L] <- 1L
+  }
+  
+  # Update ONLY the counts. 
+  # bin@cell, bin@cID, and bin@xbins remain completely strictly untouched.
+  bin@count <- new_counts
+  
+  return(bin)
 }
