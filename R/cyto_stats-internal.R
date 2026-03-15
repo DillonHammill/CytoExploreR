@@ -210,7 +210,7 @@ cyto_stat_geomedian <- function(x,
   if(is.null(dim(x))) {
     return(
       c(
-        "median" = round(
+        "geomedian" = round(
           unname(geometric_median_cpp(matrix(x, ncol = 1))),
           round
         )
