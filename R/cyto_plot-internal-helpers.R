@@ -374,24 +374,33 @@
   }
   
   # EVENT-ID
+  use_event_id <- TRUE
   if(length(x[[1]]) > 1) {
-    lapply(
-      x, 
+    has_event_id <- all(unlist(lapply(
+      x,
       function(z) {
         if(length(z) > 1) {
-          if(!all(LAPPLY(
-            z, 
+          LAPPLY(
+            z,
             function(w) {
               "Event-ID" %in% cyto_channels(w)
             }
-          ))) {
-            stop(
-              "Data must be barcoded using cyto_barcode(x, 'events') to display overlays."
-            )
-          }
+          )
+        } else {
+          list(TRUE)
         }
       }
-    )
+    )))
+    if(!has_event_id) {
+      warning(
+        paste0(
+          "Overlay layers do not contain 'Event-ID'. ",
+          "Defaulting to independent layer sampling using the 'events' argument. ",
+          "Barcode samples with cyto_barcode(x, 'events') for event-matched sampling."
+        )
+      )
+      use_event_id <- FALSE
+    }
   }
 
   # SOM
@@ -428,53 +437,113 @@
           cs_list <- x[[z]]
           # GROUP NAME
           grp <- names(x)[z]
-          # CHECK EACH LAYER FOR EVENTS IN PREVIOUS LAYERS - CANT STORE GROUP NAME
-          i <- lapply(
-            seq_along(cs_list) , 
-            function(w){
-              # CYTOSET
-              cs <- cs_list[[w]]
-              # IDENTIFIERS
-              ids <- cyto_names(cs)
-              # CYTOFRAME
+
+          # NO OVERLAY - SIMPLE SAMPLING (bypass Event-ID logic)
+          if(length(cs_list) == 1) {
+            cs <- cs_list[[1]]
+            n <- cyto_sample_n(cs, events = events)
+            cs_sub <- cyto_sample(cs, events = n, seed = seed)
+            cyto_progress(pb)
+            return(
+              structure(
+                list(
+                  if(length(cs_sub) > 1) {
+                    cytoset(
+                      structure(
+                        list(as(cs_sub, "cytoframe")),
+                        names = grp
+                      )
+                    )
+                  } else {
+                    cs_sub
+                  }
+                ),
+                names = names(cs_list)
+              )
+            )
+          }
+
+          # NO EVENT-ID - INDEPENDENT LAYER SAMPLING
+          if(!use_event_id) {
+            cs_sub_list <- lapply(cs_list, function(cs) {
+              n <- cyto_sample_n(cs, events = events)
+              cyto_sample(cs, events = n, seed = seed)
+            })
+            cyto_progress(pb)
+            return(
               structure(
                 lapply(
-                  seq_along(cs),
-                  function(q) {
-                    # IDENTIFIER
-                    id <- ids[q]
+                  seq_along(cs_sub_list),
+                  function(r) {
+                    if(length(cs_sub_list[[r]]) > 1) {
+                      cytoset(
+                        structure(
+                          list(as(cs_sub_list[[r]], "cytoframe")),
+                          names = grp
+                        )
+                      )
+                    } else {
+                      cs_sub_list[[r]]
+                    }
+                  }
+                ),
+                names = names(cs_list)
+              )
+            )
+          }
+
+          # PRE-COMPUTE LAYER IDENTIFIERS (avoid repeated cyto_names() calls)
+          all_ids <- lapply(cs_list, cyto_names)
+
+          # PRE-EXTRACT EVENT-IDS FOR ALL LAYERS & FRAMES
+          # Avoids repeated S4 dispatch + column extraction inside loops
+          all_eids <- lapply(
+            seq_along(cs_list),
+            function(w) {
+              cs <- cs_list[[w]]
+              structure(
+                lapply(
+                  all_ids[[w]],
+                  function(id) as.vector(cyto_exprs(cs[[id]], "Event-ID"))
+                ),
+                names = all_ids[[w]]
+              )
+            }
+          )
+
+          # BUILD SAMPLE-ID LOOKUP ENVIRONMENTS (O(1) membership test)
+          all_ids_env <- lapply(
+            all_ids,
+            function(ids) {
+              e <- new.env(hash = TRUE, parent = emptyenv(), size = length(ids))
+              for(id in ids) assign(id, TRUE, envir = e)
+              e
+            }
+          )
+
+          # CHECK EACH LAYER FOR EVENTS IN PREVIOUS LAYERS
+          i <- lapply(
+            seq_along(cs_list),
+            function(w) {
+              ids <- all_ids[[w]]
+              structure(
+                lapply(
+                  ids,
+                  function(id) {
                     l <- list(
-                      "total" = nrow(cs[[q]]),
-                      "layer" = NULL,
-                      "match" = 0,
+                      "total"  = length(all_eids[[w]][[id]]),
+                      "layer"  = NULL,
+                      "match"  = 0,
                       "sample" = NULL
                     )
-                    for(v in seq_len(w-1)) {
-                      # FIRST LAYER
-                      if(v == 0){
-                        break()
-                        # SUBSEQUENT LAYERS
-                      } else {
-                        # SAMPLE ID MATCH PREVIOUS LAYER
-                        if(id %in% cyto_names(cs_list[[v]])) {
-                          # MATCHING EVENT IDS?
-                          m <- sum(
-                            cyto_exprs(
-                              cs[[q]], 
-                              "Event-ID"
-                            ) %in%
-                            cyto_exprs(
-                              cs_list[[v]][[match(id, ids)]],
-                              "Event-ID"
-                            )
-                          )
-                          # ANY MATCHING EVENTS
-                          if(m > 0) {
-                            # UPDATE LIST
-                            l$layer <- v
-                            l$match <- m
-                            break()
-                          }
+                    for(v in seq_len(w - 1)) {
+                      # SAMPLE EXISTS IN PREVIOUS LAYER?
+                      if(exists(id, envir = all_ids_env[[v]], inherits = FALSE)) {
+                        m <- sum(all_eids[[w]][[id]] %in% all_eids[[v]][[id]])
+                        if(m > 0) {
+                          l$layer <- v
+                          l$match <- m
+                          break()
                         }
                       }
                     }
@@ -485,138 +554,116 @@
               )
             }
           )
-          # SAMPLE - SAVE TO CS_SUB_LIST - NEED CS_LIST CANNOT UPDATE IN PLACE
-          cs_sub_list <- list()
-          lapply(
-            seq_along(cs_list), 
-            function(w){
-              # CYTOSET
-              cs <- cs_list[[w]]
-              # IDENTIFIERS
-              ids <- cyto_names(cs)
-              # ALL CYTOFRAMES CONTAIN NEW EVENTS
-              if(is.null(LAPPLY(i[[w]], `[[`, "layer"))) {
-                # COMPUTE SAMPLE SIZES
-                n <- cyto_sample_n(
-                  cs,
-                  events = events
-                )
-                for(id in ids) {
-                  i[[w]][[id]]$sample <<- n[id]
-                }
-                cs_sub_list[[w]] <<- cyto_sample(
-                  cs,
-                  events = n,
-                  seed = seed
-                )
-                # SOME/ALL CYTOFRAMES CONTAIN EVENTS ON PLOT
-              } else {
-                # FIND WHICH CYTOFRAMES HAVE EVENTS ON PLOT
-                m <- LAPPLY(
-                  i[[w]], 
-                  function(s){
-                    !is.null(s$layer)
-                  }
-                )
-                # STORE CYTOFRAMES IN LIST
-                cf_list <- list()
-                # CYTOFRAMES WITH EVENTS ON PLOT
-                for(id in names(m[m])) {
-                  # MATCHING LAYER
-                  l <- i[[w]][[id]]$layer
-                  # ORIGINAL SIZE OF REFERNCE LAYER
-                  t <- i[[l]][[id]]$total
-                  # SAMPLE SIZE OF REFERENCE LAYER
-                  s <- i[[l]][[id]]$sample
-                  # CYTOFRAME SUBSET OF PREVIOUS LAYER
-                  if(i[[w]][[id]]$match == nrow(cs[[id]])) {
-                    # USE EVENT IDs FROM REFERENCE LAYER
-                    cf_list[[id]] <- cs[[id]][
-                      cyto_exprs(cs[[id]], "Event-ID") %in%
-                        cyto_exprs(cs_sub_list[[l]][[id]], "Event-ID")
-                      ,]
-                    i[[w]][[id]]$sample <<- nrow(cf_list[[id]])
-                    # CYTOFRAME OVERLAP WITH PREVIOUS LAYER
-                  } else {
-                    # EVENT IDs FROM LAYER SAMPLE
-                    e <- cyto_exprs(cs[[id]], "Event-ID")[
-                      cyto_exprs(cs[[id]], "Event-ID") %in%
-                        cyto_exprs(cs_sub_list[[l]][[id]], "Event-ID")
-                    ]
-                    # NON-OVERLAPPING PORTION OF CYTOFRAME
-                    cf_new <- cs[[id]][
-                      !cyto_exprs(cs[[id]], "Event-ID") %in%
-                        cyto_exprs(cs_list[[l]][[id]], "Event-ID"),
-                    ]
-                    n <- nrow(cf_new)
-                    # SAMPLE NON-OVERLAPPING PORTION OF CYTOFRAME
-                    e <- c(e,
-                           cyto_exprs(cf_new)[
-                             sample(
-                               nrow(cf_new),
-                               round(
-                                 (n/i[[l]][[id]]$total)*(i[[l]][[id]]$sample)
-                               )
-                             )
-                             , "Event-ID"])
-                    # COMPLETE SAMPLE CYTOFRAME
-                    cf_list[[id]] <- cs[[id]][
-                      cyto_exprs(cs[[id]], "Event-ID") %in% e
-                      , ]
-                    # STORE SAMPLE SIZE
-                    i[[w]][[id]]$sample <<- length(e)
-                  }
-                }
-                # CYTOFRAMES WITHOUT EVENTS ON PLOT
-                # NEW LAYER - ALL NEW CYTOFRAMES
-                if(length(m[!m]) == length(cs)) {
-                  # COMPUTE SAMPLE SIZES
-                  n <- cyto_sample_n(
-                    cs,
-                    events = events
-                  )
-                  # SAMPLE
-                  for(id in names(m[!m])) {
-                    i[[w]][[id]]$sample <<- n[id]
-                    cf_list[[id]] <- cyto_sample(
-                      cs[[id]],
-                      events = n[id],
-                      seed = seed
-                    )
-                  }
-                  # SOME NEW CYTOFRAME(S)
-                } else if(length(m[!m]) != 0 & length(m[!m]) < length(cs)) {
-                  # RATIO SAMPLING TO COMPUTE N FOR NEW CYTOFRAMES
-                  n <- round(
-                    sum(LAPPLY(i[[w]][names(m[m])], `[[`, "sample")) *
-                      (sum(LAPPLY(i[[w]][names(m[!m])], `[[`, "total")) /
-                         sum(LAPPLY(i[[w]][names(m[m])], `[[`, "total")))
-                  )
-                  # COMPUTE SAMPLE SIZES FOR NEW CYTOFRAMES
-                  n <- cyto_sample_n(
-                    cs[names(m[!m])],
-                    events = n
-                  )
-                  # SAMPLE
-                  for(id in names(m[!m])) {
-                    i[[w]][[id]]$sample <<- n[id]
-                    cf_list[[id]] <- cyto_sample(
-                      cs[[id]],
-                      events = n[id]
-                    )
-                  }
-                }
-                # ADD CYTOFRAMES TO NEW CYTOSET
-                cs_sub_list[[w]] <<- cytoset(cf_list)
+
+          # SAMPLE - SEQUENTIAL FOR LOOP (each layer depends on the previous)
+          cs_sub_list <- vector("list", length(cs_list))
+          # CACHE SAMPLED EVENT-IDS PER LAYER (avoids re-extracting from cytosets)
+          sampled_eids <- vector("list", length(cs_list))
+
+          for(w in seq_along(cs_list)) {
+            cs  <- cs_list[[w]]
+            ids <- all_ids[[w]]
+
+            # ALL CYTOFRAMES CONTAIN NEW EVENTS
+            if(is.null(LAPPLY(i[[w]], `[[`, "layer"))) {
+              # COMPUTE SAMPLE SIZES
+              n <- cyto_sample_n(cs, events = events)
+              for(id in ids) {
+                i[[w]][[id]]$sample <- n[id]
               }
+              cs_sub_list[[w]] <- cyto_sample(cs, events = n, seed = seed)
+              # CACHE SAMPLED EVENT-IDS
+              sampled_eids[[w]] <- structure(
+                lapply(
+                  ids,
+                  function(id) as.vector(cyto_exprs(cs_sub_list[[w]][[id]], "Event-ID"))
+                ),
+                names = ids
+              )
+
+            # SOME/ALL CYTOFRAMES CONTAIN EVENTS IN PREVIOUS LAYERS
+            } else {
+              # WHICH FRAMES HAVE EVENTS IN A PREVIOUS LAYER?
+              m <- LAPPLY(i[[w]], function(s) !is.null(s$layer))
+              # STORE ASSEMBLED CYTOFRAMES AND THEIR EVENT-IDS
+              cf_list <- list()
+              cf_eids <- list()
+
+              # FRAMES WITH EVENTS IN A PREVIOUS LAYER
+              for(id in names(m[m])) {
+                l         <- i[[w]][[id]]$layer
+                eid_cur   <- all_eids[[w]][[id]]
+                eid_s_ref <- sampled_eids[[l]][[id]]  # SAMPLED REFERENCE LAYER
+
+                # FRAME FULLY CONTAINED IN PREVIOUS LAYER
+                if(i[[w]][[id]]$match == length(eid_cur)) {
+                  keep          <- eid_cur %in% eid_s_ref
+                  cf_list[[id]] <- cs[[id]][keep, ]
+                  i[[w]][[id]]$sample <- sum(keep)
+                  cf_eids[[id]] <- eid_cur[keep]
+
+                # FRAME PARTIALLY OVERLAPS PREVIOUS LAYER
+                } else {
+                  # OVERLAPPING EVENTS PRESENT IN THE SAMPLE
+                  e         <- eid_cur[eid_cur %in% eid_s_ref]
+                  # NON-OVERLAPPING EVENTS (absent from full reference layer)
+                  eid_f_ref <- all_eids[[l]][[id]]
+                  new_eids  <- eid_cur[!eid_cur %in% eid_f_ref]
+                  n_new     <- length(new_eids)
+                  # SAMPLE NON-OVERLAPPING EVENTS PROPORTIONALLY
+                  if(n_new > 0) {
+                    n_sample <- round(
+                      (n_new / i[[l]][[id]]$total) * i[[l]][[id]]$sample
+                    )
+                    if(n_sample > 0) {
+                      e <- c(e, new_eids[sample(n_new, min(n_sample, n_new))])
+                    }
+                  }
+                  keep          <- eid_cur %in% e
+                  cf_list[[id]] <- cs[[id]][keep, ]
+                  i[[w]][[id]]$sample <- length(e)
+                  cf_eids[[id]] <- e
+                }
+              }
+
+              new_ids <- names(m[!m])
+
+              # NEW LAYER - ALL FRAMES ARE NEW
+              if(length(new_ids) == length(cs)) {
+                n <- cyto_sample_n(cs, events = events)
+                for(id in new_ids) {
+                  i[[w]][[id]]$sample <- n[id]
+                  cf_list[[id]] <- cyto_sample(cs[[id]], events = n[id], seed = seed)
+                  cf_eids[[id]] <- as.vector(cyto_exprs(cf_list[[id]], "Event-ID"))
+                }
+              # SOME NEW FRAMES - SAMPLE PROPORTIONALLY
+              } else if(length(new_ids) > 0) {
+                n <- round(
+                  sum(LAPPLY(i[[w]][names(m[m])], `[[`, "sample")) *
+                    (sum(LAPPLY(i[[w]][new_ids], `[[`, "total")) /
+                       sum(LAPPLY(i[[w]][names(m[m])], `[[`, "total")))
+                )
+                n <- cyto_sample_n(cs[new_ids], events = n)
+                for(id in new_ids) {
+                  i[[w]][[id]]$sample <- n[id]
+                  cf_list[[id]] <- cyto_sample(cs[[id]], events = n[id])
+                  cf_eids[[id]] <- as.vector(cyto_exprs(cf_list[[id]], "Event-ID"))
+                }
+              }
+
+              # ASSEMBLE CYTOSET
+              cs_sub_list[[w]] <- cytoset(cf_list)
+              # CACHE SAMPLED EVENT-IDS
+              sampled_eids[[w]] <- cf_eids
             }
-          )
+          }
+
           # UPDATE PROGRESS BAR
           cyto_progress(pb)
           # COERCE
           structure(
             lapply(
-              seq_along(cs_sub_list), 
+              seq_along(cs_sub_list),
               function(r){
                 if(length(cs_sub_list[[r]]) > 1) {
                   cytoset(

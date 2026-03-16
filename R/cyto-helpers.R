@@ -2885,16 +2885,23 @@ cyto_exprs.flowFrame <- function(x,
                                  format = "matrix",
                                  ...) {
   
-  # CHANNELS
-  if(!is.null(channels)) {
-    x <- x[, cyto_channels_extract(x, channels)]
-  }
-  
   # EXTRACT DATA
   if(format %in% "matrix") {
     mt <- exprs(x)[, , drop = drop, ...]
   } else {
     mt <- exprs(x)[, , drop = FALSE]
+  }
+
+  # CHANNELS
+  if(!is.null(channels)) {
+    # colnames(mt) are the raw channel names - check directly before any S4 dispatch.
+    # Only fall back to cyto_channels_extract when marker name resolution is needed.
+    if(is.character(channels) && !anyNA(idx <- match(channels, colnames(mt)))) {
+      mt <- mt[, idx, drop = drop]
+    } else {
+      channels <- cyto_channels_extract(x, channels)
+      mt <- mt[, channels, drop = drop]
+    }
   }
 
   # MARKERS
@@ -2951,20 +2958,20 @@ cyto_exprs.flowSet <- function(x,
                                drop = TRUE,
                                format = "matrix",
                                ...) {
-  
-  # CHANNELS
+
+  # CHANNELS - resolve once against the set, pass resolved names to each frame
   if(!is.null(channels)) {
-    x <- x[, cyto_channels_extract(x, channels)]
+    channels <- cyto_channels_extract(x, channels)
   }
-  
+
   # EXTRACT DATA
   structure(
     lapply(
-      seq_along(x), 
+      seq_along(x),
       function(z){
         cyto_exprs(
           x[[z]],
-          channels = NULL,
+          channels = channels,
           markers = markers,
           drop = drop,
           format = format,
@@ -3240,6 +3247,9 @@ cyto_match <- function(x,
     args <- args[!names(args) %in% "exclude"]
   }
   
+  # EXPERIMENT DETAILS
+  pd <- cyto_details(x)
+
   # INDICES/NAMES
   if(length(args) == 1 & .empty(names(args), null = TRUE)) {
     # NULL
@@ -3250,24 +3260,25 @@ cyto_match <- function(x,
       ind <- unlist(args)
     # UNNAMED CHARACTERS
     } else {
-      # EXPERIMENT DETAILS
-      pd <- cyto_details(x)
+      # CACHE LOOKUP VECTORS
+      pd_row_names <- rownames(pd)
+      pd_names <- pd[, "name"]
       # MATCH NAMES - ROWNAMES/NAME/PARTIAL
       ind <- LAPPLY(unlist(args), function(z){
         # ROWNAMES - EXACT
-        if(z %in% rownames(pd)) {
-          match(z, rownames(pd))
+        if(z %in% pd_row_names) {
+          match(z, pd_row_names)
         # NAME - EXACT
-        } else if(z %in% pd[, "name"]) {
-          match(z, pd[, "name"])
+        } else if(z %in% pd_names) {
+          match(z, pd_names)
         # PARTIAL MATCH
         } else if(exact == FALSE) {
           # ROWNAMES - PARTIAL
-          if(any(.grepl(z, rownames(pd)))) {
-            .grep(z, rownames(pd))
+          if(any(.grepl(z, pd_row_names))) {
+            .grep(z, pd_row_names)
           # NAME - PARTIAL
-          } else if(any(.grepl(z, pd[, "name"]))) {
-            .grep(z, pd[, "name"])
+          } else if(any(.grepl(z, pd_names))) {
+            .grep(z, pd_names)
           # NO MATCH
           } else {
             NULL
@@ -3286,8 +3297,6 @@ cyto_match <- function(x,
     }
   # EXPERIMENTAL VARIABLES
   } else {
-    # EXPERIMENT DETAILS
-    pd <- cyto_details(x)
     # INDICES PER VARIABLE
     ind <- lapply(
       names(args), 
@@ -3540,52 +3549,49 @@ cyto_groups <- function(x,
   # group_by is a list with factor levels - should not be "all"
   if (cyto_class(group_by, "list")) {
     # Check variables and factor levels
-    lapply(
-      seq_along(group_by), 
-      function(z) {
-        # Variable
-        var <- names(group_by)[z]
-        # Expected variable levels
-        var_levels <- unique(pd[, var])
-        # Watch out for NA
-        if (any(LAPPLY(group_by[[z]], "is.na"))) {
-          ind <- which(LAPPLY(group_by[[z]], "is.na"))
-          group_by[[z]][ind] <- "NA"
-        }
-        # Check variables
-        if (!var %in% colnames(pd)) {
-          stop(paste0(
-            var,
-            " is not a valid variable for this ",
-            class(x), "."
-          ))
-        }
-        # Incorrect factor levels
-        if (!all(group_by[[z]] %in% unique(pd[, var]))) {
-          lapply(group_by[[z]], function(y) {
-            if (!y %in% unique(pd[, var])) {
-              stop(paste0(
-                y, " is not a valid factor level for ",
-                var,
-                "."
-              ))
-            }
-          })
-        }
-        # Update factor levels in pd
-        if (!all(var_levels %in% group_by[[z]])) {
-          missing_levels <- as.vector(
-            var_levels[!var_levels %in% group_by[[z]]]
-          )
-          group_by[[z]] <<- c(
-            group_by[[z]],
-            missing_levels
-          )
-        }
-        # Convert pd variable to factor and set levels
-        pd[, var] <<- factor(pd[, var], levels = group_by[[z]])
+    for (z in seq_along(group_by)) {
+      # Variable
+      var <- names(group_by)[z]
+      # Expected variable levels (cached - used twice below)
+      var_levels <- unique(pd[, var])
+      # Watch out for NA
+      if (any(LAPPLY(group_by[[z]], "is.na"))) {
+        ind <- which(LAPPLY(group_by[[z]], "is.na"))
+        group_by[[z]][ind] <- "NA"
       }
-    )
+      # Check variables
+      if (!var %in% colnames(pd)) {
+        stop(paste0(
+          var,
+          " is not a valid variable for this ",
+          class(x), "."
+        ))
+      }
+      # Incorrect factor levels
+      if (!all(group_by[[z]] %in% var_levels)) {
+        for (y in group_by[[z]]) {
+          if (!y %in% var_levels) {
+            stop(paste0(
+              y, " is not a valid factor level for ",
+              var,
+              "."
+            ))
+          }
+        }
+      }
+      # Update factor levels in pd (explicit local mutation - no <<-)
+      if (!all(var_levels %in% group_by[[z]])) {
+        missing_levels <- as.vector(
+          var_levels[!var_levels %in% group_by[[z]]]
+        )
+        group_by[[z]] <- c(
+          group_by[[z]],
+          missing_levels
+        )
+      }
+      # Convert pd variable to factor and set levels
+      pd[, var] <- factor(pd[, var], levels = group_by[[z]])
+    }
     # Convert group_by to vector
     group_by <- names(group_by)
     # group_by is a vector of variable names
@@ -7176,18 +7182,18 @@ cyto_nodes <- function(x,
         nodes <- nodes[-bool_ind]
       }
     }
-    # TERMINAL NODES
+    # TERMINAL NODES - derive from path list (avoids per-node C++ calls)
+    # Note: root is "root"; all other nodes use leading-slash paths ("/Cells")
+    # so root's children don't start with "root/" — handle separately.
     if(terminal) {
-      nodes <- LAPPLY(
-        nodes,
-        function(node) {
-          if(length(gh_pop_get_children(gh, node)) == 0) {
-            return(node)
-          } else {
-            return(NULL)
-          }
+      is_terminal <- vapply(nodes, function(node) {
+        if (node == "root") {
+          !any(startsWith(nodes, "/"))
+        } else {
+          !any(startsWith(nodes[nodes != node], paste0(node, "/")))
         }
-      )
+      }, logical(1))
+      nodes <- nodes[is_terminal]
     }
   # GATINGTEMPLATE
   } else {
@@ -7305,60 +7311,26 @@ cyto_nodes <- function(x,
   
   # NODE INDICES
   ind <- seq_along(nodes)
-  
+
+  # INTERNAL HELPER - resolve select/exclude criteria to node indices
+  .node_indices <- function(criteria, nodes, ignore.case, ...) {
+    unique(LAPPLY(criteria, function(z) {
+      if (is.numeric(z)) {
+        z
+      } else {
+        which(suppressWarnings(.grepl(z, nodes, ignore.case = ignore.case, ...)))
+      }
+    }))
+  }
+
   # SELECT
   if(!is.null(select)) {
-    ind <- unique(
-      LAPPLY(
-        select, 
-        function(z){
-          # INDEX
-          if(is.numeric(z)) {
-            z
-          # NODE
-          } else {
-            which(
-              suppressWarnings(
-                .grepl(
-                  z, 
-                  nodes, 
-                  ignore.case = ignore.case,
-                  ...
-                )
-              )
-            )
-          }
-        }
-      )
-    )
+    ind <- .node_indices(select, nodes, ignore.case, ...)
   }
-  
+
   # EXCLUDE
   if(!is.null(exclude)) {
-    ind_rm <- unique(
-      LAPPLY(
-        exclude, 
-        function(z){
-          # INDEX
-          if(is.numeric(z)) {
-            z
-          # NODE
-          } else {
-            which(
-              suppressWarnings(
-                .grepl(
-                  z, 
-                  nodes, 
-                  ignore.case = ignore.case,
-                  ...
-                )
-              )
-            )
-          }
-        }
-      )
-    )
-    ind <- ind[!ind %in% ind_rm]
+    ind <- ind[!ind %in% .node_indices(exclude, nodes, ignore.case, ...)]
   }
   
   # NODE PATHS
@@ -8805,23 +8777,38 @@ cyto_apply.flowSet <- function(x,
     )
   }
   
-  # CYTOSET INPUT 
-  if(input == 1 | .grepl("^cytoset|^cs", input)) {
-    input <- "cytoset"
-  # CYTOFRAME INPUT
-  } else if(input == 2 | .grepl("^cytoframe|^cf", input)) {
-    input  <- "cytoframe"
-  # MATRIX INPUT
-  } else if(input == 3 | .grepl("^m", input)) {
-    input <- "matrix"
-  # COLUMN/CHANNEL INPUT
-  } else if(input == 4 | .grepl("^co|^ch", input)) {
-    input <- "column"
-  # ROW/CELL
-  } else if(input == 5 | .grepl("^r|ce", input)) {
-    input <- "row"
+  # NORMALISE INPUT TYPE - switch on first two chars avoids repeated regex
+  if (is.character(input)) {
+    input <- switch(
+      substring(tolower(input), 1, 2),
+      "cy" = if (startsWith(tolower(input), "cytoset")) "cytoset" else "cytoframe",
+      "cs" = "cytoset",
+      "cf" = "cytoframe",
+      "fl" = "flowFrame",
+      "ma" = ,
+      "m"  = "matrix",
+      "co" = ,
+      "ch" = "column",
+      "ro" = ,
+      "ce" = ,
+      "r"  = "row",
+      input  # pass through unrecognised strings unchanged
+    )
+  } else if (is.numeric(input)) {
+    input <- switch(
+      as.character(input),
+      "1" = "cytoset",
+      "2" = "cytoframe",
+      "3" = "matrix",
+      "4" = "column",
+      "5" = "row",
+      input
+    )
   }
   
+  # CACHE NAMES - cyto_names(x) is expensive; hoist once for all dispatch branches
+  nm <- cyto_names(x)
+
   # DISPATCH
   if(input == "cytoset") {
     res <- structure(
@@ -8837,73 +8824,54 @@ cyto_apply.flowSet <- function(x,
           )
           return(cyto_convert(output))
         }
-      ), 
-      names = cyto_names(x)
+      ),
+      names = nm
     )
   } else if(input == "flowFrame") { # internal use only
     res <- structure(
       lapply(
-        cyto_names(x), 
+        nm,
         function(z){
           output <- cyto_slot(
             FUN(
-              cytoframe_to_flowFrame(x[[z]]), 
+              cytoframe_to_flowFrame(x[[z]]),
               ...
             ),
             slot = slot
           )
           return(cyto_convert(output))
         }
-      ), 
-      names = cyto_names(x)
+      ),
+      names = nm
     )
   } else if(input == "cytoframe") {
     res <- structure(
       lapply(
-        cyto_names(x),
+        nm,
         function(z){
           output <- cyto_slot(
             FUN(
-              x[[z]], 
+              x[[z]],
               ...
             ),
             slot = slot
           )
           return(cyto_convert(output))
         }
-      ), 
-      names = cyto_names(x)
+      ),
+      names = nm
     )
   } else if(input == "column") {
     # TODO: Add support for passing channel-specific arguments through here
     # named vector or named list
     res <- structure(
       lapply(
-        cyto_names(x), 
+        nm,
         function(z){
           output <- cyto_slot(
             apply(
               cyto_exprs(x[[z]], drop = FALSE),
-              2, 
-              FUN, 
-              ...
-            ),
-            slot = slot
-          )
-          return(cyto_convert(output))
-        }
-      ), 
-      names = cyto_names(x)
-    )
-  } else if(input =="row") {
-    res <- structure(
-      lapply(
-        cyto_names(x), 
-        function(z){
-          output <- cyto_slot(
-            apply(
-              cyto_exprs(x[[z]], drop = FALSE),
-              1, 
+              2,
               FUN,
               ...
             ),
@@ -8911,19 +8879,38 @@ cyto_apply.flowSet <- function(x,
           )
           return(cyto_convert(output))
         }
-      ), 
-      names = cyto_names(x)
+      ),
+      names = nm
+    )
+  } else if(input =="row") {
+    res <- structure(
+      lapply(
+        nm,
+        function(z){
+          output <- cyto_slot(
+            apply(
+              cyto_exprs(x[[z]], drop = FALSE),
+              1,
+              FUN,
+              ...
+            ),
+            slot = slot
+          )
+          return(cyto_convert(output))
+        }
+      ),
+      names = nm
     )
   # MATRIX | DATA.FRAME | DATA.TABLE | TIBBLE
   } else {
     res <- structure(
       lapply(
-        cyto_names(x), 
+        nm,
         function(z){
           output <- cyto_slot(
             FUN(
               cyto_exprs(
-                x[[z]], 
+                x[[z]],
                 drop = FALSE,
                 format = input
               ),
@@ -8933,8 +8920,8 @@ cyto_apply.flowSet <- function(x,
           )
           return(cyto_convert(output))
         }
-      ), 
-      names = cyto_names(x)
+      ),
+      names = nm
     )
   }
   
@@ -8958,11 +8945,12 @@ cyto_apply.flowSet <- function(x,
       if(cyto_class(res[[1]], 
                     c("integer", "numeric", "logical", "character"), TRUE)) {
         # DONT MERGE CHANNELS INTO SINGLE COLUMN
+        nm_res <- names(res)
         if(!all(names(res[[1]]) %in% cyto_channels(x))) {
           # ATTEMPT MATRIX CONVERSION - VECTORS DIFFERENT OF SIZES
           res <- structure(
             lapply(
-              names(res),
+              nm_res,
               function(z){
                 tryCatch(
                   matrix(
@@ -8971,7 +8959,7 @@ cyto_apply.flowSet <- function(x,
                     ncol = 1,
                     dimnames = list(
                       paste0(
-                        names(res[z]), 
+                        names(res[z]),
                         if(!is.null(names(res[[z]])) & length(res[[z]]) > 1) {
                           paste0("|", names(res[[z]]))
                         } else {
@@ -8987,12 +8975,12 @@ cyto_apply.flowSet <- function(x,
                 )
               }
             ),
-            names = names(res)
+            names = nm_res
           )
         } else {
           res <- structure(
             lapply(
-              names(res),
+              nm_res,
               function(z){
                 matrix(
                   res[[z]],
@@ -9005,7 +8993,7 @@ cyto_apply.flowSet <- function(x,
                 )
               }
             ),
-            names = names(res)
+            names = nm_res
           )
         }
       }
@@ -9013,7 +9001,7 @@ cyto_apply.flowSet <- function(x,
       if(all(!is.null(LAPPLY(res, "dim")))) {
         # PREPARE & FORMAT MATRICES
         res <- lapply(
-          names(res), 
+          names(res),
           function(z){
             # ROWNAMES
             if(is.null(rownames(res[[z]]))) {

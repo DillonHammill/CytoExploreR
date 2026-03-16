@@ -471,8 +471,7 @@
   ],
   "releaseNotes": "https://github.com/DillonHammill/CytoExploreR/blob/master/NEWS.md",
   "contIntegration": [
-    "https://travis-ci.org/DillonHammill/CytoRSuite",
-    "https://ci.appveyor.com/project/DillonHammill/CytoRSuite",
+    "https://github.com/DillonHammill/CytoExploreR/actions",
     "https://codecov.io/github/DillonHammill/CytoRSuite?branch=master"
   ],
   "developmentStatus": "https://www.tidyverse.org/lifecycle/#maturing",

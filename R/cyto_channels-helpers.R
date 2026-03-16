@@ -77,75 +77,69 @@ cyto_channels <- function(x,
     channels <- colnames(x)
   }
   
-  # SELECT
-  if(!is.null(select)){
-    ind <- unique(
-      LAPPLY(
-        select, 
-        function(z){
-          # INDEX
-          if(is.numeric(z)) {
-            z
-          # NAME
-          } else {
-            which(
-              suppressWarnings(
-                .grepl(
-                  z, 
-                  channels, 
-                  escape = escape,
-                  fixed = FALSE,
-                  ignore.case = ignore.case,
-                  ...
-                )
-              )
-            )
-          }
-        }
-      )
-    )
-  } else {
-    ind <- seq_along(channels)
-  }
-  
-  # EXCLUDE
-  if(!is.null(exclude)){
-    ind_rm <- unique(
-      LAPPLY(
-        exclude, 
-        function(z){
-          # INDEX
-          if(is.numeric(z)) {
-            z
+  # SELECT / EXCLUDE - skip entirely when neither is supplied (most common case)
+  if(!is.null(select) || !is.null(exclude)) {
+    if(!is.null(select)) {
+      ind <- unique(
+        LAPPLY(
+          select,
+          function(z) {
+            # INDEX
+            if(is.numeric(z)) {
+              z
             # NAME
-          } else {
-            which(
-              suppressWarnings(
-                .grepl(
-                  z, 
-                  channels, 
-                  escape = escape,
-                  fixed = FALSE,
-                  ignore.case = ignore.case,
-                  ...
+            } else {
+              which(
+                suppressWarnings(
+                  .grepl(
+                    z,
+                    channels,
+                    escape = escape,
+                    fixed = FALSE,
+                    ignore.case = ignore.case,
+                    ...
+                  )
                 )
               )
-            )
+            }
           }
-        }
+        )
       )
-    )
-  } else {
-    ind_rm <- NULL
+    } else {
+      ind <- seq_along(channels)
+    }
+    if(!is.null(exclude)) {
+      ind_rm <- unique(
+        LAPPLY(
+          exclude,
+          function(z) {
+            # INDEX
+            if(is.numeric(z)) {
+              z
+            # NAME
+            } else {
+              which(
+                suppressWarnings(
+                  .grepl(
+                    z,
+                    channels,
+                    escape = escape,
+                    fixed = FALSE,
+                    ignore.case = ignore.case,
+                    ...
+                  )
+                )
+              )
+            }
+          }
+        )
+      )
+      if(length(ind_rm) > 0) {
+        ind <- ind[!ind %in% ind_rm]
+      }
+    }
+    channels <- channels[ind]
   }
-  
-  # CHANNELS EXCLUDE
-  if(length(ind_rm) > 0) {
-    ind <- ind[!ind %in% ind_rm]
-  }
-  
-  # SUBSET CHANNELS
-  channels <- channels[ind]
   
   # MARKERS
   markers <- cyto_markers(x)
@@ -303,88 +297,82 @@ cyto_markers <- function(x,
   
   # MARKER SELECTION/EXCLUSION
   if(!length(markers) == 0) {
-    # SELECT
-    if(!is.null(select)){
-      ind <- unique(
-        LAPPLY(
-          select, 
-          function(z) {
-            if(is.numeric(z)) {
-              z
-            } else {
-              which(
-                suppressWarnings(
-                  .grepl(
-                    z,
-                    markers,
-                    escape = escape,
-                    ignore.case = ignore.case,
-                    ...
-                  )
-                ) |
-                suppressWarnings(
-                  .grepl(
-                    z, 
-                    names(markers),
-                    escape = escape,
-                    ignore.case = ignore.case,
-                    ...
-                  )
-                )
-              )
-            }
-          }
-        )
-      )
-    } else {
-      ind <- seq_along(markers)
-    }
-    
-    # EXCLUDE
-    if(!is.null(exclude)){
-      ind_rm <- unique(
-        LAPPLY(
-          exclude, 
-          function(z) {
-            if(is.numeric(z)) {
-              z
-            } else {
-              which(
-                suppressWarnings(
-                  .grepl(
-                    z,
-                    markers,
-                    escape = escape,
-                    ignore.case = ignore.case,
-                    ...
-                  )
-                ) |
-                suppressWarnings(
-                  .grepl(
-                    z, 
-                    names(markers),
-                    escape = escape,
-                    ignore.case = ignore.case,
-                    ...
+    # SELECT / EXCLUDE - skip entirely when neither is supplied (most common case)
+    if(!is.null(select) || !is.null(exclude)) {
+      if(!is.null(select)) {
+        ind <- unique(
+          LAPPLY(
+            select,
+            function(z) {
+              if(is.numeric(z)) {
+                z
+              } else {
+                which(
+                  suppressWarnings(
+                    .grepl(
+                      z,
+                      markers,
+                      escape = escape,
+                      ignore.case = ignore.case,
+                      ...
+                    )
+                  ) |
+                  suppressWarnings(
+                    .grepl(
+                      z,
+                      names(markers),
+                      escape = escape,
+                      ignore.case = ignore.case,
+                      ...
+                    )
                   )
                 )
-              )
+              }
             }
-          }
+          )
         )
-      )
-    } else {
-      ind_rm <- NULL
+      } else {
+        ind <- seq_along(markers)
+      }
+      if(!is.null(exclude)) {
+        ind_rm <- unique(
+          LAPPLY(
+            exclude,
+            function(z) {
+              if(is.numeric(z)) {
+                z
+              } else {
+                which(
+                  suppressWarnings(
+                    .grepl(
+                      z,
+                      markers,
+                      escape = escape,
+                      ignore.case = ignore.case,
+                      ...
+                    )
+                  ) |
+                  suppressWarnings(
+                    .grepl(
+                      z,
+                      names(markers),
+                      escape = escape,
+                      ignore.case = ignore.case,
+                      ...
+                    )
+                  )
+                )
+              }
+            }
+          )
+        )
+        if(length(ind_rm) > 0) {
+          ind <- ind[!ind %in% ind_rm]
+        }
+      }
+      markers <- markers[ind]
     }
-    
-    # MARKERS EXCLUDE
-    if(length(ind_rm) > 0) {
-      ind <- ind[!ind %in% ind_rm]
-    }
-    
-    # SUBSET MARKERS
-    markers <- markers[ind]
-    
+
     # APPEND
     if(append) {
       markers <- paste0(
@@ -636,17 +624,34 @@ cyto_channels_extract <- function(x,
                                   ignore.case = TRUE,
                                   ...) {
   
+  # FAST PATH: all inputs are exact character channel names (most common case)
+  # Bypasses cyto_channels() + cyto_markers() entirely
+  if(is.null(skip) && !append && !plot && is.character(channels)) {
+    if(cyto_class(x, c("cytoframe", "cytoset", "GatingSet"))) {
+      raw_chans <- flowWorkspace::colnames(x)
+    } else if(cyto_class(x, c("flowFrame", "flowSet"), TRUE)) {
+      raw_chans <- BiocGenerics::colnames(x)
+    } else {
+      raw_chans <- colnames(x)
+    }
+    idx <- match(channels, raw_chans)
+    if(!anyNA(idx)) {
+      return(raw_chans[idx])
+    }
+  }
+
   # CHANNELS
   chans <- cyto_channels(x)
-  
-  # MARKERS
+
+  # MARKERS - fetched once; cyto_channels() already called markernames() internally
+  # but we need the named marker vector separately for resolution
   markers <- cyto_markers(x)
-  
+
   # EXTRACT CHANNELS
   res <- c()
   for(z in seq_along(channels)) {
-    # SKIP
-    skip <- any(
+    # SKIP - use separate variable to avoid overwriting the skip parameter
+    is_skip <- !is.null(skip) && any(
       .grepl(
         channels[z],
         skip,
@@ -655,26 +660,25 @@ cyto_channels_extract <- function(x,
         ...
       )
     )
-    if(skip) {
+    if(is_skip) {
       res <- c(res, channels[z])
     # INDEX
     } else if(is.numeric(channels[z])) {
-      res <- c(res, chans[channels[z]]) 
-    # EXACT MARKER MATCH
-    } else if(channels[z] %in% markers) {
+      res <- c(res, chans[channels[z]])
+    # EXACT MARKER MATCH - single match() instead of %in% + match()
+    } else if(!is.na(idx <- match(channels[z], markers))) {
       res <- c(
-        res, 
+        res,
         structure(
-          names(markers)[match(channels[z], markers)],
-          names = markers[match(channels[z], markers)]
+          names(markers)[idx],
+          names = markers[idx]
         )
       )
-    # EXACT CHANNEL MATCH  
-    } else if(channels[z] %in% chans) {
-      res <- c(res, chans[match(channels[z], chans)])
+    # EXACT OR PARTIAL CHANNEL MATCH - single match() instead of %in% + match()
+    } else if(!is.na(idx <- match(channels[z], chans))) {
+      res <- c(res, chans[idx])
     # PARTIAL OR NO MATCH
     } else {
-      # PARTIAL MATCHES
       marker_ind <- suppressWarnings(
         which(
           .grepl(
@@ -700,20 +704,20 @@ cyto_channels_extract <- function(x,
       # PARTIAL MARKER MATCH
       if(length(marker_ind) != 0) {
         res <- c(
-          res, 
+          res,
           structure(
             names(markers)[marker_ind],
             names = markers[marker_ind]
           )
         )
-        # PARTIAL CHANNEL MATCH
+      # PARTIAL CHANNEL MATCH
       } else if(length(channel_ind) != 0) {
         res <- c(res, chans[channel_ind])
       } else {
         stop(
           paste0(
             channels[z],
-            " is not a valid channel or marker for this ", 
+            " is not a valid channel or marker for this ",
             cyto_class(x, class = TRUE),
             "!"
           )
@@ -721,15 +725,14 @@ cyto_channels_extract <- function(x,
       }
     }
   }
-  
+
   # CHECK
-  if (plot == TRUE) {
-    # res <- res[1:length(channels)]
-    if (!length(res) %in% c(1, 2)) {
+  if(plot == TRUE) {
+    if(!length(res) %in% c(1, 2)) {
       stop("Invalid number of supplied channels.")
     }
   }
-  
+
   # APPEND
   if(append) {
     res <- paste0(
@@ -739,10 +742,10 @@ cyto_channels_extract <- function(x,
       res
     )
   }
-  
+
   # CHANNELS
   return(res)
-  
+
 }
 
 ## CYTO_MARKERS_EXTRACT --------------------------------------------------------
@@ -817,8 +820,8 @@ cyto_markers_extract <- function(x,
   # EXTRACT MARKERS
   res <- c()
   for(z in seq_along(channels)) {
-    # SKIP
-    skip <- any(
+    # SKIP - use separate variable to avoid overwriting the skip parameter
+    is_skip <- !is.null(skip) && any(
       .grepl(
         channels[z],
         skip,
@@ -827,21 +830,20 @@ cyto_markers_extract <- function(x,
         ...
       )
     )
-    if(skip) {
+    if(is_skip) {
       res <- c(res, channels[z])
       names(res[length(res)]) <- channels[z] # append
     # INDEX
     } else if(is.numeric(channels[z])) {
       res <- c(res, markers[match(chans[channels[z]], names(markers))])
-    # EXACT MARKER MATCH
-    } else if(channels[z] %in% markers) {
-      res <- c(res, markers[match(channels[z], markers)])
-      # EXACT CHANNEL MATCH  
-    } else if(channels[z] %in% names(markers)) {
-      res <- c(res, markers[match(channels[z], names(markers))])
-      # PARTIAL OR NO MATCH
+    # EXACT MARKER MATCH - single match() instead of %in% + match()
+    } else if(!is.na(idx <- match(channels[z], markers))) {
+      res <- c(res, markers[idx])
+    # EXACT CHANNEL MATCH - single match() instead of %in% + match()
+    } else if(!is.na(idx <- match(channels[z], names(markers)))) {
+      res <- c(res, markers[idx])
+    # PARTIAL OR NO MATCH
     } else {
-      # PARTIAL MATCHES
       marker_ind <- suppressWarnings(
         which(
           .grepl(
@@ -864,67 +866,48 @@ cyto_markers_extract <- function(x,
           )
         )
       )
-      
       # PARTIAL MARKER MATCH
       if(length(marker_ind) != 0) {
         res <- c(res, markers[marker_ind])
-        # PARTIAL CHANNEL MATCH
+      # PARTIAL CHANNEL MATCH
       } else if(length(channel_ind) != 0) {
         res <- c(res, markers[channel_ind])
       } else {
-        # CHANNEL UNASSIGNED MARKER - MATCH CHANNEL
-        if(channels[z] %in% chans) {
+        # CHANNEL UNASSIGNED MARKER - compute .grepl once
+        chan_hits <- suppressWarnings(
+          .grepl(
+            channels[z],
+            chans,
+            escape = escape,
+            ignore.case = ignore.case,
+            ...
+          )
+        )
+        # EXACT MATCH
+        if(!is.na(idx <- match(channels[z], chans))) {
           res <- c(
-            res, 
+            res,
             structure(
               c(channels[z]),
               names = channels[z]
             )
           )
-          # CHANNEL UNASSIGNED MARKER - PARTIAL
-        } else if(
-          any(
-            .grepl(
-              channels[z],
-              chans, 
-              escape = escape,
-              ignore.case = ignore.case,
-              ...
-            )
-          )
-        ) {
+        # PARTIAL MATCH - reuse chan_hits, call which() once
+        } else if(any(chan_hits)) {
+          matched <- chans[which(chan_hits)]
           res <- c(
             res,
-            structure(
-              chans[
-                which(
-                  .grepl(
-                    channels[z],
-                    chans,
-                    escape = escape,
-                    ignore.case = ignore.case,
-                    ...
-                  )
-                )
-              ],
-              names = chans[
-                which(
-                  .grepl(
-                    channels[z],
-                    chans,
-                    escape = escape,
-                    ignore.case = ignore.case,
-                    ...
-                  )
-                )
-              ]
-            )
+            structure(matched, names = matched)
           )
-          # INVALID CHANNEL/MARKER
+        # INVALID CHANNEL/MARKER
         } else {
           stop(
-            paste0(channels[z], " is not a valid channel or marker for this ", 
-                   cyto_class(x, class = TRUE), "!")
+            paste0(
+              channels[z],
+              " is not a valid channel or marker for this ",
+              cyto_class(x, class = TRUE),
+              "!"
+            )
           )
         }
       }

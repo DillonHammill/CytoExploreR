@@ -7,11 +7,9 @@
 ^codemeta\.json$
 ^codecov\.yml$
 ^README\.Rmd$
-^\.travis\.yml$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\_pkgdown\.yml$
 ^.github$
 Dockerfile
 Makefile
-^appveyor\.yml$

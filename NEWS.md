@@ -1,6 +1,19 @@
-# CytoExploreR 2.0.21 (pre-release)
+# CytoExploreR 2.0.22 (pre-release)
 
 * The behavior of `cyto_merge_by()` when `merge_by = NA` has changed from collapsing all samples to instead split samples individually. This is because splitting by `name` may not always work in cases where multiple samples share the same file names. This change requires updates to openCyto which should be re-installed when updating to the new version of CytoExploreR.
+
+# CytoExploreR 2.0.21
+* The median tracker algorithm used within `cyto_spillover_compute()` has been moved to C++ for improved performance.
+* Bug fixes to the reporting of C++ statistical functions.
+* Fix cell highlighting in `cyto_spillover_edit()` to use a JavaScript message handler instead of re-rendering the entire table, preventing user edits from being overwritten when channel selection changes.
+* Performance improvements to `cyto_exprs()` for flowFrame and flowSet objects by filtering channels on the extracted matrix and resolving channel names once per set rather than per frame.
+* Performance improvements to `cyto_match()` by caching row names and name column lookups to avoid repeated S4 dispatch.
+* Performance improvements to `cyto_channels()` and `cyto_markers()` by short-circuiting select/exclude logic when neither argument is supplied.
+* Performance improvements to `cyto_groups()` by replacing nested `lapply` calls with a `for` loop and removing `<<-` super-assignments.
+* Performance improvements to `cyto_nodes()` terminal node detection using string prefix matching instead of per-node C++ calls.
+* Performance improvements to overlay event-ID sampling in `cyto_plot()` by pre-extracting event IDs and pre-building O(1) sample-ID lookup environments to avoid repeated S4 dispatch inside loops.
+* `cyto_plot()` overlays now degrade gracefully with a warning when samples have not been barcoded with `cyto_barcode()`, falling back to independent layer sampling instead of throwing an error.
+* Simplified test setup in `helper-lib.R` to build the Activation `GatingSet` directly from `CytoExploreRData` rather than loading a saved GatingSet from disk.
 
 # CytoExploreR 2.0.20
 

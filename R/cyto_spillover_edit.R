@@ -94,7 +94,7 @@
 #'   eventReactive renderImage tabsetPanel tabPanel sidebarLayout fluidRow
 #'   updateSelectInput onStop stopApp runApp updateCheckboxInput paneViewer icon
 #'   span img NS reactive moduleServer observeEvent column
-#'   updateCheckboxGroupInput checkboxGroupInput renderPlot
+#'   updateCheckboxGroupInput checkboxGroupInput renderPlot tags tagList HTML
 #' @importFrom rhandsontable rhandsontable rHandsontableOutput hot_to_r
 #'   renderRHandsontable hot_cols hot_rows
 #' @importFrom bslib bs_theme
@@ -581,15 +581,28 @@ nodeSelectServer <- function(id, data = reactive(NULL), choices = NULL, selected
 
 #' @noRd
 spillEditUI <- function(id, height = "300px", ...) {
-  rHandsontableOutput(NS(id, "spill"), height = height, width = "99%", ...)
+  tagList(
+    tags$script(HTML(paste0(
+      "Shiny.addCustomMessageHandler('selectHotCell_", id, "', function(msg) {",
+      "  var el = document.getElementById(msg.id);",
+      "  if (!el || !el.hot) return;",
+      "  el.hot.selectCell(msg.row, msg.col, msg.row, msg.col, false);",
+      "  el.hot.render();",
+      "});"
+    ))),
+    rHandsontableOutput(NS(id, "spill"), height = height, width = "99%", ...)
+  )
 }
 
 #' @noRd
 spillEditServer <- function(id, data = reactive(NULL), spill = reactive(NULL), xchan = reactive(NULL), ychan = reactive(NULL), ...) {
   moduleServer(id, function(input, output, session){
     
-    values <- reactiveValues(spill = NULL, index = c(-1, -1))
-    
+    # source_version increments only on external spill changes, not user edits.
+    # renderRHandsontable depends solely on source_version so user edits do not
+    # trigger a full table re-render.
+    values <- reactiveValues(spill = NULL, source_version = 0L)
+
     spill_mat <- reactive({
       if(.empty(spill(), null = TRUE)) {
         if(!.empty(data(), null = TRUE)) {
@@ -606,30 +619,36 @@ spillEditServer <- function(id, data = reactive(NULL), spill = reactive(NULL), x
       }
       return(sp)
     })
-    
-    observe({ values$spill <- spill_mat() })
-    
+
+    observe({
+      values$spill <- spill_mat()
+      values$source_version <- isolate(values$source_version) + 1L
+    })
+
+    # Push cell selection to the browser without triggering a full table re-render
     observe({
       req(xchan(), ychan(), values$spill)
-      values$index <- c(match(xchan(), rownames(values$spill)) - 1, match(ychan(), colnames(values$spill)) - 1)
+      session$sendCustomMessage(
+        paste0("selectHotCell_", id),
+        list(
+          id  = session$ns("spill"),
+          row = match(xchan(), rownames(values$spill)) - 1L,
+          col = match(ychan(), colnames(values$spill)) - 1L
+        )
+      )
     })
-    
+
     output$spill <- renderRHandsontable({
-      req(values$spill)
-      rhandsontable(values$spill, rowHeaderWidth = 105, readOnly = FALSE, manualColumnResize = TRUE,
-                    row_highlight = values$index[1], col_highlight = values$index[2]) %>%
+      values$source_version
+      req(isolate(values$spill))
+      rhandsontable(isolate(values$spill), rowHeaderWidth = 105, readOnly = FALSE, manualColumnResize = TRUE) %>%
         hot_cols(type = "numeric", colWidths = 105, format = "0.000", halign = "htCenter",
                  renderer = "
                    function (instance, td, row, col, prop, value, cellProperties) {
                      Handsontable.renderers.TextRenderer.apply(this, arguments);
-                     if(instance.params) {
-                       var hrows = instance.params.row_highlight;
-                       hrows = hrows instanceof Array ? hrows : [hrows];
-                       var hcols = instance.params.col_highlight;
-                       hcols = hcols instanceof Array ? hcols : [hcols];
-                       if (hcols.includes(col) && hrows.includes(row)) {
-                         td.style.border = 'solid'; td.style.borderWidth = '3px'; td.style.borderColor = 'black';
-                       }
+                     var sel = instance.getSelected();
+                     if (sel && sel.length > 0 && row === sel[0][0] && col === sel[0][1]) {
+                       td.style.border = 'solid'; td.style.borderWidth = '3px'; td.style.borderColor = 'black';
                      }
                      if(value < 0) td.style.background = 'lightblue';
                      else if (value == 0) td.style.background = 'white';
