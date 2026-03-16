@@ -14,6 +14,7 @@
 * Performance improvements to overlay event-ID sampling in `cyto_plot()` by pre-extracting event IDs and pre-building O(1) sample-ID lookup environments to avoid repeated S4 dispatch inside loops.
 * `cyto_plot()` overlays now degrade gracefully with a warning when samples have not been barcoded with `cyto_barcode()`, falling back to independent layer sampling instead of throwing an error.
 * Simplified test setup in `helper-lib.R` to build the Activation `GatingSet` directly from `CytoExploreRData` rather than loading a saved GatingSet from disk.
+* Fast c++ label repelling algorithm to automatically compute non-overlapping label co-ordinates.
 
 # CytoExploreR 2.0.20
 

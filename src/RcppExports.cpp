@@ -11,6 +11,25 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// cpp_repel
+NumericMatrix cpp_repel(NumericVector x, NumericVector y, NumericVector w, NumericVector h, NumericVector xlim, NumericVector ylim, int iter, double force, NumericVector pad);
+RcppExport SEXP _CytoExploreR_cpp_repel(SEXP xSEXP, SEXP ySEXP, SEXP wSEXP, SEXP hSEXP, SEXP xlimSEXP, SEXP ylimSEXP, SEXP iterSEXP, SEXP forceSEXP, SEXP padSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type h(hSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type xlim(xlimSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type ylim(ylimSEXP);
+    Rcpp::traits::input_parameter< int >::type iter(iterSEXP);
+    Rcpp::traits::input_parameter< double >::type force(forceSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type pad(padSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_repel(x, y, w, h, xlim, ylim, iter, force, pad));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_median_inplace
 double rcpp_median_inplace(Rcpp::NumericVector x);
 RcppExport SEXP _CytoExploreR_rcpp_median_inplace(SEXP xSEXP) {
@@ -201,6 +220,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type x(xSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type probs(probsSEXP);
     rcpp_result_gen = Rcpp::wrap(col_quantile_cpp(x, probs));
+    return rcpp_result_gen;
+END_RCPP
+}
+// neg_quantile_cpp
+Rcpp::NumericVector neg_quantile_cpp(Rcpp::NumericMatrix x, double probs);
+RcppExport SEXP _CytoExploreR_neg_quantile_cpp(SEXP xSEXP, SEXP probsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type probs(probsSEXP);
+    rcpp_result_gen = Rcpp::wrap(neg_quantile_cpp(x, probs));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -444,6 +475,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_CytoExploreR_cpp_repel", (DL_FUNC) &_CytoExploreR_cpp_repel, 9},
     {"_CytoExploreR_rcpp_median_inplace", (DL_FUNC) &_CytoExploreR_rcpp_median_inplace, 1},
     {"_CytoExploreR_median_cpp", (DL_FUNC) &_CytoExploreR_median_cpp, 1},
     {"_CytoExploreR_col_median_cpp", (DL_FUNC) &_CytoExploreR_col_median_cpp, 1},
@@ -461,6 +493,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_CytoExploreR_col_mean_cpp", (DL_FUNC) &_CytoExploreR_col_mean_cpp, 1},
     {"_CytoExploreR_quantile_cpp", (DL_FUNC) &_CytoExploreR_quantile_cpp, 2},
     {"_CytoExploreR_col_quantile_cpp", (DL_FUNC) &_CytoExploreR_col_quantile_cpp, 2},
+    {"_CytoExploreR_neg_quantile_cpp", (DL_FUNC) &_CytoExploreR_neg_quantile_cpp, 2},
     {"_CytoExploreR_cv_cpp", (DL_FUNC) &_CytoExploreR_cv_cpp, 1},
     {"_CytoExploreR_col_cv_cpp", (DL_FUNC) &_CytoExploreR_col_cv_cpp, 1},
     {"_CytoExploreR_rcv_cpp", (DL_FUNC) &_CytoExploreR_rcv_cpp, 1},

@@ -387,6 +387,29 @@ Rcpp::NumericMatrix col_quantile_cpp(Rcpp::NumericMatrix x, Rcpp::NumericVector 
   return out;
 }
 
+// [[Rcpp::export]]
+Rcpp::NumericVector neg_quantile_cpp(Rcpp::NumericMatrix x, double probs) {
+  // Per-column quantile of negative values only.
+  // Returns NA_REAL for columns with no negative values.
+  int ncol = x.ncol();
+  Rcpp::NumericVector out(ncol, NA_REAL);
+  Rcpp::NumericVector prob_vec = Rcpp::NumericVector::create(probs);
+  for (int j = 0; j < ncol; ++j) {
+    Rcpp::NumericVector col = x.column(j);
+    Rcpp::NumericVector neg_vals;
+    for (int i = 0; i < col.size(); ++i) {
+      if (!R_IsNA(col[i]) && col[i] < 0.0) {
+        neg_vals.push_back(col[i]);
+      }
+    }
+    if (neg_vals.size() > 0) {
+      out[j] = quantile_cpp(neg_vals, prob_vec)[0];
+    }
+  }
+  out.attr("names") = Rcpp::colnames(x);
+  return out;
+}
+
 // --- COEFFICIENT OF VARIATION ---
 
 // [[Rcpp::export]]

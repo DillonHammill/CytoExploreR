@@ -2701,28 +2701,34 @@
   } else {
     # COLLAPSE LABEL_DIMS
     label_dims <- unlist(label_dims, recursive = FALSE)
-    # LABEL OVERLAP
-    if (.cyto_plot_label_overlap(label_dims)) {
-      # LABEL HEIGHT - OFFSETTING
-      label_height <- max(LAPPLY(label_dims, function(y) {
-        max(y[, "y"]) - min(y[, "y"])
-      }), na.rm = TRUE)
-      # LABEL HEIGHT BUFFERING
-      label_height <- 1.18 * label_height
-      # OFFSET Y CO-ORDINATES (EXCLUDE NA)
-      text_y <- unlist(label_text_y)
-      text_y[!is.na(text_y)] <-
-        .suppress_all_messages(
-          .spread.labels(text_y[!is.na(text_y)],
-                         mindiff = label_height,
-                         min = ymin,
-                         max = ymax
-          )
-        )
-      # UPDATE LABEL_TEXT_Y
-      label_text_y <- split(text_y,
-                            rep(seq_len(L), each = GNP))
+    # COLLAPSE LABEL POSITIONS
+    text_x <- unlist(label_text_x)
+    text_y <- unlist(label_text_y)
+    # NON-NA LABELS ONLY
+    valid <- !is.na(text_x) & !is.na(text_y)
+    if (sum(valid) > 1 && .cyto_plot_label_overlap(label_dims)) {
+      # LABEL WIDTHS & HEIGHTS
+      lw <- unlist(LAPPLY(label_dims[valid], function(d) {
+        abs(d[2, "x"] - d[1, "x"])
+      }))
+      lh <- unlist(LAPPLY(label_dims[valid], function(d) {
+        abs(d[1, "y"] - d[2, "y"])
+      }))
+      # REPEL LABELS - 2D FORCE-DIRECTED
+      repelled <- cpp_repel(
+        x    = text_x[valid],
+        y    = text_y[valid],
+        w    = lw,
+        h    = lh,
+        xlim = c(xmin, xmax),
+        ylim = c(ymin, ymax)
+      )
+      text_x[valid] <- repelled[, 1]
+      text_y[valid] <- repelled[, 2]
     }
+    # UPDATE LABEL_TEXT_X & LABEL_TEXT_Y
+    label_text_x <- split(text_x, rep(seq_len(L), each = GNP))
+    label_text_y <- split(text_y, rep(seq_len(L), each = GNP))
   }
   
   # RETURN COMPUTED LABEL CO-ORDINATES -----------------------------------------
