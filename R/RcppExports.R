@@ -13,6 +13,10 @@ col_median_cpp <- function(x) {
     .Call(`_CytoExploreR_col_median_cpp`, x)
 }
 
+binned_median_cpp <- function(x, y, n_bins) {
+    .Call(`_CytoExploreR_binned_median_cpp`, x, y, n_bins)
+}
+
 geometric_median_cpp <- function(x, eps = 1e-5, maxiter = 100L) {
     .Call(`_CytoExploreR_geometric_median_cpp`, x, eps, maxiter)
 }

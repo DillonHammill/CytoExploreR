@@ -1,4 +1,5 @@
 ^doc$
+^scripts$
 ^CODE_OF_CONDUCT\.md$
 ^Meta$
 ^docs$

@@ -1452,6 +1452,7 @@ cyto_stat_hex <- function(x,
 #' @param bin A hexbin object.
 #' @param wts Numeric vector of length 2: c(center_weight, neighbor_weight).
 #' @param normalize Logical. If TRUE, scales counts back to original magnitude to prevent "fat" hexagons.
+#' @noRd
 .hexbin_smooth <- function(bin, wts = c(48, 4), normalize = TRUE) {
   if (!inherits(bin, "hexbin")) stop("Input must be a hexbin object")
   

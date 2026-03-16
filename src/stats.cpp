@@ -65,6 +65,49 @@ Rcpp::NumericVector col_median_cpp(Rcpp::NumericMatrix x) {
   return out;
 }
 
+// SPILLOVER EDITOR MEDIAN TRACKER
+// [[Rcpp::export]]
+DataFrame binned_median_cpp(NumericVector x, NumericVector y, int n_bins) {
+  int n = x.size();
+  if (n == 0) return DataFrame::create();
+  
+  // Create an index vector and sort it based on x values
+  IntegerVector idx = seq_len(n) - 1;
+  std::sort(idx.begin(), idx.end(), [&](int i, int j){ return x[i] < x[j]; });
+  
+  double min_x = x[idx[0]];
+  double max_x = x[idx[n - 1]];
+  double bin_width = (max_x - min_x) / n_bins;
+  
+  NumericVector medians_x(n_bins, NA_REAL);
+  NumericVector medians_y(n_bins, NA_REAL);
+  
+  int current_idx = 0;
+  
+  for (int i = 0; i < n_bins; ++i) {
+    double bin_start = min_x + i * bin_width;
+    double bin_end = (i == n_bins - 1) ? max_x : bin_start + bin_width;
+    
+    std::vector<double> current_x, current_y;
+    
+    while (current_idx < n && (x[idx[current_idx]] < bin_end || (i == n_bins - 1 && x[idx[current_idx]] <= bin_end))) {
+      current_x.push_back(x[idx[current_idx]]);
+      current_y.push_back(y[idx[current_idx]]);
+      current_idx++;
+    }
+    
+    if (current_x.size() > 30) {
+      std::nth_element(current_x.begin(), current_x.begin() + current_x.size() / 2, current_x.end());
+      medians_x[i] = current_x[current_x.size() / 2];
+      
+      std::nth_element(current_y.begin(), current_y.begin() + current_y.size() / 2, current_y.end());
+      medians_y[i] = current_y[current_y.size() / 2];
+    }
+  }
+  
+  return DataFrame::create(_["x"] = medians_x, _["y"] = medians_y);
+}
+
 // --- GEOMETRIC MEDIAN ---
 
 // Function to calculate Euclidean distance between two vectors

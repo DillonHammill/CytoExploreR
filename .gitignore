@@ -1,5 +1,7 @@
 Meta
 doc
+scripts/
+*.Rproj
 .Rproj.user
 .Rhistory
 .RData
