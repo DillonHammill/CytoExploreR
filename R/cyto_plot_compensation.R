@@ -454,7 +454,7 @@ cyto_plot_compensation <- function(x,
                   x_comp[x_ind],
                   NIL
                 )
-                overlay[LAPPLY(overlay, "is.null")] <- NULL
+                overlay[ulapply(overlay, "is.null")] <- NULL
               }
               # PLOT - HISTOGRAM | SCATTER
               cyto_plot(

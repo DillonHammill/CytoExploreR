@@ -81,7 +81,7 @@ cyto_channels <- function(x,
   if(!is.null(select) || !is.null(exclude)) {
     if(!is.null(select)) {
       ind <- unique(
-        LAPPLY(
+        ulapply(
           select,
           function(z) {
             # INDEX
@@ -110,7 +110,7 @@ cyto_channels <- function(x,
     }
     if(!is.null(exclude)) {
       ind_rm <- unique(
-        LAPPLY(
+        ulapply(
           exclude,
           function(z) {
             # INDEX
@@ -289,7 +289,7 @@ cyto_markers <- function(x,
   
   # INCONSISTENT MARKERS - ALLOW IF SOME SAMPLES UNANNOTATED
   if(cyto_class(markers, "list")) {
-    markers[LAPPLY(markers, "length") == 0] <- NULL
+    markers[ulapply(markers, "length") == 0] <- NULL
     if(length(markers) == 1){
       markers <- markers[[1]]
     }
@@ -301,7 +301,7 @@ cyto_markers <- function(x,
     if(!is.null(select) || !is.null(exclude)) {
       if(!is.null(select)) {
         ind <- unique(
-          LAPPLY(
+          ulapply(
             select,
             function(z) {
               if(is.numeric(z)) {
@@ -336,7 +336,7 @@ cyto_markers <- function(x,
       }
       if(!is.null(exclude)) {
         ind_rm <- unique(
-          LAPPLY(
+          ulapply(
             exclude,
             function(z) {
               if(is.numeric(z)) {

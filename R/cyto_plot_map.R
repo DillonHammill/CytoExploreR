@@ -479,7 +479,7 @@ cyto_plot_map <- function(x,
             names = point_col
           )
           # PREPARE RECORDED PLOTS
-          p[LAPPLY(p, "is.null")] <- NULL
+          p[ulapply(p, "is.null")] <- NULL
           p <- lapply(p, `[[`, 1)
           return(p)
         }
@@ -534,7 +534,7 @@ cyto_plot_map <- function(x,
             names = names(x)
           )
           # PREPARE RECORDED PLOTS
-          p[LAPPLY(p, "is.null")] <- NULL
+          p[ulapply(p, "is.null")] <- NULL
           return(p)
         }
       ),

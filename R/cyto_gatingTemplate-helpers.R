@@ -146,7 +146,7 @@ cyto_gatingTemplate_extract <- function(x,
   # SORT ENTRIES
   if(sort) {
     # AUTO PATHS FOR ENTRIES
-    pops <- LAPPLY(
+    pops <- ulapply(
       seq_len(nrow(gt)),
       function(z) {
         cyto_nodes_convert(
@@ -1123,7 +1123,7 @@ cyto_gatingTemplate_apply <- function(x,
       path = "full"
     )
     # GET ALL PARENTAL NODES
-    nodes <- LAPPLY(
+    nodes <- ulapply(
       nodes,
       function(node) {
         parents <- c(node)
@@ -1317,7 +1317,7 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
   if (!is.null(gt)) {
     if(nrow(gt) > 0 ){
       gt_chunk <- gt[
-        LAPPLY(
+        ulapply(
           seq_len(nrow(gt)),
           function(z) {
             all(parent %in% unlist(strsplit(gt$parent[z], ",")))
@@ -1560,13 +1560,13 @@ cyto_gatingTemplate_write <- function(gatingTemplate = NULL,
   
   # HANDLE NAs
   gatingTemplate$groupBy[
-    LAPPLY(
+    ulapply(
       gatingTemplate$groupBy,
       ".empty"
     )
   ] <- "NA"
   gatingTemplate$preprocessing_args[
-    LAPPLY(
+    ulapply(
       gatingTemplate$preprocessing_args,
       ".empty"
     )

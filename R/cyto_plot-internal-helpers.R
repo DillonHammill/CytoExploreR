@@ -86,7 +86,7 @@
   # BYPASS DATA PREPARTION
   if(cyto_class(x, "list", TRUE)) {
     # LIST OF CYTOSET LISTS
-    if(all(LAPPLY(x, "cyto_class", "flowSet"))) {
+    if(all(ulapply(x, "cyto_class", "flowSet"))) {
       return(
         list(x)
       )
@@ -197,7 +197,7 @@
   # EVENTS - NA -> MINIMUM ACROSS BASE LAYERS
   if(.all_na(events)) {
     events <- min(
-      LAPPLY(
+      ulapply(
         x,
         function(z) {
           sum(
@@ -380,7 +380,7 @@
       x,
       function(z) {
         if(length(z) > 1) {
-          LAPPLY(
+          ulapply(
             z,
             function(w) {
               "Event-ID" %in% cyto_channels(w)
@@ -565,7 +565,7 @@
             ids <- all_ids[[w]]
 
             # ALL CYTOFRAMES CONTAIN NEW EVENTS
-            if(is.null(LAPPLY(i[[w]], `[[`, "layer"))) {
+            if(is.null(ulapply(i[[w]], `[[`, "layer"))) {
               # COMPUTE SAMPLE SIZES
               n <- cyto_sample_n(cs, events = events)
               for(id in ids) {
@@ -584,7 +584,7 @@
             # SOME/ALL CYTOFRAMES CONTAIN EVENTS IN PREVIOUS LAYERS
             } else {
               # WHICH FRAMES HAVE EVENTS IN A PREVIOUS LAYER?
-              m <- LAPPLY(i[[w]], function(s) !is.null(s$layer))
+              m <- ulapply(i[[w]], function(s) !is.null(s$layer))
               # STORE ASSEMBLED CYTOFRAMES AND THEIR EVENT-IDS
               cf_list <- list()
               cf_eids <- list()
@@ -639,9 +639,9 @@
               # SOME NEW FRAMES - SAMPLE PROPORTIONALLY
               } else if(length(new_ids) > 0) {
                 n <- round(
-                  sum(LAPPLY(i[[w]][names(m[m])], `[[`, "sample")) *
-                    (sum(LAPPLY(i[[w]][new_ids], `[[`, "total")) /
-                       sum(LAPPLY(i[[w]][names(m[m])], `[[`, "total")))
+                  sum(ulapply(i[[w]][names(m[m])], `[[`, "sample")) *
+                    (sum(ulapply(i[[w]][new_ids], `[[`, "total")) /
+                       sum(ulapply(i[[w]][names(m[m])], `[[`, "total")))
                 )
                 n <- cyto_sample_n(cs[new_ids], events = n)
                 for(id in new_ids) {
@@ -688,7 +688,7 @@
   }
   
   # FORMAT DATA FOR HISTOGRAMS
-  if(length(channels) == 1 & all(LAPPLY(x, "length") == 1)) {
+  if(length(channels) == 1 & all(ulapply(x, "length") == 1)) {
     # HIST_LAYERS
     if(.all_na(hist_layers)) {
       if(hist_stack == 0) {
@@ -856,8 +856,8 @@
         drop = TRUE
       )
       # EMPTY ALIAS - PLACE BOOL IN RCORRECT ORDER
-      if(any(LAPPLY(alias, ".empty"))) {
-        alias <- alias[!LAPPLY(alias, ".empty")]
+      if(any(ulapply(alias, ".empty"))) {
+        alias <- alias[!ulapply(alias, ".empty")]
         pops <- gt[gt$dims %in% c(paste(channels, collapse = ","), 
                                   paste(rev(channels), collapse = ",")), ]
         bool_ind <- which(pops$gating_mathod %in% "boolGate")
@@ -893,7 +893,7 @@
         gate <- list(gate)
       }
       # STORE FILTER NAMES IN LIST NAMES
-      ids <- LAPPLY(
+      ids <- ulapply(
         gate, 
         function(z){
           tryCatch(
@@ -930,7 +930,7 @@
             function(w){
               # EXTRACT FILTERS
               gate_list <- unlist(w)
-              ids <- LAPPLY(
+              ids <- ulapply(
                 gate_list, 
                 function(z){
                   tryCatch(
@@ -952,7 +952,7 @@
         # EXTRACT FILTERS
         gate <- unlist(gate)
         # STORE FILTER NAMES IN LIST NAMES
-        ids <- LAPPLY(
+        ids <- ulapply(
           gate, 
           function(z){
             tryCatch(
@@ -1419,7 +1419,7 @@
           )
         )
         # COMPUTE MINOR TICKS - WITHIN MAJOR TICK RANGE
-        axis_minor_ticks <- LAPPLY(
+        axis_minor_ticks <- ulapply(
           seq_len(length(axis_major_ticks) - 1),
           function(w){
             pretty(
@@ -1457,7 +1457,7 @@
         if(!.all_na(rescale)) {
           # RESCALE TICK LOCATIONS
           axis_ticks <- structure(
-            LAPPLY(
+            ulapply(
               axis_ticks,
               function(v) {
                 cyto_stat_rescale(
@@ -1472,7 +1472,7 @@
         }
         # FORMAT LABELS - NOT MAPPED TO AXIS - ABBREVIATE LABELS
         if(format) {
-          names(axis_ticks) <- LAPPLY(
+          names(axis_ticks) <- ulapply(
             names(axis_ticks),
             function(v) {
               if(!.empty(v)) {
@@ -1516,7 +1516,7 @@
         # AXIS TICKS
         axis_ticks <- c(
           sort(
-            LAPPLY(
+            ulapply(
               1 * 10^seq_len(9),
               function(v) {
                 -seq(90, 10, -10) * v
@@ -1524,7 +1524,7 @@
             )
           ),
           seq(-9, 9, 1),
-          LAPPLY(
+          ulapply(
             1 * 10^seq_len(9),
             function(v) {
               seq(10, 90, 10) * v
@@ -1601,7 +1601,7 @@
         # RESCALE TICK LOCATIONS - KEY MAPPING TO Y AXIS
         if(!.all_na(rescale)) {
           # RESCALE TICK LOCATIONS
-          axis_ticks <- LAPPLY(
+          axis_ticks <- ulapply(
             axis_ticks,
             function(v) {
               cyto_stat_rescale(
@@ -1919,16 +1919,16 @@
   TNP_split <- split(seq_len(TNP), rep(seq_len(SMP), each = NP))
   
   # LABEL_STAT FILLED WITH EMPTY
-  if (!all(LAPPLY(label_stat, ".empty")) &
-      any(LAPPLY(label_stat, ".empty"))) {
-    label_stat[LAPPLY(label_stat, ".empty")] <- NA
+  if (!all(ulapply(label_stat, ".empty")) &
+      any(ulapply(label_stat, ".empty"))) {
+    label_stat[ulapply(label_stat, ".empty")] <- NA
   }
   
   # LABEL_STAT
   # 1D PLOT NO STACK
   if (length(channels) == 1 & hist_stack == 0) {
     # LABEL_STAT MISSING
-    if (all(LAPPLY(label_stat, ".empty"))) {
+    if (all(ulapply(label_stat, ".empty"))) {
       # GATE - FREQ STAT
       if (!.all_na(gate)) {
         # LABEL_STAT - BASE LAYER ONLY
@@ -1963,7 +1963,7 @@
     # 1D PLOT STACK
   } else if (length(channels) == 1 & hist_stack != 0) {
     # LABEL_STAT MISSING
-    if (all(LAPPLY(label_stat, ".empty"))) {
+    if (all(ulapply(label_stat, ".empty"))) {
       # GATE - FREQ STAT
       if (!.all_na(gate)) {
         # LABEL_STAT - ALL LAYERS
@@ -1980,7 +1980,7 @@
     # 2D PLOT
   } else if (length(channels) >= 2) {
     # LABEL_STAT MISSING
-    if (all(LAPPLY(label_stat, ".empty"))) {
+    if (all(ulapply(label_stat, ".empty"))) {
       # GATE - FREQ STAT
       if (!.all_na(gate)) {
         # LABEL_STAT - BASE LAYER ONLY
@@ -2015,11 +2015,11 @@
   }
   
   # LABEL_TEXT
-  if(any(LAPPLY(label_text, ".empty"))) {
+  if(any(ulapply(label_text, ".empty"))) {
     # POPULATION NAMES FROM GATES - WATCH OUT QUADGATES
     if(!.all_na(gate)) {
       pops <- rep(
-        LAPPLY(
+        ulapply(
           seq_along(gate),
           function(z) {
             # USE NAMES OF GATE LIST
@@ -2050,7 +2050,7 @@
         pops <- rep(NA, length(x))
       }
     }
-    label_text <- LAPPLY(
+    label_text <- ulapply(
       seq_along(label_text),
       function(z) {
         if(!.all_na(label_stat[z])) {
@@ -2067,7 +2067,7 @@
   }
   
   # LABEL
-  if (all(LAPPLY(label, ".empty"))) {
+  if (all(ulapply(label, ".empty"))) {
     # TURN LABELS ON
     if (!.all_na(c(label_text, label_stat))) {
       label <- TRUE
@@ -2136,7 +2136,7 @@
   
   # LIST OF GATE OBJECT LISTS
   if(cyto_class(gate, "list") &
-     all(LAPPLY(gate, "cyto_class", "list", TRUE))){
+     all(ulapply(gate, "cyto_class", "list", TRUE))){
     # USE BASE LAYER GATES
     gate <- gate[[1]]
   }
@@ -2244,7 +2244,7 @@
   # COMPUTE STATISTICS ---------------------------------------------------------
   
   # STATISTICS
-  LABEL_STAT <- LAPPLY(seq_len(length(x)), function(z) {
+  LABEL_STAT <- ulapply(seq_len(length(x)), function(z) {
     # LABEL_STAT
     ST <- lapply(seq_len(length(pops[[z]])), function(y) {
       # STATISTIC SUPPLIED
@@ -2265,7 +2265,7 @@
             details = FALSE
           )
         # HISTOGRAM STATISTICS - ADDITIONAL ARGUMENTS
-        } else if(any(LAPPLY(c("mode",
+        } else if(any(ulapply(c("mode",
                                "auc"), function(w){
                                  grepl(paste0(w, "$"), 
                                        label_stat_fun, 
@@ -2309,7 +2309,7 @@
           res <- .round(res)
         }
         # STATSTICS REQUIRE %
-        if(any(LAPPLY(c("freq",
+        if(any(ulapply(c("freq",
                         "percent",
                         "cv",
                         "rcv"), function(w){
@@ -2452,7 +2452,7 @@
     # STACKING
     if (hist_stack != 0 &
         ifelse(.all_na(hist_layers), TRUE, hist_layers != 1)) {
-      stk <- LAPPLY(d, function(z){
+      stk <- ulapply(d, function(z){
         z$range
       })
       y_coords <- stk + 0.5 * (
@@ -2673,7 +2673,7 @@
       # LABEL OVERLAP
       if (.cyto_plot_label_overlap(label_dims[[z]])) {
         # LABEL HEIGHT - OFFSETTING
-        label_height <- max(LAPPLY(label_dims[[z]], function(y) {
+        label_height <- max(ulapply(label_dims[[z]], function(y) {
           max(y[, "y"]) - min(y[, "y"])
         }), na.rm = TRUE)
         # LABEL HEIGHT BUFFERING
@@ -2708,10 +2708,10 @@
     valid <- !is.na(text_x) & !is.na(text_y)
     if (sum(valid) > 1 && .cyto_plot_label_overlap(label_dims)) {
       # LABEL WIDTHS & HEIGHTS
-      lw <- unlist(LAPPLY(label_dims[valid], function(d) {
+      lw <- unlist(ulapply(label_dims[valid], function(d) {
         abs(d[2, "x"] - d[1, "x"])
       }))
-      lh <- unlist(LAPPLY(label_dims[valid], function(d) {
+      lh <- unlist(ulapply(label_dims[valid], function(d) {
         abs(d[1, "y"] - d[2, "y"])
       }))
       # REPEL LABELS - 2D FORCE-DIRECTED
@@ -2829,10 +2829,10 @@
 .cyto_plot_label_overlap <- function(x) {
   
   # For each rectangle in x
-  overlaps <- LAPPLY(seq_len(length(x)), function(y) {
+  overlaps <- ulapply(seq_len(length(x)), function(y) {
     
     # Check if other rectangles overlap
-    LAPPLY(seq_len(length(x))[-y], function(z) {
+    ulapply(seq_len(length(x))[-y], function(z) {
       
       # Co-ordinates of reference label
       x1 <- x[[y]][, "x"]
@@ -2943,7 +2943,7 @@
       args[[z]] <- lapply(
         seq_len(NP),
         function(y){
-          LAPPLY(args[[z]], `[[`, y)
+          ulapply(args[[z]], `[[`, y)
         }
       )
     }
@@ -3018,13 +3018,13 @@
   
   # REVERT LABEL_TEXT_X & LABEL_TEXT_Y TO ORIGINAL FORMAT
   if (L > 1) {
-    args$label_text_x <- LAPPLY(
+    args$label_text_x <- ulapply(
       seq_len(L), 
       function(z) {
         args$label_text_x[names(args$label_text_x) == z]
       }
     )
-    args$label_text_y <- LAPPLY(
+    args$label_text_y <- ulapply(
       seq_len(L), 
       function(z) {
         args$label_text_y[names(args$label_text_y) == z]
@@ -3321,7 +3321,7 @@
       spectra_col_scale = spectra_col_scale
     )
     # SPECTRA COLOURS
-    spectra_col <- LAPPLY(
+    spectra_col <- ulapply(
       seq_along(spectra_col),
       function(z) {
         adjustcolor(
@@ -3401,7 +3401,7 @@
   # REQUIRED COLOURS
   spectra_extra_cols <- spectra_cols(
     sum(
-      LAPPLY(
+      ulapply(
         spectra_col[-1],
         .all_na
       )
@@ -4540,7 +4540,7 @@
   }
   
   # COMBINED/ALL EVENTS
-  title <- LAPPLY(
+  title <- ulapply(
     title, 
     function(z){
       if(!.all_na(z)) {
@@ -4718,7 +4718,7 @@
   # LOCATE POINT_COL = NA LAYERS
   # FIRST NA IS TREATED AS DENSITY LAYER
   # REMAINING LAYERS INHERIT SOLID COLOURS
-  idx <- which(LAPPLY(args$point_col, ".all_na"))
+  idx <- which(ulapply(args$point_col, ".all_na"))
   if(length(idx) > 0) {
     args$point_col[[idx[1]]] <- as.logical(NA)
     if(length(idx) > 1) {
@@ -4730,18 +4730,18 @@
   }
   
   # # REMAINING LAYERS - SELECT FROM POINT_COLS
-  # if (any(LAPPLY(args$point_col[-1], ".all_na"))) {
+  # if (any(ulapply(args$point_col[-1], ".all_na"))) {
   #   # NUMBER OF REQUIRED COLOURS
   #   n <- length(
   #     args$point_col[-1][
-  #       LAPPLY(args$point_col[-1], ".all_na")
+  #       ulapply(args$point_col[-1], ".all_na")
   #     ]
   #   )
   #   # GET MISSING COLOURS FROM POINT_COLS
   #   clrs <- args$point_cols(n)
   #   # UPDATE COLOURS IN POINT_COL
   #   args$point_col[
-  #     c(FALSE, LAPPLY(args$point_col[-1], ".all_na"))
+  #     c(FALSE, ulapply(args$point_col[-1], ".all_na"))
   #   ] <- clrs
   # }
   
@@ -5096,7 +5096,7 @@
                       if(length(id) == 1) {
                         # SET SEED FOR REPRODUCIBLE SAMPLING - REQUIRED MATCH COMPUTED BKDE
                         set.seed(42)
-                        z[, id] <- LAPPLY(
+                        z[, id] <- ulapply(
                           unique(z[, id]),
                           function(w) {
                             rnorm(
@@ -5354,7 +5354,7 @@
   )
   
   # STACKING - RANGE STORED IN DENSITY OBJECT -  CANNOT ROUND DENSITY
-  hist_heights <- LAPPLY(
+  hist_heights <- ulapply(
     d, 
     function(D){
       if(.all_na(D)){

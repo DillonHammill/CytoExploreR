@@ -391,7 +391,7 @@ cyto_plot_empty <- function(x,
       # YLIM
       ymin <- d[[1]]$range[1]
       ymax <- max(
-        LAPPLY(d, function(D){
+        ulapply(d, function(D){
           D$range[2]
         }),
         na.rm = TRUE
@@ -1118,7 +1118,7 @@ cyto_plot_new <- function(popup = NULL,
       }),
       names = shared_pars
     )
-    update_pars[LAPPLY(update_pars, "is.null")] <- NULL
+    update_pars[ulapply(update_pars, "is.null")] <- NULL
     set_pars <- c(
       update_pars,
       new_pars[!names(new_pars) %in% names(set_pars)] # NEW
@@ -1614,7 +1614,7 @@ cyto_plot_complete <- function(...) {
   # CLOSE DEVICE (not RStudioGD/X11/quartz)
   if (cyto_option("cyto_plot_save")) {
     # CLOSE GRAPHICS DEVICE
-    if(!any(LAPPLY(
+    if(!any(ulapply(
       c("RStudio", "windows", "x11", "quartz", "cairo"), function(z){
       grepl(
         z,
@@ -1906,7 +1906,7 @@ cyto_plot_par <- function(...,
     # SET REMAINING PARAMETERS IF VALUES DONT MATCH
     curr_pars <- .par(names(new_pars))
     new_pars <- new_pars[
-      LAPPLY(
+      ulapply(
         names(new_pars),
         function(z) {
           !all(

@@ -229,7 +229,7 @@ cyto_dist <- function(x,
     # EVENTS
     if(.all_na(events)) {
       events <- min(
-        LAPPLY(
+        ulapply(
           x_list,
           function(z) {
             cnts <- cyto_stats_compute(

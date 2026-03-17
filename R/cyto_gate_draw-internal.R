@@ -65,7 +65,7 @@
   }
   
   # BYPASS EMPTY GATES
-  if(any(LAPPLY(gate, function(z){.all_na(z) | is.null(z)}))) {
+  if(any(ulapply(gate, function(z){.all_na(z) | is.null(z)}))) {
     label <- FALSE
   }
   
@@ -83,7 +83,7 @@
         function(arg) {
           split(
             rep(arg, length.out = length(unlist(pops))),
-            rep(1:length(pops), LAPPLY(pops, length))
+            rep(1:length(pops), ulapply(pops, length))
           )
         }
       ),
@@ -1361,7 +1361,7 @@
   )
   
   # NO GATE DRAWN
-  if(length(coords[!LAPPLY(coords, "is.null")]) == 0) {
+  if(length(coords[!ulapply(coords, "is.null")]) == 0) {
     return(NULL)
   }
   

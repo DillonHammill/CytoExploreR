@@ -205,11 +205,11 @@ match_ind <- function(x, y, ...){
   trimws(format(round(x, k), nsmall = k))
 } 
 
-## LAPPLY ----------------------------------------------------------------------
+## ulapply ----------------------------------------------------------------------
 
 #' Automatically flatten lapply results
 #' @noRd
-LAPPLY <- function(...){
+ulapply <- function(...){
   unlist(lapply(...))
 }
 
@@ -278,7 +278,7 @@ SysExec <- function(
     missing.exe <- file_ext(x = progs) != 'exe'
     progs[missing.exe] <- paste0(progs[missing.exe], '.exe')
   }
-  paths <- LAPPLY(
+  paths <- ulapply(
     X = progs,
     FUN = function(x) {
       return(tryCatch(

@@ -7,7 +7,7 @@ data("Activation_gatingTemplate",  package = "CytoExploreRData", envir = environ
 # Activation GatingSet ---------------------------------------------------------
 
 gs <- GatingSet(Activation)
-gs <- cyto_transform(gs)
+gs <- cyto_transform(gs, plot = FALSE)
 gs <- cyto_gatingTemplate_apply(gs, Activation_gatingTemplate)
 gs <- cyto_barcode(gs, "events")
 

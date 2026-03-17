@@ -391,7 +391,7 @@ cyto_load <- function(path = ".",
   # PATH - NAMED LIST OF MATRICES
   if(cyto_class(path, "list", TRUE)) {
     # NAMES REQUIRED
-    if(is.null(names(path)) | any(is.null(LAPPLY(path, "dim")))) {
+    if(is.null(names(path)) | any(is.null(ulapply(path, "dim")))) {
       stop(
         "'path' must be a named list of matrices!"
       )
@@ -413,7 +413,7 @@ cyto_load <- function(path = ".",
   }
   
   # PATH - DIRECTORY/FILES
-  files <- LAPPLY(
+  files <- ulapply(
     path, 
     function(z){
       # DIRECTORY
@@ -1345,7 +1345,7 @@ cyto_names <- function(x,
     sampleNames(x)
   # LIST
   } else {
-    LAPPLY(
+    ulapply(
       x,
       "cyto_names",
       select = select,
@@ -1481,7 +1481,7 @@ cyto_names_parse <- function(x,
   }
   
   # REQUIRED VARIABLE LENGTH
-  var_length <- max(LAPPLY(cyto_names_split, "length"))
+  var_length <- max(ulapply(cyto_names_split, "length"))
   
   # VARIABLES
   if(is.null(vars)){
@@ -1789,7 +1789,7 @@ cyto_transform.default <- function(x,
       # GATINGSET - PREPARE GATES
       } else {
         # PREPARE NEW GATES
-        if(all(LAPPLY(gateTemplate, "length") > 0)) {
+        if(all(ulapply(gateTemplate, "length") > 0)) {
           gateTemplate <- structure(
             lapply(
               seq_along(x),
@@ -2188,7 +2188,7 @@ cyto_transform.transformerList <- function(x,
       # GATINGSET - PREPARE GATES
     } else {
       # PREPARE NEW GATES
-      if(all(LAPPLY(gateTemplate, "length") > 0)) {
+      if(all(ulapply(gateTemplate, "length") > 0)) {
         gateTemplate <- structure(
           lapply(
             seq_along(x),
@@ -3008,7 +3008,7 @@ cyto_exprs.flowSet <- function(x,
   # CYTO_EXPRS(CS[1:2]) <- LIST(MAT, MAT) - S4 NOT SUBSETTABLE
   
   # VALUE - LIST OF MATRICES
-  if(!all(LAPPLY(value, "cyto_class", "matrix")) |
+  if(!all(ulapply(value, "cyto_class", "matrix")) |
      length(value) != length(object)) {
     stop(
       paste0(
@@ -3215,40 +3215,42 @@ cyto_filter <- function(x,
 #' @seealso \code{\link{cyto_filter}}
 #'
 #' @export
-cyto_match <- function(x, 
+cyto_match <- function(x,
                        ...,
                        exclude = FALSE,
                        exact = FALSE) {
-  
+
   # CYTOSET/GATINGSET
   if(!cyto_class(x, c("flowSet", "GatingSet"))) {
     stop(
       "'x' should be an object of class cytoset or GatingSet."
     )
   }
-  
+
   # ARGUMENTS
   args <- list(...)
-  
+
   # ... NAMED LIST OF ARGUMENTS
   if(cyto_class(args[[1]], "list")) {
     args <- args[[1]]
   }
-  
+
   # EXACT
   if("exact" %in% names(args)) {
     exact <- args[["exact"]]
     args <- args[!names(args) %in% "exact"]
   }
-  
+
   # EXCLUDE
   if("exclude" %in% names(args)) {
     exclude <- args[["exclude"]]
     args <- args[!names(args) %in% "exclude"]
   }
-  
+
   # EXPERIMENT DETAILS
   pd <- cyto_details(x)
+  # CACHE COLUMN NAMES ONCE
+  pd_col_names <- colnames(pd)
 
   # INDICES/NAMES
   if(length(args) == 1 & .empty(names(args), null = TRUE)) {
@@ -3260,28 +3262,25 @@ cyto_match <- function(x,
       ind <- unlist(args)
     # UNNAMED CHARACTERS
     } else {
-      # CACHE LOOKUP VECTORS
+      # CACHE LOOKUP VECTORS (direct column access via [[)
       pd_row_names <- rownames(pd)
-      pd_names <- pd[, "name"]
+      pd_names <- pd[["name"]]
       # MATCH NAMES - ROWNAMES/NAME/PARTIAL
-      ind <- LAPPLY(unlist(args), function(z){
+      ind <- ulapply(unlist(args), function(z){
         # ROWNAMES - EXACT
         if(z %in% pd_row_names) {
           match(z, pd_row_names)
         # NAME - EXACT
         } else if(z %in% pd_names) {
           match(z, pd_names)
-        # PARTIAL MATCH
-        } else if(exact == FALSE) {
-          # ROWNAMES - PARTIAL
-          if(any(.grepl(z, pd_row_names))) {
-            .grep(z, pd_row_names)
-          # NAME - PARTIAL
-          } else if(any(.grepl(z, pd_names))) {
-            .grep(z, pd_names)
-          # NO MATCH
+        # PARTIAL MATCH - compute grep once, check length
+        } else if(!exact) {
+          idx <- .grep(z, pd_row_names)
+          if(length(idx) > 0) {
+            idx
           } else {
-            NULL
+            idx <- .grep(z, pd_names)
+            if(length(idx) > 0) idx else NULL
           }
         # NO MATCH
         } else {
@@ -3299,62 +3298,50 @@ cyto_match <- function(x,
   } else {
     # INDICES PER VARIABLE
     ind <- lapply(
-      names(args), 
+      names(args),
       function(z) {
         # DIRECT MATCH
-        if(z %in% colnames(pd)) {
-          var_ind <- match_ind(z, colnames(pd))
-          # PARTIAL MATCH
-        } else if(exact == FALSE) {
-          var_ind <- .grep(
-            z, 
-            colnames(pd)
-          )
+        if(z %in% pd_col_names) {
+          var_ind <- match_ind(z, pd_col_names)
+        # PARTIAL MATCH
+        } else if(!exact) {
+          var_ind <- .grep(z, pd_col_names)
+        } else {
+          var_ind <- integer(0)
         }
         # NO MATCH
         if(length(var_ind) == 0) {
           stop(
-            paste0(
-              z,
-              " is not a valid variable in cyto_details(x)."
-            )
+            paste0(z, " is not a valid variable in cyto_details(x).")
           )
-          # MULTIPLE MATCHES
+        # MULTIPLE MATCHES
         } else if(length(var_ind) > 1) {
           stop(
-            paste0(
-              z,
-              " matches multiple variables in cyto_details(x)."
-            )
+            paste0(z, " matches multiple variables in cyto_details(x).")
           )
         }
+        # CACHE COLUMN ONCE; COERCE VALUES ONCE
+        col  <- as.character(pd[[var_ind]])
+        vals <- as.character(args[[z]])
         # ORDER AS SUPPLIED
-        LAPPLY(args[[z]], function(w){
-          # EXACT MATCH
-          if(w %in% pd[, var_ind]) {
-            levels <- which(pd[, var_ind] %in% as.character(w))
-            # PARTIAL MATCH
-          } else if(exact == FALSE) {
-            levels <- .grep(
-              as.character(w),
-              pd[, var_ind]
-            )
-          }
+        ulapply(vals, function(w) {
+          # EXACT MATCH - single == faster than %in% for scalar w
+          if(w %in% col) {
+            which(col == w)
+          # PARTIAL MATCH
+          } else if(!exact) {
+            idx <- .grep(w, col)
+            if(length(idx) == 0) {
+              stop(paste0(w, " is not a valid level for ", z, "!"))
+            }
+            idx
           # NO MATCH
-          if(length(levels) == 0) {
-            stop(
-              paste0(
-                w, 
-                " is not a valid level for ",
-                z,
-                "!"
-              )
-            )
+          } else {
+            stop(paste0(w, " is not a valid level for ", z, "!"))
           }
-          return(levels)
-        }
-      )
-    })
+        })
+      }
+    )
     # INTERSECTION
     if(length(ind) > 1) {
       ind <- Reduce("intersect", ind)
@@ -3362,15 +3349,15 @@ cyto_match <- function(x,
       ind <- ind[[1]]
     }
   }
-  
+
   # NEGATIVE EXCLUSION INDICES
-  if (exclude == TRUE) {
+  if(exclude) {
     return(-ind)
   # POSITIVE SELECTION INDICES
   } else {
     return(ind)
   }
-  
+
 }
 
 ## CYTO_SELECT -----------------------------------------------------------------
@@ -3548,62 +3535,49 @@ cyto_groups <- function(x,
   
   # group_by is a list with factor levels - should not be "all"
   if (cyto_class(group_by, "list")) {
+    # CACHE NAMES ONCE — avoid names(group_by)[z] inside every iteration
+    gb_names     <- names(group_by)
+    pd_col_names <- colnames(pd)
     # Check variables and factor levels
     for (z in seq_along(group_by)) {
       # Variable
-      var <- names(group_by)[z]
-      # Expected variable levels (cached - used twice below)
-      var_levels <- unique(pd[, var])
-      # Watch out for NA
-      if (any(LAPPLY(group_by[[z]], "is.na"))) {
-        ind <- which(LAPPLY(group_by[[z]], "is.na"))
-        group_by[[z]][ind] <- "NA"
+      var <- gb_names[z]
+      # Expected variable levels — [[ is direct column access vs [.data.frame
+      var_levels <- unique(pd[[var]])
+      # Watch out for NA — vectorised is.na, not ulapply(lapply(...))
+      na_mask <- is.na(group_by[[z]])
+      if (any(na_mask)) {
+        group_by[[z]][na_mask] <- "NA"
       }
-      # Check variables
-      if (!var %in% colnames(pd)) {
-        stop(paste0(
-          var,
-          " is not a valid variable for this ",
-          class(x), "."
-        ))
+      # Check variable name
+      if (!var %in% pd_col_names) {
+        stop(paste0(var, " is not a valid variable for this ", class(x), "."))
       }
-      # Incorrect factor levels
-      if (!all(group_by[[z]] %in% var_levels)) {
-        for (y in group_by[[z]]) {
-          if (!y %in% var_levels) {
-            stop(paste0(
-              y, " is not a valid factor level for ",
-              var,
-              "."
-            ))
-          }
-        }
+      # Incorrect factor levels — setdiff finds invalids in one pass
+      invalid <- setdiff(group_by[[z]], var_levels)
+      if (length(invalid) > 0) {
+        stop(paste0(invalid[1], " is not a valid factor level for ", var, "."))
       }
       # Update factor levels in pd (explicit local mutation - no <<-)
-      if (!all(var_levels %in% group_by[[z]])) {
-        missing_levels <- as.vector(
-          var_levels[!var_levels %in% group_by[[z]]]
-        )
-        group_by[[z]] <- c(
-          group_by[[z]],
-          missing_levels
-        )
+      missing_levels <- var_levels[!var_levels %in% group_by[[z]]]
+      if (length(missing_levels) > 0) {
+        group_by[[z]] <- c(group_by[[z]], missing_levels)
       }
       # Convert pd variable to factor and set levels
-      pd[, var] <- factor(pd[, var], levels = group_by[[z]])
+      pd[[var]] <- factor(pd[[var]], levels = group_by[[z]])
     }
     # Convert group_by to vector
-    group_by <- names(group_by)
-    # group_by is a vector of variable names
+    group_by <- gb_names
+  # group_by is a vector of variable names
   } else {
     # GROUP_BY = NA
     if(.all_na(group_by)) {
       group_by <- "all"
     }
-    # Check variables
-    if(!all(group_by %in% "all") & !all(group_by %in% colnames(pd))) {
+    # Check variables (short-circuit &&)
+    if(!all(group_by %in% "all") && !all(group_by %in% colnames(pd))) {
       lapply(
-        group_by, 
+        group_by,
         function(y) {
           if (!y %in% colnames(pd)) {
             stop(paste0(y, " is not a valid variable for this ", class(x), "."))
@@ -3612,27 +3586,19 @@ cyto_groups <- function(x,
       )
     }
   }
-  
-  # Split pd based on group_by into a named list
-  if (length(group_by) == 1) {
-    if (group_by == "all") {
-      pd_split <- list("all" = pd)
-    } else if (group_by == "name") {
-      pd_split <- lapply(
-        cyto_names(x), 
-        function(z) {
-          pd[rownames(pd) == z, , drop = FALSE] # name column may not match
-        }
-      )
-      names(pd_split) <- cyto_names(x)
-    } else {
-      pd_split <- split(
-        pd, pd[, group_by],
-        sep = sep,
-        lex.order = TRUE,
-        drop = TRUE
-      )
-    }
+
+  # Split pd based on group_by — merged branches eliminate duplicate split() call
+  if (length(group_by) == 1 && group_by == "all") {
+    pd_split <- list("all" = pd)
+  } else if (length(group_by) == 1 && group_by == "name") {
+    # Pre-compute match once (O(N)) then use direct integer indexing per row
+    nm  <- cyto_names(x)
+    rn  <- rownames(pd)
+    idx <- match(nm, rn)
+    pd_split <- setNames(
+      lapply(idx, function(i) pd[i, , drop = FALSE]),
+      nm
+    )
   } else {
     pd_split <- split(
       pd, pd[, group_by],
@@ -3641,17 +3607,16 @@ cyto_groups <- function(x,
       drop = TRUE
     )
   }
-  
+
   # CONVERT ALL -> COMBINED EVENTS
   names(pd_split)[names(pd_split) == "all"] <- "Combined Events"
-  
-  # RETURN SPLIT DETAILS
-  if(details == TRUE){
+
+  # RETURN
+  if(details) {
     return(pd_split)
-    # RETURN GROUP NAMES
-  }else{
+  } else {
     groups <- names(pd_split)
-    names(groups) <- sapply(pd_split, nrow)
+    names(groups) <- vapply(pd_split, nrow, integer(1))
     return(groups)
   }
   
@@ -3710,7 +3675,7 @@ cyto_sort_by <- function(x,
   
   # Sorting indices
   ind <- match_ind(
-    rownames(cyto_details(x)), 
+    sampleNames(x),
     rownames(pd)
   )
   
@@ -3772,15 +3737,13 @@ cyto_group_by <- function(x,
     details = TRUE
   )
   
+  # sampleNames() is a direct accessor — avoids the pData() full-df copy
+  pd_rn <- sampleNames(x)
   # Replace each element of pd_split with matching samples
   x_list <- lapply(
-    seq_len(length(pd_split)), 
+    seq_along(pd_split),
     function(z) {
-      ind <- match(
-        rownames(pd_split[[z]]),
-        rownames(cyto_details(x))
-      )
-      x[ind]
+      x[match(rownames(pd_split[[z]]), pd_rn)]
     }
   )
   names(x_list) <- names(pd_split)
@@ -3883,101 +3846,73 @@ cyto_merge_by <- function(x,
   
   # MERGING --------------------------------------------------------------------
   
+  # CACHE LOOP INVARIANTS
+  nm_cs    <- names(cs_list)
+  is_som   <- cyto_som_check(cs_list[[1]])
+  cs_class <- cyto_class(cs_list[[1]])       # "cytoset" | "flowSet"
+  cf_class <- cyto_class(cs_list[[1]][[1]])  # "cytoframe" | "flowFrame"
+
   # CONVERT EACH GROUP TO MERGED CYTOSET/FLOWSET
   if(.grepl("set", format)) {
+    add_vars <- !all(merge_by %in% "all") && !.all_na(merge_by)
     structure(
       lapply(
-        seq_along(cs_list), 
+        seq_along(cs_list),
         function(z){
           # SOM CYTOSET | GATINGSET
-          if(cyto_som_check(cs_list[[z]])) {
+          if(is_som) {
             # EXTRACT SOM CODES & DIM REDUCTION
             SOM <- cyto_exprs(
               cs_list[[z]][[1]],
               channels = cyto_channels(
                 cs_list[[z]],
-                exclude = c(
-                  "SOM_counts",
-                  "SOM_freq",
-                  "Event",
-                  "Sample"
-                )
+                exclude = c("SOM_counts", "SOM_freq", "Event", "Sample")
               ),
               drop = FALSE
             )
-            # COUNT MATRIX
-            SOM_counts <- do.call(
-              "cbind",
-              cyto_apply(
-                cs_list[[z]],
-                function(w) {
-                  return(w)
-                },
-                input = "matrix",
-                channels = "SOM_counts",
-                simplify = FALSE,
-                copy = FALSE
+            # SUM COUNTS FOR GROUP (rowSums replaces apply(..., 1, "sum"))
+            SOM_counts <- rowSums(
+              do.call(
+                "cbind",
+                cyto_apply(
+                  cs_list[[z]],
+                  function(w) w,
+                  input = "matrix",
+                  channels = "SOM_counts",
+                  simplify = FALSE,
+                  copy = FALSE
+                )
               )
-            )
-            # EXTRACT & SUM COUNTS FOR GROUP
-            SOM_counts <- apply(
-              SOM_counts,
-              1,
-              "sum"
             )
             # APPEND COUNTS
             SOM <- cbind(
               SOM,
               "SOM_counts" = SOM_counts,
-              "SOM_freq" = SOM_counts/sum(SOM_counts)
+              "SOM_freq"   = SOM_counts / sum(SOM_counts)
             )
             # CREATE NEW CYTOFRAME
-            cf <- as(
-              SOM,
-              cyto_class(cs_list[[z]][[1]]) # flowFrame|cytoframe
-            )
+            cf <- as(SOM, cf_class)
             cyto_keyword(
               cf,
               keyword = "CytoExploreR_SOM",
-              value = cyto_keyword(
-                cs_list[[z]][[1]],
-                "CytoExploreR_SOM"
-              )[[1]]
+              value = cyto_keyword(cs_list[[z]][[1]], "CytoExploreR_SOM")[[1]]
             )
             # CREATE NEW CYTOSET
             cs <- do.call(
-              cyto_class(cs_list[[z]]), # flowSet()|cytoset()
-              list(
-                structure(
-                  list(
-                    cf
-                  ),
-                  names = names(cs_list)[z]
-                )
-              )
+              cs_class,
+              list(structure(list(cf), names = nm_cs[z]))
             )
             # TRANSFER MARKERNAMES
-            
+
           # CYTOSET | GATINGSET
           } else {
-            # CYTOSET
             cs <- do.call(
-              cyto_class(cs_list[[z]]), # flowSet()|cytoset()
-              list(
-                structure(
-                  list(
-                    as(
-                      cs_list[[z]], 
-                      cyto_class(cs_list[[z]][[1]])  # flowFrame|cytoframe
-                    )
-                  ),
-                  names = names(cs_list)[z]
-                )
-              )
+              cs_class,
+              list(structure(list(as(cs_list[[z]], cf_class)), names = nm_cs[z]))
             )
           }
           # EXPERIMENT DETAILS
-          if(!all(merge_by %in% "all") & !.all_na(merge_by)) {
+          if(add_vars) {
             cyto_details(cs) <- cbind(
               cyto_details(cs),
               cyto_details(cs_list[[z]])[1, merge_by, drop = FALSE]
@@ -3986,72 +3921,51 @@ cyto_merge_by <- function(x,
           return(cs)
         }
       ),
-      names = names(cs_list)
+      names = nm_cs
     )
   # CONVERT EACH GROUP TO CYTOFRAME
   } else {
-    # SOM CYTOSET|GATINGSET
     structure(
       lapply(
         seq_along(cs_list),
         function(z) {
-          # SOM
-          if(cyto_som_check(cs_list[[z]])) {
-            # EXTRACT SOM CODES & DIME REDUCTION
+          if(is_som) {
+            # EXTRACT SOM CODES & DIM REDUCTION
             SOM <- cyto_exprs(
               cs_list[[z]][[1]],
               channels = cyto_channels(
                 cs_list[[z]],
-                exclude = c(
-                  "SOM_counts",
-                  "SOM_freq",
-                  "Event",
-                  "Sample"
-                )
+                exclude = c("SOM_counts", "SOM_freq", "Event", "Sample")
               ),
               drop = FALSE
             )
-            # COUNT MATRIX
-            SOM_counts <- do.call(
-              "cbind",
-              cyto_apply(
-                cs_list[[z]],
-                function(w) {
-                  return(w)
-                },
-                input = "matrix",
-                channels = "SOM_counts",
-                simplify = FALSE,
-                copy = FALSE
+            # SUM COUNTS FOR GROUP
+            SOM_counts <- rowSums(
+              do.call(
+                "cbind",
+                cyto_apply(
+                  cs_list[[z]],
+                  function(w) w,
+                  input = "matrix",
+                  channels = "SOM_counts",
+                  simplify = FALSE,
+                  copy = FALSE
+                )
               )
-            )
-            # EXTRACT & SUM COUNTS FOR GROUP
-            SOM_counts <- apply(
-              SOM_counts,
-              1,
-              "sum"
             )
             # APPEND COUNTS
             SOM <- cbind(
               SOM,
               "SOM_counts" = SOM_counts,
-              "SOM_freq" = SOM_counts/sum(SOM_counts)
+              "SOM_freq"   = SOM_counts / sum(SOM_counts)
             )
-            # CYTOFRAME
-            as(
-              SOM,
-              cyto_class(cs_list[[z]][[1]])
-            ) 
+            as(SOM, cf_class)
           } else {
-            # flowFrame|cytoframe
-            as(
-              cs_list[[z]],
-              cyto_class(cs_list[[z]][[1]])
-            ) 
+            as(cs_list[[z]], cf_class)
           }
         }
       ),
-      names = names(cs_list)
+      names = nm_cs
     )
   }
   
@@ -4409,7 +4323,7 @@ cyto_split <- function(x,
     } else {
       id <- split(
         id,
-        LAPPLY(
+        ulapply(
           nrow(cnts), 
           function(z){
             rep(z, cnts[z, 1])
@@ -5244,55 +5158,44 @@ cyto_sample.flowFrame <- function(x,
                                   events = 1,
                                   seed = NULL,
                                   ...) {
-  
+
+  # CACHE COUNT AND SOM FLAG ONCE
+  n_total <- cyto_stat_count(x)
+  is_som  <- cyto_som_check(x)
+
   # NO SAMPLING - EMPTY FLOWFRAME
-  if (cyto_stat_count(x) == 0) {
+  if (n_total == 0) {
     return(x)
   }
-  
+
   # SAMPLING REQUIRED
   if (events != 1) {
     # TOTAL EVENTS
-    if(cyto_som_check(x)) {
-      n <- sum(
-        cyto_exprs(
-          x,
-          channels = "SOM_counts",
-          drop = TRUE
-        )
-      )
+    n <- if (is_som) {
+      sum(cyto_exprs(x, channels = "SOM_counts", drop = TRUE))
     } else {
-      n <- cyto_stat_count(x)
+      n_total
     }
-    # n is the number of events to keep
+    # SIZE
     if (events > 1) {
-      # n is too large - retain all events
+      # requested more than available - retain all
       if (events > n) {
         return(x)
-        # n is sample of x
-      } else {
-        size <- events
       }
-      # n is a proportion of events to keep
+      size <- events
     } else {
-      # Size
       size <- events * n
     }
-    # Set seed
+    # SET SEED
     if (!is.null(seed)) {
       set.seed(seed)
     }
     # SOM SAMPLE
-    if(cyto_som_check(x)) {
-      exprs <- cyto_exprs(
-        x,
-        drop = FALSE
-      )
+    if (is_som) {
+      exprs <- cyto_exprs(x, drop = FALSE)
       # TODO: ENSURE COUNTS ADD UP TO SIZE (ROUNDING)
-      exprs[, "SOM_counts"] <- round(
-        exprs[, "SOM_freq"] * size
-      )
-      exprs[, "SOM_freq"] <- exprs[, "SOM_counts"] / sum(exprs[, "SOM_counts"])
+      exprs[, "SOM_counts"] <- round(exprs[, "SOM_freq"] * size)
+      exprs[, "SOM_freq"]   <- exprs[, "SOM_counts"] / sum(exprs[, "SOM_counts"])
       x <- as(exprs, "cytoframe")
     # NORMAL SAMPLE
     } else {
@@ -5300,7 +5203,7 @@ cyto_sample.flowFrame <- function(x,
       x <- Subset(x, smp)
     }
   }
-  
+
   return(x)
 }
 
@@ -5312,25 +5215,18 @@ cyto_sample.flowSet <- function(x,
                                 ...) {
   
   # TODO: ADD SOM MINIMUM EVENTS
-  
+
   # SAMPLE TO MINIMUM EVENTS
   if(.all_na(events)) {
+    # SOM FLAG - CHECK ONCE
+    is_som <- cyto_som_check(x)
     # EVENTS PER SAMPLE
     events <- cyto_apply(
       x,
-      FUN = function(z) {
-        # SOM
-        if(cyto_som_check(z)) {
-          sum(
-            cyto_exprs(
-              z,
-              channels = "SOM_counts",
-              drop = TRUE
-            )
-          )
-        } else {
-          cyto_stat_count(z)
-        }
+      FUN = if (is_som) {
+        function(z) sum(cyto_exprs(z, channels = "SOM_counts", drop = TRUE))
+      } else {
+        cyto_stat_count
       },
       input = "cytoframe",
       copy = FALSE
@@ -5450,22 +5346,16 @@ cyto_sample_n <- function(x,
                           events = 1,
                           parent = NULL) {
   
+  # SOM FLAG - CHECK ONCE
+  is_som <- cyto_som_check(x)
+
   # COUNTS
   counts <- cyto_apply(
     x,
-    FUN = function(z) {
-      # SOM
-      if(cyto_som_check(z)) {
-        sum(
-          cyto_exprs(
-            z,
-            channels = "SOM_counts",
-            drop = TRUE
-          )
-        )
-      } else {
-        cyto_stat_count(z)
-      }
+    FUN = if (is_som) {
+      function(z) sum(cyto_exprs(z, channels = "SOM_counts", drop = TRUE))
+    } else {
+      cyto_stat_count
     },
     parent = parent,
     input = "cytoframe",
@@ -5477,12 +5367,12 @@ cyto_sample_n <- function(x,
     counts[, 1, drop = TRUE],
     names = rownames(counts)
   )
-  
+
   # TOTAL COUNT
   total_count <- sum(counts)
-  
+
   # DISPLAY CANNOT BE LARGER THAN TOTAL COUNT
-  if(events > 1 & events > total_count) {
+  if(events > 1 && events > total_count) {
     events <- total_count # n may be set to zero here
   }
   
@@ -5510,7 +5400,7 @@ cyto_sample_n <- function(x,
       ind <- sample(sample_ind, 1)
       sample_counts[ind] <- sample_counts[ind] - 1
       if(sample_counts[ind] == 0) {
-        sample_ind <- sample_ind[-match(names(ind), names(sample_ind))]
+        sample_ind <- sample_ind[sample_ind != ind]
       }
     }
   }
@@ -5636,11 +5526,11 @@ cyto_coerce <- function(x,
   x <- cytoset(
     structure(
       lapply(
-        cyto_names(x), 
+        ids,
         function(z){
           fr <- cyto_sample(
-            x[[z]], 
-            events = events[z], 
+            x[[z]],
+            events = events[z],
             seed = seed
           )
           if(cyto_class(fr, "flowFrame", TRUE)) {
@@ -5652,7 +5542,8 @@ cyto_coerce <- function(x,
           return(fr)
         }
       ),
-    names = cyto_names(x))
+      names = ids
+    )
   )
 
   # BARCODE
@@ -5844,7 +5735,7 @@ cyto_sample_to_node <- function(x,
   }
   
   # NODE RATIOS
-  node_ratios <- LAPPLY(
+  node_ratios <- ulapply(
     node_counts, 
     function(z) {
       if(z > 0) {
@@ -5964,6 +5855,10 @@ cyto_beads_sample <- function(...){
 #' @param overwrite logical to indicate whether existing barcodes should be
 #'   overwritten, thus providing a non-interactive way to control how existing
 #'   barcodes are handled.
+#' @param barcodes optional numeric vector of custom sample identifiers, one per
+#'   sample. When supplied the \code{"Sample-ID"} column is populated with these
+#'   values instead of sequential integers. Implicitly activates sample
+#'   barcoding when \code{type} does not already include \code{"samples"}.
 #'
 #' @return barcoded cytoset or GatingSet with \code{"Sample-ID"} and/or
 #'   \code{"Event-ID"} column added and annotated.
@@ -5985,10 +5880,11 @@ cyto_beads_sample <- function(...){
 #' @export
 cyto_barcode <- function(x,
                          type = "samples",
-                         overwrite = NULL) {
-  
+                         overwrite = NULL,
+                         barcodes = NULL) {
+
   # CHECKS ---------------------------------------------------------------------
-  
+
   # CYTOSET
   cs <- cyto_data_extract(
     x,
@@ -5996,52 +5892,63 @@ cyto_barcode <- function(x,
     copy = FALSE,
     format = "cytoset"
   )[[1]]
-  
+
+  # BARCODES
+  if (!is.null(barcodes)) {
+    if (!is.numeric(barcodes)) {
+      stop("'barcodes' must be a numeric vector.")
+    }
+    if (length(barcodes) != length(cs)) {
+      stop(
+        "'barcodes' must have the same length as the number of samples (",
+        length(cs), ")."
+      )
+    }
+    # Ensure sample barcoding is active
+    if (!any(.grepl("^s", type))) {
+      type <- c(type, "samples")
+    }
+  }
+
   # TYPE
   if (.grepl("^b", type)) {
     type <- c("samples", "events")
   }
-  
+
   # PREPARE DATA ---------------------------------------------------------------
-  
-  # TODO: NON-INTERACTIVE MODE
-  
-  # BARCODE?
-  barcode <- TRUE
-  
+
   # CHECK FOR SAMPLE IDs
-  if (any(.grepl("^s", type))){
+  if (any(.grepl("^s", type))) {
+    barcode_samples <- TRUE
     # SAMPLE IDs EXIST - BACKWARDS COMPATIBLE
-    if(any(.grepl("^Sample-?ID$", cyto_channels(cs)))) {
+    if (any(.grepl("^Sample-?ID$", cyto_channels(cs)))) {
       # OVERWRITE
-      if(!is.logical(overwrite)) {
+      if (!is.logical(overwrite)) {
         overwrite <- cyto_enquire(
           "Overwrite existing sample IDs? (Y/N): ",
           options = c("T", "Y")
         )
       }
-      # OVERWRITE BARCODES
-      if(overwrite) {
-        # REMOVE SAMPLE ID COLUMN
-        cs <- cyto_copy(
-          cs[, -which(.grepl("^Sample-?ID$", cyto_channels(cs)))]
-        )
-      } else {
-        barcode <- FALSE
+      if (!overwrite) {
+        barcode_samples <- FALSE
       }
     }
     # BARCODE SAMPLES
-    if(barcode){
+    if (barcode_samples) {
+      keep <- which(!.grepl("^Sample-?ID$", cyto_channels(cs)))
+      nm   <- cyto_names(cs)
       cs <- cytoset(
         structure(
           lapply(
-            seq_along(cs), 
+            seq_along(cs),
             function(z) {
+              id_val <- if (!is.null(barcodes)) barcodes[z] else z
+              fr <- cs[[z]]
               suppressWarnings(
                 cyto_cbind(
-                  cs[[z]],
+                  fr[, keep],
                   matrix(
-                    rep(z, cyto_stat_count(cs[[z]])),
+                    rep(id_val, cyto_stat_count(fr)),
                     ncol = 1,
                     dimnames = list(NULL, "Sample-ID")
                   )
@@ -6049,57 +5956,47 @@ cyto_barcode <- function(x,
               )
             }
           ),
-          names = cyto_names(cs)
+          names = nm
         )
       )
     }
   }
-  
+
   # CHECK FOR EVENT IDs
   if (any(.grepl("^e", type))) {
+    barcode_events <- TRUE
     # EVENT IDs EXIST
-    if(any(.grepl("^Event-?ID$", cyto_channels(cs)))) {
+    if (any(.grepl("^Event-?ID$", cyto_channels(cs)))) {
       # OVERWRITE
-      if(!is.logical(overwrite)) {
+      if (!is.logical(overwrite)) {
         overwrite <- cyto_enquire(
           "Overwrite existing event IDs? (Y/N): ",
           options = c("T", "Y")
         )
       }
-      # OVERWRITE BARCODES
-      if(overwrite){
-        # REMOVE EVENT ID COLUMN
-        cs <- cyto_copy(
-          cs[, -which(.grepl("^Event-?ID$",cyto_channels(cs)))]
-        )
-      } else {
-        barcode <- FALSE
+      if (!overwrite) {
+        barcode_events <- FALSE
       }
     }
     # BARCODE EVENTS
-    if(barcode) {
-      # EVENT IDs
-      cnt <- 0
-      event_ids <- lapply(
-        seq_along(cs), 
-        function(z){
-          if(cyto_stat_count(cs[[z]]) == 0) {
-            return(NA)
-          } else {
-            ids <- seq(cnt + 1, cnt + cyto_stat_count(cs[[z]]))
-            cnt <<- ids[length(ids)]
-            return(ids)
-          }
-        }
-      )
+    if (barcode_events) {
+      # VECTORISED EVENT ID RANGES
+      counts  <- vapply(seq_along(cs), function(z) cyto_stat_count(cs[[z]]), integer(1))
+      ends    <- cumsum(counts)
+      starts  <- c(1L, ends[-length(ends)] + 1L)
+      event_ids <- lapply(seq_along(cs), function(z) {
+        if (counts[z] == 0L) NA_integer_ else seq.int(starts[z], ends[z])
+      })
+      keep <- which(!.grepl("^Event-?ID$", cyto_channels(cs)))
+      nm   <- cyto_names(cs)
       cs <- cytoset(
         structure(
           lapply(
-            seq_along(cs), 
+            seq_along(cs),
             function(z) {
               suppressWarnings(
                 cyto_cbind(
-                  cs[[z]],
+                  cs[[z]][, keep],
                   matrix(
                     event_ids[[z]],
                     ncol = 1,
@@ -6109,7 +6006,7 @@ cyto_barcode <- function(x,
               )
             }
           ),
-          names = cyto_names(cs)
+          names = nm
         )
       )
     }
@@ -6305,7 +6202,7 @@ cyto_markers_edit <- function(x,
   }
   
   # EMPTY -> NA
-  ind <- which(LAPPLY(cyto_marks, ".empty"))
+  ind <- which(ulapply(cyto_marks, ".empty"))
   if (length(ind) > 0) {
     cyto_marks[ind] <- NA
   }
@@ -7004,7 +6901,7 @@ cyto_compensate.flowFrame <- function(x,
     # NON-SQUARE OR UNLABELLED MATRIX
     if(!all(colnames(spill) %in% chans)) {
       # ANY COLUMNS CONTAINING CHANNEL NAMES?
-      chans_ind <- LAPPLY(
+      chans_ind <- ulapply(
         seq_len(ncol(spill)),
         function(z){
           if(all(spill[, z] %in% chans)) {
@@ -7015,7 +6912,7 @@ cyto_compensate.flowFrame <- function(x,
         }
       )
       # COLUMN CONTAINING SPILLOVER VALUES
-      spill_ind <- LAPPLY(
+      spill_ind <- ulapply(
         seq_len(ncol(spill)),
         function(z){
           if(is.numeric(spill[, z])) {
@@ -7068,7 +6965,7 @@ cyto_compensate.flowFrame <- function(x,
         # REMOVE EXCESS ROWS/COLUMNS - MATRIX MAY BE NON-SQUARE
         cols_rm <- which(!colnames(z) %in% chans)
         if(length(cols_rm) > 0) {
-          row_rm <- LAPPLY(
+          row_rm <- ulapply(
             cols_rm, 
             function(w) {
               which(z[, w] == 1)
@@ -7160,7 +7057,7 @@ cyto_nodes <- function(x,
     if(!is.null(bool)) {
       # BOOLEAN NODE INDICES
       bool_ind <- which(
-        LAPPLY(
+        ulapply(
           nodes, 
           function(z) {
             if(z %in% "root") {
@@ -7206,7 +7103,7 @@ cyto_nodes <- function(x,
     # FULL NODE PATHS
     nodes_full <- c(
       "root",
-      LAPPLY(
+      ulapply(
         1:nrow(gt),
         function(z) {
           paste0(
@@ -7244,7 +7141,7 @@ cyto_nodes <- function(x,
     }
     # AUTO NODE PATHS
     if(path == "auto") {
-      nodes <- LAPPLY(
+      nodes <- ulapply(
         nodes_full,
         function(node) {
           pop <- basename(node)
@@ -7294,7 +7191,7 @@ cyto_nodes <- function(x,
     }
     # TERMINAL NODES
     if(terminal) {
-      nodes <- LAPPLY(
+      nodes <- ulapply(
         seq_along(nodes),
         function(z) {
           # CHECK FOR DESCENDANTS
@@ -7314,7 +7211,7 @@ cyto_nodes <- function(x,
 
   # INTERNAL HELPER - resolve select/exclude criteria to node indices
   .node_indices <- function(criteria, nodes, ignore.case, ...) {
-    unique(LAPPLY(criteria, function(z) {
+    unique(ulapply(criteria, function(z) {
       if (is.numeric(z)) {
         z
       } else {
@@ -7394,7 +7291,7 @@ cyto_nodes_fix <- function(x) {
         path = "full"
       )[ind],
       "node_auto" = nodes_auto[ind],
-      "node_new" = LAPPLY(
+      "node_new" = ulapply(
         node_match,
         function(z) {
           node_ind[as.character(z)] <<- node_ind[as.character(z)] + 1
@@ -7521,7 +7418,7 @@ cyto_nodes_fix <- function(x) {
       # SPLIT OUT POPULATIONS - RENAME - REPLACE ILLEGAL - RECOMBINE
       # RENAME IS PRIOR TO REMOVAL OF ILLEGAL CHARACTERS
       pops <- unlist(strsplit(gate@deparse, "\\||\\&|\\!"))
-      pops <- pops[!LAPPLY(pops, ".empty")]
+      pops <- pops[!ulapply(pops, ".empty")]
       pops_new <- pops
       # RENAME POPULATIONS
       if(!is.null(nodes_rename)) {
@@ -7657,7 +7554,7 @@ cyto_nodes_check <- function(x,
       node <- nodes[z]
       node_split <- nodes_split[[z]]
       # CHECK AGAINST AUTO PATHS
-      ind <- which(LAPPLY(nodes_auto_split, function(y){
+      ind <- which(ulapply(nodes_auto_split, function(y){
         # SHORT NODE PATH
         if(length(node_split) < length(y)){
           # PARTIAL
@@ -7773,7 +7670,7 @@ cyto_nodes_convert <- function(x,
   # nodes_terminal <- basename(nodes_full)
   
   # STRIP REFERENCE TO ROOT
-  nodes <- LAPPLY(
+  nodes <- ulapply(
     nodes, 
     function(node){
       # DROP ROOT REFERENCE
@@ -7849,7 +7746,7 @@ cyto_nodes_convert <- function(x,
   }
   
   # CONVERT NODES
-  nodes <- LAPPLY(
+  nodes <- ulapply(
     nodes, 
     function(node) {
       # PREPARE NODE
@@ -7955,7 +7852,7 @@ cyto_nodes_convert <- function(x,
           # UNIQUE NODE EXISTS - INDEX FULL NODES
           ind <- nodes_match[
             which(
-              LAPPLY(
+              ulapply(
                 nodes_full_split, # ONLY SEARCH NODES WITH PARTIAL MATCH
                 function(z) {
                   # IDENTICAL NODE REQUIRED
@@ -7984,7 +7881,7 @@ cyto_nodes_convert <- function(x,
             # NON-UNIQUE NODE PATH - CHOOSE SHORTEST
             } else if (length(ind) > 1) {
               nodes_unique <- nodes_full_split[ind]
-              nodes_lengths <- LAPPLY(nodes_unique, "length")
+              nodes_lengths <- ulapply(nodes_unique, "length")
               nodes_length_min <- min(nodes_lengths)
               if (length(nodes_lengths[nodes_lengths == nodes_length_min]) > 1) {
                 stop(
@@ -8011,7 +7908,7 @@ cyto_nodes_convert <- function(x,
   # SORT NODES
   if(sort) {
     nodes <- structure(
-      LAPPLY(
+      ulapply(
         nodes,
         function(node){
           if(path == "auto") {
@@ -8041,7 +7938,7 @@ cyto_nodes_convert <- function(x,
           "\\\\/"
         )
       )
-      node <- node[!LAPPLY(node, ".empty")]
+      node <- node[!ulapply(node, ".empty")]
       return(node)
     }
   )
@@ -8108,7 +8005,7 @@ cyto_nodes_ancestor <- function(x,
   # GET COMMON ANCESTOR - SHORTEST SHARED PATH WITH FIRST NODE
   ancestor <- c()
   for(i in rev(seq_len(length(nodes_split[[1]])))){
-    if(all(LAPPLY(nodes_split[-1], function(z){
+    if(all(ulapply(nodes_split[-1], function(z){
       all(nodes_split[[1]][seq_len(i)] %in% z)
     }))){
       ancestor <- c(
@@ -8216,7 +8113,7 @@ cyto_nodes_kin <- function(x,
     
     # RELATIVE NODES
     return(
-      LAPPLY(
+      ulapply(
         nodes,
         function(node) {
           # CHILDREN
@@ -8284,7 +8181,7 @@ cyto_nodes_kin <- function(x,
           # TERMINAL
           if(terminal) {
             pops <- pops[
-              LAPPLY(
+              ulapply(
                 pops,
                 function(pop) {
                   length(
@@ -8327,7 +8224,7 @@ cyto_nodes_kin <- function(x,
       path = "full"
     )
     # RELATIVE NODES
-    res <- LAPPLY(
+    res <- ulapply(
       nodes,
       function(node) {
         # CONVERT NODE TO FULL PATH
@@ -8389,7 +8286,7 @@ cyto_nodes_kin <- function(x,
     # TERMINAL NODES
     if(terminal) {
       res <- res[
-        LAPPLY(
+        ulapply(
           res,
           function(pop) {
             length(
@@ -8484,7 +8381,7 @@ cyto_spillover_extract <- function(x) {
   # GATINGSET
   if (cyto_class(x, "GatingSet", TRUE)) {
     spill <- gs_get_compensations(x)
-    if (all(LAPPLY(spill, "is.null"))) {
+    if (all(ulapply(spill, "is.null"))) {
       spill <- NULL
     } else {
       spill <- lapply(
@@ -8518,7 +8415,7 @@ cyto_spillover_extract <- function(x) {
       }
     )
     names(spill) <- cyto_names(x)
-    if (all(LAPPLY(spill, "is.null"))) {
+    if (all(ulapply(spill, "is.null"))) {
       spill <- NULL
     }
   # CYTOFRAME
@@ -8998,7 +8895,7 @@ cyto_apply.flowSet <- function(x,
         }
       }
       # LIST OF MATRICES
-      if(all(!is.null(LAPPLY(res, "dim")))) {
+      if(all(!is.null(ulapply(res, "dim")))) {
         # PREPARE & FORMAT MATRICES
         res <- lapply(
           names(res),
@@ -9035,7 +8932,7 @@ cyto_apply.flowSet <- function(x,
             return(res[[z]])
           })
         # RBIND MATRICES - SAME DIMENSIONS
-        if(length(unique(LAPPLY(res, "ncol"))) == 1) {
+        if(length(unique(ulapply(res, "ncol"))) == 1) {
           res <- do.call("rbind", unname(res))
         }
       }
@@ -9510,61 +9407,52 @@ cyto_cbind.flowFrame <- function(x,
 
 #' @rdname cyto_cbind
 #' @export
-cyto_cbind.flowSet <- function(x, 
+cyto_cbind.flowSet <- function(x,
                                cols = NULL){
-  
+
   # MATRIX
-  if(is.matrix(cols)){
-    # COUNTS
-    cyto_counts <- cyto_stat_count(x) 
-    # SAME NUMBER OF EVENTS
-    if(nrow(cols) != sum(cyto_counts)){
-      stop(
-        paste0("'cols' does not contain the same number of events as this ", 
-               class(x))
-      )
-      # SPLIT MATRIX INTO LIST
-    }else{
-      cols <- lapply(
-        seq_along(cyto_counts), 
-        function(z){
-          if(z == 1){
-            res <- cols[1:cyto_counts[z], , drop = FALSE]
-          }else{
-            start <- sum(cyto_counts[1:(z-1)]) + 1
-            end <- start + cyto_counts[z] - 1
-            res <- cols[start:end, , drop = FALSE]
-          }
-          # CONVERT TO TYPE DOUBLE
-          apply(
-            res,
-            2,
-            "as.double"
-          )
-        }
-      )
-      names(cols) <- cyto_names(x)
-    }
-  } else {
+  if(!is.matrix(cols)){
     stop("'cols' must be a matrix!")
   }
-  
-  # BIND COLUMNS
-  cf_list <- lapply(
-    cyto_names(x),
+
+  # CACHE NAMES ONCE
+  nm <- cyto_names(x)
+
+  # COUNTS
+  cyto_counts <- cyto_stat_count(x)
+
+  # SAME NUMBER OF EVENTS
+  if(nrow(cols) != sum(cyto_counts)){
+    stop(
+      paste0("'cols' does not contain the same number of events as this ",
+             class(x))
+    )
+  }
+
+  # PRE-COMPUTE BOUNDS (avoids O(z) cumsum recalculation per iteration)
+  ends   <- cumsum(cyto_counts)
+  starts <- c(1L, ends[-length(ends)] + 1L)
+
+  # SPLIT MATRIX INTO LIST
+  cols <- lapply(
+    seq_along(cyto_counts),
     function(z){
-      cyto_cbind(x[[z]], cols[[z]])
+      apply(cols[starts[z]:ends[z], , drop = FALSE], 2, as.double)
     }
   )
-  names(cf_list) <- cyto_names(x)
-  
+  names(cols) <- nm
+
+  # BIND COLUMNS
+  cf_list <- lapply(nm, function(z) cyto_cbind(x[[z]], cols[[z]]))
+  names(cf_list) <- nm
+
   # RETURN FLOWSET/CYTOSET
   if(cyto_class(cf_list[[1]], "cytoframe", TRUE)){
     return(cytoset(cf_list))
   }else{
     return(flowSet(cf_list))
   }
-  
+
 }
 
 ## CYTO_ENQUIRE ----------------------------------------------------------------
@@ -9590,7 +9478,7 @@ cyto_enquire <- function(x,
   answer <- readline(x)
   # OPTIONS
   if(!is.null(options)) {
-    if(any(LAPPLY(options, 
+    if(any(ulapply(options, 
                   function(z) {
                     grepl(z, 
                           answer, 
@@ -9959,7 +9847,7 @@ cyto_keyword <- function(x,
         lapply(
           keyword,
           function(z) {
-            if(all(LAPPLY(val, "is.null"))) {
+            if(all(ulapply(val, "is.null"))) {
               return(NULL)
             } else {
               do.call("c", val)

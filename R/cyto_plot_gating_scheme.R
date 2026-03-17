@@ -181,7 +181,7 @@ cyto_plot_gating_scheme <- function(x,
       path = "auto"
     ),
     "alias" = gt$alias,
-    "alias_auto" = LAPPLY(
+    "alias_auto" = ulapply(
       seq_len(nrow(gt)),
       function(z) {
         cyto_nodes_convert(
@@ -199,7 +199,7 @@ cyto_plot_gating_scheme <- function(x,
   # EXCLUDE HIDDEN NODES
   if(!hidden) {
     gt <- gt[
-      LAPPLY(
+      ulapply(
         gt[, "alias_auto"],
         function(z) {
           # ONLY EXCLUDE ALIAS BUT KEEP PARENT FOR DESCENDANTS
@@ -263,7 +263,7 @@ cyto_plot_gating_scheme <- function(x,
       function(z) {
         ind <<- c(
           ind, 
-          LAPPLY(
+          ulapply(
             seq_along(gt_split),
             function(v) {
               if(z %in% gt_split[[v]][, "alias_auto"]) {
@@ -283,7 +283,7 @@ cyto_plot_gating_scheme <- function(x,
   
   # NODES
   nodes <- unique(
-    LAPPLY(
+    ulapply(
       seq_len(nrow(gt)),
       function(z) {
         c(gt$parent_auto[z], gt$alias_auto[z])
@@ -415,7 +415,7 @@ cyto_plot_gating_scheme <- function(x,
     # FORMAT LEGEND - DOUBLE PANELS
     cnt <- 0
     ind <- c()
-    LAPPLY(
+    ulapply(
       names(legend), 
       function(z){
         if(as.numeric(z) %% 2 > 0) {
@@ -506,7 +506,7 @@ cyto_plot_gating_scheme <- function(x,
     # GATING SCHEME STEPS - LABEL WITH PARENT & CHANNELS
     } else {
       header <- rep(
-        LAPPLY(
+        ulapply(
           gt_split,
           function(z) {
             paste0(
@@ -558,7 +558,7 @@ cyto_plot_gating_scheme <- function(x,
       title <- rep(
         cyto_nodes_convert(
           x,
-          nodes = LAPPLY(
+          nodes = ulapply(
             gt_split,
             function(z) {
               unique(z$parent)
@@ -570,7 +570,7 @@ cyto_plot_gating_scheme <- function(x,
       )
     # GATING SCHEME STEPS
     } else {
-      title <- LAPPLY(
+      title <- ulapply(
         names(x_list),
         function(z) {
           paste0(
@@ -578,7 +578,7 @@ cyto_plot_gating_scheme <- function(x,
             "\n",
             cyto_nodes_convert(
               x,
-              nodes = LAPPLY(
+              nodes = ulapply(
                 gt_split,
                 function(w) {
                   unique(w$parent)
@@ -806,7 +806,7 @@ cyto_plot_gating_scheme <- function(x,
             names = NULL
           )
           # PREPARE PLOTS
-          p[LAPPLY(p, "is.null")] <- NULL
+          p[ulapply(p, "is.null")] <- NULL
           return(p)
         }
       ),
@@ -1012,7 +1012,7 @@ cyto_plot_gating_scheme <- function(x,
             names = names(x_list)
           )
           # PREPARE PLOTS
-          p[LAPPLY(p, "is.null")] <- NULL
+          p[ulapply(p, "is.null")] <- NULL
           return(p)
         }
       ),

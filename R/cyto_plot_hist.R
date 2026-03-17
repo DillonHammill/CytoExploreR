@@ -84,7 +84,7 @@ cyto_plot_hist <- function(x,
   if(cyto_class(x, "cyto_plot")) {
     .args_update(x)
   # X - LIST OF DENSITY OBJECTS  
-  } else if(cyto_class(x, "list") & all(LAPPLY(x, "cyto_class", "density"))) {
+  } else if(cyto_class(x, "list") & all(ulapply(x, "cyto_class", "density"))) {
     d <- x
   # X - CYTOFRAME/CYTOSET/GATINGHIERARCHY/GATINGSET/LIST
   } else {

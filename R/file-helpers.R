@@ -71,7 +71,7 @@ file_ext_append <- function(x,
   ext <- rep(ext, length(x))
   
   # ADD EXTENSIONS TO FILE NAMES WITHOUT EXTENSIONS
-  LAPPLY(seq_along(x), function(z) {
+  ulapply(seq_along(x), function(z) {
     # PREPARE EXTENSION
     if (!grepl(".", ext[z])) {
       ext[z] <- paste0(".", ext[z])

@@ -663,7 +663,7 @@
   }
   
   # POPULATION COUNT
-  P <- LAPPLY(seq_len(length(gate)), function(z){
+  P <- ulapply(seq_len(length(gate)), function(z){
     # GATE OBJECT
     if(grepl("gate", cyto_class(gate[[z]]), ignore.case = TRUE)) {
       if(cyto_class(gate[[z]], "quadGate")) {
@@ -703,22 +703,22 @@
   # RECTANGLEGATES SUPPLIED
   if(cyto_class(gate, "list", TRUE)) {
     # LIST OF RECTANGLEGATES
-    if(all(LAPPLY(gate, function(z){
+    if(all(ulapply(gate, function(z){
       cyto_class(z, "rectangleGate")
     }))){
       # ORDER QUADRANTS - GATINGSET EXTRACTED GATES
-      if(all(LAPPLY(gate, function(z){
+      if(all(ulapply(gate, function(z){
         any(grepl("quad", names(attributes(z))))
       }))){
         # QUADRANTS
-        quads <- LAPPLY(
+        quads <- ulapply(
           gate,
           function(z) {
             names(attributes(z)[["quadrants"]])
           }
         )
       }else{
-        quads <- LAPPLY(
+        quads <- ulapply(
           gate, 
           function(z){
             z@filterId
@@ -729,7 +729,7 @@
       chans <- as.character(parameters(gate[[1]]))
       # CO-ORDINATES
       coords <- .cyto_gate_coords(gate, channels = chans)
-      coords <- LAPPLY(
+      coords <- ulapply(
         chans, 
         function(z){
           unique(coords[, z][is.finite(coords[, z])])
@@ -796,7 +796,7 @@
   
   # LIST OF GATES
   coords <- lapply(channels, function(z){
-    LAPPLY(x, function(y){
+    ulapply(x, function(y){
       # RECTANGLEGATE
       if(cyto_class(y, "rectangleGate")){
         if(length(y@min) == 2){

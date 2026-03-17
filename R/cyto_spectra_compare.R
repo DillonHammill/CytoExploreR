@@ -47,7 +47,7 @@ cyto_spectra_compare <- function(x,
   if(cyto_class(x, "matrix", FALSE)) {
     # SELECT ROWS
     if(!is.null(select)) {
-      idx <- LAPPLY(
+      idx <- ulapply(
         select,
         function(z) {
           id <- match(z, rownames(x))
@@ -113,7 +113,7 @@ cyto_spectra_compare <- function(x,
   # LIST
   } else if(cyto_class(x, "list", "TRUE")) {
     # LIST OF MATRICES
-    if(!all(LAPPLY(x, cyto_class, expect = "matrix", class = "FALSE"))) {
+    if(!all(ulapply(x, cyto_class, expect = "matrix", class = "FALSE"))) {
       stop("'x' must be a list of matrices to compute similarity scores!")
     }
     # CHECK NAMES
@@ -126,7 +126,7 @@ cyto_spectra_compare <- function(x,
         lapply(
           x,
           function(z) {
-            idx <- LAPPLY(
+            idx <- ulapply(
               select,
               function(w) {
                 id <- match(w, rownames(z))
@@ -162,7 +162,7 @@ cyto_spectra_compare <- function(x,
     }
     # SELECT ROWS THAT OCCUR IN ALL MATRICES
     cnt <- table(
-      LAPPLY(
+      ulapply(
         x,
         rownames
       )
@@ -200,7 +200,7 @@ cyto_spectra_compare <- function(x,
       rownames(cs) <- names(x)
     # COMPLEXITY 
     } else if(grepl("^com|^cond", type, ignore.case = TRUE)) {
-      cs <- LAPPLY(
+      cs <- ulapply(
         x,
         "kappa"
       )

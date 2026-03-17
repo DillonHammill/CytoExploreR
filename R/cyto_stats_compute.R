@@ -317,7 +317,7 @@ cyto_stats_compute <- function(x,
     }
     # PARENT POPULATIONS IN LIST
   } else {
-    if(!all(LAPPLY(parent, "cyto_class", "flowSet"))) {
+    if(!all(ulapply(parent, "cyto_class", "flowSet"))) {
       stop("'parent' must be list of cytosets!")
     }
   }
@@ -337,7 +337,7 @@ cyto_stats_compute <- function(x,
     # STAT STRIPPED
     stat_strip <- gsub("cyto_stat_", "", stat)
     # COMPUTE STATISTICS
-    if (any(LAPPLY(c(
+    if (any(ulapply(c(
       "count",
       "mean",
       "median",
@@ -420,7 +420,7 @@ cyto_stats_compute <- function(x,
               lapply(
                 y, 
                 function(q) {
-                  LAPPLY(
+                  ulapply(
                     unname(colnames(q)),
                     function(r) {
                       if (.all_na(trans)) {
@@ -482,7 +482,7 @@ cyto_stats_compute <- function(x,
               # CHANNEL INDEX
               cnt <<- cnt + 1
               round(
-                LAPPLY(
+                ulapply(
                   names(y), 
                   function(w){
                     if(.all_na(y[[w]])) {
@@ -576,7 +576,7 @@ cyto_stats_compute <- function(x,
           function(z){
             # MARKERS
             if(markers) {
-              colnames(res[[z]]) <- LAPPLY(
+              colnames(res[[z]]) <- ulapply(
                 colnames(res[[z]]),
                 function(w) {
                   if (w %in% cyto_channels(x)) {

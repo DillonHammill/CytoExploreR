@@ -173,10 +173,10 @@ cyto_array_analyse.GatingSet <- function(x,
     std <- bead_data[[z]][!bead_data[[z]][, "standard"] == "NA" & 
                             !is.na(bead_data[[z]][, "standard"]), ]
     # STANDRAD INDICES - REMOVE LEADING C
-    if(all(LAPPLY(std[,"standard"], function(w){
+    if(all(ulapply(std[,"standard"], function(w){
       grepl("C", w, ignore.case = TRUE)
     }))){
-      std_ind <- LAPPLY(std[, "standard"], function(w){
+      std_ind <- ulapply(std[, "standard"], function(w){
         as.numeric(gsub("c", "", w, ignore.case = TRUE))
       })
     }else{
@@ -187,7 +187,7 @@ cyto_array_analyse.GatingSet <- function(x,
     # MAXIMUM CONCENTRATION
     max_conc <- array[array$bead_id == z, "max_concentration"]
     # STANDARD CONCENTRATIONS
-    std_conc <- LAPPLY(std_ind, function(y){
+    std_conc <- ulapply(std_ind, function(y){
       # ZERO CONCENTRATION
       if(std_ind_max - y == std_ind_max){
         return(0)

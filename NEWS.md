@@ -11,10 +11,11 @@
 * Performance improvements to `cyto_channels()` and `cyto_markers()` by short-circuiting select/exclude logic when neither argument is supplied.
 * Performance improvements to `cyto_groups()` by replacing nested `lapply` calls with a `for` loop and removing `<<-` super-assignments.
 * Performance improvements to `cyto_nodes()` terminal node detection using string prefix matching instead of per-node C++ calls.
+* Performance improvements to `cyto_apply()` by switching input-type dispatch from regex to `switch` on the first two characters of the input string, and by caching `cyto_names()` once per call to avoid repeated S4 dispatch across frames.
 * Performance improvements to overlay event-ID sampling in `cyto_plot()` by pre-extracting event IDs and pre-building O(1) sample-ID lookup environments to avoid repeated S4 dispatch inside loops.
 * `cyto_plot()` overlays now degrade gracefully with a warning when samples have not been barcoded with `cyto_barcode()`, falling back to independent layer sampling instead of throwing an error.
-* Simplified test setup in `helper-lib.R` to build the Activation `GatingSet` directly from `CytoExploreRData` rather than loading a saved GatingSet from disk.
 * Fast c++ label repelling algorithm to automatically compute non-overlapping label co-ordinates.
+* `cyto_barcode()` has a new `barcodes` argument to allow for custom numeric sample identifiers for better visualisation of titration data.
 
 # CytoExploreR 2.0.20
 

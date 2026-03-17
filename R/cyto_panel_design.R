@@ -82,7 +82,7 @@ cyto_panel_design <- function(x,
   
   # CHECK LIST CONTAINS GATINGSETS ONLY
   if(cyto_class(x, "list", TRUE)) {
-    if(!all(LAPPLY(x, cyto_class, "GatingSet", TRUE))) {
+    if(!all(ulapply(x, cyto_class, "GatingSet", TRUE))) {
       stop(
         "'x' must be a list of GatingSet objects!"
       )
@@ -250,7 +250,7 @@ cyto_panel_design <- function(x,
           dyes
         )
         # SEARCH FOR GATES
-        LAPPLY(
+        ulapply(
           dyes, 
           function(dye) {
             if(!any(grepl(paste0(dye, "\\-"), nodes))) {

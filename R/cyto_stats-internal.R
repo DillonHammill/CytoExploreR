@@ -13,7 +13,7 @@
 .cyto_stat_dispatch <- function(FUN) {
   
   if(is.character(FUN)) {
-    if(any(LAPPLY(c("count",
+    if(any(ulapply(c("count",
                     "freq",
                     "mean",
                     "geomean",
@@ -1035,7 +1035,7 @@ cyto_stat_bkde2d <- function(x,
   if(length(ind) == 1) {
     # SET SEED FOR REPRODUCIBLE SAMPLING - REQUIRED
     set.seed(42)
-    x[, ind] <- LAPPLY(
+    x[, ind] <- ulapply(
       unique(x[, ind]),
       function(w) {
         rnorm(
@@ -1078,7 +1078,7 @@ cyto_stat_bkde2d <- function(x,
   )
   
   # COMPUTE BANDWIDTH USING PLUGIN METHOD
-  bandwidth <- LAPPLY(
+  bandwidth <- ulapply(
     seq_along(bandwidth), 
     function(z){
       if(.all_na(bandwidth[z])) {
@@ -1120,8 +1120,8 @@ cyto_stat_bkde2d <- function(x,
   h <- bandwidth
   
   # COMPUTE GRID POINTS
-  a <- LAPPLY(limits, "min")
-  b <- LAPPLY(limits, "max")
+  a <- ulapply(limits, "min")
+  b <- ulapply(limits, "max")
   xpts <- seq(
     a[1],
     b[1],
@@ -1329,7 +1329,7 @@ cyto_stat_hex <- function(x,
   if(length(ind) == 1) {
     # SET SEED FOR REPRODUCIBLE SAMPLING - REQUIRED
     set.seed(42)
-    x[, ind] <- LAPPLY(
+    x[, ind] <- ulapply(
       unique(x[, ind]),
       function(w) {
         rnorm(

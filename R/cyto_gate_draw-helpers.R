@@ -43,7 +43,7 @@
   # SUPPORTED GATE TYPES -------------------------------------------------------
   
   # GATE TYPES
-  ind <- LAPPLY(seq_len(length(type)), function(z) {
+  ind <- ulapply(seq_len(length(type)), function(z) {
     if(grepl("^r", type[z], ignore.case = TRUE)) {
       type[z] <<- "rectangle"
       return(TRUE)
@@ -175,7 +175,7 @@
   # ALIAS PER GATE TYPE --------------------------------------------------------
   
   # EXPECTED ALIAS LENGTH PER GATE TYPE
-  N <- LAPPLY(
+  N <- ulapply(
     type, 
     function(z) {
       # Negate already handled above (type set to NA)

@@ -137,9 +137,9 @@ cyto_rebuild <- function(x,
     seq_along(gt),
     function(z) {
       gates <- lapply(gt[[z]], `[[`, "gate")
-      parent <- unique(LAPPLY(gt[[z]], `[[`, "parent"))
-      alias <- unique(LAPPLY(gt[[z]], `[[`, "alias"))
-      type <- unique(LAPPLY(gates, "cyto_class"))
+      parent <- unique(ulapply(gt[[z]], `[[`, "parent"))
+      alias <- unique(ulapply(gt[[z]], `[[`, "alias"))
+      type <- unique(ulapply(gates, "cyto_class"))
       # BOOLEAN GATES - USE LOGICAL INDICES
       if(type %in% "booleanFilter") {
         gates <- structure(

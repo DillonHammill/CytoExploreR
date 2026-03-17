@@ -67,7 +67,7 @@ cyto_gateTemplate.GatingHierarchy <- function(x) {
         # ORDER
         ind <<- c(
           ind,
-          LAPPLY(
+          ulapply(
             seq_along(
               gate
             ),
@@ -98,11 +98,11 @@ cyto_gateTemplate.GatingHierarchy <- function(x) {
         gates,
         recursive = FALSE
       ),
-      names = LAPPLY(gates, "names")
+      names = ulapply(gates, "names")
     )
     # MATCH EACH GATE TO NODE
     order <- order(
-      LAPPLY(
+      ulapply(
         names(gates), 
         function(z){
           min(
@@ -268,7 +268,7 @@ cyto_gateTemplate_apply <- function(x,
     # GATETEMPLATE PER GATINGHIERARCHY
     } else {
       # CHECK GATETEMPLATES - SAME SAMPLES REQUIRED
-      if(!all(LAPPLY(gateTemplate, "cyto_class", "gateTemplate")) |
+      if(!all(ulapply(gateTemplate, "cyto_class", "gateTemplate")) |
          !all(cyto_names(x) %in% names(gateTemplate))) {
         stop(
           paste0(

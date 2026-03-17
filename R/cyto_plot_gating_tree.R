@@ -99,7 +99,7 @@ cyto_plot_gating_tree.GatingHierarchy <- function(x,
   gt <- gh_generate_template(x)
   
   # UNIQUE ALIAS
-  gt$alias_unique <- LAPPLY(seq_len(nrow(gt)), function(z){
+  gt$alias_unique <- ulapply(seq_len(nrow(gt)), function(z){
     cyto_nodes_convert(x,
                        nodes = gt$alias[z],
                        anchor = gt$parent[z],
@@ -107,7 +107,7 @@ cyto_plot_gating_tree.GatingHierarchy <- function(x,
   })
   
   # UNIQUE PARENT
-  gt$parent_unique <- LAPPLY(seq_len(nrow(gt)), function(z){
+  gt$parent_unique <- ulapply(seq_len(nrow(gt)), function(z){
     cyto_nodes_convert(x,
                        nodes = gt$parent[z],
                        path = "auto")
@@ -145,7 +145,7 @@ cyto_plot_gating_tree.GatingHierarchy <- function(x,
       stats <- node_counts$Count/
         node_counts[match(c("root", edges$from), 
                           node_counts$Population), "Count"] * 100
-      stats <- LAPPLY(stats, function(z){.round(z, 2)})
+      stats <- ulapply(stats, function(z){.round(z, 2)})
       stats <- paste(stats, "%")
       
     }
@@ -179,7 +179,7 @@ cyto_plot_gating_tree.GatingHierarchy <- function(x,
   
   # NODE FILL COLOURS
   point_col_alpha <- rep(point_col_alpha, length.out = nrow(nodes))
-  point_fill <- LAPPLY(seq_len(nrow(nodes)), function(z){
+  point_fill <- ulapply(seq_len(nrow(nodes)), function(z){
     adjustcolor(point_col[z], point_col_alpha[z])
   })
   

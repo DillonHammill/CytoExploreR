@@ -402,7 +402,7 @@ cyto_gate_draw <- function(x,
               # NEGATE
             } else {
               # GATES MISSING
-              if(any(LAPPLY(gates, "is.null"))) {
+              if(any(ulapply(gates, "is.null"))) {
                 gate_new <- NULL
               }
               # NEGATE SINGLE GATE
@@ -420,7 +420,7 @@ cyto_gate_draw <- function(x,
             if(is.null(gate_new) & !.all_na(gate)) {
               if(cyto_class(gate, "filters")) {
                 args$gate <- gate[[
-                  LAPPLY(
+                  ulapply(
                     gate,
                     function(z) {
                       z@filterId %in% alias

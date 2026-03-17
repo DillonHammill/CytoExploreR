@@ -648,7 +648,7 @@ cyto_plot <- function(x,
   # ARGUMENTS ------------------------------------------------------------------
   
   # HIST_LAYERS - DATA PREPARED IN .CYTO_PLOT_DATA()
-  args$hist_layers <- LAPPLY(args$x, "length")
+  args$hist_layers <- ulapply(args$x, "length")
   
   # TODO: HANDLE GATES FOR STACKED POINTS
   if(length(args$channels) == 2 & .all_na(overlay) & point_stack) {
@@ -684,11 +684,11 @@ cyto_plot <- function(x,
   }
   
   # TITLE - INHERIT NAMES
-  if(all(LAPPLY(args$title, ".empty"))) {
+  if(all(ulapply(args$title, ".empty"))) {
     # REPEAT
     args$title <- rep("", length(args$x))
     # INHERIT GROUP NAMES
-    args$title <- LAPPLY(
+    args$title <- ulapply(
       seq_along(args$title), 
       function(z){
         paste0(
@@ -702,7 +702,7 @@ cyto_plot <- function(x,
       args$title <- names(args$x)
     }
     # POPULATIONS - SHARED
-    args$title <- LAPPLY(
+    args$title <- ulapply(
       seq_along(args$x), 
       function(z){
         if(length(unique(names(args$x[[z]]))) == 1) {
@@ -727,8 +727,8 @@ cyto_plot <- function(x,
   # LEGEND_TEXT
   if(.all_na(args$legend_text)) {
     # POPULATIONS
-    if(!is.null(LAPPLY(args$x, "names"))) {
-      args$legend_text <- LAPPLY(
+    if(!is.null(ulapply(args$x, "names"))) {
+      args$legend_text <- ulapply(
         args$x, 
         function(z){
           nm <- names(z)
@@ -1018,7 +1018,7 @@ cyto_plot <- function(x,
       
       # LEGEND_TEXT
       if(.all_na(ARGS$legend_text)) {
-        ARGS$legend_text <- LAPPLY(ARGS$x, "cyto_names") 
+        ARGS$legend_text <- ulapply(ARGS$x, "cyto_names") 
       }
       
       # LABEL STATISTICS -------------------------------------------------------
@@ -1137,7 +1137,7 @@ cyto_plot <- function(x,
       lapply(
         names(m[[1]]), 
         function(z){
-          m <- LAPPLY(m, `[[`, z)
+          m <- ulapply(m, `[[`, z)
           names(m) <- rep(NA, length(m))
           return(m)
         }
@@ -1170,7 +1170,7 @@ cyto_plot <- function(x,
   # RETURN RECORDED PLOTS ------------------------------------------------------
   
   # RECORDED PLOTS
-  plots[LAPPLY(plots, "is.null")] <- NULL
+  plots[ulapply(plots, "is.null")] <- NULL
   if(length(plots) == 0){
     plots <- NULL
   }

@@ -43,12 +43,12 @@ cyto_gate_apply <- function(x,
   
   # RECTANGLEGATES TO QUADGATE
   quad_order <- NULL
-  if (length(gate) == 4 & all(LAPPLY(gate, function(z) {
+  if (length(gate) == 4 & all(ulapply(gate, function(z) {
     cyto_class(z, "rectangleGate") & any(grepl("quad", names(attributes(z))))
   }))) {
     # CHANNELS
     chans <- as.character(parameters(gate[[1]]))
-    quad_order <- LAPPLY(gate, function(z) {
+    quad_order <- ulapply(gate, function(z) {
       z@filterId
     })
     gate <- list(.cyto_gate_quad_convert(gate, channels = chans))
@@ -439,7 +439,7 @@ cyto_gate_remove <- function(x,
   # GATINGHIERARCHY | GATINGSET ------------------------------------------------
   
   # ALIAS IN GH | GS
-  gs_alias <- LAPPLY(
+  gs_alias <- ulapply(
     alias,
     function(z) {
       tryCatch(
@@ -522,7 +522,7 @@ cyto_gate_remove <- function(x,
       data.table = FALSE
     )
     # ALIAS
-    gt_alias_rm <- LAPPLY(
+    gt_alias_rm <- ulapply(
       alias,
       function(z) {
         tryCatch(
@@ -547,7 +547,7 @@ cyto_gate_remove <- function(x,
         # PARSE ALIAS
         pops <- unlist(strsplit(as.character(gt$alias[z]), ","))
         # ANCHOR ALIAS
-        LAPPLY(
+        ulapply(
           prnt,
           function(v) {
             cyto_nodes_convert(
@@ -582,7 +582,7 @@ cyto_gate_remove <- function(x,
       parse = FALSE
     )
     # REMOVE ROWS MATCHING ALIAS
-    ind <- LAPPLY(
+    ind <- ulapply(
       gt_alias,
       function(z) {
         any(z %in% gt_alias_rm)
@@ -704,7 +704,7 @@ cyto_gate_rename <- function(x,
         unlist(strsplit(as.character(z), ","))
       }
     )
-    gt_alias <- LAPPLY(
+    gt_alias <- ulapply(
       gt_alias, 
       function(z) {
         lapply(
@@ -885,7 +885,7 @@ cyto_gate_copy <- function(x,
   )
     
   # LOCATE NODES TO COPY IN GATINGTEMPLATE
-  copy_ind <- LAPPLY(
+  copy_ind <- ulapply(
     copy, 
     function(z) {
       m <- NA
@@ -1092,7 +1092,7 @@ cyto_gate_bool <- function(x,
   # LOGIC - STRIP WHITE SPACE
   logic <- lapply(seq_along(logic), function(z){
     logic_to_clean <- logic[z]
-    logic_vector <- LAPPLY(seq_len(nchar(logic_to_clean)), function(z){
+    logic_vector <- ulapply(seq_len(nchar(logic_to_clean)), function(z){
       substr(logic_to_clean, z, z)
     })
     logic_match <- which(grepl("\\||\\&|\\!", logic_vector))
@@ -1100,7 +1100,7 @@ cyto_gate_bool <- function(x,
     if(logic_match[1] != 1){
       logic_match <- c(0, logic_match)
     }
-    logic_split <- LAPPLY(seq_along(logic_match), function(z){
+    logic_split <- ulapply(seq_along(logic_match), function(z){
       # FIRST CHUNK NO OPERATOR
       if(logic_match[z] == 0){
         return(
@@ -1170,7 +1170,7 @@ cyto_gate_bool <- function(x,
     })
     return(logic_split)
   })
-  logic <- LAPPLY(
+  logic <- ulapply(
     logic, 
     function(z){
       paste0(z, collapse = "")
@@ -1182,8 +1182,8 @@ cyto_gate_bool <- function(x,
     logic, 
     function(z){
       p <- unlist(strsplit(z, "\\||\\&|\\!"))
-      p <- p[!LAPPLY(p, ".empty")]
-      LAPPLY(
+      p <- p[!ulapply(p, ".empty")]
+      ulapply(
         p, 
         function(y) {
           cyto_nodes_convert(
@@ -1199,7 +1199,7 @@ cyto_gate_bool <- function(x,
   # PARENT
   if(is.null(parent)){
     # COMMON ANCESTOR
-    parent <- LAPPLY(logic_pop_list, function(pops){
+    parent <- ulapply(logic_pop_list, function(pops){
       cyto_nodes_ancestor(x,
                           nodes = pops)
     })
@@ -1387,7 +1387,7 @@ cyto_gate_extract <- function(x,
             if(cyto_class(gate, "booleanFilter") & bool) {
               logic <- gate@deparse
               pops <- unlist(strsplit(logic, "[^[:alnum:][:space:]]"))
-              pops <- pops[!LAPPLY(pops, ".empty")]
+              pops <- pops[!ulapply(pops, ".empty")]
               # BOOLEAN GATE REFERS TO OTHER POPULATIONS
               if(is.null(
                 tryCatch(
@@ -1405,7 +1405,7 @@ cyto_gate_extract <- function(x,
               }
               # EXTRACT OPERATORS
               ops <- unlist(strsplit(logic, "[[:alnum:][:space:]]"))
-              ops <- ops[!LAPPLY(ops, ".empty")]
+              ops <- ops[!ulapply(ops, ".empty")]
               # EXTRACT GATES
               gts <- structure(
                 lapply(
@@ -1429,7 +1429,7 @@ cyto_gate_extract <- function(x,
         )
         # RECTANGLEGATES BELONG TO QUADGATE?
         quad_ind <- which(
-          LAPPLY(
+          ulapply(
             gates, 
             function(v) {
               cyto_class(v, "rectangleGate") & 
@@ -1470,7 +1470,7 @@ cyto_gate_extract <- function(x,
     gates <- structure(
       lapply(alias, function(x) {
         # ALIAS NODE
-        ind <- LAPPLY(
+        ind <- ulapply(
           seq_len(length(nds)), 
           function(z) {
             if (x %in% nds[[z]]) {
@@ -1490,7 +1490,7 @@ cyto_gate_extract <- function(x,
         } else if(bool) {
           logic <- as.character(parameters(gm)[[1]])
           pops <- unlist(strsplit(logic, "[^[:alnum:][:space:]]"))
-          pops <- pops[!LAPPLY(pops, ".empty")]
+          pops <- pops[!ulapply(pops, ".empty")]
           # BOOLEAN GATE REFERS TO OTHER POPULATIONS
           if(is.null(
             tryCatch(
@@ -1508,7 +1508,7 @@ cyto_gate_extract <- function(x,
           }
           # OPERATORS
           ops <- unlist(strsplit(logic, "[[:alnum:][:space:]]"))
-          ops <- ops[!LAPPLY(ops, ".empty")]
+          ops <- ops[!ulapply(ops, ".empty")]
           # EXTRACT GATES
           gts <- structure(
             lapply(
@@ -1741,7 +1741,7 @@ cyto_gate_edit <- function(x,
   } else {
     # ALIAS MAY INCLUDE NEW NAME FOR BOOLEAN GATE (NEGATE NOW TRUE)
     alias_new <- NULL
-    alias <- LAPPLY(seq_along(alias), function(z){
+    alias <- ulapply(seq_along(alias), function(z){
       pop <- tryCatch(
         cyto_nodes_convert(
           x,
@@ -1803,7 +1803,7 @@ cyto_gate_edit <- function(x,
   # RESTRICT GATINGTEMPLATE
   gt_chunk <- 
     gt[gt$parent == parent & 
-         LAPPLY(
+         ulapply(
            gt$alias, 
            function(z) {
              any(alias %in% unlist(strsplit(z, ",")))
@@ -2084,13 +2084,13 @@ cyto_gate_edit <- function(x,
       
       # TODO: THIS SHOULD BE OBSOLETE NOW CYTO_GATE_DRAW RETURNS ORIGINAL GATES
       # POPULATIONS WITH NEW GATES
-      pops_new <- names(gate_new)[!LAPPLY(gate_new, "is.null")]
+      pops_new <- names(gate_new)[!ulapply(gate_new, "is.null")]
       if(length(pops_new) > 0) {
         gates_gs[[y]][pops_new] <<- gate_new[pops_new]
       }
       
       # # POPULATIONS WITH OLD GATES REQUIRE LABELS
-      # pops_old <- names(gate_new)[LAPPLY(gate_new, "is.null")]
+      # pops_old <- names(gate_new)[ulapply(gate_new, "is.null")]
       # if(length(pops_old) > 0) {
       #   .cyto_gate_draw_label(
       #     cs_list[[1]],
@@ -2442,7 +2442,7 @@ cyto_gate_type <- function(gates) {
     # Multiple gates supplied
   } else if (length(gates) > 1) {
     # Get classes of gates
-    classes <- LAPPLY(gates, function(x) {
+    classes <- ulapply(gates, function(x) {
       cyto_class(x, class = TRUE)
     })
     # All gates are of the same class
@@ -2467,7 +2467,7 @@ cyto_gate_type <- function(gates) {
             types <- "quadrant"
             # Each gate could be either rectangle, interval, threshold, boundary
           } else {
-            types <- LAPPLY(gates, function(x) {
+            types <- ulapply(gates, function(x) {
               # Includes rectangle, interval, threshold and boundary gate_types
               if (length(parameters(x)) == 1) {
                 # Gate in One Dimension
@@ -2494,7 +2494,7 @@ cyto_gate_type <- function(gates) {
             })
           }
         } else {
-          types <- LAPPLY(gates, function(x) {
+          types <- ulapply(gates, function(x) {
             # Includes rectangle, interval, threshold and boundary gate_types
             if (length(parameters(x)) == 1) {
               # Gate in One Dimension
@@ -2540,7 +2540,7 @@ cyto_gate_type <- function(gates) {
       }
       # Not all supplied gates are of the same class - treat separately
     } else {
-      types <- LAPPLY(gates, function(x) {
+      types <- ulapply(gates, function(x) {
         # ELLIPSE
         if (cyto_class(x, "ellipsoidGate")) {
           types <- "ellipse"
@@ -3019,7 +3019,7 @@ cyto_gate_prepare <- function(x,
   
   # PREPARE GATE LIST
   if (cyto_class(x, "list", TRUE)) {
-    if (!all(LAPPLY(x, "cyto_class") %in% c(
+    if (!all(ulapply(x, "cyto_class") %in% c(
       "rectangleGate",
       "polygonGate",
       "ellipsoidGate",
@@ -3108,7 +3108,7 @@ cyto_gate_transform.rectangleGate <- function(x,
   lapply(gate_trans_channels, function(z){
     # TRANSFORM COORDS - WATCH OUT INF COORDS
     if(inverse == FALSE){
-      gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
+      gate_coords[, z] <<- ulapply(gate_coords[,z], function(y){
         if(is.finite(y)){
           trans[[z]]$transform(y)
         }else{
@@ -3116,7 +3116,7 @@ cyto_gate_transform.rectangleGate <- function(x,
         }
       })
     }else{
-      gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
+      gate_coords[, z] <<- ulapply(gate_coords[,z], function(y){
         if(is.finite(y)){
           trans[[z]]$inverse(y)
         }else{
@@ -3161,7 +3161,7 @@ cyto_gate_transform.polygonGate <- function(x,
   lapply(gate_trans_channels, function(z){
     # TRANSFORM COORDS - WATCH OUT INF COORDS
     if(inverse == FALSE){
-      gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
+      gate_coords[, z] <<- ulapply(gate_coords[,z], function(y){
         if(is.finite(y)){
           trans[[z]]$transform(y)
         }else{
@@ -3169,7 +3169,7 @@ cyto_gate_transform.polygonGate <- function(x,
         }
       })
     }else{
-      gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
+      gate_coords[, z] <<- ulapply(gate_coords[,z], function(y){
         if(is.finite(y)){
           trans[[z]]$inverse(y)
         }else{
@@ -3319,7 +3319,7 @@ cyto_gate_transform.quadGate <- function(x,
   lapply(gate_trans_channels, function(z){
     # TRANSFORM COORDS - WATCH OUT INF COORDS
     if(inverse == FALSE){
-      gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
+      gate_coords[, z] <<- ulapply(gate_coords[,z], function(y){
         if(is.finite(y)){
           trans[[z]]$transform(y)
         }else{
@@ -3327,7 +3327,7 @@ cyto_gate_transform.quadGate <- function(x,
         }
       })
     }else{
-      gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
+      gate_coords[, z] <<- ulapply(gate_coords[,z], function(y){
         if(is.finite(y)){
           trans[[z]]$inverse(y)
         }else{

@@ -30,7 +30,7 @@
   
   # CALLED WITHIN CYTO_PLOT METHOD - VECTOR OF LENGTH NP
   if (missing(layers)) {
-    L <- LAPPLY(x$x, "length")
+    L <- ulapply(x$x, "length")
   # CALLED WITHIN CYTO_PLOT WRAPPER
   } else {
     if (length(layers) != NP) {
@@ -53,7 +53,7 @@
   } else if (length(x$gate) != NP) {
     stop("Gates must be supplied per plot to split cyto_plot arguments.")
   }
-  GC <- LAPPLY(x$gate, function(z) {
+  GC <- ulapply(x$gate, function(z) {
     if (.all_na(z)) {
       return(0)
     } else {
@@ -86,8 +86,8 @@
         }
       }
     })
-    GP <- unlist(LAPPLY(GP, "sum"))
-    GNP <- unlist(LAPPLY(GNP, "sum"))
+    GP <- unlist(ulapply(GP, "sum"))
+    GNP <- unlist(ulapply(GNP, "sum"))
   # NO GATES
   } else {
     GP <- rep(1, NP)
@@ -250,7 +250,7 @@
     # ARGUMENT EXISTS
     if (arg %in% names(args)) {
       # DEFAULT FOR ARGUMENT
-      if (arg == "label_text" & !all(LAPPLY(x[[z]], ".empty"))) {
+      if (arg == "label_text" & !all(ulapply(x[[z]], ".empty"))) {
         arg_default <- NA
       } else {
         arg_default <- args[[arg]]
@@ -315,21 +315,21 @@
         )
       )
       # PLOT ARGUMENTS - COMPLETE/INCOMPLETE/MISSING
-      arg_complete <- which(LAPPLY(arg_split, function(z) {
+      arg_complete <- which(ulapply(arg_split, function(z) {
         ind <- z == "*-*"
         if(any(is.na(ind))){
           ind[is.na(ind)] <- FALSE
         }
         return(!any(ind))
       }))
-      arg_incomplete <- which(LAPPLY(arg_split, function(z) {
+      arg_incomplete <- which(ulapply(arg_split, function(z) {
         ind <- z == "*-*"
         if(any(is.na(ind))){
           ind[is.na(ind)] <- FALSE
         }
         return(any(ind) & !all(ind))
       }))
-      arg_missing <- which(LAPPLY(arg_split, function(z) {
+      arg_missing <- which(ulapply(arg_split, function(z) {
         ind <- z == "*-*"
         if(any(is.na(ind))){
           ind[is.na(ind)] <- FALSE
@@ -346,7 +346,7 @@
         lapply(arg_incomplete, function(z) {
           # REPEAT ARGUMENT (CHARACTERISTIC - MULTI-LEVEL)
           if(length(arg_split[[z]]) > arg_default_length &
-             any(LAPPLY(c("fill_alpha",
+             any(ulapply(c("fill_alpha",
                           "col_alpha",
                           "line_", # miss contour_lines
                           "shape",
@@ -434,7 +434,7 @@
           x[[arg]], 
           function(w){
             if(is.vector(w) & !is.list(w)) {
-              empty_ind <- which(LAPPLY(w, ".empty"))
+              empty_ind <- which(ulapply(w, ".empty"))
               if(length(empty_ind) == 0) {
                 return(type.convert(w, as.is = TRUE))
               } else if(length(empty_ind) == length(w)) {

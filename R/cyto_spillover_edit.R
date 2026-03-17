@@ -266,7 +266,7 @@ cyto_spillover_edit <- function(x,
     )
     # NO SPILLOVER MATRIX FOUND
     if(!is.null(spillover)) {
-      spillover <- spillover[!LAPPLY(spillover, "is.null")][[1]]
+      spillover <- spillover[!ulapply(spillover, "is.null")][[1]]
       # TEMPLATE SPILLOVER MATRIX
     } else {
       spillover <- matrix(
@@ -816,7 +816,7 @@ compPlotServer <- function(id, ID_comp_trans = reactive(NULL), NIL_comp_trans = 
       if(!is.null(nil_data)) {
         cf_list <- structure(list(ID_comp_trans()[[1]], nil_data[[1]]),
                              names = c(cyto_names(ID_comp_trans()), cyto_names(nil_data)))
-        cs <- cytoset(cf_list[!LAPPLY(cf_list, "is.null")])
+        cs <- cytoset(cf_list[!ulapply(cf_list, "is.null")])
       } else {
         cs <- ID_comp_trans()
       }

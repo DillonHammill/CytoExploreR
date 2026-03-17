@@ -101,7 +101,7 @@ cyto_plot_contour <- function(x,
   } else if(cyto_class(x, "cyto_plot")) {
     args <- x
   # CHECK LISTS
-  } else if(!all(LAPPLY(x, cyto_class, "flowSet"))) {
+  } else if(!all(ulapply(x, cyto_class, "flowSet"))) {
     stop("'x' must be a list of cytosets!")
   }
   

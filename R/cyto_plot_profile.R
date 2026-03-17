@@ -246,9 +246,9 @@ cyto_plot_profile <- function(x,
     # CHANNEL ORDER
     if(grepl("^c", order, ignore.case = TRUE)) {
       # SINGLE LAYER
-      if(all(LAPPLY(x, "length") == 1) | !.all_na(overlay)) {
+      if(all(ulapply(x, "length") == 1) | !.all_na(overlay)) {
         header <- rep(
-          LAPPLY(x, "names"), 
+          ulapply(x, "names"), 
           each = pg
         )
       # MULTIPLE LAYERS
@@ -350,7 +350,7 @@ cyto_plot_profile <- function(x,
             }
           )
           # PREPARE RECORDED PLOTS
-          p[LAPPLY(p, "is.null")] <- NULL
+          p[ulapply(p, "is.null")] <- NULL
           return(p)
         }
       ),
@@ -423,7 +423,7 @@ cyto_plot_profile <- function(x,
             }
           )
           # PREPARE RECORDED PLOTS
-          p[LAPPLY(p, "is.null")] <- NULL
+          p[ulapply(p, "is.null")] <- NULL
           return(p)
         }
       ),
@@ -432,7 +432,7 @@ cyto_plot_profile <- function(x,
   }
   
   # FORMAT RECORDED PLOTS
-  plots[LAPPLY(plots, "is.null")] <- NULL
+  plots[ulapply(plots, "is.null")] <- NULL
   if(length(plots) == 0) {
     plots <- NULL
   }

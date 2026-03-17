@@ -274,7 +274,7 @@ cyto_panels_merge <- function(x,
   
   # COMPUTE MEAN EVENTS PER GROUP
   if(is.null(events)) {
-    events <- LAPPLY(
+    events <- ulapply(
       x,
       function(z) {
         ceiling(
@@ -307,7 +307,7 @@ cyto_panels_merge <- function(x,
         # GROUP PANEL DETAILS
         pd_group <- cyto_details(y)
         # BACKBONE CHANNELS
-        backbone_channels <- LAPPLY(
+        backbone_channels <- ulapply(
           channels,
           function(v) {
             # EMPTY
@@ -498,7 +498,7 @@ cyto_panels_merge <- function(x,
 
   # POOL SAMPLES - MATCHING PANELS
   if(pool) {
-    if(all(LAPPLY(x, function(z){
+    if(all(ulapply(x, function(z){
       setequal(cyto_channels(x[[1]]),
                cyto_channels(z))
     }))) {

@@ -284,10 +284,10 @@ cyto_plot_explore <- function(x,
     } else {
       header <- rep(
         unname(
-          LAPPLY(
+          ulapply(
             channels_x, 
             function(z){
-              LAPPLY(
+              ulapply(
                 channels_y,
                 function(v) {
                   if(v == z) {
@@ -439,7 +439,7 @@ cyto_plot_explore <- function(x,
                   }
                 )
                 # PREPARE PLOTS
-                p[LAPPLY(p, "is.null")] <- NULL
+                p[ulapply(p, "is.null")] <- NULL
                 p <- lapply(p, `[[`, 1)
                 return(p)
               }
@@ -510,7 +510,7 @@ cyto_plot_explore <- function(x,
                   names = names(x)
                 )
                 # PREPARE PLOTS
-                p[LAPPLY(p, "is.null")] <- NULL
+                p[ulapply(p, "is.null")] <- NULL
                 p <- lapply(p, `[[`, 1)
                 return(p)
               }
@@ -524,7 +524,7 @@ cyto_plot_explore <- function(x,
   }
   
   # FORMAT RECORDED PLOTS
-  plots[LAPPLY(plots, "is.null")] <- NULL
+  plots[ulapply(plots, "is.null")] <- NULL
   if(length(plots) == 0) {
     plots <- NULL
   }

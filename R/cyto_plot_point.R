@@ -115,7 +115,7 @@ cyto_plot_point <- function(x,
   } else if(cyto_class(x, "cyto_plot")) {
     args <- x
   # CHECK LISTS
-  } else if(!all(LAPPLY(x, cyto_class, "flowSet"))) {
+  } else if(!all(ulapply(x, cyto_class, "flowSet"))) {
     stop("'x' must be a list of cytosets!")
   }
   
@@ -444,7 +444,7 @@ cyto_plot_point <- function(x,
           if(length(ind) == 1 & .all_na(args$hex[[z]]$x)) {
             # SET SEED FOR REPRODUCIBLE SAMPLING - REQUIRED
             set.seed(42)
-            exprs[, ind] <- LAPPLY(
+            exprs[, ind] <- ulapply(
               unique(exprs[, ind]),
               function(w) {
                 rnorm(

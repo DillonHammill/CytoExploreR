@@ -167,7 +167,7 @@ cyto_transformers_define <- function(x,
       )
     }
     # CHECK TYPE FORMAT
-    if(!all(LAPPLY(type, function(w){
+    if(!all(ulapply(type, function(w){
       cyto_class(w, "list", TRUE) & length(w) == 2
     }))) {
       stop(

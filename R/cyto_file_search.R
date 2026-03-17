@@ -71,7 +71,7 @@ cyto_file_search <- function(x,
   # FILES SUPPLIED
   } else {
     ind <- which(
-      LAPPLY(
+      ulapply(
         files,
         "file_exists",
         error = FALSE
@@ -131,7 +131,7 @@ cyto_file_search <- function(x,
       names = files
     )
     # RETURN DATA
-    files <- files[!LAPPLY(files, "is.null")]
+    files <- files[!ulapply(files, "is.null")]
   }
   
   # NO FILES FOUND

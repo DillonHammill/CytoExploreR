@@ -636,7 +636,7 @@
   )@clusters
   
   # PREPARE CLUSTER LABELS
-  res <- LAPPLY(
+  res <- ulapply(
     seq_along(res),
     function(z) {
       cl <- rep(

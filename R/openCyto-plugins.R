@@ -160,7 +160,7 @@
       )
       # WE COULD ALSO PASS GROUP NAMES HERE
       ind <- names(grps)[
-        LAPPLY(
+        ulapply(
           grps,
           function(grp) {
             all(cyto_names(fs) %in% c(rownames(grp), grp$name))
@@ -290,7 +290,7 @@
   
   # WE COULD ALSO PASS GROUP NAMES HERE
   grp_ind <- names(grps)[
-    LAPPLY(
+    ulapply(
       grps,
       function(grp) {
         all(cyto_names(fs) %in% c(rownames(grp), grp$name))

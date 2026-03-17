@@ -722,7 +722,7 @@ cyto_spillover_compute <- function(x,
                   names = pops
                 )
                 # REMOVE MISSING GATES
-                gates[LAPPLY(gates, "is.null")] <- NULL
+                gates[ulapply(gates, "is.null")] <- NULL
                 if(length(gates) == 0) {
                   gates <- NA
                 }
@@ -1086,7 +1086,7 @@ cyto_spillover_compute <- function(x,
       # DETECTORS WITH DUPLICATE CONTROLS
       detectors <- names(cnt)[cnt > 0]
       # CONTROLS TO REMOVE
-      pops_rm <- LAPPLY(
+      pops_rm <- ulapply(
         detectors,
         function(detector) {
           # LOCATE CONTROLS FOR THE SAME DETECTOR
