@@ -63,7 +63,7 @@
 #' @param ... not in use.
 #'
 #' @importFrom flowCore exprs
-#' @importFrom graphics par rasterImage points
+#' @importFrom graphics par rasterImage points segments
 #' @importFrom grDevices col2rgb dev.size
 #' @importFrom stats rnorm dist
 #'
@@ -133,38 +133,29 @@ cyto_plot_point <- function(x,
     "point_bins",
     names(args)[grepl("contour_", names(args))]
   )
-  lapply(
-    layer_args,
-    function(z) {
-      args[[z]] <<- rep(args[[z]], length.out = length(args$x))
-    }
-  )
+  for(z in layer_args) {
+    args[[z]] <- rep(args[[z]], length.out = length(args$x))
+  }
   
   # PREPARE DATA ---------------------------------------------------------------
-  
+
   # TODO: hexbin can be on any layer
   # TODO: use bkde2d for all point shapes except hexbin
   # TODO: colour hexbins by other parameters - average?
   # TODO: can we use hexbins for contour lines?
-  
+
+  # CACHE PLOT LIMITS
+  usr <- .par("usr")[[1]]
+  usr_xlim <- usr[1:2]
+  usr_ylim <- usr[3:4]
+
+  # PRE-COMPUTE PER-LAYER FLAGS
+  is_hex <- args$point_shape %in% "hex"
+  is_size_list <- vapply(args$point_size, is.list, logical(1))
+
   # INITIALIZE HEXBIN
-  args$hex <- rep(
-    list(
-      list(
-        x = NA,
-        y = NA,
-        cell = NA,
-        id = NA,
-        counts = NA,
-        width = NA,
-        height = NA,
-        density = NA,
-        coords = NA
-      )
-    ),
-    length(args$x)
-  )
-  
+  args$hex <- vector("list", length(args$x))
+
   # INITIALIZE BKDE2D - BKDE2D MAY BE PRE-COMPUTED
   if(!"bkde2d" %in% names(args)) {
     args$bkde2d <- rep(
@@ -178,127 +169,124 @@ cyto_plot_point <- function(x,
       length(args$x)
     )
   }
-  
+
   # HEXBIN | BKDE2D | SORT | SIZE
-  lapply(
-    seq_along(args$x),
-    function(z) {
-      # HEXBIN
-      hex <- list(
-        x = NA,
-        y = NA,
-        cell = NA,
-        id = NA,
-        counts = NA,
-        width = NA,
-        height = NA,
-        density = NA,
-        coords = NA
-      )
-      if(args$point_shape[z] %in% "hex") {
-        hex <- cyto_apply(
-          args$x[[z]],
-          "cyto_stat_hex",
-          input = "matrix",
-          channels = args$channels,
-          copy = FALSE,
-          simplify = FALSE,
-          bins = args$point_bins[z],
-          smooth = args$point_col_smooth,
-          limits = list(
-            .par("usr")[[1]][1:2],
-            .par("usr")[[1]][3:4]
-          ),
-          inverse = FALSE
-        )[[1]]
+  for(z in seq_along(args$x)) {
+    # HEXBIN
+    hex <- list(
+      x = NA,
+      y = NA,
+      cell = NA,
+      id = NA,
+      counts = NA,
+      width = NA,
+      height = NA,
+      density = NA,
+      coords = NA
+    )
+    if(is_hex[z]) {
+      hex <- cyto_apply(
+        args$x[[z]],
+        "cyto_stat_hex",
+        input = "matrix",
+        channels = args$channels,
+        copy = FALSE,
+        simplify = FALSE,
+        bins = args$point_bins[z],
+        smooth = args$point_col_smooth,
+        limits = list(
+          usr_xlim,
+          usr_ylim
+        ),
+        inverse = FALSE
+      )[[1]]
+    }
+    args$hex[[z]] <- hex
+    # BKDE2D
+    if(.all_na(unlist(args$point_col[z])) & .all_na(args$bkde2d[[z]]$bkde)) {
+      args$bkde2d[[z]] <- cyto_apply(
+        args$x[[z]],
+        "cyto_stat_bkde2d",
+        input = "matrix",
+        channels = args$channels,
+        limits = list(
+          usr_xlim,
+          usr_ylim
+        ),
+        smooth = args$point_col_smooth,
+        bins = args$point_bins[z],
+        copy = FALSE,
+        simplify = FALSE,
+        inverse = FALSE
+      )[[1]]
+    }
+    # SORT BY MARKER EXPRESSION
+    sort_by <- NULL
+    if(!is_hex[z] & args$point_col[z] %in%
+      c(cyto_channels(args$x[[1]]), cyto_markers(args$x[[1]]))) {
+       sort_by <- "col"
+    }
+    # SORT BY SIZE
+    if(is_size_list[z]) {
+      sort_by <- c(sort_by, "size")
+      # CHANNEL + SCALING FACTOR
+      if(!is.null(names(args$point_size[z])) &
+         length(args$point_size[[z]]) == 1) {
+        fct <- args$point_size[[z]]
+        args$point_size[[z]] <- cyto_exprs(
+          args$x[[z]][[1]],
+          channels = names(args$point_size[z]),
+          drop = TRUE
+        )
+        args$point_size[[z]] <- (args$point_size[[z]]/sum(args$point_size[[z]])) *
+          fct
       }
-      args$hex[[z]] <<- hex
-      # BKDE2D
-      if(.all_na(unlist(args$point_col[z])) & .all_na(args$bkde2d[[z]]$bkde)) {
-        args$bkde2d[[z]] <<- cyto_apply(
-          args$x[[z]],
-          "cyto_stat_bkde2d",
-          input = "matrix",
-          channels = args$channels,
-          limits = list(
-            .par("usr")[[1]][1:2],
-            .par("usr")[[1]][3:4]
-          ),
-          smooth = args$point_col_smooth,
-          bins = args$point_bins[z],
-          copy = FALSE,
-          simplify = FALSE,
-          inverse = FALSE
-        )[[1]]
-      }
-      # SORT BY MARKER EXPRESSION
-      sort_by <- NULL
-      if(!args$point_shape[z] %in% "hex" & args$point_col[z] %in% 
-        c(cyto_channels(args$x[[1]]), cyto_markers(args$x[[1]]))) {
-         sort_by <- "col"
-      }
-      # SORT BY SIZE
-      if(cyto_class(args$point_size[z], "list", TRUE)) {
-        sort_by <- c(sort_by, "size")
-        # CHANNEL + SCALING FACTOR
-        if(!is.null(names(args$point_size[z])) & 
-           length(args$point_size[[z]]) == 1) {
-          fct <- args$point_size[[z]]
-          args$point_size[[z]] <<- cyto_exprs(
-            args$x[[z]][[1]],
-            channels = names(args$point_size[z]),
+    }
+    # NOTE: SORTING WON'T WORK FOR SAMPLE-ID AS JITTERING DONE LATER
+    # SORTING REQUIRED
+    if(length(sort_by) > 0) {
+      # TWO WAY SORT - SIZE & COLOUR
+      if(length(sort_by) == 2) {
+        ind <- order(
+          -args$point_size[[z]],
+          cyto_exprs(
+            args$x[[z]],
+            channels = args$point_col[z],
             drop = TRUE
-          )
-          args$point_size[[z]] <<- (args$point_size[[z]]/sum(args$point_size[[z]])) *
-            fct
-        }
-      }
-      # NOTE: SORTING WON'T WORK FOR SAMPLE-ID AS JITTERING DONE LATER
-      # SORTING REQUIRED
-      if(length(sort_by) > 0) {
-        # TWO WAY SORT - SIZE & COLOUR
-        if(length(sort_by) == 2) {
+          )[[1]]
+        )
+        # SINGLE WAY SORT
+      } else {
+        # SIZE
+        if(sort_by %in% "size") {
           ind <- order(
-            -args$point_size[[z]],
+            -args$point_size[[z]]
+          )
+          # COLOUR
+        } else {
+          ind <- order(
             cyto_exprs(
               args$x[[z]],
               channels = args$point_col[z],
               drop = TRUE
             )[[1]]
           )
-          # SINGLE WAY SORT
-        } else {
-          # SIZE
-          if(sort_by %in% "size") {
-            ind <- order(
-              -args$point_size[[z]]
-            )
-            # COLOUR
-          } else {
-            ind <- order(
-              cyto_exprs(
-                args$x[[z]],
-                channels = args$point_col[z],
-                drop = TRUE
-              )[[1]]
-            )
-          }
         }
-        # SORT EVENTS - COPY REQUIRED
-        args$x[[z]] <<- cyto_copy(args$x[[z]])
-        cyto_exprs(args$x[[z]]) <<- list(
-          cyto_exprs(args$x[[z]], drop = FALSE)[[1]][
-            ind, , drop = FALSE
-          ]
-        )
-        # SORT POINT_SIZE - POINT_COL HANDLED LATER
-        if(cyto_class(args$point_size[z], "list", TRUE)) {
-          args$point_size[[z]] <<- args$point_size[[z]][ind]
-        }
-        rm(ind)
       }
+      # SORT EVENTS - COPY REQUIRED
+      args$x[[z]] <- cyto_copy(args$x[[z]])
+      cyto_exprs(args$x[[z]]) <- list(
+        cyto_exprs(args$x[[z]], drop = FALSE)[[1]][
+          ind, , drop = FALSE
+        ]
+      )
+      # SORT POINT_SIZE - POINT_COL HANDLED LATER
+      if(is_size_list[z]) {
+        args$point_size[[z]] <- args$point_size[[z]][ind]
+      }
+      rm(ind)
     }
-  )
+  }
   
   # TODO: SORT OUT POINT_COL FOR HEXBINS & BKDE2D PRE-COMPUTED FORMAT
   
@@ -309,11 +297,6 @@ cyto_plot_point <- function(x,
     ".cyto_plot_point_col",
     args
   )
-  
-  # GRAPHICAL PARAMETERS -------------------------------------------------------
-  
-  # PLOT LIMITS
-  usr <- .par("usr")[[1]]
   
   # FAST PLOTTING --------------------------------------------------------------
   
@@ -331,223 +314,201 @@ cyto_plot_point <- function(x,
   # POINT & CONTOUR LINES LAYERS -----------------------------------------------
   
   # ADD POINTS & CONTOURS
-  lapply(
-    seq_along(args$x),
-    function(z) {
-      # EXTRACT MATRIX
-      exprs <- cyto_data_extract(
-        args$x[[z]],
-        format = "matrix",
-        copy = FALSE
-      )[[1]][[1]]
-      # SOM MST TREE - BASE LAYER ONLY
-      if(z == 1 & cyto_som_check(args$x[[z]])) {
-        # MST CHANNELS REQUIRED
-        if(all(grepl("MST", args$channels, ignore.case = TRUE))) {
-          # IGRAPH REQUIRED -> REBUILD GRAPH (EDGELIST REQUIRED)
-          cyto_require(
-            "igraph",
-            source = "CRAN"
+  for(z in seq_along(args$x)) {
+    # EXTRACT MATRIX
+    exprs <- cyto_data_extract(
+      args$x[[z]],
+      format = "matrix",
+      copy = FALSE
+    )[[1]][[1]]
+    # SOM MST TREE - BASE LAYER ONLY
+    if(z == 1 & cyto_som_check(args$x[[z]])) {
+      # MST CHANNELS REQUIRED
+      if(all(grepl("MST", args$channels, ignore.case = TRUE))) {
+        # IGRAPH REQUIRED -> REBUILD GRAPH (EDGELIST REQUIRED)
+        cyto_require(
+          "igraph",
+          source = "CRAN"
+        )
+        # TODO: MAYBE ALL USED CHANNELS SHOULD BE ASSIGNED AS MARKERS IN CYTO_SOM()
+        # DISTANCE MATRIX - ANY -A|-H|-W CHANNELS INCLUDED
+        d <- as.matrix(
+          dist(
+            cyto_stat_scale(
+              exprs[, colnames(exprs)[
+                grepl("\\-H$|\\-W$|\\-A$", colnames(exprs))
+              ], drop = FALSE],
+              type = "range"
+            ),
+            method = "euclidean"
           )
-          # TODO: MAYBE ALL USED CHANNELS SHOULD BE ASSIGNED AS MARKERS IN CYTO_SOM()
-          # DISTANCE MATRIX - ANY -A|-H|-W CHANNELS INCLUDED
-          d <- as.matrix(
-            dist(
-              cyto_stat_scale(
-                exprs[, colnames(exprs)[
-                  grepl("\\-H$|\\-W$|\\-A$", colnames(exprs))
-                ], drop = FALSE],
-                type = "range"
-              ),
-              method = "euclidean"
+        )
+        # GRAPH
+        g <- cyto_func_call(
+          "igraph::graph.adjacency",
+          list(
+            d,
+            mode = "undirected",
+            weighted = TRUE
+          )
+        )
+        # MST
+        mst <- cyto_func_call(
+          "igraph::minimum.spanning.tree",
+          list(
+            g
+          )
+        )
+        # WEIGHTS
+        w <- cyto_func_call(
+          "igraph::edge.attributes",
+          list(
+            mst
+          )
+        )$weight
+        w <- w/mean(w)
+        # UPDATE WEIGHTS
+        cyto_func_call(
+          "igraph::edge.attributes<-",
+          list(
+            graph = mst,
+            value = list(
+              weight = w
             )
           )
-          # GRAPH
-          g <- cyto_func_call(
-            "igraph::graph.adjacency",
-            list(
-              d,
-              mode = "undirected",
-              weighted = TRUE
-            )
-          )
-          # MST
-          mst <- cyto_func_call(
-            "igraph::minimum.spanning.tree",
-            list(
-              g
-            )
-          )
-          # WEIGHTS
-          w <- cyto_func_call(
-            "igraph::edge.attributes",
+        )
+        # GRAPH EDGELIST
+        edges <- as.data.frame(
+          cyto_func_call(
+            "igraph::as_edgelist",
             list(
               mst
             )
-          )$weight
-          w <- w/mean(w)
-          # UPDATE WEIGHTS
-          cyto_func_call(
-            "igraph::edge.attributes<-",
-            list(
-              graph = mst,
-              value = list(
-                weight = w
-              )
-            )
-          )
-          # GRAPH EDGELIST
-          edges <- as.data.frame(
-            cyto_func_call(
-              "igraph::as_edgelist",
-              list(
-                mst
-              )
-            ),
-            stringsAsFactors = FALSE
-          )
-          # LAYOUT FROM SOM
-          layout <- exprs[, args$channels, drop = FALSE]
-          # LINE COORDINATES
-          lines <- lapply(
-            seq_len(nrow(edges)), 
-            function(w) {
-              node_ids <- as.numeric(edges[w, ])
-              c(layout[node_ids[1], 1],
-                layout[node_ids[1], 2],
-                layout[node_ids[2], 1],
-                layout[node_ids[2], 2]
-              )
-            }
-          )
-          lines <- do.call("rbind", lines)
-          colnames(lines) <- c("x", "y", "xend", "yend")
-          # LINES - NOT CUSTOMISABLE (STANDARD LINES)
-          lapply(
-            seq_len(nrow(lines)),
-            function(w) {
-              lines(
-                x = lines[w, c("x", "xend")],
-                y = lines[w, c("y", "yend")]
-              )
-            }
-          )
-        }
+          ),
+          stringsAsFactors = FALSE
+        )
+        # LAYOUT FROM SOM
+        layout <- exprs[, args$channels, drop = FALSE]
+        # LINE COORDINATES - VECTORIZED
+        edge_from <- as.numeric(edges[, 1])
+        edge_to <- as.numeric(edges[, 2])
+        # LINES - NOT CUSTOMISABLE (STANDARD LINES)
+        segments(
+          x0 = layout[edge_from, 1],
+          y0 = layout[edge_from, 2],
+          x1 = layout[edge_to, 1],
+          y1 = layout[edge_to, 2]
+        )
       }
-      # POINTS - SKIP NO EVENTS
-      if(!is.null(nrow(exprs))) {
-        # POINTS - BYPASS EMPTY CYTOFRAME
-        if(nrow(exprs) != 0) {
-          # JITTER SAMPLE-ID BARCODES
-          ind <- grep("^Sample\\-ID$", colnames(exprs))
-          # POINT FOR HEXBINS ALREADY JITTERED ABOVE
-          if(length(ind) == 1 & .all_na(args$hex[[z]]$x)) {
-            # SET SEED FOR REPRODUCIBLE SAMPLING - REQUIRED
-            set.seed(42)
-            exprs[, ind] <- ulapply(
-              unique(exprs[, ind]),
-              function(w) {
-                rnorm(
-                  n = length(
-                    exprs[exprs[, ind] == w, ind]
-                  ),
-                  mean = w,
-                  sd = 0.1
-                )
+    }
+    # POINTS - SKIP NO EVENTS
+    if(!is.null(nrow(exprs))) {
+      # POINTS - BYPASS EMPTY CYTOFRAME
+      if(nrow(exprs) != 0) {
+        # JITTER SAMPLE-ID BARCODES
+        sid_ind <- grep("^Sample\\-ID$", colnames(exprs))
+        # POINT FOR HEXBINS ALREADY JITTERED ABOVE
+        if(length(sid_ind) == 1 & .all_na(args$hex[[z]]$x)) {
+          # SET SEED FOR REPRODUCIBLE SAMPLING - REQUIRED
+          set.seed(42)
+          exprs[, sid_ind] <- ave(
+            exprs[, sid_ind],
+            exprs[, sid_ind],
+            FUN = function(w) {
+              rnorm(length(w), mean = w[1], sd = 0.1)
+            }
+          )
+          # RESET SEED
+          rm(list = ".Random.seed", envir = globalenv())
+        }
+        # HEXBIN
+        if(!.all_na(args$hex[[z]]$x)) {
+          n <- length(args$hex[[z]]$x)
+          n7 <- rep.int(7, n)
+          polygon(
+            x = rep.int(args$hex[[z]]$coords$x, n) +
+              rep.int(args$hex[[z]]$x, n7),
+            y = rep.int(args$hex[[z]]$coords$y, n) +
+              rep.int(args$hex[[z]]$y, n7),
+            col = args$point_col[[z]],
+            border = args$point_col[[z]]
+          )
+        # POINTS
+        } else {
+          # PLOT DEFAULT POINTS
+          if (!args$point_fast) {
+            # CONVENTIONAL PLOTTING
+            points(
+              x = exprs[, args$channels[1]],
+              y = exprs[, args$channels[2]],
+              pch = args$point_shape[z],
+              cex = if(is_size_list[z]) {
+                args$point_size[[z]]
+              } else {
+                args$point_size[z]
+              },
+              col = if(args$point_shape[z] %in% c(21:25)) {
+                "black"
+              } else {
+                args$point_col[[z]]
+              },
+              bg = if(args$point_shape[z] %in% c(21:25)) {
+                args$point_col[[z]]
+              } else {
+                "black"
               }
             )
-            # RESET SEED
-            rm(list=".Random.seed", envir=globalenv())
-          }
-          # HEXBIN
-          if(!.all_na(args$hex[[z]]$x)) {
-            n <- length(args$hex[[z]]$x)
-            n7 <- rep.int(7, n)
-            polygon(
-              x = rep.int(args$hex[[z]]$coords$x, n) + 
-                rep.int(args$hex[[z]]$x, n7),
-              y = rep.int(args$hex[[z]]$coords$y, n) + 
-                rep.int(args$hex[[z]]$y, n7),
-              col = args$point_col[[z]],
-              border = args$point_col[[z]]
-            )
-          # POINTS
+            # SCATTERMORE POINTS - LACK PCH CONTROL
           } else {
-            # PLOT DEFAULT POINTS
-            if (!args$point_fast) {
-              # CONVENTIONAL PLOTTING
-              points(
-                x = exprs[, args$channels[1]],
-                y = exprs[, args$channels[2]],
-                pch = args$point_shape[z],
-                cex = if(cyto_class(args$point_size, "list", TRUE)) {
-                  args$point_size[[z]]
-                } else {
-                  args$point_size[z]
-                },
-                col = if(args$point_shape[z] %in% c(21:25)) {
-                  "black"
-                } else {
-                  args$point_col[[z]]
-                },
-                bg = if(args$point_shape[z] %in% c(21:25)) {
-                  args$point_col[[z]]
-                } else {
-                  "black"
-                }
-              )
-              # SCATTERMORE POINTS - LACK PCH CONTROL
-            } else {
-              # RASTER
-              rasterImage(
-                cyto_func_call(
-                  "scattermore::scattermore",
-                  list(
-                    xy = cbind(
-                      exprs[, args$channels[1]], 
-                      exprs[, args$channels[2]]
-                    ),
-                    size = dev_size,
-                    xlim = usr[1:2],
-                    ylim = usr[3:4],
-                    cex = if(cyto_class(args$point_size, "list", TRUE)){
-                      0.5 * args$point_size[[z]][1]
-                    }else {
-                      0.5 * args$point_size[z]
-                    },
-                    rgba = col2rgb(
-                      args$point_col[[z]], 
-                      alpha = TRUE
-                    ),
-                    output.raster = TRUE
-                  )
-                ),
-                xleft = usr[1],
-                xright = usr[2],
-                ybottom = usr[3],
-                ytop = usr[4]
-              )
-            }
-          }
-          # CONTOUR_LINES
-          if (args$contour_lines[z] != 0) {
-            cyto_plot_contour(
-              args$x[[z]],
-              channels = args$channels,
-              events = 1,
-              contour_bins = args$point_bins[z],
-              contour_lines = args$contour_lines[z],
-              contour_line_type = args$contour_line_type[z],
-              contour_line_width = args$contour_line_width[z],
-              contour_line_col = args$contour_line_col[z],
-              contour_line_alpha = args$contour_line_alpha[z],
-              bkde2d = args$bkde2d[[z]]
+            # RASTER
+            rasterImage(
+              cyto_func_call(
+                "scattermore::scattermore",
+                list(
+                  xy = cbind(
+                    exprs[, args$channels[1]],
+                    exprs[, args$channels[2]]
+                  ),
+                  size = dev_size,
+                  xlim = usr_xlim,
+                  ylim = usr_ylim,
+                  cex = if(is_size_list[z]) {
+                    0.5 * args$point_size[[z]][1]
+                  } else {
+                    0.5 * args$point_size[z]
+                  },
+                  rgba = col2rgb(
+                    args$point_col[[z]],
+                    alpha = TRUE
+                  ),
+                  output.raster = TRUE
+                )
+              ),
+              xleft = usr[1],
+              xright = usr[2],
+              ybottom = usr[3],
+              ytop = usr[4]
             )
           }
+        }
+        # CONTOUR_LINES
+        if (args$contour_lines[z] != 0) {
+          cyto_plot_contour(
+            args$x[[z]],
+            channels = args$channels,
+            events = 1,
+            contour_bins = args$point_bins[z],
+            contour_lines = args$contour_lines[z],
+            contour_line_type = args$contour_line_type[z],
+            contour_line_width = args$contour_line_width[z],
+            contour_line_col = args$contour_line_col[z],
+            contour_line_alpha = args$contour_line_alpha[z],
+            bkde2d = args$bkde2d[[z]]
+          )
         }
       }
     }
-  )
+  }
   
   # INVISIBLE NULL RETURN
   invisible(NULL)

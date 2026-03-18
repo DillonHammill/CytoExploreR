@@ -4,6 +4,10 @@
 #include <numeric>   // std::accumulate std::iota
 #include <sstream>   // For std::stringstream
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 using namespace Rcpp;
 
 // --- MEDIAN ---
@@ -387,27 +391,49 @@ Rcpp::NumericMatrix col_quantile_cpp(Rcpp::NumericMatrix x, Rcpp::NumericVector 
   return out;
 }
 
+// Thread-safe quantile helper using only std::vector (no Rcpp types)
+static double quantile_std(std::vector<double>& x, double prob) {
+  int n = static_cast<int>(x.size());
+  if (n == 0) return R_NaReal;
+  if (n == 1) return x[0];
+  double index = (n - 1) * prob;
+  int lo = static_cast<int>(std::floor(index));
+  int hi = static_cast<int>(std::ceil(index));
+  std::nth_element(x.begin(), x.begin() + lo, x.end());
+  double val_lo = x[lo];
+  if (lo == hi) return val_lo;
+  std::nth_element(x.begin() + lo + 1, x.begin() + hi, x.end());
+  double val_hi = x[hi];
+  double h = index - lo;
+  return (1.0 - h) * val_lo + h * val_hi;
+}
+
 // [[Rcpp::export]]
 Rcpp::NumericVector neg_quantile_cpp(Rcpp::NumericMatrix x, double probs) {
-  // Per-column quantile of negative values only.
-  // Returns NA_REAL for columns with no negative values.
   int ncol = x.ncol();
-  Rcpp::NumericVector out(ncol, NA_REAL);
-  Rcpp::NumericVector prob_vec = Rcpp::NumericVector::create(probs);
+  int nrow = x.nrow();
+  std::vector<double> out(ncol, NA_REAL);
+  const double* x_ptr = REAL(x);
+
+  #pragma omp parallel for schedule(static)
   for (int j = 0; j < ncol; ++j) {
-    Rcpp::NumericVector col = x.column(j);
-    Rcpp::NumericVector neg_vals;
-    for (int i = 0; i < col.size(); ++i) {
-      if (!R_IsNA(col[i]) && col[i] < 0.0) {
-        neg_vals.push_back(col[i]);
+    std::vector<double> neg_vals;
+    neg_vals.reserve(nrow / 4);
+    const double* col_ptr = x_ptr + static_cast<size_t>(j) * nrow;
+    for (int i = 0; i < nrow; ++i) {
+      double val = col_ptr[i];
+      if (!R_IsNA(val) && val < 0.0) {
+        neg_vals.push_back(val);
       }
     }
-    if (neg_vals.size() > 0) {
-      out[j] = quantile_cpp(neg_vals, prob_vec)[0];
+    if (!neg_vals.empty()) {
+      out[j] = quantile_std(neg_vals, probs);
     }
   }
-  out.attr("names") = Rcpp::colnames(x);
-  return out;
+
+  Rcpp::NumericVector result(out.begin(), out.end());
+  result.attr("names") = Rcpp::colnames(x);
+  return result;
 }
 
 // --- COEFFICIENT OF VARIATION ---

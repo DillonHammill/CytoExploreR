@@ -45,6 +45,7 @@
                           alpha.bg = 0.5, ...) {
   border <- NA
   oldpars <- par(c("cex", "xpd"))
+  on.exit(par(oldpars))
   par(cex = cex, xpd = TRUE)
   if(.all_na(y)){
     y <- x
@@ -96,7 +97,6 @@
        border = border
   )
   do.call(text, args)
-  par(cex = oldpars)
 }
 
 ## .SPREAD.LABELS --------------------------------------------------------------

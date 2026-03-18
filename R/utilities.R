@@ -62,10 +62,10 @@ do_call <- function(what, args, ...) {
 match_fun <- function(FUN, descend = TRUE) {
   # NAMESPACED CHARACTER
   if(is.character(FUN)) {
-    if(grepl(":{2,3}", FUN)) {
-      FUN <- unlist(strsplit(FUN, ":{2,3}"))
-      FUN <- get(FUN[2],
-                 envir = asNamespace(FUN[1]),
+    parts <- strsplit(FUN, ":{2,3}")[[1]]
+    if(length(parts) == 2) {
+      FUN <- get(parts[2],
+                 envir = asNamespace(parts[1]),
                  mode = "function")
     }
   }
@@ -160,11 +160,11 @@ match_ind <- function(x, y, ...){
   args <- args[which(!duplicated(names(args)))]
   
   # Replace any elements with class "name" with ""
-  lapply(names(args), function(x){
-    if(all(class(args[[x]]) == "name")){
-      args[[x]] <<- ""
+  for(nm in names(args)) {
+    if(inherits(args[[nm]], "name")) {
+      args[[nm]] <- ""
     }
-  })
+  }
   
   # Convert to alist
   class(args) <- "alist"
@@ -188,12 +188,13 @@ match_ind <- function(x, y, ...){
 .args_update <- function(x){
   
   if(!is.null(x)) {
-    lapply(seq(1,length(x)), function(z){
-      if(!is.null(names(x)[z])) {
-        assign(names(x)[z], 
-               x[[z]], envir = parent.frame(n = 3))
+    nms <- names(x)
+    for(z in seq_along(x)) {
+      nm <- nms[z]
+      if(nzchar(nm)) {
+        assign(nm, x[[z]], envir = parent.frame(n = 1))
       }
-    })
+    }
   }
 
 }
@@ -422,7 +423,7 @@ suppressPrint <- function(x) {
     )
   # NOT FIXED - CASE SENSITIVE | INSENSITIVE
   } else {
-    grepl(
+    gsub(
       pattern,
       replacement,
       x,
@@ -431,7 +432,7 @@ suppressPrint <- function(x) {
       ...
     )
   }
-  
+
 }
 
 ## ESCAPE ----------------------------------------------------------------------

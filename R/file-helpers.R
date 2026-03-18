@@ -66,23 +66,18 @@ file_ext_remove <- function(x,
 #' @noRd
 file_ext_append <- function(x,
                             ext = "csv") {
-  
+
   # REPEAT EXTENSION
   ext <- rep(ext, length(x))
-  
-  # ADD EXTENSIONS TO FILE NAMES WITHOUT EXTENSIONS
-  ulapply(seq_along(x), function(z) {
-    # PREPARE EXTENSION
-    if (!grepl(".", ext[z])) {
-      ext[z] <- paste0(".", ext[z])
-    }
-    # APPEND EXTENSION
-    if (.empty(file_ext(x[z]))) {
-      paste0(x[z], ext[z])
-    } else {
-      x[z]
-    }
-  })
+
+  # PREPARE EXTENSIONS (PREPEND DOT IF MISSING)
+  needs_dot <- !grepl(".", ext, fixed = FALSE)
+  ext[needs_dot] <- paste0(".", ext[needs_dot])
+
+  # APPEND EXTENSION TO FILE NAMES WITHOUT EXTENSIONS
+  no_ext <- nchar(file_ext(x)) == 0L
+  x[no_ext] <- paste0(x[no_ext], ext[no_ext])
+  x
 }
 
 ## FILE_SORT -------------------------------------------------------------------

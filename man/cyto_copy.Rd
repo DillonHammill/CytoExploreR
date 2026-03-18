@@ -4,10 +4,13 @@
 \alias{cyto_copy}
 \title{Copy a cytoset, cytoframe or GatingSet}
 \usage{
-cyto_copy(x)
+cyto_copy(x, type = "HDF5")
 }
 \arguments{
 \item{x}{cytoframe, cytoset or GatingSet to be copied.}
+
+\item{type}{\code{TRUE}/\code{"HDF5"}/\code{"disk"} for a disk-backed copy
+(default) or \code{"memory"} for an in-memory MemCytoFrame-backed copy.}
 }
 \value{
 copied cytoframe, cytoset or GatingSet.

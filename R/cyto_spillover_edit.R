@@ -163,31 +163,6 @@ cyto_spillover_edit <- function(x,
   
   # EXPERIMENT DETAILS
   pd <- cyto_details(x)
-  
-  # INTERACTIVE CHANNEL_MATCH
-  if(isTRUE(channel_match) | is.character(channel_match)) {
-    pd <- cyto_channel_match(
-      x,
-      channels = channels,
-      file = if(isTRUE(channel_match)){
-        NULL
-        } else{
-          channel_match
-        }
-    )
-    pd <- pd[match(rownames(cyto_details(x)), rownames(pd)), , drop = FALSE]
-  # BYPASS CHANNEL_MATCH
-  } else {
-    lapply(c("group", "parent", "channel"), function(z) {
-      if(!z %in% colnames(pd)) {
-        if(z == "parent") pd[, z] <<- rep("root", nrow(pd))
-        else pd[, z] <<- rep(NA, nrow(pd))
-      }
-    })
-  }
-  
-  # EXPERIMENT DETAILS
-  pd <- cyto_details(x)
   pd_order <- rownames(pd)
   
   # INTERACTIVE CHANNEL_MATCH
@@ -288,13 +263,15 @@ cyto_spillover_edit <- function(x,
     )[[1]]
   }
   
+  # Pre-computed constant: axes_trans and channels do not change after startup.
+  trans_ind           <- if(any(channels %in% names(axes_trans))) match_ind(channels, names(axes_trans)) else NULL
+  axes_trans_combined <- if(!is.null(trans_ind)) cyto_transformers_combine(axes_trans[trans_ind]) else NULL
+
   # X -> LINEAR SCALE
-  if(attributes(axes_trans)$applied & any(channels %in% names(axes_trans))) {
+  if(attributes(axes_trans)$applied & !is.null(axes_trans_combined)) {
     x <- cyto_transform(
       x,
-      trans = cyto_transformers_combine(
-        axes_trans[match_ind(channels, names(axes_trans))]
-      ),
+      trans = axes_trans_combined,
       inverse = TRUE,
       copy = TRUE,
       plot = FALSE,
@@ -312,12 +289,10 @@ cyto_spillover_edit <- function(x,
   # X - LINEAR UNCOMPENSATED
   x_linear <- cyto_copy(x)
   # X - TRANSFORMED UNCOMPENSATED
-  if(any(channels %in% names(axes_trans))) {
+  if(!is.null(axes_trans_combined)) {
     x <- cyto_transform(
       x,
-      trans = cyto_transformers_combine(
-        axes_trans[match_ind(channels, names(axes_trans))]
-      ),
+      trans = axes_trans_combined,
       inverse = FALSE,
       copy = FALSE,
       plot = FALSE,
@@ -347,8 +322,12 @@ cyto_spillover_edit <- function(x,
     ID_select <- pd$name[1]
   }
   
-  # X CHANNEL
-  xchan_select <- NULL
+  # X CHANNEL - pre-compute initial value from ID_select so the channel
+  # dropdown is seeded correctly on first flush, before ID() resolves
+  xchan_select <- {
+    ch <- pd$channel[pd$name == ID_select]
+    if(length(ch) > 0 && !is.na(ch[1])) ch[1] else NULL
+  }
   
   # EDITOR OPTIONS
   if (any(grepl("Unstained", pd$channel))) {
@@ -382,8 +361,27 @@ cyto_spillover_edit <- function(x,
   app <- shinyApp(
     ui <- fluidPage(
       theme = bs_theme(bootswatch = "yeti", version = 3),
+      tags$head(tags$style(HTML("
+        .shiny-plot-output { position: relative; }
+        .shiny-plot-output.recalculating { opacity: 0.4; }
+        .shiny-plot-output.recalculating::after {
+          content: '';
+          display: block;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 50px;
+          height: 50px;
+          margin: -25px 0 0 -25px;
+          border-radius: 50%;
+          border: 5px solid #ccc;
+          border-top-color: #2196F3;
+          animation: cyto-spin 0.8s linear infinite;
+        }
+        @keyframes cyto-spin { to { transform: rotate(360deg); } }
+      "))),
       titlePanel(span(img(src = CytoExploreR_logo(), width = 35), "CytoExploreR Spillover Matrix Editor")),
-      tabsetPanel(
+      tabsetPanel(id = "tabs",
         tabPanel("Editor", fluid = TRUE, sidebarLayout(
           sidebarPanel(width = 3,
                        cytoSelectUI("editor_select_unst", label = "Select unstained sample:"),
@@ -419,20 +417,29 @@ cyto_spillover_edit <- function(x,
       editor_parent <- nodeSelectServer("editor_node_select", data = reactive(x), selected = reactive("root"))
       NIL <- cytoSelectServer("editor_select_unst", data = reactive(x), choices = "None", selected = reactive(NIL_select))
       ID <- cytoSelectServer("editor_select", data = reactive(x), selected = reactive(ID_select))
-      xchan <- channelSelectServer("editor_xchannel", data = reactive(x), selected = reactive(NULL))
+
+      # Auto-populate x channel from pData channel column for selected sample.
+      # Falls back to xchan_select (pre-computed from ID_select) before ID()
+      # resolves so channelSelectServer gets a correct initial value on the
+      # first flush, preventing a spurious extra render with the wrong channel.
+      selected_xchan <- reactive({
+        id <- tryCatch(ID(), error = function(e) NULL)
+        if(is.null(id)) return(xchan_select)
+        ch <- pd$channel[pd$name == id]
+        if(length(ch) > 0 && !is.na(ch[1])) ch[1] else NULL
+      })
+      xchan <- channelSelectServer("editor_xchannel", data = reactive(x), selected = selected_xchan)
       ychan <- channelSelectServer("editor_ychannel", data = reactive(x))
       editor_opts <- optionsServer("editor_options", selected = reactive(editor_opts_select))
       
       NIL_linear_subset <- reactive({
         req(NIL(), NIL() != "None")
-        dat <- cyto_data_extract(x_linear, select = NIL(), parent = editor_parent(), copy = TRUE)[[1]]
-        if(nrow(dat) > events) cyto_sample(dat, events) else dat
+        cyto_data_extract(x_linear, select = NIL(), parent = editor_parent(), events = events, copy = TRUE)[[1]]
       })
-      
+
       ID_linear_subset <- reactive({
         req(ID())
-        dat <- cyto_data_extract(x_linear, select = ID(), parent = editor_parent(), copy = TRUE)[[1]]
-        if(nrow(dat) > events) cyto_sample(dat, events) else dat
+        cyto_data_extract(x_linear, select = ID(), parent = editor_parent(), events = events, copy = TRUE)[[1]]
       })
       
       spill_edit <- spillEditServer("editor_spill", data = reactive(x), spill = reactive(spillover), xchan = xchan, ychan = ychan)
@@ -449,39 +456,41 @@ cyto_spillover_edit <- function(x,
       
       NIL_comp_trans <- reactive({
         req(NIL_compensated())
-        if(any(channels %in% names(axes_trans))) {
-          cyto_transform(NIL_compensated(), trans = cyto_transformers_combine(axes_trans[match_ind(channels, names(axes_trans))]),
+        if(!is.null(axes_trans_combined)) {
+          cyto_transform(NIL_compensated(), trans = axes_trans_combined,
                          inverse = FALSE, copy = FALSE, plot = FALSE, quiet = TRUE)
         } else NIL_compensated()
       })
-      
+
       ID_comp_trans <- reactive({
         req(ID_compensated())
-        if(any(channels %in% names(axes_trans))) {
-          cyto_transform(ID_compensated(), trans = cyto_transformers_combine(axes_trans[match_ind(channels, names(axes_trans))]),
+        if(!is.null(axes_trans_combined)) {
+          cyto_transform(ID_compensated(), trans = axes_trans_combined,
                          inverse = FALSE, copy = FALSE, plot = FALSE, quiet = TRUE)
         } else ID_compensated()
       })
       
       editPlotServer("editor_plot",
                      ID_comp_trans = ID_comp_trans, NIL_comp_trans = NIL_comp_trans,
+                     NIL = NIL,
                      parent = editor_parent, opts = editor_opts, xchan = xchan, ychan = ychan,
                      axes_trans = axes_trans, axes_limits = axes_limits, events = events,
                      point_size = point_size, axes_text_size = axes_text_size,
                      axes_label_text_size = axes_label_text_size, title_text_size = title_text_size, ...)
       
-      plots_NIL <- cytoSelectServer("plots_select_unst", data = reactive(x), choices = "None", selected = reactive(NIL_select))
-      plots_ID <- cytoSelectServer("plots_select", data = reactive(x), selected = reactive(ID_select))
-      plots_parent <- nodeSelectServer("plots_node_select", data = reactive(x), selected = reactive("root"))
-      plots_xchan <- channelSelectServer("plots_xchannel", data = reactive(x), selected = reactive(NULL))
+      plots_NIL <- cytoSelectServer("plots_select_unst", data = reactive(x), choices = "None", selected = NIL)
+      plots_ID <- cytoSelectServer("plots_select", data = reactive(x), selected = ID)
+      plots_parent <- nodeSelectServer("plots_node_select", data = reactive(x), selected = editor_parent)
+      plots_xchan <- channelSelectServer("plots_xchannel", data = reactive(x), selected = xchan)
       plots_opts <- optionsServer("plots_options", selected = reactive(plots_opts_select))
-      
+
       compPlotServer("plots",
                      ID_comp_trans = ID_comp_trans, NIL_comp_trans = NIL_comp_trans,
                      opts = plots_opts, xchan = plots_xchan, channels = reactive(channels),
                      spillover = spill_edit, axes_trans = axes_trans, axes_limits = axes_limits,
                      events = events, point_size = point_size, axes_text_size = axes_text_size,
-                     axes_label_text_size = axes_label_text_size, title_text_size = title_text_size, ...)
+                     axes_label_text_size = axes_label_text_size, title_text_size = title_text_size,
+                     active_tab = reactive(input$tabs), ...)
       
       spillSaveServer("editor_save", spill = spill_edit, save_as = save_as)
       
@@ -507,10 +516,19 @@ cytoSelectUI <- function(id, label = NULL, ...) {
 #' @noRd
 cytoSelectServer <- function(id, data = reactive(NULL), choices = NULL, selected = reactive(NULL)) {
   moduleServer(id, function(input, output, session){
+    pending_sel <- reactiveVal(NULL)
     observe({
-      updateSelectInput(session, "select", choices = c(cyto_names(data()), choices), selected = selected())
+      sel <- selected()
+      pending_sel(sel)
+      updateSelectInput(session, "select", choices = c(cyto_names(data()), choices), selected = sel)
     })
-    return(reactive({ req(input$select); input$select }))
+    observeEvent(input$select, {
+      ps <- pending_sel()
+      if(is.null(ps) || input$select != ps) {
+        pending_sel(input$select)
+      }
+    }, ignoreInit = TRUE)
+    return(reactive({ if(!is.null(pending_sel())) pending_sel() else input$select }))
   })
 }
 
@@ -528,37 +546,69 @@ channelSelectUI <- function(id, label = NULL, ...) {
 #' @noRd
 channelSelectServer <- function(id, data = reactive(NULL), selected = reactive(NULL), exclude = reactive(NULL), ...) {
   moduleServer(id, function(input, output, session) {
-    
+
     channels_excl <- reactive({
       req(data())
       chans <- unname(cyto_fluor_channels(data()))
       if(!.empty(exclude(), null = TRUE)) chans <- chans[-match(exclude(), chans)]
       chans
     })
-    
-    observe({ updateSelectInput(session, "select", choices = channels_excl()) })
+
+    # Server-side effective selection — updated synchronously when selected()
+    # changes so downstream reactives see the new channel in the same flush
+    # cycle as the sample switch, eliminating an intermediate render with the
+    # wrong channel before the browser round-trip completes.
+    pending_sel <- reactiveVal(NULL)
+
     observe({
-      if(!is.null(selected())) {
-        sel <- if(is.na(selected())) channels_excl()[1] else selected()
-        updateSelectInput(session, "select", selected = sel)
+      chans <- channels_excl()
+      sel <- selected()
+      if(!is.null(sel)) {
+        effective <- if(is.na(sel)) chans[1] else sel
+        pending_sel(effective)
+        updateSelectInput(session, "select", choices = chans, selected = effective)
+      } else {
+        # Seed pending_sel with the first channel so downstream reactives have
+        # a valid value before the browser's first round-trip populates
+        # input$select.  Use isolate() so this read does not add pending_sel
+        # as a reactive dependency of this observer (which would re-trigger it
+        # every time pending_sel changes and create a loop).
+        if(is.null(isolate(pending_sel()))) {
+          pending_sel(chans[1])
+        }
+        updateSelectInput(session, "select", choices = chans)
       }
     })
-    
+
+    # User manually changed the dropdown — sync pending_sel only when the new
+    # value differs from what was last set programmatically, so that the
+    # updateSelectInput round-trip is not treated as a user action.
+    observeEvent(input$select, {
+      ps <- pending_sel()
+      if(is.null(ps) || input$select != ps) {
+        pending_sel(input$select)
+      }
+    }, ignoreInit = TRUE)
+
     observeEvent(input$up, {
       req(input$select, channels_excl())
       ind <- match(input$select, channels_excl())
       new_ind <- if(ind < length(channels_excl())) ind + 1 else 1
-      updateSelectInput(session, "select", choices = channels_excl(), selected = channels_excl()[new_ind])
+      new_chan <- channels_excl()[new_ind]
+      pending_sel(new_chan)
+      updateSelectInput(session, "select", choices = channels_excl(), selected = new_chan)
     })
-    
+
     observeEvent(input$down, {
       req(input$select, channels_excl())
       ind <- match(input$select, channels_excl())
       new_ind <- if(ind > 1) ind - 1 else length(channels_excl())
-      updateSelectInput(session, "select", choices = channels_excl(), selected = channels_excl()[new_ind])
+      new_chan <- channels_excl()[new_ind]
+      pending_sel(new_chan)
+      updateSelectInput(session, "select", choices = channels_excl(), selected = new_chan)
     })
-    
-    return(reactive({ input$select }))
+
+    return(reactive({ if(is.null(pending_sel())) input$select else pending_sel() }))
   })
 }
 
@@ -583,11 +633,21 @@ nodeSelectServer <- function(id, data = reactive(NULL), choices = NULL, selected
 spillEditUI <- function(id, height = "300px", ...) {
   tagList(
     tags$script(HTML(paste0(
+      "if (!window._cytoHighlight) window._cytoHighlight = {};",
       "Shiny.addCustomMessageHandler('selectHotCell_", id, "', function(msg) {",
-      "  var el = document.getElementById(msg.id);",
-      "  if (!el || !el.hot) return;",
-      "  el.hot.selectCell(msg.row, msg.col, msg.row, msg.col, false);",
-      "  el.hot.render();",
+      "  window._cytoHighlight[msg.id] = { row: msg.row, col: msg.col };",
+      "  (function tryRender(n) {",
+      "    var el = document.getElementById(msg.id);",
+      "    if (el) {",
+      "      var hw = HTMLWidgets.getInstance(el);",
+      "      if (hw && hw.hot) {",
+      "        hw.hot.scrollViewportTo(msg.row, msg.col);",
+      "        hw.hot.render();",
+      "        return;",
+      "      }",
+      "    }",
+      "    if (n > 0) { setTimeout(function() { tryRender(n - 1); }, 100); }",
+      "  })(10);",
       "});"
     ))),
     rHandsontableOutput(NS(id, "spill"), height = height, width = "99%", ...)
@@ -625,30 +685,44 @@ spillEditServer <- function(id, data = reactive(NULL), spill = reactive(NULL), x
       values$source_version <- isolate(values$source_version) + 1L
     })
 
-    # Push cell selection to the browser without triggering a full table re-render
+    # Push cell selection to the browser without triggering a full table re-render.
+    # values$spill is read with isolate() so user edits to the table do not
+    # re-fire this observer — hot.render() called from JS can otherwise
+    # propagate back to input$spill -> values$spill -> here, creating a loop.
+    # values$source_version is read non-isolated so the observer re-fires when
+    # the table first loads (spill was NULL when xchan/ychan initially resolved).
+    # The row/col indices depend only on matrix dimension (channel names), which
+    # are fixed for the lifetime of the editor session.
     observe({
-      req(xchan(), ychan(), values$spill)
+      req(xchan(), ychan())
+      values$source_version
+      sp <- isolate(values$spill)
+      req(sp)
       session$sendCustomMessage(
         paste0("selectHotCell_", id),
         list(
           id  = session$ns("spill"),
-          row = match(xchan(), rownames(values$spill)) - 1L,
-          col = match(ychan(), colnames(values$spill)) - 1L
+          row = match(xchan(), rownames(sp)) - 1L,
+          col = match(ychan(), colnames(sp)) - 1L
         )
       )
     })
 
     output$spill <- renderRHandsontable({
       values$source_version
-      req(isolate(values$spill))
-      rhandsontable(isolate(values$spill), rowHeaderWidth = 105, readOnly = FALSE, manualColumnResize = TRUE) %>%
+      sp <- isolate(values$spill)
+      req(sp)
+      hot_id <- session$ns("spill")
+      rhandsontable(sp, rowHeaderWidth = 105, readOnly = FALSE, manualColumnResize = TRUE) %>%
         hot_cols(type = "numeric", colWidths = 105, format = "0.000", halign = "htCenter",
-                 renderer = "
+                 renderer = paste0("
                    function (instance, td, row, col, prop, value, cellProperties) {
                      Handsontable.renderers.TextRenderer.apply(this, arguments);
-                     var sel = instance.getSelected();
-                     if (sel && sel.length > 0 && row === sel[0][0] && col === sel[0][1]) {
+                     var hl = window._cytoHighlight && window._cytoHighlight['", hot_id, "'];
+                     if (hl && row === hl.row && col === hl.col) {
                        td.style.border = 'solid'; td.style.borderWidth = '3px'; td.style.borderColor = 'black';
+                     } else {
+                       td.style.border = '';
                      }
                      if(value < 0) td.style.background = 'lightblue';
                      else if (value == 0) td.style.background = 'white';
@@ -658,7 +732,7 @@ spillEditServer <- function(id, data = reactive(NULL), spill = reactive(NULL), x
                      else if (value > 50 && value < 100) td.style.background = 'red';
                      else if (value == 100) td.style.background = 'darkgrey';
                      else if (value > 100) td.style.background = 'violet';
-                   }") %>%
+                   }")) %>%
         hot_rows(rowHeights = 20)
     })
     
@@ -669,7 +743,11 @@ spillEditServer <- function(id, data = reactive(NULL), spill = reactive(NULL), x
         if(is.null(values$spill)) sp[is.na(sp)] <- 0
         else sp[is.na(sp)] <- values$spill[is.na(sp)]
       }
-      values$spill <- sp
+      # Skip update if value is unchanged — prevents spurious re-renders when
+      # rhandsontable sends back its initial value after the first browser render.
+      if(is.null(values$spill) || !isTRUE(all.equal(sp, values$spill, check.attributes = FALSE))) {
+        values$spill <- sp
+      }
     })
     
     spill_reactive <- reactive({
@@ -718,25 +796,53 @@ editPlotUI <- function(id, ...) {
 
 #' @noRd
 editPlotServer <- function(id, ID_comp_trans = reactive(NULL), NIL_comp_trans = reactive(NULL),
+                           NIL = reactive(NULL),
                            opts = reactive(NULL), xchan = reactive(NULL), ychan = reactive(NULL),
                            axes_trans = NA, axes_limits = "machine", events = 2000,
                            point_size = 3, axes_text_size = 1.7, axes_label_text_size = 2,
                            title_text_size = 1.5, ...) {
   moduleServer(id, function(input, output, session){
+
+    # Cache nil_data as reactive — avoid tryCatch inside renderPlot
+    nil_data <- reactive({
+      tryCatch(NIL_comp_trans(), error = function(e) NULL)
+    })
+
+    # Pre-compute overlay flag — only invalidates when nil_data or opts change
+    use_overlay <- reactive({
+      !is.null(nil_data()) && "overlay" %in% opts()
+    })
+
+    # Cache NIL medians — only recomputes when nd changes, not on channel navigation
+    nil_medians <- reactive({
+      nd <- nil_data()
+      req(nd)
+      cyto_apply(nd, "cyto_stat_median", input = "matrix", inverse = FALSE, copy = FALSE)
+    })
+
     output$plot <- renderPlot({
       req(ID_comp_trans(), xchan(), ychan())
-      
-      overlay <- FALSE
-      nil_data <- tryCatch(NIL_comp_trans(), error = function(e) NULL)
-      if(!is.null(nil_data) && "overlay" %in% opts()) overlay <- TRUE
-      
+
+      nd <- nil_data()
+
+      # If an unstained control is selected, gate on its data being ready.
+      # Without this, the plot renders once with nd=NULL (before NIL()'s
+      # browser round-trip completes) and again immediately after NIL_comp_trans
+      # resolves, producing an unnecessary double render on load.
+      nil_name <- tryCatch(NIL(), error = function(e) NULL)
+      if (!is.null(nil_name) && nil_name != "None") {
+        req(nd)
+      }
+
+      overlay <- use_overlay()
+
       cyto_plot_custom(layout = matrix(c(1, 1, 2, 2, 1, 1, 3, 3), byrow = TRUE, ncol = 4), popup = FALSE)
       
       suppressPrint(
         cyto_plot(
           ID_comp_trans(),
           channels = c(xchan(), ychan()),
-          overlay = if(overlay) nil_data else NA,
+          overlay = if(overlay) nd else NA,
           axes_trans = axes_trans, axes_limits = axes_limits, events = events,
           title = cyto_names(ID_comp_trans()), point_size = point_size,
           axes_text_size = axes_text_size, axes_label_text_size = axes_label_text_size,
@@ -747,9 +853,9 @@ editPlotServer <- function(id, ID_comp_trans = reactive(NULL), NIL_comp_trans = 
       
       usr <- .par("usr")[[1]]
       
-      if(!is.null(nil_data) && "line" %in% opts()) {
-        medFI <- cyto_apply(nil_data, "cyto_stat_median", input = "matrix", inverse = FALSE, copy = FALSE)
-        abline(h = medFI[1, ychan()], col = "red", lwd = 2)
+      if(!is.null(nd) && "line" %in% opts()) {
+        medFI <- tryCatch(nil_medians(), error = function(e) NULL)
+        if(!is.null(medFI)) abline(h = medFI[1, ychan()], col = "red", lwd = 2)
       }
       
       if("tracker" %in% opts()) {
@@ -768,7 +874,7 @@ editPlotServer <- function(id, ID_comp_trans = reactive(NULL), NIL_comp_trans = 
         
         suppressPrint(
           cyto_plot(
-            if(overlay) nil_data else ID_comp_trans(),
+            if(overlay) nd else ID_comp_trans(),
             channels = chan,
             overlay = if(overlay) ID_comp_trans() else NA,
             axes_trans = axes_trans, axes_limits = axes_limits, events = events,
@@ -803,36 +909,64 @@ compPlotServer <- function(id, ID_comp_trans = reactive(NULL), NIL_comp_trans = 
                            opts = reactive(NULL), xchan = reactive(NULL), channels = reactive(NULL),
                            spillover = reactive(NULL), axes_trans = NA, axes_limits = "machine",
                            events = 2000, point_size = 3, axes_text_size = 1.7,
-                           axes_label_text_size = 2, title_text_size = 1.5, ...) {
+                           axes_label_text_size = 2, title_text_size = 1.5,
+                           active_tab = reactive(NULL), ...) {
   moduleServer(id, function(input, output, session){
-    
+
     layout_dims <- reactive({ c(ceiling(length(channels())/4), 4) })
-    
-    output$cyto_plot_comp <- renderPlot({
-      req(ID_comp_trans(), xchan(), channels())
-      
-      nil_data <- tryCatch(NIL_comp_trans(), error = function(e) NULL)
-      
-      if(!is.null(nil_data)) {
-        cf_list <- structure(list(ID_comp_trans()[[1]], nil_data[[1]]),
-                             names = c(cyto_names(ID_comp_trans()), cyto_names(nil_data)))
+
+    # Cache nil_data as reactive — avoid tryCatch inside renderPlot
+    nil_data <- reactive({
+      tryCatch(NIL_comp_trans(), error = function(e) NULL)
+    })
+
+    # Cache cytoset assembly — avoid constructing new cytoset every render
+    comp_cs <- reactive({
+      req(ID_comp_trans(), xchan())
+      nd <- nil_data()
+      if(!is.null(nd)) {
+        cf_list <- structure(list(ID_comp_trans()[[1]], nd[[1]]),
+                             names = c(cyto_names(ID_comp_trans()), cyto_names(nd)))
         cs <- cytoset(cf_list[!ulapply(cf_list, "is.null")])
       } else {
         cs <- ID_comp_trans()
       }
-      
       pd <- cyto_details(cs)
       pd$channel <- c(xchan(), "unstained")[seq_along(cs)]
-      
+      cyto_details(cs) <- pd
+      cs
+    })
+
+    # Pre-compute overlay colours — only recalculated when opts() changes
+    plot_colours <- reactive({
+      o <- opts()
+      has_unst <- "unstained" %in% o
+      has_comp <- "compensated" %in% o
+      cols <- if(has_unst && has_comp) {
+        c("magenta", "blue", "grey40")
+      } else if(has_unst) {
+        c("magenta", "grey40")
+      } else if(has_comp) {
+        c("magenta", "blue")
+      } else {
+        c("magenta")
+      }
+      overlay <- if(!has_unst && !has_comp) "none" else o[o %in% c("unstained", "compensated")]
+      list(cols = cols, overlay = overlay)
+    })
+
+    output$cyto_plot_comp <- renderPlot({
+      req(comp_cs(), channels(), isTRUE(active_tab() == "Plots"))
+      pc <- plot_colours()
+
       suppressPrint(
         suppressWarnings(
           cyto_plot_compensation(
-            cs, channels = channels(), channel_match = pd,
-            overlay = if(!any(c("unstained", "compensated") %in% opts())) "none" else opts()[opts() %in% c("unstained", "compensated")],
+            comp_cs(), channels = channels(), channel_match = cyto_details(comp_cs()),
+            overlay = pc$overlay,
             spillover = spillover(), compensated = TRUE, axes_trans = axes_trans,
             axes_limits = axes_limits, events = events, point_size = point_size,
-            point_col = if(all(c("unstained", "compensated") %in% opts())) c("magenta", "blue", "grey40") else if("unstained" %in% opts()) c("magenta", "grey40") else if("compensated" %in% opts()) c("magenta", "blue") else c("magenta"),
-            hist_fill = if(all(c("unstained", "compensated") %in% opts())) c("magenta", "blue", "grey40") else if("unstained" %in% opts()) c("magenta", "grey40") else if("compensated" %in% opts()) c("magenta", "blue") else c("magenta"),
+            point_col = pc$cols, hist_fill = pc$cols,
             lines = "models" %in% opts(), text = TRUE, text_size = 1.5,
             axes_text_size = 1.7, axes_label_text_size = 2, title_text_size = 2,
             layout = layout_dims(), popup = FALSE, ...

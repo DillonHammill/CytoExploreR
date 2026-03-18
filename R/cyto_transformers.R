@@ -277,7 +277,49 @@ cyto_transformers_define <- function(x,
   
   # PRINT PARAMETER ESTIMATES PER CHANNEL
   message("Transformer parameters:")
-  
+
+  # BATCH NEGATIVE QUANTILE - identify channels that need it
+  neg_q_channels <- character(0)
+  if (!cyto_class(type, "list", TRUE)) {
+    neg_q_channels <- channels[vapply(channels, function(z) {
+      tz <- type[z]
+      # ASINH (non-flowVS) without supplied cofactor
+      if (grepl("^a", tz, ignore.case = TRUE) &&
+          !grepl("VS", tz, ignore.case = TRUE) &&
+          is.na(cofactors[z])) {
+        return(TRUE)
+      }
+      # LOGICLE without supplied w
+      if (grepl("^logicle$", tz, ignore.case = TRUE) &&
+          !"w" %in% names(args)) {
+        return(TRUE)
+      }
+      return(FALSE)
+    }, logical(1))]
+  }
+
+  # COMPUTE BATCH NEGATIVE QUANTILES
+  if (length(neg_q_channels) > 0) {
+    neg_q_per_sample <- cyto_apply(
+      x,
+      parent = parent,
+      select = select,
+      channels = neg_q_channels,
+      input = "matrix",
+      FUN = function(m) {
+        neg_quantile_cpp(m, probs)
+      },
+      simplify = FALSE
+    )
+    neg_q_matrix <- do.call(rbind, neg_q_per_sample)
+    neg_q_min <- apply(neg_q_matrix, 2, min, na.rm = TRUE)
+    # Channels with all-NA (no negatives in any sample) -> NA
+    all_na <- apply(neg_q_matrix, 2, function(col) all(is.na(col)))
+    neg_q_min[all_na] <- NA_real_
+  } else {
+    neg_q_min <- structure(numeric(0), names = character(0))
+  }
+
   # TRANSFORMATION DEFINITIONS
   transformer_list <- structure(
     lapply(
@@ -338,34 +380,12 @@ cyto_transformers_define <- function(x,
                 )
                 # LOGICLE APPROACH
               } else {
-                # NOTE: DO WE WANT SAMPLING HERE?
-                # ESTIMATE COFACTOR
-                cf <- abs(
-                  min(
-                    cyto_apply(
-                      x,
-                      parent = parent,
-                      select = select,
-                      channels = z,
-                      input = "column",
-                      FUN = function(v) {
-                        v <- v[v < 0]
-                        if(length(v) == 0) {
-                          return(NA)
-                        } else {
-                          return(
-                            quantile_cpp(v, probs)
-                          )
-                        }
-                      },
-                      simplify = TRUE
-                    ),
-                    na.rm = TRUE
-                  )
-                )
-                # ALL DATA ABOVE ZERO
-                if(is.infinite(cf)) {
+                # USE PRE-COMPUTED BATCH NEGATIVE QUANTILE
+                cf <- neg_q_min[z]
+                if (is.na(cf) || is.infinite(cf)) {
                   cf <- 1
+                } else {
+                  cf <- abs(cf)
                 }
               }
             }
@@ -500,29 +520,11 @@ cyto_transformers_define <- function(x,
               #   )
               # )
               # args$p <- .Machine$double.eps + quantile_cpp(d,0.05)
-              # FASTER METHOD - MIN QUANTILE ACROSS SAMPLES
-              q <- cyto_apply(
-                x,
-                parent = parent,
-                select = select,
-                channels = z,
-                input = "column",
-                FUN = function(v) {
-                  v <- v[v < 0]
-                  if(length(v) == 0) {
-                    return(NA)
-                  } else {
-                    return(
-                      quantile_cpp(v, probs)
-                    )
-                  }
-                },
-                simplify = TRUE
-              )
-              # COMPUTE MINIMUM VALUE
-              if(!.all_na(q)) {
-                args$p <- .Machine$double.eps + min(q, na.rm = TRUE)
-                args$w <- (args$m - log10(args$t/abs(args$p))) / 2
+              # USE PRE-COMPUTED BATCH NEGATIVE QUANTILE
+              q_val <- neg_q_min[z]
+              if (!is.na(q_val)) {
+                args$p <- .Machine$double.eps + q_val
+                args$w <- (args$m - log10(args$t / abs(args$p))) / 2
               }
             }
             # CHECK W > 0

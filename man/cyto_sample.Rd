@@ -15,11 +15,11 @@ cyto_sample(x, ...)
 
 \method{cyto_sample}{GatingSet}(x, events = 1, seed = NULL, ...)
 
-\method{cyto_sample}{flowFrame}(x, events = 1, seed = NULL, ...)
+\method{cyto_sample}{flowFrame}(x, events = 1, seed = NULL, ..., copy = FALSE)
 
-\method{cyto_sample}{flowSet}(x, events = 1, seed = NULL, ...)
+\method{cyto_sample}{flowSet}(x, events = 1, seed = NULL, ..., copy = FALSE)
 
-\method{cyto_sample}{list}(x, events = 1, seed = NULL, ...)
+\method{cyto_sample}{list}(x, events = 1, seed = NULL, ..., copy = FALSE)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},

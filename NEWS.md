@@ -1,6 +1,20 @@
-# CytoExploreR 2.0.22 (pre-release)
+# CytoExploreR 2.0.22
 
 * The behavior of `cyto_merge_by()` when `merge_by = NA` has changed from collapsing all samples to instead split samples individually. This is because splitting by `name` may not always work in cases where multiple samples share the same file names. This change requires updates to openCyto which should be re-installed when updating to the new version of CytoExploreR.
+* `cyto_save()` gains a `type` argument (`"FCS"` or `"HDF5"`) to write flowWorkspace-native HDF5 files via `cf_write_h5()` in addition to standard FCS files. Existing calls default to `"FCS"` and are unaffected. The GatingSet archive branch (no `parent` supplied) ignores `type`.
+* Six new built-in plot themes: `cyto_plot_theme_minimal()`, `cyto_plot_theme_presentation()`, `cyto_plot_theme_publication()`, `cyto_plot_theme_colorblind()`, `cyto_plot_theme_pastel()`, and `cyto_plot_theme_ocean()`.
+* New `neg_quantile_cpp()` C++ function for fast per-column negative-value quantile computation with OpenMP parallelisation, used by `cyto_transformers_define()` to batch-compute negative quantiles across all samples in a single pass instead of per-sample calls.
+* `cyto_sample()` gains a `copy` argument (flowFrame, flowSet, and list methods) to control whether a deep copy is made after sampling, allowing callers to defer materialisation.
+* `cyto_data_extract()` now performs sampling before barcoding and coercion so that only the downsampled row count is carried through the remaining pipeline steps.
+* Performance improvements to `cyto_plot_point()`: `lapply` loops replaced with `for` loops; plot limits cached once per call; per-layer `is_hex` and `is_size_list` flags pre-computed; MST tree edges drawn with a single vectorised `segments()` call instead of per-edge `lines()` calls; sample-ID jitter uses `ave()` instead of per-sample `rnorm()` in a loop.
+* Performance improvements to `cyto_spillover_edit()`: duplicate `cyto_details()` call and dead `channel_match` branch removed; `axes_trans_combined` pre-computed once at startup and reused across transforms and reactive contexts; x-channel selector now seeded correctly from `ID_select` on first render; compensation plot rendering gated behind an `active_tab` reactive to avoid redundant redraws on hidden tabs; `nil_data`, `nil_medians`, `plot_colours`, and `comp_cs` extracted as cached reactives to reduce recomputation.
+* `cyto_spillover_edit()` reactive select inputs now use a `pending_sel` pattern to prevent selection-feedback loops when choices are updated programmatically; cell highlighting uses a `window._cytoHighlight` registry with retry logic to handle deferred Handsontable widget initialisation.
+* `cyto_spillover_edit()` gains a loading spinner (CSS animation) and the `tabsetPanel` is assigned an `id` so that tab-aware conditional rendering can suppress off-screen plot redraws.
+* Performance improvements to `cyto_compensate()`: spillover column detection replaced with vectorised `vapply` + `which()`; long-format matrix fill replaced with vectorised index-pair assignment; row names synchronised with column names after square-matrix construction.
+* Performance improvements to `cyto_nodes_convert()`: path-format node vector pre-computed once before the conversion loop to avoid repeated `cyto_nodes()` S4 dispatch per node.
+* `cyto_copy()`, `cyto_transform()`, `cyto_compensate()`, and `cyto_data_extract()` now use `!isFALSE(copy)` guards and forward a `type` argument through to `cyto_copy()`, enabling callers to specify shallow versus deep copy semantics.
+* `file_ext_add()` and `file_ext_remove()` vectorised to handle character vectors without looping.
+* Line-intersection helper in `geometric-functions.R` rewritten with a direct algebraic formula.
 
 # CytoExploreR 2.0.21
 * The median tracker algorithm used within `cyto_spillover_compute()` has been moved to C++ for improved performance.

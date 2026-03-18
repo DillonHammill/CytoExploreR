@@ -15,6 +15,7 @@ cyto_save(
   overwrite = NULL,
   inverse = FALSE,
   decompensate = FALSE,
+  type = "FCS",
   ...
 )
 }
@@ -62,6 +63,11 @@ scale, set to FALSE by default.}
 removed from the data prior to extraction, set to FALSE by default.
 Optionally, users can supply a named of list of spillover matrices when a
 \code{cytoset} is supplied to remove compensation from the extracted data.}
+
+\item{type}{character; \code{"FCS"} (default) writes standard FCS files via
+\code{write.FCS}. \code{"HDF5"} writes flowWorkspace-native HDF5 files via
+\code{cf_write_h5}. Ignored when saving a complete GatingSet archive (no
+\code{parent} supplied).}
 
 \item{...}{additional arguments passed to \code{\link{cyto_data_extract}} to
 allow control over how the data is formatted prior to saving.}
