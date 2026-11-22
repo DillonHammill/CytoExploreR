@@ -35,15 +35,16 @@ RUN cd /. && \
     mv /FIt-SNE-master home/rstudio/.FIt-SNE
 
 # R DEPENDENCIES
+# (remotes::install_github() - devtools no longer brings in remotes)
 RUN R -e "options('timeout' = 999999)" && \
-    R -e "install.packages('BiocManager')" &&\
+    R -e "install.packages(c('BiocManager', 'remotes'))" &&\
     R -e "BiocManager::install(c('cytolib', 'flowCore', 'flowWorkspace', 'openCyto', 'ggcyto', 'CytoML', 'flowWorkspaceData'))" &&\
-    R -e "devtools::install_github('RGLab/cytoqc')" &&\
-    R -e "devtools::install_github('DillonHammill/openCyto', force = TRUE)" && \
-    R -e "devtools::install_github('DillonHammill/CytoExploreRData')" && \
-    R -e "devtools::install_github('DillonHammill/DataEditR')" && \
-    R -e "devtools::install_github('DillonHammill/HeatmapR')" && \
-    R -e "devtools::install_github('DillonHammill/CytoExploreR', ref = 'refine')" && \
+    R -e "remotes::install_github('RGLab/cytoqc')" &&\
+    R -e "remotes::install_github('DillonHammill/openCyto', force = TRUE)" && \
+    R -e "remotes::install_github('DillonHammill/CytoExploreRData')" && \
+    R -e "remotes::install_github('DillonHammill/DataEditR')" && \
+    R -e "remotes::install_github('DillonHammill/HeatmapR')" && \
+    R -e "remotes::install_github('DillonHammill/CytoExploreR', ref = 'refine')" && \
     R -e "install.packages(c('dplyr', 'tidyr', 'stringr', 'magrittr', 'forcats'))" && \
     R -e "install.packages(c('overlapping', 'FNN'))"
 
