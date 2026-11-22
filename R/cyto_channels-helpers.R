@@ -1161,15 +1161,18 @@ cyto_channel_match <- function(x,
   
   # UNSTAINED CONTROLS ---------------------------------------------------------
   
-  # LOCATE UNSTAINED CONTROLS
-  unst_idx <- grep(
-    "Unstained|NIL|Negative",
-    cyto_names(x),
-    ignore.case = TRUE
-  )
+  # LOCATE UNSTAINED CONTROLS WITHOUT A CHANNEL (ROWS OF PD - PD CAN COME
+  # FROM A FILE WITH EXTRA SAMPLES OR IN ANOTHER ORDER)
+  unst_idx <- x_ind[
+    grepl(
+      "Unstained|NIL|Negative",
+      rownames(pd)[x_ind],
+      ignore.case = TRUE
+    ) & pd$channel[x_ind] %in% c(NA, "NA", "")
+  ]
   
   # SET UNSTAINED CHANNEL
-  pd$channe[pd$channel[unst_idx] %in% c(NA, "NA", "")] <- "Unstained"
+  pd$channel[unst_idx] <- "Unstained"
   
   # UPDATE METADATA
   cyto_details(x) <- pd[match(rownames(cyto_details(x)), rownames(pd)), ,]

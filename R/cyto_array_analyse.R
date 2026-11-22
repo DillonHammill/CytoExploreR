@@ -55,55 +55,36 @@ cyto_array_analyse.GatingSet <- function(x,
   
   # ARRAY DETAILS --------------------------------------------------------------
   
-  # ARRAY DETAILS - REQUIRED
+  # ARRAY DETAILS - REQUIRED (A DATA.FRAME - USED WITH $ AND ARITHMETIC BELOW)
   if (is.null(array)) {
     message("Update details of the bead array to continue...")
-    array <- matrix(c(
-      "A1",
-      "IL-2",
-      "10000",
-      "4"
-    ),
-    ncol = 4,
-    dimnames = list(
-      NULL,
-      c(
-        "bead_id",
-        "analyte",
-        "max_concentration",
-        "dilution_factor"
-      )
+    array <- data.frame(
+      "bead_id" = "A1",
+      "analyte" = "IL-2",
+      "max_concentration" = 10000,
+      "dilution_factor" = 4,
+      stringsAsFactors = FALSE
     )
-    )
-    array <- data_edit(array,
-                       title = "Bead Array Details Editor",
-                       save_as = paste0(format(Sys.Date(), "%d%m%y"), 
-                                        "-", 
-                                        "Bead-Array-Details.csv"),
-                       logo = CytoExploreR_logo(),
-                       write_fun = "write_to_csv",
-                       viewer = "pane"
-    )
-  } else {
-    if (is(array, "character")) {
-      # EDIT ARRAY DETAILS
-      array <- data_editor(array,
-                           title = "Bead Array Details Editor",
-                           save_as = array,
-                           logo = CytoExploreR_logo(),
-                           write_fun = "write_to_csv"
-      )
-    } else {
-      # EDIT ARRAY DETAILS
-      array <- data_editor(array,
-                           title = "Bead Array Details Editor",
-                           save_as = paste0(format(Sys.Date(), "%d%m%y"), 
-                                            "-", 
-                                            "Bead-Array-Details.csv"),
-                           logo = CytoExploreR_logo(),
-                           write_fun = "write_to_csv")
-    }
   }
+  
+  # EDIT ARRAY DETAILS - A CSV FILE IS READ AND SAVED BACK TO THE SAME FILE
+  # (WRITE_TO_CSV & READ_FROM_CSV ARE PASSED AS FUNCTIONS - DATAEDITR CANNOT
+  # SEE CYTOEXPLORER'S INTERNAL FUNCTIONS BY NAME)
+  array <- data_edit(array,
+                     title = "Bead Array Details Editor",
+                     save_as = if (is(array, "character")) {
+                       array
+                     } else {
+                       paste0(format(Sys.Date(), "%d%m%y"),
+                              "-",
+                              "Bead-Array-Details.csv")
+                     },
+                     logo = CytoExploreR_logo(),
+                     read_fun = read_from_csv,
+                     write_fun = write_to_csv,
+                     viewer = "pane"
+  )
+  array <- as.data.frame(array, stringsAsFactors = FALSE)
   
   # DILUTION FACTOR - WHOLE NUMBER
   ind <- which(array[, "dilution_factor"] < 0 )
